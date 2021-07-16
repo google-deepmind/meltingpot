@@ -1,0 +1,5 @@
+# Ignore byte-compiled Python code
+*.py[cod]
+
+# Ignore default venv created by install.sh
+venv/
