@@ -84,7 +84,7 @@ for an example installation script):
 ## Example usage
 
 You can try out the substrates interactively with the
-[human_players](python/human_players) scripts. For example, to play the
+[human_players](meltingpot/python/human_players) scripts. For example, to play the
 `clean_up` substrate, you can run:
 
 ```shell
@@ -94,7 +94,7 @@ python3 meltingpot/python/human_players/play_clean_up.py
 You can move around with the `W`, `A`, `S`, `D` keys, Turn with `Q`, and `E`,
 fire the zapper with `1`, and fire the cleaning beam with `2`. You can switch
 between players with `TAB`. There are other substrates available in the
-[human_players](python/human_players) directory. Some have multiple variants,
+[human_players](meltingpot/python/human_players) directory. Some have multiple variants,
 which you select with the `--level_name` flag.
 
 ### Training agents
