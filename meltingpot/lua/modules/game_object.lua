@@ -80,11 +80,9 @@ function GameObject:__init__(kwargs)
 
   self._updaterRegistry = updater_registry.UpdaterRegistry()
   --[[ After creation, but before any callbacks are performed, the following
-  fields will be added:
+  field will be added:
   *   self.simulation: A reference to the game Simulation (see
       base_simulation.lua).
-  *   self.avatarManager: A reference to the AvatarManager (see
-      base_avatar_manager.lua).
   ]]
 end
 
