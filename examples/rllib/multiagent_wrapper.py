@@ -50,10 +50,10 @@ def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
   Returns:
     The Gym space corresponding to the given spec.
   """
-  if isinstance(spec, dm_env.specs.BoundedArray):
-    return spaces.Box(spec.minimum, spec.maximum, spec.shape, spec.dtype)
-  elif isinstance(spec, dm_env.specs.DiscreteArray):
+  if isinstance(spec, dm_env.specs.DiscreteArray):
     return spaces.Discrete(spec.num_values)
+  elif isinstance(spec, dm_env.specs.BoundedArray):
+    return spaces.Box(spec.minimum, spec.maximum, spec.shape, spec.dtype)
   elif isinstance(spec, dm_env.specs.Array):
     if np.issubdtype(spec.dtype, np.floating):
       info = np.finfo(spec.dtype)
