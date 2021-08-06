@@ -27,6 +27,22 @@ ACTION_SPEC = dm_env.specs.DiscreteArray(
 
 class SubstrateTest(parameterized.TestCase):
 
+  @parameterized.parameters(
+      [[42], [123], [1337], [12481632]])
+  def test_seed_causes_determinism(self, seed):
+    config = substrate.get_config('allelopathic_harvest')
+    with config.unlocked():
+      config.env_seed = seed
+
+    env = substrate.build(config)
+    prev_obs = env.reset().observation[0]
+    obs = []
+    for _ in range(10):
+      env = substrate.build(config)
+      obs.append(env.reset().observation[0])
+
+    np.testing.assert_equal(obs, [prev_obs] * 10)
+
   @parameterized.named_parameters(
       (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
   def test_substrate_creation(self, substrate_name):

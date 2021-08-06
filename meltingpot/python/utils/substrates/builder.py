@@ -14,6 +14,7 @@
 """Multi-player environment builder for Melting Pot levels."""
 
 import copy
+import itertools
 import os
 import pathlib  # pylint: disable=unused-import
 import random
@@ -133,14 +134,6 @@ def locate_and_overwrite_level_directory(
     lab2d_settings.levelDirectory = _MELTINGPOT_ROOT
 
 
-def set_env_seed(lab2d_settings: config_dict.ConfigDict,
-                 env_seed: Optional[int] = None,):
-  if env_seed is None:
-    # Select a long seed different than zero.
-    env_seed = random.randint(1, _MAX_SEED)
-  lab2d_settings.env_seed = env_seed
-
-
 def builder(
     lab2d_settings: Settings,
     prefab_overrides: Optional[Settings] = None,
@@ -162,6 +155,10 @@ def builder(
 
   assert "simulation" in lab2d_settings
 
+  if env_seed is None:
+    # Select a long seed different than zero.
+    env_seed = random.randint(1, _MAX_SEED)
+
   # Copy config, so as not to modify it.
   lab2d_settings = config_dict.ConfigDict(
       copy.deepcopy(lab2d_settings)).unlock()
@@ -169,7 +166,6 @@ def builder(
   apply_prefab_overrides(lab2d_settings, prefab_overrides)
   maybe_build_and_add_avatar_objects(lab2d_settings)
   locate_and_overwrite_level_directory(lab2d_settings)
-  set_env_seed(lab2d_settings, env_seed)
 
   # Convert settings from python to Lua format.
   lab2d_settings_dict = parse_python_settings_for_dmlab2d(lab2d_settings)
@@ -180,16 +176,17 @@ def builder(
   logging.info("available observation names: %s", observation_names)
 
   # Wrap the raw environment with the dm_env API.
-  env = dmlab2d.Environment(env_raw, observation_names)
+  env = dmlab2d.Environment(env_raw, observation_names, env_seed)
+
+  seeds_iter = itertools.count(env_seed)
 
   def rebuild_environment():
-    seed = random.randint(1, _MAX_SEED)
-    lab2d_settings_dict["env_seed"] = str(seed)
+    seed = next(seeds_iter) % (_MAX_SEED + 1)
     env_raw = dmlab2d.Lab2d(runfiles_helper.find(), lab2d_settings_dict)
     return dmlab2d.Environment(
         env=env_raw,
         observation_names=observation_names,
-        seed=random.randint(1, _MAX_SEED))
+        seed=seed)
 
   # Add a wrapper that rebuilds the environment when reset is called.
   env = reset_wrapper.ResetWrapper(env, rebuild_environment)
