@@ -51,7 +51,7 @@ as the original, single-player versions:
 """
 
 import copy
-from typing import Mapping, Sequence
+from typing import Collection, Mapping, Sequence
 
 import dm_env
 import numpy as np
@@ -68,7 +68,7 @@ class Wrapper(base.Wrapper):
   """Exposes actions/observations/rewards from all players to all players."""
 
   def __init__(self, env: base.Substrate,
-               observations_to_share: Sequence[str] = (),
+               observations_to_share: Collection[str] = (),
                share_actions: bool = False,
                share_rewards: bool = False) -> None:
     """Wraps an environment.
