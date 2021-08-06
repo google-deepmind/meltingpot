@@ -202,13 +202,13 @@ function BaseSimulation:buildGameObjectFromSettings(gameObjectConfig)
 
   -- Add default components (with error-level logging to discourage).
   if not hasStateManager then
-    log.error(
+    log.warn(
       "GameObject '" .. name .. "' did not have a StateManager component, " ..
       "but explicitly specifying one is strongly preferred. Using a default.")
     table.insert(configuredComponents, _defaultStateManager())
   end
   if not hasTransform then
-    log.error(
+    log.warn(
       "GameObject '" .. name .. "' did not have a Transform component, " ..
       "but explicitly specifying one is strongly preferred. Using a default.")
     table.insert(configuredComponents, _defaultTransform(isAvatar))
