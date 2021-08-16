@@ -170,7 +170,7 @@ def create_cell_prefab(compound_name, compounds, reactivity_levels,
     if "reactivity" in attributes:
       reactivity_group = attributes["reactivity"]
       groups.append(reactivity_group)
-    if "immovable" in attributes:
+    if "immovable" in attributes and attributes["immovable"]:
       groups.append("immovables")
     if "query_config" in attributes:
       query_configs[compound] = attributes["query_config"]
@@ -291,7 +291,7 @@ def create_stomach(compounds, reactivity_levels, default_reaction_radius=None,
       reactivity_group = (stomach_prefix +
                           attributes["reactivity"])
       groups.append(reactivity_group)
-    if "immovable" in attributes:
+    if "immovable" in attributes and attributes["immovable"]:
       groups.append("immovables")
     if "query_config" in attributes:
       query_configs[compound] = attributes["query_config"]
