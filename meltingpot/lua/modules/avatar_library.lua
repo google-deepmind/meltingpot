@@ -1117,6 +1117,19 @@ function PeriodicNeed:resetDriveLevel()
   self._hungerLevel = self._config.delay
 end
 
+--[[ Return the current need amount as a number between 0 and 1.
+
+Returns 0 when hungerLevel = delay and returns 1 when hungerLevel <= 0.
+]]
+function PeriodicNeed:getNeed()
+  local normalizedTimeTillActive = self._hungerLevel / self._config.delay
+  if self.gameObject:getComponent('Avatar'):isAlive() then
+    return math.max(1 - normalizedTimeTillActive, 0)
+  else
+    return 0
+  end
+end
+
 
 --[[ `Role` provides a convenient way to store role data for an avatar.
 ]]
