@@ -72,6 +72,23 @@ class Policy(metaclass=abc.ABCMeta):
     self.close()
 
 
+def _tensor_to_numpy(
+    tensors: tree.Structure[tf.Tensor]) -> tree.Structure[np.ndarray]:
+  """Converts tensors to numpy arrays.
+
+  Args:
+    tensors: input tensors.
+
+  Returns:
+    The values of the tensors.
+  """
+  if tf.executing_eagerly():
+    return tree.map_structure(lambda x: x.numpy(), tensors)
+  else:
+    with tf.compat.v1.Session() as sess:
+      return sess.run(tensors)
+
+
 class SavedModelPolicy(Policy):
   """Policy wrapping a saved model for inference.
 
@@ -103,12 +120,14 @@ class SavedModelPolicy(Policy):
         discount=discount,
         observation=observation,
         prev_state=prev_state)
-    action = int(output.action['environment_action'][0])
+    action = int(_tensor_to_numpy(output.action['environment_action'][0]))
+    next_state = _tensor_to_numpy(next_state)
     return action, next_state
 
   def initial_state(self) -> State:
     """See base class."""
-    return self._model.initial_state(batch_size=1, trainable=None)
+    state = self._model.initial_state(batch_size=1, trainable=None)
+    return _tensor_to_numpy(state)
 
   def close(self) -> None:
     """See base class."""
