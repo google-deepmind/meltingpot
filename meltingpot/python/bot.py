@@ -16,7 +16,7 @@
 import abc
 import os
 import re
-from typing import Tuple
+from typing import Mapping, Tuple
 
 import dm_env
 from ml_collections import config_dict
@@ -120,7 +120,12 @@ class SavedModelPolicy(Policy):
         discount=discount,
         observation=observation,
         prev_state=prev_state)
-    action = int(_tensor_to_numpy(output.action['environment_action'][0]))
+    if isinstance(output.action, Mapping):
+      # Legacy bots trained with older action spec.
+      action = output.action['environment_action']
+    else:
+      action = output.action
+    action = int(_tensor_to_numpy(action[0]))
     next_state = _tensor_to_numpy(next_state)
     return action, next_state
 
