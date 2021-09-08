@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# LINT.IfChange
 """A permissive wrapper for a SavedModel."""
 
 import copy
@@ -203,3 +204,6 @@ class PermissiveModel:
         copy.deepcopy(self.signatures[name]),
         copy.deepcopy(concrete_func.structured_input_signature),
     )
+
+# Changes should be pushed back to internal version.
+# LINT.ThenChange(//internal/permissive_model.py)
