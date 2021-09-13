@@ -342,7 +342,6 @@ function Reactant:__init__(kwargs)
   self._config.shuffleReactionCheckOrder = kwargs.shuffleReactionCheckOrder
   self._config.priorityMode = kwargs.priorityMode
 
-  -- The reactivities table maps reactivity (a float) to group name.
   self._config.reactivities = {}
   for reactionGroup, reactivity in pairs(kwargs.reactivities) do
     self._config.reactivities[reactionGroup] = reactivity
