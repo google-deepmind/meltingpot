@@ -15,7 +15,7 @@
 
 import concurrent
 import random
-from typing import Callable, List, Mapping, Sequence, Tuple
+from typing import Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
 
 from absl import logging
 import dm_env
@@ -28,7 +28,6 @@ from meltingpot.python.utils.scenarios.wrappers import agent_slot_wrapper
 from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
 from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
-from meltingpot.python.utils.scenarios.wrappers import restricted_observations_wrapper
 
 AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIOS)
 PERMITTED_OBSERVATIONS = frozenset({
@@ -36,6 +35,8 @@ PERMITTED_OBSERVATIONS = frozenset({
     'READY_TO_SHOOT',
     'RGB',
 })
+
+T = TypeVar('T')
 
 
 def _step_fn(policy: bot_factory.Policy) -> Callable[[dm_env.TimeStep], int]:
@@ -57,6 +58,28 @@ def _step_fn(policy: bot_factory.Policy) -> Callable[[dm_env.TimeStep], int]:
   return step
 
 
+def _restrict_observation(
+    observation: Mapping[str, T],
+    permitted_observations: Collection[str],
+) -> Mapping[str, T]:
+  """Restricts an observation to only the permitted keys."""
+  return {
+      key: observation[key]
+      for key in observation if key in permitted_observations
+  }
+
+
+def _restrict_observations(
+    observations: Iterable[Mapping[str, T]],
+    permitted_observations: Collection[str],
+) -> Sequence[Mapping[str, T]]:
+  """Restricts multiple observations to only the permitted keys."""
+  return [
+      _restrict_observation(observation, permitted_observations)
+      for observation in observations
+  ]
+
+
 class Scenario(base.Wrapper):
   """An substrate where a number of player slots are filled by bots."""
 
@@ -65,6 +88,7 @@ class Scenario(base.Wrapper):
       substrate,
       bots: Mapping[str, bot_factory.Policy],
       num_bots: int,
+      permitted_observations: Collection[str] = PERMITTED_OBSERVATIONS,
   ) -> None:
     """Initializes the scenario.
 
@@ -72,10 +96,13 @@ class Scenario(base.Wrapper):
       substrate: the substrate to add bots to.
       bots: the bots to sample from (with replacement) each episode.
       num_bots: the number of to sample each episode.
+      permitted_observations: the observations exposed by the scenario to focal
+        agents.
     """
     super().__init__(substrate)
     self._bots = dict(bots)
     self._num_bots = num_bots
+    self._permitted_observations = frozenset(permitted_observations)
     self._executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=self._num_bots)
     self._bot_step_fns: List[Callable[[dm_env.TimeStep], int]] = []
@@ -117,7 +144,10 @@ class Scenario(base.Wrapper):
     """Splits multiplayer timestep as needed by agents and bots."""
     agent_timestep = timestep._replace(
         reward=timestep.reward[:-self._num_bots],
-        observation=timestep.observation[:-self._num_bots])
+        observation=_restrict_observations(
+            timestep.observation[:-self._num_bots],
+            self._permitted_observations),
+    )
     bot_timesteps = [
         timestep._replace(
             observation=timestep.observation[i], reward=timestep.reward[i])
@@ -148,7 +178,9 @@ class Scenario(base.Wrapper):
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    return super().observation_spec()[:-self._num_bots]
+    return _restrict_observations(
+        super().observation_spec()[:-self._num_bots],
+        self._permitted_observations)
 
   def reward_spec(self) -> Sequence[dm_env.specs.Array]:
     """See base class."""
@@ -177,7 +209,7 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   return config.lock()
 
 
-def build(config: config_dict.ConfigDict) -> dm_env.Environment:
+def build(config: config_dict.ConfigDict) -> Scenario:
   """Builds a scenario for the given config.
 
   Args:
@@ -192,7 +224,7 @@ def build(config: config_dict.ConfigDict) -> dm_env.Environment:
       for bot_name, bot_config in config.bots.items()
   }
 
-  # Add observations needed by the bots.
+  # Add observations needed by some bots. These are removed for focal players.
   substrate = all_observations_wrapper.Wrapper(
       substrate, observations_to_share=['POSITION'], share_actions=True)
   substrate = agent_slot_wrapper.Wrapper(substrate)
@@ -201,7 +233,8 @@ def build(config: config_dict.ConfigDict) -> dm_env.Environment:
     substrate = default_observation_wrapper.Wrapper(
         substrate, key='INVENTORY', default_value=np.zeros([1]))
 
-  scenario = Scenario(substrate=substrate, bots=bots, num_bots=config.num_bots)
-  scenario = restricted_observations_wrapper.Wrapper(
-      scenario, permitted_observations=PERMITTED_OBSERVATIONS)
-  return scenario
+  return Scenario(
+      substrate=substrate,
+      bots=bots,
+      num_bots=config.num_bots,
+      permitted_observations=PERMITTED_OBSERVATIONS)
