@@ -72,9 +72,10 @@ class ScenarioWrapperTest(parameterized.TestCase):
       )
 
     def bot_step(timestep, prev_state, n):
-      received_bot_rewards[n] = timestep.reward
-      received_bot_observations[n] = timestep.observation
-      received_bot_states[n] = prev_state
+      if received_bot_rewards[n] is None:
+        received_bot_rewards[n] = timestep.reward
+        received_bot_observations[n] = timestep.observation
+        received_bot_states[n] = prev_state
       return n + 2, prev_state
 
     substrate = mock.Mock(spec_set=substrate_factory.Substrate)
