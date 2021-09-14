@@ -13,10 +13,17 @@
 # limitations under the License.
 """Tests of bots."""
 
+import functools
+import random
+from unittest import mock
+
 from absl.testing import absltest
 from absl.testing import parameterized
+import dm_env
 
+from meltingpot.python import bot as bot_factory
 from meltingpot.python import scenario as scenario_factory
+from meltingpot.python import substrate as substrate_factory
 
 
 class ScenarioTest(parameterized.TestCase):
@@ -29,6 +36,69 @@ class ScenarioTest(parameterized.TestCase):
     with scenario_factory.build(scenario_config) as scenario:
       scenario.reset()
       scenario.step([0] * num_players)
+
+
+class ScenarioWrapperTest(parameterized.TestCase):
+
+  def test_wrapper(self):
+    received_actions = [None] * 4
+    received_bot_rewards = [None] * 4
+    received_bot_states = [None] * 4
+
+    def substrate_reset():
+      timestep = dm_env.restart(observation=[1, 2, 3, 4])
+      return timestep._replace(reward=[10, 20, 30, 40])
+
+    def substrate_step(actions):
+      received_actions[:] = actions
+      return dm_env.transition(
+          reward=[11, 21, 31, 41],
+          observation=[100, 200, 300, 400])
+
+    def bot_initial_state(n):
+      return f'state_{n}'
+
+    def bot_step(timestep, prev_state, n):
+      received_bot_rewards[n] = timestep.reward
+      received_bot_states[n] = prev_state
+      return n, prev_state
+
+    substrate = mock.Mock(spec_set=substrate_factory.Substrate)
+    substrate.action_spec.return_value = [object() for _ in range(4)]
+    substrate.observation_spec.return_value = [object() for _ in range(4)]
+    substrate.reward_spec.return_value = [object() for _ in range(4)]
+    substrate.reset.side_effect = substrate_reset
+    substrate.step.side_effect = substrate_step
+
+    bots = {}
+    for n in [2, 3]:
+      bot = mock.Mock(spec_set=bot_factory.Policy)
+      bot.initial_state.side_effect = functools.partial(bot_initial_state, n=n)
+      bot.step.side_effect = functools.partial(bot_step, n=n)
+      bots[f'bot_{n}'] = bot
+
+    with mock.patch.object(random, 'choices', return_value=['bot_2', 'bot_3']):
+      with scenario_factory.Scenario(substrate, bots, num_bots=2) as scenario:
+        action_spec = scenario.action_spec()
+        observation_spec = scenario.observation_spec()
+        reward_spec = scenario.reward_spec()
+        timestep = scenario.reset()
+        scenario.step([0, 1])
+
+    with self.subTest(name='action_spec'):
+      self.assertEqual(action_spec, substrate.action_spec()[:2])
+    with self.subTest(name='observation_spec'):
+      self.assertEqual(observation_spec, substrate.observation_spec()[:2])
+    with self.subTest(name='reward_spec'):
+      self.assertEqual(reward_spec, substrate.reward_spec()[:2])
+    with self.subTest(name='received_bot_states'):
+      self.assertEqual(received_bot_states, [None, None, 'state_2', 'state_3'])
+    with self.subTest(name='received_bot_rewards'):
+      self.assertEqual(received_bot_rewards, [None, None, 30, 40])
+    with self.subTest(name='received_actions'):
+      self.assertEqual(received_actions, [0, 1, 2, 3])
+    with self.subTest(name='agent_rewards'):
+      self.assertEqual(timestep.reward, [10, 20])
 
 
 if __name__ == '__main__':

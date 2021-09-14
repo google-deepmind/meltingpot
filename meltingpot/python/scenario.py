@@ -120,12 +120,12 @@ class Scenario(base.Wrapper):
         observation=timestep.observation[:-self._num_bots])
     bot_timesteps = [
         timestep._replace(
-            observation=timestep.observation[-i], reward=timestep.reward[-i])
+            observation=timestep.observation[i], reward=timestep.reward[i])
         for i in range(-self._num_bots, 0)
     ]
     return agent_timestep, bot_timesteps
 
-  def reset(self) -> Sequence[dm_env.TimeStep]:
+  def reset(self) -> dm_env.TimeStep:
     """See base class."""
     self._resample_bots()
     timestep = super().reset()
@@ -133,7 +133,7 @@ class Scenario(base.Wrapper):
     self._send_timesteps(bot_timesteps)
     return agent_timestep
 
-  def step(self, action: Sequence[int]) -> Sequence[dm_env.TimeStep]:
+  def step(self, action: Sequence[int]) -> dm_env.TimeStep:
     """See base class."""
     agent_actions = action
     bot_actions = self._await_actions()
