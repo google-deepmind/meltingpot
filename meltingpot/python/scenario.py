@@ -80,6 +80,34 @@ def _restrict_observations(
   ]
 
 
+def _partition(
+    values: Sequence[T],
+    is_focal: Sequence[bool],
+) -> Tuple[Sequence[T], Sequence[T]]:
+  """Partitions a sequence into focal and background sequences."""
+  focal_values = []
+  background_values = []
+  for focal, value in zip(is_focal, values):
+    if focal:
+      focal_values.append(value)
+    else:
+      background_values.append(value)
+  return focal_values, background_values
+
+
+def _merge(
+    focal_values: Sequence[T],
+    background_values: Sequence[T],
+    is_focal: Sequence[bool],
+) -> Sequence[T]:
+  """Merges focal and background sequences into one."""
+  focal_values = iter(focal_values)
+  background_values = iter(background_values)
+  return [
+      next(focal_values if focal else background_values) for focal in is_focal
+  ]
+
+
 class Scenario(base.Wrapper):
   """An substrate where a number of player slots are filled by bots."""
 
@@ -87,7 +115,7 @@ class Scenario(base.Wrapper):
       self,
       substrate,
       bots: Mapping[str, bot_factory.Policy],
-      num_bots: int,
+      is_focal: Sequence[bool],
       permitted_observations: Collection[str] = PERMITTED_OBSERVATIONS,
   ) -> None:
     """Initializes the scenario.
@@ -95,13 +123,19 @@ class Scenario(base.Wrapper):
     Args:
       substrate: the substrate to add bots to.
       bots: the bots to sample from (with replacement) each episode.
-      num_bots: the number of to sample each episode.
+      is_focal: which player slots are allocated to focal players.
       permitted_observations: the observations exposed by the scenario to focal
         agents.
     """
     super().__init__(substrate)
     self._bots = dict(bots)
-    self._num_bots = num_bots
+    num_players = len(substrate.action_spec())
+    if len(is_focal) != num_players:
+      raise ValueError(f'is_focal is length {len(is_focal)} but substrate is '
+                       f'{num_players}-player.')
+    self._is_focal = is_focal
+    self._num_focal = sum(is_focal)
+    self._num_bots = num_players - self._num_focal
     self._permitted_observations = frozenset(permitted_observations)
     self._executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=self._num_bots)
@@ -142,16 +176,17 @@ class Scenario(base.Wrapper):
       self, timestep: dm_env.TimeStep
   ) -> Tuple[dm_env.TimeStep, Sequence[dm_env.TimeStep]]:
     """Splits multiplayer timestep as needed by agents and bots."""
+    agent_rewards, bot_rewards = _partition(timestep.reward, self._is_focal)
+    agent_observations, bot_observations = _partition(timestep.observation,
+                                                      self._is_focal)
     agent_timestep = timestep._replace(
-        reward=timestep.reward[:-self._num_bots],
-        observation=_restrict_observations(
-            timestep.observation[:-self._num_bots],
-            self._permitted_observations),
+        reward=agent_rewards,
+        observation=_restrict_observations(agent_observations,
+                                           self._permitted_observations),
     )
     bot_timesteps = [
-        timestep._replace(
-            observation=timestep.observation[i], reward=timestep.reward[i])
-        for i in range(-self._num_bots, 0)
+        timestep._replace(observation=observation, reward=reward)
+        for observation, reward in zip(bot_observations, bot_rewards)
     ]
     return agent_timestep, bot_timesteps
 
@@ -167,26 +202,30 @@ class Scenario(base.Wrapper):
     """See base class."""
     agent_actions = action
     bot_actions = self._await_actions()
-    timestep = super().step(list(agent_actions) + list(bot_actions))
+    actions = _merge(agent_actions, bot_actions, self._is_focal)
+    timestep = super().step(actions)
     agent_timestep, bot_timesteps = self._split_timestep(timestep)
     self._send_timesteps(bot_timesteps)
     return agent_timestep
 
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
-    return super().action_spec()[:-self._num_bots]
+    agent_action_spec, _ = _partition(super().action_spec(), self._is_focal)
+    return agent_action_spec
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    return _restrict_observations(
-        super().observation_spec()[:-self._num_bots],
-        self._permitted_observations)
+    agent_observation_spec, _ = _partition(super().observation_spec(),
+                                           self._is_focal)
+    return _restrict_observations(agent_observation_spec,
+                                  self._permitted_observations)
 
   def reward_spec(self) -> Sequence[dm_env.specs.Array]:
     """See base class."""
     # TODO(b/192925212): better typing to avoid pytype disables.
     reward_spec: Sequence[dm_env.specs.Array] = super().reward_spec()  # pytype: disable=annotation-type-mismatch
-    return reward_spec[:-self._num_bots]
+    agent_reward_spec, _ = _partition(reward_spec, self._is_focal)
+    return agent_reward_spec
 
 
 def get_config(scenario_name: str) -> config_dict.ConfigDict:
@@ -205,6 +244,8 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       num_players=scenario.num_focal_agents,
       bots=bots,
       num_bots=scenario.num_background_bots,
+      is_focal=tuple([True] * scenario.num_focal_agents +
+                     [False] * scenario.num_background_bots),
   )
   return config.lock()
 
@@ -236,5 +277,5 @@ def build(config: config_dict.ConfigDict) -> Scenario:
   return Scenario(
       substrate=substrate,
       bots=bots,
-      num_bots=config.num_bots,
+      is_focal=config.is_focal,
       permitted_observations=PERMITTED_OBSERVATIONS)
