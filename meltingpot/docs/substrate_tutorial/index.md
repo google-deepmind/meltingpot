@@ -83,7 +83,7 @@ individual observation to the config in
 Everything in our substrate, including avatars, is a `GameObject`. You can think
 of `GameObject`s as _dumb_ containers of functionality. Functionality is
 provided via `Component`s. You can learn details of how components work in the
-[concepts page](concepts.md). For the purposes of this tutorial, just think of
+[concepts page](../concepts.md). For the purposes of this tutorial, just think of
 `GameObject`s as the elements of your substrate, and `Component`s as modular
 game logic you add to them.
 
@@ -159,11 +159,11 @@ Prefabs have the following structure:
 ```
 
 If you want to learn more about this format, check out our
-[detailed documentation](substrates.md#specifying-gameobjects-as-prefabs)
+[detailed documentation](../substrates.md#specifying-gameobjects-as-prefabs)
 
 The components `StateManager` and `Transform` are required. We'll discuss states
 a bit more later, but if you want to understand this better, you can check their
-[documentation](concepts.md#statemanager). For now, think of a `GameObject`s
+[documentation](../concepts.md#statemanager). For now, think of a `GameObject`s
 state as its _look and feel_.
 
 ### Defining spawn points
@@ -237,7 +237,7 @@ the `lab2d_settings` part of the config. In the end, they should look like this:
 The main reason is because we often want to have one char to map not just to
 _one_ prefab, but a collection of them, or a choice between prefabs. For this
 substrate we won't need this functionality, but if you are interested, read
-about [prefab specifications](substrates.md#prefab-specification).
+about [prefab specifications](../substrates.md#prefab-specification).
 
 #### Key-word arguments to components
 
@@ -671,7 +671,7 @@ end
 ```
 
 To learn more about _updaters_ read
-[our documentation](concepts.md#updaters-or-update)
+[our documentation](../concepts.md#updaters-or-update)
 
 All that is left, is adding this component to our `APPLE` prefab.
 
