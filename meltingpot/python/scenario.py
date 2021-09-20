@@ -30,6 +30,11 @@ from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
 
 AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIOS)
+
+SCENARIOS_BY_SUBSTRATE: Mapping[
+    str, Collection[str]] = scenario_config.scenarios_by_substrate(
+        scenario_config.SCENARIOS)
+
 PERMITTED_OBSERVATIONS = frozenset({
     'INVENTORY',
     'READY_TO_SHOOT',

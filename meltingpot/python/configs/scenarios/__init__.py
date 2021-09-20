@@ -13,9 +13,10 @@
 # limitations under the License.
 """Test scenario configs."""
 
-from typing import AbstractSet, Mapping
-
+import collections
 import dataclasses
+from typing import AbstractSet, Collection, Mapping
+
 import immutabledict
 
 
@@ -1315,3 +1316,14 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
     ),
     # keep-sorted end
 )
+
+
+def scenarios_by_substrate(
+    scenarios: Mapping[str, Scenario]
+) -> Mapping[str, Collection[str]]:
+  by_substrate = collections.defaultdict(list)
+  for scenario_name, scenario in scenarios.items():
+    by_substrate[scenario.substrate].append(scenario_name)
+  for key, value in by_substrate.items():
+    by_substrate[key] = tuple(value)
+  return immutabledict.immutabledict(**by_substrate)
