@@ -13,7 +13,7 @@
 # limitations under the License.
 """A set of commonly used ASCII art shape and helper functions for DMLab2D."""
 
-from typing import Mapping, Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 
 ColorRGBA = Tuple[int, int, int, int]
@@ -2102,7 +2102,7 @@ def scale_color(color_tuple: ColorRGBA, factor: float,
 
 
 # LINT.IfChange
-def get_palette(color: Color) -> Mapping[str, ColorRGBA]:
+def get_palette(color: Color) -> Dict[str, ColorRGBA]:
   """Convert provided color to a palette suitable for the player text shape.
 
   The overall palette is:
