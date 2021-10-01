@@ -155,10 +155,6 @@ def builder(
 
   assert "simulation" in lab2d_settings
 
-  if env_seed is None:
-    # Select a long seed different than zero.
-    env_seed = random.randint(1, _MAX_SEED)
-
   # Copy config, so as not to modify it.
   lab2d_settings = config_dict.ConfigDict(
       copy.deepcopy(lab2d_settings)).unlock()
@@ -171,18 +167,17 @@ def builder(
   lab2d_settings_dict = parse_python_settings_for_dmlab2d(lab2d_settings)
 
   # Only the raw environment has the properties API.
-  lab2d_settings_dict["env_seed"] = str(env_seed)  # Sets the Lua seed.
   env_raw = dmlab2d.Lab2d(_DMLAB2D_ROOT, lab2d_settings_dict)
   observation_names = env_raw.observation_names()
   logging.info("available observation names: %s", observation_names)
 
-  # Wrap the raw environment with the dm_env API.
-  env = dmlab2d.Environment(env_raw, observation_names, env_seed)
+  if env_seed is None:
+    # Select a long seed different than zero.
+    env_seed = random.randint(1, _MAX_SEED)
+  env_seeds = (seed % (_MAX_SEED + 1) for seed in itertools.count(env_seed))
 
-  seeds_iter = itertools.count(env_seed + 1)
-
-  def rebuild_environment():
-    seed = next(seeds_iter) % (_MAX_SEED + 1)
+  def build_environment():
+    seed = next(env_seeds)
     lab2d_settings_dict["env_seed"] = str(seed)  # Sets the Lua seed.
     env_raw = dmlab2d.Lab2d(runfiles_helper.find(), lab2d_settings_dict)
     return dmlab2d.Environment(
@@ -191,6 +186,6 @@ def builder(
         seed=seed)
 
   # Add a wrapper that rebuilds the environment when reset is called.
-  env = reset_wrapper.ResetWrapper(env, rebuild_environment)
+  env = reset_wrapper.ResetWrapper(build_environment)
 
   return env

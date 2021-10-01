@@ -24,18 +24,15 @@ from meltingpot.python.utils.substrates.wrappers import base
 class ResetWrapper(base.Wrapper):
   """Wrapper that rebuilds the environment on reset."""
 
-  def __init__(self,
-               env: dmlab2d.Environment,
-               rebuild_environment: Callable[[], dmlab2d.Environment]):
+  def __init__(self, build_environment: Callable[[], dmlab2d.Environment]):
     """Initializes the object.
 
     Args:
-      env: Wrapped environment. Will be closed and rebuilt on every reset call
-        except the first. When this wrapper closes env will also be closed.
-      rebuild_environment: Called on each reset to rebuild the environment.
+      build_environment: Called to build the underlying environment.
     """
+    env = build_environment()
     super().__init__(env)
-    self._rebuild_environment = rebuild_environment
+    self._rebuild_environment = build_environment
     self._reset = False
 
   def reset(self) -> dm_env.TimeStep:
