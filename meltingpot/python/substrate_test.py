@@ -27,21 +27,49 @@ ACTION_SPEC = dm_env.specs.DiscreteArray(
 
 class SubstrateTest(parameterized.TestCase):
 
-  @parameterized.parameters(
-      [[42], [123], [1337], [12481632]])
+  @parameterized.product(seed=[42, 123, 1337, 12481632])
   def test_seed_causes_determinism(self, seed):
-    config = substrate.get_config('allelopathic_harvest')
+    config = substrate.get_config('running_with_scissors_in_the_matrix')
     with config.unlocked():
       config.env_seed = seed
 
-    env = substrate.build(config)
-    prev_obs = env.reset().observation[0]
-    obs = []
-    for _ in range(10):
-      env = substrate.build(config)
-      obs.append(env.reset().observation[0])
+    env1 = substrate.build(config)
+    env2 = substrate.build(config)
+    for episode in range(5):
+      obs1 = env1.reset().observation[0]['WORLD.RGB']
+      obs2 = env2.reset().observation[0]['WORLD.RGB']
+      np.testing.assert_equal(
+          obs1, obs2, f'Episode {episode} mismatch: {obs1} != {obs2} ')
 
-    np.testing.assert_equal(obs, [prev_obs] * 10)
+  @parameterized.product(seed=[None, 42, 123, 1337, 12481632])
+  def test_episodes_are_randomized(self, seed):
+    config = substrate.get_config('running_with_scissors_in_the_matrix')
+    with config.unlocked():
+      config.env_seed = seed
+    env = substrate.build(config)
+
+    obs = env.reset().observation[0]['WORLD.RGB']
+    for episode in range(4):
+      last_obs = obs
+      obs = env.reset().observation[0]['WORLD.RGB']
+      with self.assertRaises(
+          AssertionError,
+          msg=f'Episodes {episode} and {episode+1} match: {last_obs} == {obs}'):
+        np.testing.assert_equal(last_obs, obs)
+
+  def test_no_seed_causes_nondeterminism(self):
+    config = substrate.get_config('running_with_scissors_in_the_matrix')
+    with config.unlocked():
+      config.env_seed = None
+
+    env1 = substrate.build(config)
+    env2 = substrate.build(config)
+    for episode in range(5):
+      obs1 = env1.reset().observation[0]['WORLD.RGB']
+      obs2 = env2.reset().observation[0]['WORLD.RGB']
+      with self.assertRaises(
+          AssertionError, msg=f'Episode {episode} match: {obs1} == {obs2}'):
+        np.testing.assert_equal(obs1, obs2)
 
   @parameterized.named_parameters(
       (name, name) for name in substrate.AVAILABLE_SUBSTRATES)

@@ -178,7 +178,7 @@ def builder(
   # Wrap the raw environment with the dm_env API.
   env = dmlab2d.Environment(env_raw, observation_names, env_seed)
 
-  seeds_iter = itertools.count(env_seed)
+  seeds_iter = itertools.count(env_seed + 1)
 
   def rebuild_environment():
     seed = next(seeds_iter) % (_MAX_SEED + 1)
