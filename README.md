@@ -56,6 +56,10 @@ for an example installation script):
     pip3 install https://github.com/deepmind/lab2d/releases/download/release_candidate_2021-07-13/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl
     ```
 
+    If there is no appropriate wheel (e.g. M1 chipset) you will need to install
+    [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel yourself
+    using `bazel build -c opt --define=lua=5_1 //dmlab2d:dmlab2d_wheel`.
+
 3.  Test the `dmlab2d` installation in `python3`:
 
     ```python
