@@ -157,7 +157,7 @@ class Scenario(base.Wrapper):
   def _resample_bots(self):
     """Resamples the currently active bots."""
     sampled_names = random.choices(tuple(self._bots), k=self._num_bots)
-    logging.info('Resampled bots: {sampled_bot_names}')
+    logging.info('Resampled bots: %s', sampled_names)
     self._bot_step_fns = [_step_fn(self._bots[name]) for name in sampled_names]
     for future in self._action_futures:
       future.cancel()
