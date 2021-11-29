@@ -31,6 +31,12 @@ local updater_registry = require(meltingpot .. 'updater_registry')
 -- For Lua 5.2 compatibility.
 local unpack = unpack or table.unpack
 
+-- Component API functions
+_COMPONENT_FUNCTIONS = {
+    'awake', 'reset', 'start', 'postStart', 'preUpdate', 'update', 'onBlocked',
+    'onEnter', 'onExit', 'onHit', 'onStateChange'}
+
+
 local GameObject = class.Class()
 
 --[[ A GameObject is a container for components.
@@ -74,6 +80,8 @@ function GameObject:__init__(kwargs)
   -- Components will be a mapping between the component name and a list of
   -- components with that name.
   self._components = {}
+  -- Mapping of components by their API functions (e.g. `start`, `update`, etc.)
+  self._components_by_function = {}
   for _, component in ipairs(kwargs.components) do
     self:addComponent(component)
   end
@@ -86,6 +94,25 @@ function GameObject:__init__(kwargs)
   ]]
 end
 
+function _safe_add_to_table(mapping, func_name, component)
+  if mapping[func_name] == nil then
+    mapping[func_name] = {}
+  end
+  table.insert(mapping[func_name], component)
+end
+
+--[[
+Registers the component's implemented API functions to the GameObject's internal
+mapping of components_by_functions.
+]]
+function GameObject:_registerComponentFunctions(component)
+  for _, func in pairs(_COMPONENT_FUNCTIONS) do
+    if component[func] ~= nil then
+      _safe_add_to_table(self._components_by_function, func, component)
+    end
+  end
+end
+
 --[[ Adds a component to this GameObject.  A Component must be added to at most
 one GameObject, and it is an error to add it to two or more.
 There are two special types of components: StateManager and Transform.  When
@@ -94,6 +121,9 @@ purposes of the GameObject calls relating explicitly to them (e.g.
 getState() or getPiece()).
 
 Once a component is added, its awake() method is called (if implemented).
+
+WARNING: Calling addComponent after initialisation is NOT supported. Callbacks
+         from such components will not be properly registered.
 ]]
 function GameObject:addComponent(component)
   if component.gameObject ~= nil then
@@ -104,6 +134,7 @@ function GameObject:addComponent(component)
     self._components[component.name] = {}
   end
   table.insert(self._components[component.name], component)
+  self:_registerComponentFunctions(component)
   -- Store a dedicated reference to certain essential (and unique) components.
   if component.name == 'StateManager' then
     self._stateManager = component
@@ -273,6 +304,24 @@ function GameObject:_onExit(initiator, contactName)
   self:_onSomething('onExit', initiator, contactName)
 end
 
+-- Removed callbacks that no component has.
+function GameObject:_prune_callbacks(state_callbacks)
+  if self._components_by_function['onStateChange'] == nil then
+    state_callbacks.onAdd = nil
+    state_callbacks.onRemove = nil
+  end
+  if self._components_by_function['onBlocked'] == nil then
+    state_callbacks.onBlocked = nil
+  end
+  if self._components_by_function['onHit'] == nil then
+    state_callbacks.onHit = nil
+  end
+  if self._components_by_function['onEnter'] == nil and
+      self._components_by_function['onExit'] == nil then
+    state_callbacks.onContact = nil
+  end
+end
+
 -- Note that this function modifies the arg table `callbacks`.
 -- This function initializes an empty callbacks table for each state.
 -- Then it calls addTypeCallbacks in all components.
@@ -314,6 +363,7 @@ function GameObject:addTypeCallbacks(callbacks)
           self:_onExit(initiatorPiece, contactName)
         end
       end
+      self:_prune_callbacks(callbacks[uState])
     end)
 end
 
@@ -380,21 +430,19 @@ end
 
 --[[ preUpdate is called for all gameObjects before update is called for any.]]
 function GameObject:preUpdate()
-  self:_doOnAllComponents(
-    function(component)
-      if component.preUpdate then
-        component:preUpdate()
-      end
-    end)
+  if self._components_by_function['preUpdate'] ~= nil then
+    for _, component in pairs(self._components_by_function['preUpdate']) do
+      component:preUpdate()
+    end
+  end
 end
 
 function GameObject:update(grid)
-  self:_doOnAllComponents(
-    function(component)
-      if component.update then
-        component:update()
-      end
-    end)
+  if self._components_by_function['update'] ~= nil then
+    for _, component in pairs(self._components_by_function['update']) do
+      component:update()
+    end
+  end
 end
 
 function GameObject:hasComponent(name)
