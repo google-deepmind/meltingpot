@@ -75,7 +75,7 @@ def main():
   # Training batch size -> Fragments are concatenated up to this point.
   config["train_batch_size"] = 200
   # After n steps, force reset simulation
-  config["horizon"] = 200
+  config["horizon"] = 2000
   # Default: False
   config["no_done_at_end"] = False
   # Info: If False, each agents trajectory is expected to have
