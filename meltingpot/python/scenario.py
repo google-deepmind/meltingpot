@@ -154,9 +154,13 @@ class Scenario(base.Wrapper):
     self._executor.shutdown(wait=False)
     super().close()
 
+  def _sample_bot_names(self) -> Sequence[str]:
+    """Returns a sample of bot names to fill the background slots."""
+    return random.choices(tuple(self._bots), k=self._num_bots)
+
   def _resample_bots(self):
     """Resamples the currently active bots."""
-    sampled_names = random.choices(tuple(self._bots), k=self._num_bots)
+    sampled_names = self._sample_bot_names()
     logging.info('Resampled bots: %s', sampled_names)
     self._bot_step_fns = [_step_fn(self._bots[name]) for name in sampled_names]
     for future in self._action_futures:
