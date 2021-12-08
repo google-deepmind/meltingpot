@@ -178,9 +178,12 @@ class PermissiveModel:
         if arg_path in flat_bound_args_dict and arg_spec is None:
           arg_value = flat_bound_args_dict[arg_path]
           if arg_value is not None:
-            logging.warning(
+            logging.log_first_n(
+                logging.WARNING,
                 "Received unexpected argument `%s` for path %s, replaced with "
-                "None.", arg_value, arg_path)
+                "None.",
+                20,
+                arg_value, arg_path)
           flat_bound_args_dict[arg_path] = None
 
       # Filter out extraneous arguments and dictionary keys.
