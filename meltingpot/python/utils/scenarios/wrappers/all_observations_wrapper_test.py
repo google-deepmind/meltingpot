@@ -100,8 +100,8 @@ class AllObservationsWrapperTest(parameterized.TestCase):
                 OBSERVATIONS_KEY: {
                     OBSERVATION_1: np.array([[1.], [2.]])
                 },
-                REWARDS_KEY: np.zeros([2], dtype=np.float32),
-                ACTIONS_KEY: np.zeros([2], dtype=np.int32),
+                REWARDS_KEY: np.zeros([2], dtype=REWARD_SPEC.dtype),
+                ACTIONS_KEY: np.zeros([2], dtype=ACTION_SPEC.dtype),
             }
         },
         {
@@ -111,8 +111,8 @@ class AllObservationsWrapperTest(parameterized.TestCase):
                 OBSERVATIONS_KEY: {
                     OBSERVATION_1: np.array([[1.], [2.]])
                 },
-                REWARDS_KEY: np.zeros([2], dtype=np.float32),
-                ACTIONS_KEY: np.zeros([2], dtype=np.int32),
+                REWARDS_KEY: np.zeros([2], dtype=REWARD_SPEC.dtype),
+                ACTIONS_KEY: np.zeros([2], dtype=ACTION_SPEC.dtype),
             }
         },
     ])._replace(reward=[np.array(0), np.array(0)])
@@ -140,10 +140,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
         share_actions=True,
         share_rewards=True)
 
-    actual = wrapped.step([
-        np.array(3, dtype=np.int32),
-        np.array(4, dtype=np.int32),
-    ])
+    actual = wrapped.step([3, 4])
     expected = dm_env.transition(
         reward=[np.array(1), np.array(2)],
         observation=[
@@ -154,8 +151,8 @@ class AllObservationsWrapperTest(parameterized.TestCase):
                     OBSERVATIONS_KEY: {
                         OBSERVATION_1: np.array([[1.], [2.]])
                     },
-                    REWARDS_KEY: np.array([1, 2], dtype=np.float32),
-                    ACTIONS_KEY: np.array([3, 4], dtype=np.int32),
+                    REWARDS_KEY: np.array([1, 2], dtype=REWARD_SPEC.dtype),
+                    ACTIONS_KEY: np.array([3, 4], dtype=ACTION_SPEC.dtype),
                 }
             },
             {
@@ -165,8 +162,8 @@ class AllObservationsWrapperTest(parameterized.TestCase):
                     OBSERVATIONS_KEY: {
                         OBSERVATION_1: np.array([[1.], [2.]])
                     },
-                    REWARDS_KEY: np.array([1, 2], dtype=np.float32),
-                    ACTIONS_KEY: np.array([3, 4], dtype=np.int32),
+                    REWARDS_KEY: np.array([1, 2], dtype=REWARD_SPEC.dtype),
+                    ACTIONS_KEY: np.array([3, 4], dtype=ACTION_SPEC.dtype),
                 }
             },
         ],

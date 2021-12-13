@@ -92,7 +92,7 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
         {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_1},
         {'MOVE': VALID_VALUE_1, 'TURN': VALID_VALUE_0},
     ])
-    actual = wrapped.step([np.array(0), np.array(2)])
+    actual = wrapped.step([0, 2])
 
     with self.subTest('timestep'):
       np.testing.assert_equal(actual, mock.sentinel.timestep)

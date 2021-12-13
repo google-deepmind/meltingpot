@@ -95,10 +95,9 @@ class Wrapper(base.Wrapper):
     self._action_table = _immutable_action_table(action_table, action_spec[0])
     _validate_action_table(self._action_table, action_spec[0])
 
-  def step(self, action: Sequence[np.ndarray]):
+  def step(self, action: Sequence[int]):
     """See base class."""
-    action = [
-        self._action_table[int(player_action)] for player_action in action]
+    action = [self._action_table[player_action] for player_action in action]
     return super().step(action)
 
   @functools.lru_cache(maxsize=1)

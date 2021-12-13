@@ -51,7 +51,7 @@ as the original, single-player versions:
 """
 
 import copy
-from typing import Collection, Mapping, Sequence
+from typing import Collection, Mapping, Sequence, Union
 
 import dm_env
 import numpy as np
@@ -85,15 +85,16 @@ class Wrapper(base.Wrapper):
     self._share_actions = share_actions
     self._share_rewards = share_rewards
 
-    action_spec = env.action_spec()
+    action_spec = super().action_spec()
     self._num_players = len(action_spec)
     self._missing_actions = [spec.generate_value() for spec in action_spec]
+    self._action_dtype = action_spec[0].dtype
 
   def _shared_observation(
       self,
       observations: Sequence[Mapping[str, np.ndarray]],
-      rewards: Sequence[np.ndarray],
-      actions: Sequence[np.ndarray]):
+      rewards: Sequence[Union[float, np.ndarray]],
+      actions: Sequence[int]):
     """Returns shared observations."""
     shared_observation = {}
 
@@ -108,12 +109,13 @@ class Wrapper(base.Wrapper):
       shared_observation[REWARDS_KEY] = np.stack(rewards)
 
     if self._share_actions:
-      shared_observation[ACTIONS_KEY] = np.stack(actions)
+      shared_observation[ACTIONS_KEY] = np.asarray(
+          actions, dtype=self._action_dtype)
 
     return shared_observation
 
   def _adjusted_timestep(self, timestep: dm_env.TimeStep,
-                         actions: Sequence[np.ndarray]) -> dm_env.TimeStep:
+                         actions: Sequence[int]) -> dm_env.TimeStep:
     """Returns timestep with shared observations."""
     shared_observation = self._shared_observation(
         observations=timestep.observation,
@@ -131,7 +133,7 @@ class Wrapper(base.Wrapper):
     timestep = super().reset()
     return self._adjusted_timestep(timestep, self._missing_actions)
 
-  def step(self, actions: Sequence[np.ndarray]) -> dm_env.TimeStep:
+  def step(self, actions: Sequence[int]) -> dm_env.TimeStep:
     """See base class."""
     timestep = super().step(actions)
     return self._adjusted_timestep(timestep, actions)
