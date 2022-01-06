@@ -275,11 +275,11 @@ def build(config: config_dict.ConfigDict) -> Scenario:
   }
 
   # Add observations needed by some bots. These are removed for focal players.
+  substrate_observations = set(substrate.observation_spec()[0])
   substrate = all_observations_wrapper.Wrapper(
       substrate, observations_to_share=['POSITION'], share_actions=True)
   substrate = agent_slot_wrapper.Wrapper(substrate)
-  add_inventory = 'INVENTORY' not in substrate.observation_spec()[0]
-  if add_inventory:
+  if 'INVENTORY' not in substrate_observations:
     substrate = default_observation_wrapper.Wrapper(
         substrate, key='INVENTORY', default_value=np.zeros([1]))
 
@@ -287,4 +287,4 @@ def build(config: config_dict.ConfigDict) -> Scenario:
       substrate=substrate,
       bots=bots,
       is_focal=config.is_focal,
-      permitted_observations=PERMITTED_OBSERVATIONS)
+      permitted_observations=PERMITTED_OBSERVATIONS & substrate_observations)

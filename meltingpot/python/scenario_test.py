@@ -37,6 +37,18 @@ class ScenarioTest(parameterized.TestCase):
       scenario.reset()
       scenario.step([0] * num_players)
 
+  @parameterized.named_parameters(
+      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+  def test_permitted_observations(self, scenario):
+    scenario_config = scenario_factory.get_config(scenario)
+    with scenario_factory.build(scenario_config) as scenario:
+      scenario_spec = set(scenario.observation_spec()[0])
+    with substrate_factory.build(scenario_config.substrate) as substrate:
+      substrate_spec = set(substrate.observation_spec()[0])
+
+    self.assertEqual(scenario_spec,
+                     substrate_spec & scenario_factory.PERMITTED_OBSERVATIONS)
+
 
 @parameterized.parameters(
     ([], [], [], []),
