@@ -21,6 +21,7 @@ from absl import logging
 import dm_env
 from ml_collections import config_dict
 import numpy as np
+
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.configs import scenarios as scenario_config
@@ -154,15 +155,18 @@ class Scenario(base.Wrapper):
     self._executor.shutdown(wait=False)
     super().close()
 
-  def _sample_bot_names(self) -> Sequence[str]:
+  def _sample_bots(self) -> Sequence[str]:
     """Returns a sample of bot names to fill the background slots."""
     return random.choices(tuple(self._bots), k=self._num_bots)
 
-  def _resample_bots(self):
-    """Resamples the currently active bots."""
-    sampled_names = self._sample_bot_names()
-    logging.info('Resampled bots: %s', sampled_names)
-    self._bot_step_fns = [_step_fn(self._bots[name]) for name in sampled_names]
+  def _set_bots(self, bot_names: Sequence[str]) -> None:
+    """Sets the currently active bots.
+
+    Args:
+      bot_names: names of bots to set active.
+    """
+    logging.info('Resampled bots: %s', bot_names)
+    self._bot_step_fns = [_step_fn(self._bots[name]) for name in bot_names]
     for future in self._action_futures:
       future.cancel()
     self._action_futures.clear()
@@ -201,7 +205,8 @@ class Scenario(base.Wrapper):
 
   def reset(self) -> dm_env.TimeStep:
     """See base class."""
-    self._resample_bots()
+    bot_names = self._sample_bots()
+    self._set_bots(bot_names)
     timestep = super().reset()
     agent_timestep, bot_timesteps = self._split_timestep(timestep)
     self._send_timesteps(bot_timesteps)
