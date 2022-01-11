@@ -56,10 +56,12 @@ def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
     return spaces.Box(spec.minimum, spec.maximum, spec.shape, spec.dtype)
   elif isinstance(spec, dm_env.specs.Array):
     if np.issubdtype(spec.dtype, np.floating):
-      info = np.finfo(spec.dtype)
-    else:
+      return spaces.Box(-np.inf, np.inf, spec.shape, spec.dtype)
+    elif np.issubdtype(spec.dtype, np.integer):
       info = np.iinfo(spec.dtype)
-    return spaces.Box(info.min, info.max, spec.shape, spec.dtype)
+      return spaces.Box(info.min, info.max, spec.shape, spec.dtype)
+    else:
+      raise NotImplementedError(f'Unsupported dtype {spec.dtype}')
   elif isinstance(spec, (list, tuple)):
     return spaces.Tuple([_spec_to_space(s) for s in spec])
   elif isinstance(spec, dict):
