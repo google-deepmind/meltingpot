@@ -366,7 +366,7 @@ def get_lab2d_settings(num_players):
       "levelDirectory":
           "meltingpot/lua/levels",
       "numPlayers": num_players,
-      "episodeLengthFrames": 1000,
+      "maxEpisodeLengthFrames": 1000,
       "spriteSize": 8,
       "topology": "BOUNDED",
       "simulation": {

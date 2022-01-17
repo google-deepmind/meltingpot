@@ -500,7 +500,7 @@ def create_lab2d_settings(
       "levelName": "the_matrix",
       "levelDirectory": "meltingpot/lua/levels",
       "numPlayers": num_players,
-      "episodeLengthFrames": 1000,
+      "maxEpisodeLengthFrames": 1000,
       "spriteSize": 8,
       "simulation": {
           "map": ascii_map_string,

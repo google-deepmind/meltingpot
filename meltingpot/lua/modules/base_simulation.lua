@@ -450,8 +450,8 @@ end
 Returns whether the simulation (episode) should continue for at least another
 step, as controlled by the components and its updaters. Notice that it is
 possible for this function to return true, and still being at the end of the
-episode if we have reached the `episodeLengthFrames`, as that is controlled by
-the engine.
+episode if we have reached the `maxEpisodeLengthFrames`, as that is controlled
+by api_factory.
 --]]
 function BaseSimulation:continue()
   return self._variables.continueEpisodeAfterThisFrame

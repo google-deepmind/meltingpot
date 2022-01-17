@@ -137,7 +137,7 @@ class PlayLevelTest(parameterized.TestCase):
   def test_run_level(
       self, config_module, play_module, unused_k, unused_d, unused_e, unused_t):
     full_config = config_module.get_config()
-    full_config['lab2d_settings']['episodeLengthFrames'] = 10
+    full_config['lab2d_settings']['maxEpisodeLengthFrames'] = 10
     level_playing_utils.run_episode(
         'RGB', {}, play_module._ACTION_MAP, full_config)
 

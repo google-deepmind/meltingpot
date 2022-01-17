@@ -61,7 +61,7 @@ A Melting Pot substrate consists of the following required elements:
     *   settings:
         -   `spriteSize`: Sprites will be squares of `spriteSize` X
             `spriteSize`.
-        -   `episodeLengthFrames` Terminate the episode after this many frames.
+        -   `maxEpisodeLengthFrames` Terminate the episode after this many frames.
 *   A configuration file (in Python)
 
 ![simulation objects and components](images/levels.png)
@@ -86,7 +86,7 @@ return api_factory.apiFactory{
         -- Scale each sprite to a square of size `spriteSize` X `spriteSize`.
         spriteSize = 8,
         -- Terminate the episode after this many frames.
-        episodeLengthFrames = 1000,
+        maxEpisodeLengthFrames = 1000,
         -- Required to exist. They will be filled in automatically from Python.
         simulation = {},
         topology = 'BOUNDED',
@@ -149,7 +149,7 @@ the substrate contains.
 config.lab2d_settings = {
     "substrateName": your_substrate_name,
     "levelDirectory": "path/to/your/levelDirectory",
-    "episodeLengthFrames": 1000,
+    "maxEpisodeLengthFrames": 1000,
     "spriteSize": 8,
     "simulation": {
         "map": ASCII_MAP,

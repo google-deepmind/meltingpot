@@ -202,7 +202,7 @@ def get_config():
           "harvest_finished",
       "levelDirectory":
           "meltingpot/examples/tutorial/harvest/levels",
-      "episodeLengthFrames":
+      "maxEpisodeLengthFrames":
           1000,
       "numPlayers":
           5,

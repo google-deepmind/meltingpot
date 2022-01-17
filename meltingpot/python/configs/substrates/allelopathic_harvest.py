@@ -916,7 +916,7 @@ def create_lab2d_settings(
       "levelDirectory":
             "meltingpot/lua/levels",
       "numPlayers": num_players,
-      "episodeLengthFrames": 2000,
+      "maxEpisodeLengthFrames": 2000,
       "spriteSize": 8,
       "topology": "TORUS",  # Choose from ["BOUNDED", "TORUS"],
       "simulation": {

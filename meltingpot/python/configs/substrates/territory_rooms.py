@@ -474,7 +474,7 @@ def create_lab2d_settings(num_players: int) -> Dict[str, Any]:
           "meltingpot/lua/levels",
       "numPlayers": num_players,
       # Define upper bound of episode length since episodes end stochastically.
-      "episodeLengthFrames": 2000,
+      "maxEpisodeLengthFrames": 2000,
       "spriteSize": 8,
       "topology": "TORUS",  # Choose from ["BOUNDED", "TORUS"],
       "simulation": {

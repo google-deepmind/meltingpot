@@ -643,7 +643,7 @@ def create_lab2d_settings(
       "levelName": "paintball_king_of_the_hill",
       "levelDirectory": "meltingpot/lua/levels",
       "numPlayers": num_players,
-      "episodeLengthFrames": 1000,
+      "maxEpisodeLengthFrames": 1000,
       "spriteSize": 8,
       "topology": "BOUNDED",  # Choose from ["BOUNDED", "TORUS"],
       "simulation": {

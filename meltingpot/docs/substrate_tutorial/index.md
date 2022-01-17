@@ -211,7 +211,7 @@ the `lab2d_settings` part of the config. In the end, they should look like this:
       "levelName": "harvest",
       "levelDirectory":
           "meltingpot/substrate_tutorial/harvest/levels",
-      "episodeLengthFrames": 100,
+      "maxEpisodeLengthFrames": 100,
       "numPlayers": 1,
       "spriteSize": 8,
       "simulation": {

@@ -39,6 +39,7 @@ local function apiFactory(env)
           numPlayers = 1,
           spriteSize = 16,
           simulation = env.Simulation.defaultSettings(),
+          maxEpisodeLengthFrames = 3600,
           episodeLengthFrames = 3600,
           topology = 'BOUNDED'
       }
@@ -54,6 +55,15 @@ local function apiFactory(env)
     read_settings.apply(tables.flatten(env.settings), self._settings)
     read_settings.apply(kwargs, self._settings)
     random:seed(self._settings.env_seed)
+    if self._settings.maxEpisodeLengthFrames then
+      self._settings.episodeLengthFrames = nil
+    else
+      self._settings.maxEpisodeLengthFrames = self._settings.episodeLengthFrames
+    end
+    if self._settings.episodeLengthFrames then
+      log.warn('Deprecation warning: `episodeLengthFrames` is deprecated.' ..
+               ' Use `maxEpisodeLengthFrames` instead.')
+    end
     self.simulation = env.Simulation{
         numPlayers = self._settings.numPlayers,
         settings = self._settings.simulation,
@@ -104,7 +114,7 @@ local function apiFactory(env)
     self.simulation:update(self._grid)
     self._grid:update(random)
     local simulationContinue = self.simulation:continue() ~= false
-    local withinFrameLimit = steps < self._settings.episodeLengthFrames
+    local withinFrameLimit = steps < self._settings.maxEpisodeLengthFrames
     local continue = simulationContinue and withinFrameLimit
     return continue, self.simulation:getReward()
   end
