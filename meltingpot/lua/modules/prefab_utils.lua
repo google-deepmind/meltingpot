@@ -41,20 +41,8 @@ local function _createGameObjectConfig(prefab, row, col)
   return go
 end
 
---[[ This function processes a single character in the ASCII map, at the given
-row & column (indexed from 0). The character, if not found in charPrefabMap,
-is ignored
-]]
-local function _processChar(row, col, char, charPrefabMap, prefabs, gameObjects)
-  log.v(2, "Processing char '" .. char .. "' at " .. row .. ", " .. col)
-  local prefab = rawget(charPrefabMap, char)
-  if prefab == nil then
-    if char ~= " " then
-      log.warn("Character", char, "not found in the charPrefabMap. Ignoring.")
-    end
-    return
-  end
-  if type(prefab) == "table" then
+local function _createPrefabsFromSpec(row, col, prefab, prefabs, gameObjects)
+  if type(prefab) == "table" then  -- Prefab spec case.
     assert(
       prefab.type,
       "A prefab specification other than a prefab name must be a table with " ..
@@ -70,21 +58,33 @@ local function _processChar(row, col, char, charPrefabMap, prefabs, gameObjects)
     log.v(1, "char maps to table: " .. helpers.tostring(prefab))
     if prefab.type == "all" then
       for _, p in pairs(prefab.list) do
-        local actual = rawget(prefabs, p)
-        assert(actual, "Prefab with name '" .. p .. "' not found in prefabs.")
-        table.insert(gameObjects, _createGameObjectConfig(actual, row, col))
+        _createPrefabsFromSpec(row, col, p, prefabs, gameObjects)
       end
     elseif prefab.type == "choice" then
       local which = random:choice(prefab.list)
-      local actual = rawget(prefabs, which)
-      assert(actual, "Prefab with name '" .. which .. "' not found prefabs.")
-      table.insert(gameObjects, _createGameObjectConfig(actual, row, col))
+      _createPrefabsFromSpec(row, col, which, prefabs, gameObjects)
     end
-  else  -- Typical case, since named prefab.
+  else  -- Named prefab case.
     local actual = rawget(prefabs, prefab)
     assert(actual, "Prefab with name '" .. prefab .. "' not found prefabs.")
     table.insert(gameObjects, _createGameObjectConfig(actual, row, col))
   end
+end
+
+--[[ This function processes a single character in the ASCII map, at the given
+row & column (indexed from 0). The character, if not found in charPrefabMap,
+is ignored
+]]
+local function _processChar(row, col, char, charPrefabMap, prefabs, gameObjects)
+  log.v(2, "Processing char '" .. char .. "' at " .. row .. ", " .. col)
+  local prefab = rawget(charPrefabMap, char)
+  if prefab == nil then
+    if char ~= " " then
+      log.warn("Character", char, "not found in the charPrefabMap. Ignoring.")
+    end
+    return
+  end
+  _createPrefabsFromSpec(row, col, prefab, prefabs, gameObjects)
 end
 
 -- Iterate over all characters in the map, and call the provided function
@@ -178,5 +178,6 @@ end
 return {
   buildGameObjectConfigs = buildGameObjectConfigs,
   buildAvatarConfigs = buildAvatarConfigs,
+  random = random,  -- returning so it can be mocked.
 }
 
