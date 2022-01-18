@@ -178,6 +178,5 @@ end
 return {
   buildGameObjectConfigs = buildGameObjectConfigs,
   buildAvatarConfigs = buildAvatarConfigs,
-  random = random,  -- returning so it can be mocked.
 }
 

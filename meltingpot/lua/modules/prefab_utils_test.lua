@@ -139,8 +139,6 @@ function tests.buildGameObjectFromAllSpec()
 end
 
 function tests.buildGameObjectFromChoiceSpec()
-  asserts.EQ(prefab_utils.random:choice({12, 32, 154}), 32)
-
   ascii = 'x'
   prefabs = {
       prefabA = _createPrefab('prefabA'),
@@ -155,8 +153,6 @@ function tests.buildGameObjectFromChoiceSpec()
 end
 
 function tests.buildGameObjectFromNestedSpecChoiceAll()
-  asserts.EQ(prefab_utils.random:choice({12, 32, 154}), 32)
-
   ascii = 'x'
   prefabs = {
       prefabA = _createPrefab('prefabA'),
@@ -175,8 +171,6 @@ function tests.buildGameObjectFromNestedSpecChoiceAll()
 end
 
 function tests.buildGameObjectFromNestedSpecAllChoice()
-  asserts.EQ(prefab_utils.random:choice({12, 32, 154}), 32)
-
   ascii = 'x'
   prefabs = {
       prefabA = _createPrefab('prefabA'),
