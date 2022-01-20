@@ -166,11 +166,6 @@ def builder(
   # Convert settings from python to Lua format.
   lab2d_settings_dict = parse_python_settings_for_dmlab2d(lab2d_settings)
 
-  # Only the raw environment has the properties API.
-  env_raw = dmlab2d.Lab2d(_DMLAB2D_ROOT, lab2d_settings_dict)
-  observation_names = env_raw.observation_names()
-  logging.info("available observation names: %s", observation_names)
-
   if env_seed is None:
     # Select a long seed different than zero.
     env_seed = random.randint(1, _MAX_SEED)
@@ -180,6 +175,7 @@ def builder(
     seed = next(env_seeds)
     lab2d_settings_dict["env_seed"] = str(seed)  # Sets the Lua seed.
     env_raw = dmlab2d.Lab2d(runfiles_helper.find(), lab2d_settings_dict)
+    observation_names = env_raw.observation_names()
     return dmlab2d.Environment(
         env=env_raw,
         observation_names=observation_names,
