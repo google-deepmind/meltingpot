@@ -174,7 +174,7 @@ def builder(
   def build_environment():
     seed = next(env_seeds)
     lab2d_settings_dict["env_seed"] = str(seed)  # Sets the Lua seed.
-    env_raw = dmlab2d.Lab2d(runfiles_helper.find(), lab2d_settings_dict)
+    env_raw = dmlab2d.Lab2d(_DMLAB2D_ROOT, lab2d_settings_dict)
     observation_names = env_raw.observation_names()
     return dmlab2d.Environment(
         env=env_raw,
