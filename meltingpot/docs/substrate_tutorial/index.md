@@ -503,7 +503,7 @@ character in the ASCII map, and call the prefab `"apple"`.
       "levelName": "harvest",
       "levelDirectory":
           "meltingpot/tutorial/harvest/levels",
-      "episodeLengthFrames": 100,
+      "maxEpisodeLengthFrames": 100,
       "numPlayers": 5,
       "spriteSize": 8,
       "simulation": {
@@ -723,7 +723,7 @@ First set `config.num_players = 5`. The rest of the changes go in
       "levelName": "harvest_finished",
       "levelDirectory":
           "meltingpot/tutorial/harvest/levels",
-      "episodeLengthFrames": 1000,
+      "maxEpisodeLengthFrames": 1000,
       "numPlayers": 5,
       "spriteSize": 8,
       "simulation": {
