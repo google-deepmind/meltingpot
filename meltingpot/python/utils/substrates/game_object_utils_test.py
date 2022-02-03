@@ -274,7 +274,7 @@ class BuildAvatarObjectsTest(parameterized.TestCase):
     self.assertLen(avatars, num_players)
 
   def test_with_palette_build(self):
-    palettes = [{'*': (255, 0, 0, 255)}, {'*': (0, 255, 0, 255)}]
+    palettes = [(255, 0, 0, 255), (0, 255, 0, 255)]
     prefabs = {'avatar': AVATAR}
     avatars = game_object_utils.build_avatar_objects(
         num_players=2,
@@ -307,7 +307,7 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
     self.assertLen(badges, num_players)
 
   def test_with_palette_build(self):
-    palettes = [{'*': (255, 0, 0, 255)}, {'*': (0, 255, 0, 255)}]
+    palettes = [(255, 0, 0, 255), (0, 255, 0, 255)]
     prefabs = {'avatar_badge': BADGE}
     badges = game_object_utils.build_avatar_badges(
         num_players=2,

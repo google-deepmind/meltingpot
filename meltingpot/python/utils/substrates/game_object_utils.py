@@ -15,7 +15,7 @@
 
 import copy
 import enum
-from typing import Any, List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union
+from typing import List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
@@ -25,7 +25,8 @@ from meltingpot.python.utils.substrates import shapes
 
 # Type of a GameObject prefab configuration: A recursive string mapping.
 # pytype: disable=not-supported-yet
-PrefabConfig = Mapping[str, Union[str, list, float, "PrefabConfig"]]
+PrefabConfig = Mapping[str, "PrefabConfigValue"]
+PrefabConfigValue = Union[str, float, List["PrefabConfigValue"], PrefabConfig]
 # pytype: enable=not-supported-yet
 
 
@@ -53,14 +54,14 @@ TYPE_CHOICE = "choice"
 
 def get_named_components(
     game_object_config: PrefabConfig,
-    name: str) -> Sequence[Any]:  # pytype: disable=not-supported-yet
+    name: str):
   return [component for component in game_object_config["components"]
           if component["component"] == name]
 
 
 def get_first_named_component(
     game_object_config: PrefabConfig,
-    name: str) -> Any:  # pytype: disable=not-supported-yet
+    name: str):
   named = get_named_components(game_object_config, name)
   if not named:
     raise ValueError(f"No component with name '{name}' found.")
@@ -72,10 +73,10 @@ def build_game_objects(
     ascii_map: str,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
     char_prefab_map: Optional[PrefabConfig] = None,
-    player_palettes: Optional[Sequence[PrefabConfig]] = None,
+    player_palettes: Optional[Sequence[shapes.Color]] = None,
     use_badges: bool = False,
-    badge_palettes: Optional[Sequence[PrefabConfig]] = None,  # pytype: disable=not-supported-yet
-    ) -> Tuple[List[PrefabConfig], List[PrefabConfig]]:  # pytype: disable=not-supported-yet
+    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+) -> Tuple[List[PrefabConfig], List[PrefabConfig]]:
   """Build all avatar and normal game objects based on the config and map."""
   game_objects = get_game_objects_from_map(ascii_map, char_prefab_map, prefabs)
   avatar_objects = build_avatar_objects(num_players, prefabs, player_palettes)
@@ -87,8 +88,8 @@ def build_game_objects(
 def build_avatar_objects(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    player_palettes: Optional[Sequence[PrefabConfig]] = None,
-    ) -> List[PrefabConfig]:  # pytype: disable=not-supported-yet
+    player_palettes: Optional[Sequence[shapes.Color]] = None,
+) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar" not in prefabs:
     raise ValueError(
@@ -132,8 +133,8 @@ def build_avatar_objects(
 def build_avatar_badges(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    badge_palettes: Optional[Sequence[PrefabConfig]] = None,  # pytype: disable=not-supported-yet
-    ) -> List[PrefabConfig]:  # pytype: disable=not-supported-yet
+    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar_badge" not in prefabs:
     raise ValueError(
@@ -220,7 +221,7 @@ def get_game_objects_from_map(
     char_prefab_map: Mapping[str, str],
     prefabs: Mapping[str, PrefabConfig],
     random: np.random.RandomState = np.random.RandomState()
-    ) -> List[PrefabConfig]:  # pytype: disable=not-supported-yet
+) -> List[PrefabConfig]:
   """Returns a list of game object configurations from the map and prefabs.
 
   Each prefab will have its `Transform` component overwritten to its actual
