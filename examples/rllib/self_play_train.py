@@ -83,6 +83,26 @@ def main():
   # If no_done_at_end = True, environment is not resetted
   # when dones[__all__]= True.
 
+  # Setup for the neural network.
+  config["model"] = {}
+  # The strides of the first convolutional layer were chosen to perfectly line
+  # up with the sprites, which are 8x8.
+  # The final layer must be chosen specifically so that its output is
+  # [B, 1, 1, X]. See the explanation in
+  # https://docs.ray.io/en/latest/rllib-models.html#built-in-models. It is
+  # because rllib is unable to flatten to a vector otherwise.
+  # The a3c models used as baselines in the meltingpot paper were not run using
+  # rllib, so they used a different configuration for the second convolutional
+  # layer. It was 32 channels, [4, 4] kernel shape, and stride = 1.
+  config["model"]["conv_filters"] = [[16, [8, 8], 8], [128, [11, 11], 1]]
+  config["model"]["conv_activation"] = "relu"
+  config["model"]["post_fcnet_hiddens"] = [256]
+  config["model"]["post_fcnet_activation"] = "relu"
+  config["model"]["use_lstm"] = True
+  config["model"]["lstm_use_prev_action"] = True
+  config["model"]["lstm_use_prev_reward"] = False
+  config["model"]["lstm_cell_size"] = 256
+
   # 6. Initialize ray and trainer object
   ray.init(num_cpus=num_cpus + 1)
   trainer = get_trainer_class(agent_algorithm)(env="meltingpot", config=config)
