@@ -3,3 +3,6 @@
 
 # Ignore default venv created by install.sh
 venv/
+
+examples/results/
+*.egg-info
