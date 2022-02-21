@@ -17,7 +17,6 @@ import concurrent
 import random
 from typing import Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
 
-from absl import logging
 import dm_env
 from ml_collections import config_dict
 import numpy as np
@@ -62,6 +61,77 @@ def _step_fn(policy: bot_factory.Policy) -> Callable[[dm_env.TimeStep], int]:
     return action
 
   return step
+
+
+class Population:
+  """A population of policies to use in a scenario."""
+
+  def __init__(self, policies: Mapping[str, bot_factory.Policy],
+               population_size: int) -> None:
+    """Initializes the population.
+
+    Args:
+      policies: the policies to sample from (with replacement) each episode.
+      population_size: the number of policies to sample on each reset.
+    """
+    self._policies = dict(policies)
+    self._population_size = population_size
+    self._executor = concurrent.futures.ThreadPoolExecutor(
+        max_workers=self._population_size)
+    self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
+    self._action_futures: List[concurrent.futures.Future] = []
+
+  def close(self):
+    """Closes the population."""
+    for future in self._action_futures:
+      future.cancel()
+    self._executor.shutdown(wait=False)
+    for policy in self._policies.values():
+      policy.close()
+
+  def _sample_names(self) -> Sequence[str]:
+    """Returns a sample of policy names for the population."""
+    return random.choices(tuple(self._policies), k=self._population_size)
+
+  def reset(self) -> None:
+    """Resamples the population."""
+    names = self._sample_names()
+    self._step_fns = [_step_fn(self._policies[name]) for name in names]
+    for future in self._action_futures:
+      future.cancel()
+    self._action_futures.clear()
+
+  def send_timestep(self, timestep: dm_env.TimeStep) -> None:
+    """Sends timestep to population for asynchronous processing.
+
+    Args:
+      timestep: The substrate timestep for the popualtion.
+
+    Raises:
+      RuntimeError: previous action has not been awaited.
+    """
+    if self._action_futures:
+      raise RuntimeError('Previous action not retrieved.')
+    for n, step_fn in enumerate(self._step_fns):
+      bot_timestep = timestep._replace(
+          observation=timestep.observation[n], reward=timestep.reward[n])
+      future = self._executor.submit(step_fn, bot_timestep)
+      self._action_futures.append(future)
+
+  def await_action(self) -> Sequence[int]:
+    """Waits for the population action in response to last timestep.
+
+    Returns:
+      The action for the population.
+
+    Raises:
+      RuntimeError: no timestep has been sent.
+    """
+    if not self._action_futures:
+      raise RuntimeError('No timestep sent.')
+    actions = tuple([future.result() for future in self._action_futures])
+    self._action_futures.clear()
+    return actions
 
 
 def _restrict_observation(
@@ -133,113 +203,80 @@ class Scenario(base.Wrapper):
       permitted_observations: the observations exposed by the scenario to focal
         agents.
     """
-    super().__init__(substrate)
-    self._bots = dict(bots)
     num_players = len(substrate.action_spec())
     if len(is_focal) != num_players:
       raise ValueError(f'is_focal is length {len(is_focal)} but substrate is '
                        f'{num_players}-player.')
+    super().__init__(substrate)
     self._is_focal = is_focal
-    self._num_focal = sum(is_focal)
-    self._num_bots = num_players - self._num_focal
+    self._background_population = Population(
+        policies=bots, population_size=num_players - sum(is_focal))
     self._permitted_observations = frozenset(permitted_observations)
-    self._executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=self._num_bots)
-    self._bot_step_fns: List[Callable[[dm_env.TimeStep], int]] = []
-    self._action_futures: List[concurrent.futures.Future] = []
 
   def close(self):
     """See base class."""
-    for bot in self._bots.values():
-      bot.close()
-    self._executor.shutdown(wait=False)
+    self._background_population.close()
     super().close()
 
-  def _sample_bots(self) -> Sequence[str]:
-    """Returns a sample of bot names to fill the background slots."""
-    return random.choices(tuple(self._bots), k=self._num_bots)
-
-  def _set_bots(self, bot_names: Sequence[str]) -> None:
-    """Sets the currently active bots.
-
-    Args:
-      bot_names: names of bots to set active.
-    """
-    logging.info('Resampled bots: %s', bot_names)
-    self._bot_step_fns = [_step_fn(self._bots[name]) for name in bot_names]
-    for future in self._action_futures:
-      future.cancel()
-    self._action_futures.clear()
-
-  def _send_timesteps(self, timesteps: Sequence[dm_env.TimeStep]) -> None:
-    """Sends timesteps to bots for asynchronous processing."""
-    assert not self._action_futures
-    for bot_step, timestep in zip(self._bot_step_fns, timesteps):
-      future = self._executor.submit(bot_step, timestep=timestep)
-      self._action_futures.append(future)
-
-  def _await_actions(self) -> Sequence[int]:
-    """Waits for the bots actions form the last timestep sent."""
-    assert self._action_futures
-    actions = [future.result() for future in self._action_futures]
-    self._action_futures.clear()
-    return actions
+  def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
+    """Returns full action after awaiting bot actions."""
+    background_action = self._background_population.await_action()
+    return _merge(focal_action, background_action, self._is_focal)
 
   def _split_timestep(
       self, timestep: dm_env.TimeStep
-  ) -> Tuple[dm_env.TimeStep, Sequence[dm_env.TimeStep]]:
+  ) -> Tuple[dm_env.TimeStep, dm_env.TimeStep]:
     """Splits multiplayer timestep as needed by agents and bots."""
-    agent_rewards, bot_rewards = _partition(timestep.reward, self._is_focal)
-    agent_observations, bot_observations = _partition(timestep.observation,
-                                                      self._is_focal)
-    agent_timestep = timestep._replace(
-        reward=agent_rewards,
-        observation=_restrict_observations(agent_observations,
-                                           self._permitted_observations),
-    )
-    bot_timesteps = [
-        timestep._replace(observation=observation, reward=reward)
-        for observation, reward in zip(bot_observations, bot_rewards)
-    ]
-    return agent_timestep, bot_timesteps
+    focal_rewards, background_rewards = _partition(timestep.reward,
+                                                   self._is_focal)
+    focal_observations, background_observations = _partition(
+        timestep.observation, self._is_focal)
+    focal_observations = _restrict_observations(focal_observations,
+                                                self._permitted_observations)
+    focal_timestep = timestep._replace(
+        reward=focal_rewards, observation=focal_observations)
+    background_timestep = timestep._replace(
+        reward=background_rewards, observation=background_observations)
+    return focal_timestep, background_timestep
+
+  def _send_full_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
+    """Returns focal timestep and sends background timestep to bots."""
+    focal_timestep, background_timestep = self._split_timestep(timestep)
+    self._background_population.send_timestep(background_timestep)
+    return focal_timestep
 
   def reset(self) -> dm_env.TimeStep:
     """See base class."""
-    bot_names = self._sample_bots()
-    self._set_bots(bot_names)
+    self._background_population.reset()
     timestep = super().reset()
-    agent_timestep, bot_timesteps = self._split_timestep(timestep)
-    self._send_timesteps(bot_timesteps)
-    return agent_timestep
+    focal_timestep = self._send_full_timestep(timestep)
+    return focal_timestep
 
   def step(self, action: Sequence[int]) -> dm_env.TimeStep:
     """See base class."""
-    agent_actions = action
-    bot_actions = self._await_actions()
-    actions = _merge(agent_actions, bot_actions, self._is_focal)
-    timestep = super().step(actions)
-    agent_timestep, bot_timesteps = self._split_timestep(timestep)
-    self._send_timesteps(bot_timesteps)
-    return agent_timestep
+    action = self._await_full_action(focal_action=action)
+    timestep = super().step(action)
+    focal_timestep = self._send_full_timestep(timestep)
+    return focal_timestep
 
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
-    agent_action_spec, _ = _partition(super().action_spec(), self._is_focal)
-    return agent_action_spec
+    focal_action_spec, _ = _partition(super().action_spec(), self._is_focal)
+    return focal_action_spec
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    agent_observation_spec, _ = _partition(super().observation_spec(),
+    focal_observation_spec, _ = _partition(super().observation_spec(),
                                            self._is_focal)
-    return _restrict_observations(agent_observation_spec,
+    return _restrict_observations(focal_observation_spec,
                                   self._permitted_observations)
 
   def reward_spec(self) -> Sequence[dm_env.specs.Array]:
     """See base class."""
     # TODO(b/192925212): better typing to avoid pytype disables.
     reward_spec: Sequence[dm_env.specs.Array] = super().reward_spec()  # pytype: disable=annotation-type-mismatch
-    agent_reward_spec, _ = _partition(reward_spec, self._is_focal)
-    return agent_reward_spec
+    focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
+    return focal_reward_spec
 
 
 def get_config(scenario_name: str) -> config_dict.ConfigDict:
