@@ -40,6 +40,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
 
   def test_observation_spec(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.observation_spec.return_value = [{
         OBSERVATION_1: dm_env.specs.Array(shape=[1], dtype=np.float32),
         OBSERVATION_2: dm_env.specs.Array(shape=[2], dtype=np.float32),
@@ -73,6 +74,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
 
   def test_reset(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.action_spec.return_value = [ACTION_SPEC] * 2
     env.reward_spec.return_value = [REWARD_SPEC] * 2
     env.reset.return_value = dm_env.restart([
@@ -120,6 +122,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
 
   def test_step(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.action_spec.return_value = [ACTION_SPEC] * 2
     env.reward_spec.return_value = [REWARD_SPEC] * 2
     env.step.return_value = dm_env.transition(

@@ -77,3 +77,7 @@ class Wrapper(substrate.Substrate):
   def read_property(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.read_property(*args, **kwargs)
+
+  def observables(self, *args, **kwargs) -> ...:
+    """See base class."""
+    return self._env.observables(*args, **kwargs)

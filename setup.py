@@ -60,6 +60,7 @@ setuptools.setup(
         'networkx',
         'numpy',
         'pygame',
+        'rx',
         'tensorflow',
     ],
     extras_require={

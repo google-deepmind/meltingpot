@@ -54,6 +54,7 @@ class AgentSlotWrapperTest(absltest.TestCase):
 
   def test_added_slot(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.observation_spec.return_value = [{'RGB': RGB_SPEC}] * 3
     env.reset.return_value = dm_env.restart([{'RGB': RGB_VALUE}] * 3)
     env.step.return_value = dm_env.transition(1, [{'RGB': RGB_VALUE}] * 3)

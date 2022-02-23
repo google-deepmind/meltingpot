@@ -92,6 +92,7 @@ class ScenarioWrapperTest(absltest.TestCase):
             immutabledict.immutabledict(ok=41, not_ok=401),
         ),
     )
+    substrate.events.return_value = ()
     substrate.action_spec.return_value = tuple(
         f'action_spec_{n}' for n in range(4)
     )
