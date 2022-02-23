@@ -35,49 +35,50 @@ class Wrapper(dmlab2d.Environment):
     """
     self._env = env
 
-  def reset(self, *args, **kwargs):
+  def reset(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.reset(*args, **kwargs)
 
-  def step(self, *args, **kwargs):
+  def step(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.step(*args, **kwargs)
 
-  def reward_spec(self, *args, **kwargs):
+  def reward_spec(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.reward_spec(*args, **kwargs)
 
-  def discount_spec(self, *args, **kwargs):
+  def discount_spec(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.discount_spec(*args, **kwargs)
 
-  def observation_spec(self, *args, **kwargs):
+  def observation_spec(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.observation_spec(*args, **kwargs)
 
-  def action_spec(self, *args, **kwargs):
+  def action_spec(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.action_spec(*args, **kwargs)
 
-  def close(self, *args, **kwargs):
+  def close(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.close(*args, **kwargs)
 
-  def observation(self, *args, **kwargs):
+  def observation(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.observation(*args, **kwargs)
 
-  def events(self, *args, **kwargs):
+  def events(self, *args, **kwargs) -> ...:
+    """See base class."""
     return self._env.events(*args, **kwargs)
 
-  def list_property(self, *args, **kwargs):
+  def list_property(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.list_property(*args, **kwargs)
 
-  def write_property(self, *args, **kwargs):
+  def write_property(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.write_property(*args, **kwargs)
 
-  def read_property(self, *args, **kwargs):
+  def read_property(self, *args, **kwargs) -> ...:
     """See base class."""
     return self._env.read_property(*args, **kwargs)
