@@ -26,6 +26,17 @@ from meltingpot.python import scenario as scenario_factory
 from meltingpot.python import substrate as substrate_factory
 
 
+def _track(source, fields):
+  destination = []
+  for field in fields:
+    getattr(source, field).subscribe(
+        on_next=destination.append,
+        on_error=lambda e: destination.append(type(e)),
+        on_completed=lambda: destination.append('DONE'),
+    )
+  return destination
+
+
 class ScenarioTest(parameterized.TestCase):
 
   @parameterized.named_parameters(
@@ -92,7 +103,8 @@ class ScenarioWrapperTest(absltest.TestCase):
             immutabledict.immutabledict(ok=41, not_ok=401),
         ),
     )
-    substrate.events.return_value = ()
+    substrate.events.return_value = (
+        mock.sentinel.event_0, mock.sentinel.event_1)
     substrate.action_spec.return_value = tuple(
         f'action_spec_{n}' for n in range(4)
     )
@@ -113,9 +125,18 @@ class ScenarioWrapperTest(absltest.TestCase):
       bots[f'bot_{n}'] = bot
 
     with scenario_factory.Scenario(
-        substrate, bots,
+        substrate=substrate_factory.Substrate(substrate),
+        bots=bots,
         is_focal=[True, False, True, False],
         permitted_observations={'ok'}) as scenario:
+      observables = scenario.observables()
+      received = {
+          'base': _track(observables, ['events', 'action', 'timestep']),
+          'focal': _track(observables.focal, ['action', 'timestep']),
+          'background': _track(observables.background, ['action', 'timestep']),
+          'substrate': _track(
+              observables.substrate, ['events', 'action', 'timestep']),
+      }
       action_spec = scenario.action_spec()
       observation_spec = scenario.observation_spec()
       reward_spec = scenario.reward_spec()
@@ -132,6 +153,9 @@ class ScenarioWrapperTest(absltest.TestCase):
                         immutabledict.immutabledict(ok='ok_spec_2')))
     with self.subTest(name='reward_spec'):
       self.assertEqual(reward_spec, ('reward_spec_0', 'reward_spec_2'))
+
+    with self.subTest(name='events'):
+      self.assertEmpty(scenario.events())
 
     with self.subTest(name='initial_timestep'):
       expected = dm_env.TimeStep(
@@ -182,6 +206,111 @@ class ScenarioWrapperTest(absltest.TestCase):
           prev_state='bot_state_1')
       self.assertEqual(actual, expected)
 
+    with self.subTest(name='base_observables'):
+      expected = [
+          dm_env.TimeStep(
+              step_type=dm_env.StepType.FIRST,
+              discount=0,
+              reward=(10, 30),
+              observation=(
+                  immutabledict.immutabledict(ok=10),
+                  immutabledict.immutabledict(ok=30),
+              ),
+          ),
+          [0, 1],
+          dm_env.transition(
+              reward=(11, 31),
+              observation=(
+                  immutabledict.immutabledict(ok=11),
+                  immutabledict.immutabledict(ok=31),
+              ),
+          ),
+          'DONE',
+          'DONE',
+          'DONE',
+      ]
+      self.assertEqual(received['base'], expected)
+
+    with self.subTest(name='substrate_observables'):
+      expected = [
+          dm_env.TimeStep(
+              step_type=dm_env.StepType.FIRST,
+              discount=0,
+              reward=(10, 20, 30, 40),
+              observation=(
+                  immutabledict.immutabledict(ok=10, not_ok=100),
+                  immutabledict.immutabledict(ok=20, not_ok=200),
+                  immutabledict.immutabledict(ok=30, not_ok=300),
+                  immutabledict.immutabledict(ok=40, not_ok=400),
+              ),
+          ),
+          mock.sentinel.event_0,
+          mock.sentinel.event_1,
+          (0, 10, 1, 11),
+          dm_env.transition(
+              reward=(11, 21, 31, 41),
+              observation=(
+                  immutabledict.immutabledict(ok=11, not_ok=101),
+                  immutabledict.immutabledict(ok=21, not_ok=201),
+                  immutabledict.immutabledict(ok=31, not_ok=301),
+                  immutabledict.immutabledict(ok=41, not_ok=401),
+              ),
+          ),
+          mock.sentinel.event_0,
+          mock.sentinel.event_1,
+          'DONE',
+          'DONE',
+          'DONE',
+      ]
+      self.assertEqual(received['substrate'], expected)
+
+    with self.subTest(name='focal_observables'):
+      expected = [
+          dm_env.TimeStep(
+              step_type=dm_env.StepType.FIRST,
+              discount=0,
+              reward=(10, 30),
+              observation=(
+                  immutabledict.immutabledict(ok=10),
+                  immutabledict.immutabledict(ok=30),
+              ),
+          ),
+          [0, 1],
+          dm_env.transition(
+              reward=(11, 31),
+              observation=(
+                  immutabledict.immutabledict(ok=11),
+                  immutabledict.immutabledict(ok=31),
+              ),
+          ),
+          'DONE',
+          'DONE',
+      ]
+      self.assertEqual(received['focal'], expected)
+
+    with self.subTest(name='background_observables'):
+      expected = [
+          dm_env.TimeStep(
+              step_type=dm_env.StepType.FIRST,
+              discount=0,
+              reward=(20, 40),
+              observation=(
+                  immutabledict.immutabledict(ok=20, not_ok=200),
+                  immutabledict.immutabledict(ok=40, not_ok=400),
+              ),
+          ),
+          (10, 11),
+          dm_env.transition(
+              reward=(21, 41),
+              observation=(
+                  immutabledict.immutabledict(ok=21, not_ok=201),
+                  immutabledict.immutabledict(ok=41, not_ok=401),
+              ),
+          ),
+          'DONE',
+          'DONE',
+      ]
+      self.assertEqual(received['background'], expected)
 
 if __name__ == '__main__':
   absltest.main()

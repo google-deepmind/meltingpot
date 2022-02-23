@@ -14,13 +14,16 @@
 """Scenario factory."""
 
 import concurrent
+import dataclasses
 import random
-from typing import Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
+from typing import Any, Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
 
 import dm_env
 import immutabledict
 from ml_collections import config_dict
 import numpy as np
+import rx
+from rx import subject
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
@@ -185,6 +188,36 @@ def _merge(
   )
 
 
+@dataclasses.dataclass(frozen=True)
+class PopulationObservables:
+  """Observables for a population.
+
+  Attributes:
+    action: emits actions sent to the substrate by the poulation.
+    timestep: emits timesteps sent from the substrate to the population.
+  """
+  action: rx.typing.Observable[Sequence[int]]
+  timestep: rx.typing.Observable[dm_env.TimeStep]
+
+
+@dataclasses.dataclass(frozen=True)
+class ScenarioObservables(substrate_factory.SubstrateObservables):
+  """Observables for a Scenario.
+
+  Attributes:
+    action: emits actions sent to the scenario from (focal) players.
+    timestep: emits timesteps sent from the scenario to (focal) players.
+    events: emits environment-specific events resulting from any interactions
+      with the scenario.
+    focal: observables from the perspective of the focal players.
+    background: observables from the perspective of the background players.
+    substrate: observables for the underlying substrate.
+  """
+  focal: PopulationObservables
+  background: PopulationObservables
+  substrate: substrate_factory.SubstrateObservables
+
+
 class Scenario(base.Wrapper):
   """An substrate where a number of player slots are filled by bots."""
 
@@ -214,14 +247,43 @@ class Scenario(base.Wrapper):
         policies=bots, population_size=num_players - sum(is_focal))
     self._permitted_observations = frozenset(permitted_observations)
 
-  def close(self):
+    self._focal_action_subject = subject.Subject()
+    self._focal_timestep_subject = subject.Subject()
+    self._background_action_subject = subject.Subject()
+    self._background_timestep_subject = subject.Subject()
+    self._events_subject = subject.Subject()
+    focal_observables = PopulationObservables(
+        action=self._focal_action_subject,
+        timestep=self._focal_timestep_subject,
+    )
+    background_observables = PopulationObservables(
+        action=self._background_action_subject,
+        timestep=self._background_timestep_subject,
+    )
+    self._observables = ScenarioObservables(
+        action=self._focal_action_subject,
+        events=self._events_subject,
+        timestep=self._focal_timestep_subject,
+        focal=focal_observables,
+        background=background_observables,
+        substrate=super().observables(),
+    )
+
+  def close(self) -> None:
     """See base class."""
     self._background_population.close()
     super().close()
+    self._focal_action_subject.on_completed()
+    self._background_action_subject.on_completed()
+    self._focal_timestep_subject.on_completed()
+    self._background_timestep_subject.on_completed()
+    self._events_subject.on_completed()
 
   def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
     """Returns full action after awaiting bot actions."""
+    self._focal_action_subject.on_next(focal_action)
     background_action = self._background_population.await_action()
+    self._background_action_subject.on_next(background_action)
     return _merge(focal_action, background_action, self._is_focal)
 
   def _split_timestep(
@@ -243,7 +305,9 @@ class Scenario(base.Wrapper):
   def _send_full_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
     """Returns focal timestep and sends background timestep to bots."""
     focal_timestep, background_timestep = self._split_timestep(timestep)
+    self._background_timestep_subject.on_next(background_timestep)
     self._background_population.send_timestep(background_timestep)
+    self._focal_timestep_subject.on_next(focal_timestep)
     return focal_timestep
 
   def reset(self) -> dm_env.TimeStep:
@@ -251,6 +315,8 @@ class Scenario(base.Wrapper):
     self._background_population.reset()
     timestep = super().reset()
     focal_timestep = self._send_full_timestep(timestep)
+    for event in self.events():
+      self._events_subject.on_next(event)
     return focal_timestep
 
   def step(self, action: Sequence[int]) -> dm_env.TimeStep:
@@ -258,7 +324,15 @@ class Scenario(base.Wrapper):
     action = self._await_full_action(focal_action=action)
     timestep = super().step(action)
     focal_timestep = self._send_full_timestep(timestep)
+    for event in self.events():
+      self._events_subject.on_next(event)
     return focal_timestep
+
+  def events(self) -> Sequence[Tuple[str, Any]]:
+    """See base class."""
+    # Do not emit substrate events as these may not make sense in the context
+    # of a scenario (e.g. player indices may have changed).
+    return ()
 
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
@@ -278,6 +352,10 @@ class Scenario(base.Wrapper):
     reward_spec: Sequence[dm_env.specs.Array] = super().reward_spec()  # pytype: disable=annotation-type-mismatch
     focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
     return focal_reward_spec
+
+  def observables(self) -> ScenarioObservables:
+    """Returns the observables for the scenario."""
+    return self._observables
 
 
 def get_config(scenario_name: str) -> config_dict.ConfigDict:
