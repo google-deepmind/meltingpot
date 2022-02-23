@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests of bots."""
+"""Tests of scenarios."""
 
 import random
 from unittest import mock
@@ -29,7 +29,7 @@ from meltingpot.python import substrate as substrate_factory
 class ScenarioTest(parameterized.TestCase):
 
   @parameterized.named_parameters(
-      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+      (scenario,) * 2 for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_step_without_error(self, scenario):
     scenario_config = scenario_factory.get_config(scenario)
     num_players = scenario_config.num_players
@@ -38,7 +38,7 @@ class ScenarioTest(parameterized.TestCase):
       scenario.step([0] * num_players)
 
   @parameterized.named_parameters(
-      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+      (scenario,) * 2 for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_permitted_observations(self, scenario):
     scenario_config = scenario_factory.get_config(scenario)
     with scenario_factory.build(scenario_config) as scenario:
@@ -51,11 +51,11 @@ class ScenarioTest(parameterized.TestCase):
 
 
 @parameterized.parameters(
-    ([], [], [], []),
-    (['a'], [True], ['a'], []),
-    (['a'], [False], [], ['a']),
-    (['a', 'b', 'c'], [True, True, False], ['a', 'b'], ['c']),
-    (['a', 'b', 'c'], [False, True, False], ['b'], ['a', 'c']),
+    ((), (), (), ()),
+    (('a',), (True,), ('a',), ()),
+    (('a',), (False,), (), ('a',)),
+    (('a', 'b', 'c'), (True, True, False), ('a', 'b'), ('c',)),
+    (('a', 'b', 'c'), (False, True, False), ('b',), ('a', 'c')),
 )
 class PartitionMergeTest(parameterized.TestCase):
 
@@ -124,31 +124,38 @@ class ScenarioWrapperTest(absltest.TestCase):
       step_timestep = scenario.step([0, 1])
 
     with self.subTest(name='action_spec'):
-      self.assertEqual(action_spec, ['action_spec_0', 'action_spec_2'])
+      self.assertEqual(action_spec, ('action_spec_0', 'action_spec_2'))
     with self.subTest(name='observation_spec'):
       self.assertEqual(observation_spec,
-                       [dict(ok='ok_spec_0'), dict(ok='ok_spec_2')])
+                       (immutabledict.immutabledict(ok='ok_spec_0'),
+                        immutabledict.immutabledict(ok='ok_spec_2')))
     with self.subTest(name='reward_spec'):
-      self.assertEqual(reward_spec, ['reward_spec_0', 'reward_spec_2'])
+      self.assertEqual(reward_spec, ('reward_spec_0', 'reward_spec_2'))
 
     with self.subTest(name='initial_timestep'):
       expected = dm_env.TimeStep(
           step_type=dm_env.StepType.FIRST,
           discount=0,
-          reward=[10, 30],
-          observation=[dict(ok=10), dict(ok=30)],
+          reward=(10, 30),
+          observation=(
+              immutabledict.immutabledict(ok=10),
+              immutabledict.immutabledict(ok=30),
+          ),
       )
       self.assertEqual(initial_timestep, expected)
 
     with self.subTest(name='step_timestep'):
       expected = dm_env.transition(
-          reward=[11, 31],
-          observation=[dict(ok=11), dict(ok=31)],
+          reward=(11, 31),
+          observation=(
+              immutabledict.immutabledict(ok=11),
+              immutabledict.immutabledict(ok=31),
+          ),
       )
       self.assertEqual(step_timestep, expected)
 
     with self.subTest(name='substrate_step'):
-      substrate.step.assert_called_once_with([0, 10, 1, 11])
+      substrate.step.assert_called_once_with((0, 10, 1, 11))
 
     with self.subTest(name='bot_0_step'):
       actual = bots['bot_0'].step.call_args_list[0]

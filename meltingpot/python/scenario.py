@@ -18,6 +18,7 @@ import random
 from typing import Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
 
 import dm_env
+import immutabledict
 from ml_collections import config_dict
 import numpy as np
 
@@ -129,7 +130,7 @@ class Population:
     """
     if not self._action_futures:
       raise RuntimeError('No timestep sent.')
-    actions = tuple([future.result() for future in self._action_futures])
+    actions = tuple(future.result() for future in self._action_futures)
     self._action_futures.clear()
     return actions
 
@@ -139,10 +140,10 @@ def _restrict_observation(
     permitted_observations: Collection[str],
 ) -> Mapping[str, T]:
   """Restricts an observation to only the permitted keys."""
-  return {
+  return immutabledict.immutabledict({
       key: observation[key]
       for key in observation if key in permitted_observations
-  }
+  })
 
 
 def _restrict_observations(
@@ -150,10 +151,10 @@ def _restrict_observations(
     permitted_observations: Collection[str],
 ) -> Sequence[Mapping[str, T]]:
   """Restricts multiple observations to only the permitted keys."""
-  return [
+  return tuple(
       _restrict_observation(observation, permitted_observations)
       for observation in observations
-  ]
+  )
 
 
 def _partition(
@@ -168,7 +169,7 @@ def _partition(
       focal_values.append(value)
     else:
       background_values.append(value)
-  return focal_values, background_values
+  return tuple(focal_values), tuple(background_values)
 
 
 def _merge(
@@ -179,9 +180,9 @@ def _merge(
   """Merges focal and background sequences into one."""
   focal_values = iter(focal_values)
   background_values = iter(background_values)
-  return [
+  return tuple(
       next(focal_values if focal else background_values) for focal in is_focal
-  ]
+  )
 
 
 class Scenario(base.Wrapper):
