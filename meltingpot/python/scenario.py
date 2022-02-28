@@ -371,11 +371,10 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   bots = {name: bot_factory.get_config(name) for name in scenario.bots}
   config = config_dict.create(
       substrate=substrate,
-      num_players=scenario.num_focal_agents,
       bots=bots,
-      num_bots=scenario.num_background_bots,
-      is_focal=tuple([True] * scenario.num_focal_agents +
-                     [False] * scenario.num_background_bots),
+      is_focal=scenario.is_focal,
+      num_players=sum(scenario.is_focal),
+      num_bots=len(scenario.is_focal) - sum(scenario.is_focal),
   )
   return config.lock()
 

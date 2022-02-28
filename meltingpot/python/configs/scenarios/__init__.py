@@ -15,7 +15,7 @@
 
 import collections
 import dataclasses
-from typing import AbstractSet, Collection, Mapping
+from typing import AbstractSet, Collection, Mapping, Sequence
 
 import immutabledict
 
@@ -25,8 +25,7 @@ class Scenario:
   description: str
   tags: AbstractSet[str]
   substrate: str
-  num_focal_agents: int
-  num_background_bots: int
+  is_focal: Sequence[bool]
   bots: AbstractSet[str]
 
 
@@ -38,8 +37,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='allelopathic_harvest',
-        num_focal_agents=15,
-        num_background_bots=1,
+        is_focal=(True,) * 15 + (False,) * 1,
         bots=frozenset({
             'ah3gs_bot_finding_berry_two_the_most_tasty_0',
             'ah3gs_bot_finding_berry_two_the_most_tasty_1',
@@ -54,8 +52,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='allelopathic_harvest',
-        num_focal_agents=4,
-        num_background_bots=12,
+        is_focal=(True,) * 4 + (False,) * 12,
         bots=frozenset({
             'ah3gs_bot_finding_berry_two_the_most_tasty_0',
             'ah3gs_bot_finding_berry_two_the_most_tasty_1',
@@ -71,8 +68,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_free',
         }),
         substrate='arena_running_with_scissors_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'arena_rws_free_0',
             'arena_rws_free_1',
@@ -86,8 +82,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='arena_running_with_scissors_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'arena_rws_pure_paper_0',
             'arena_rws_pure_paper_1',
@@ -110,8 +105,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_rock',
         }),
         substrate='arena_running_with_scissors_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'arena_rws_pure_rock_0',
             'arena_rws_pure_rock_1',
@@ -126,8 +120,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_paper',
         }),
         substrate='arena_running_with_scissors_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'arena_rws_pure_paper_0',
             'arena_rws_pure_paper_1',
@@ -142,8 +135,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_scissors',
         }),
         substrate='arena_running_with_scissors_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'arena_rws_pure_scissors_0',
             'arena_rws_pure_scissors_1',
@@ -159,8 +151,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='bach_or_stravinsky_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'bach_fan_0',
             'bach_fan_1',
@@ -175,8 +166,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='bach_or_stravinsky_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'stravinsky_fan_0',
             'stravinsky_fan_1',
@@ -190,8 +180,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='capture_the_flag',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_a3c_2',
             'ctf_pseudorewards_for_main_game_events_a3c_6',
@@ -204,8 +193,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='capture_the_flag',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_vmpo_0',
             'ctf_pseudorewards_for_main_game_events_vmpo_3',
@@ -221,8 +209,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='capture_the_flag',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_a3c_2',
             'ctf_pseudorewards_for_main_game_events_a3c_6',
@@ -235,8 +222,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='capture_the_flag',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_vmpo_0',
             'ctf_pseudorewards_for_main_game_events_vmpo_3',
@@ -251,8 +237,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'half_and_half',
         }),
         substrate='chemistry_branched_chain_reaction',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'chemistry_branched_chain_reaction_X_specialist_0',
             'chemistry_branched_chain_reaction_X_specialist_1',
@@ -265,8 +250,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'half_and_half',
         }),
         substrate='chemistry_branched_chain_reaction',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'chemistry_branched_chain_reaction_Y_specialist_0',
             'chemistry_branched_chain_reaction_Y_specialist_1',
@@ -279,8 +263,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='chemistry_branched_chain_reaction',
-        num_focal_agents=7,
-        num_background_bots=1,
+        is_focal=(True,) * 7 + (False,) * 1,
         bots=frozenset({
             'chemistry_branched_chain_reaction_X_specialist_0',
             'chemistry_branched_chain_reaction_X_specialist_1',
@@ -297,8 +280,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='chemistry_branched_chain_reaction',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'chemistry_branched_chain_reaction_X_specialist_0',
             'chemistry_branched_chain_reaction_X_specialist_1',
@@ -314,8 +296,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'half_and_half',
         }),
         substrate='chemistry_metabolic_cycles',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'chemistry_metabolic_cycles_food1_specialist_0',
             'chemistry_metabolic_cycles_food1_specialist_1',
@@ -327,8 +308,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'half_and_half',
         }),
         substrate='chemistry_metabolic_cycles',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'chemistry_metabolic_cycles_food2_specialist_0',
             'chemistry_metabolic_cycles_food2_specialist_1',
@@ -340,8 +320,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='chemistry_metabolic_cycles',
-        num_focal_agents=7,
-        num_background_bots=1,
+        is_focal=(True,) * 7 + (False,) * 1,
         bots=frozenset({
             'chemistry_metabolic_cycles_food1_specialist_0',
             'chemistry_metabolic_cycles_food1_specialist_1',
@@ -355,8 +334,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='chemistry_metabolic_cycles',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'chemistry_metabolic_cycles_food1_specialist_0',
             'chemistry_metabolic_cycles_food1_specialist_1',
@@ -371,8 +349,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='chicken_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'chicken_pure_dove_0',
             'chicken_pure_dove_1',
@@ -391,8 +368,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='chicken_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'chicken_pure_dove_0',
             'chicken_pure_dove_1',
@@ -407,8 +383,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_hawk',
         }),
         substrate='chicken_in_the_matrix',
-        num_focal_agents=5,
-        num_background_bots=3,
+        is_focal=(True,) * 5 + (False,) * 3,
         bots=frozenset({
             'chicken_pure_hawk_0',
             'chicken_pure_hawk_1',
@@ -424,8 +399,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='chicken_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'chicken_free_0',
             'chicken_free_1',
@@ -441,8 +415,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='chicken_in_the_matrix',
-        num_focal_agents=2,
-        num_background_bots=6,
+        is_focal=(True,) * 2 + (False,) * 6,
         bots=frozenset({
             'chicken_puppet_grim',
         }),
@@ -454,8 +427,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='clean_up',
-        num_focal_agents=3,
-        num_background_bots=4,
+        is_focal=(True,) * 3 + (False,) * 4,
         bots=frozenset({
             'cleanup_cleaner_1',
             'cleanup_cleaner_2',
@@ -468,8 +440,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_consumers',
         }),
         substrate='clean_up',
-        num_focal_agents=4,
-        num_background_bots=3,
+        is_focal=(True,) * 4 + (False,) * 3,
         bots=frozenset({
             'cleanup_consumer_0',
             'cleanup_consumer_1',
@@ -483,8 +454,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='clean_up',
-        num_focal_agents=3,
-        num_background_bots=4,
+        is_focal=(True,) * 3 + (False,) * 4,
         bots=frozenset({
             'cleanup_puppet_alternate_clean_first',
         }),
@@ -496,8 +466,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='clean_up',
-        num_focal_agents=3,
-        num_background_bots=4,
+        is_focal=(True,) * 3 + (False,) * 4,
         bots=frozenset({
             'cleanup_puppet_alternate_eat_first',
         }),
@@ -509,8 +478,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_puppet',
         }),
         substrate='clean_up',
-        num_focal_agents=6,
-        num_background_bots=1,
+        is_focal=(True,) * 6 + (False,) * 1,
         bots=frozenset({
             'cleanup_puppet_reciprocator_threshold_low',
         }),
@@ -522,8 +490,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_puppet',
         }),
         substrate='clean_up',
-        num_focal_agents=5,
-        num_background_bots=2,
+        is_focal=(True,) * 5 + (False,) * 2,
         bots=frozenset({
             'cleanup_puppet_reciprocator_threshold_mid',
         }),
@@ -535,8 +502,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_puppet',
         }),
         substrate='clean_up',
-        num_focal_agents=6,
-        num_background_bots=1,
+        is_focal=(True,) * 6 + (False,) * 1,
         bots=frozenset({
             'cleanup_puppet_reciprocator_threshold_mid',
         }),
@@ -548,8 +514,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='collaborative_cooking_impassable',
-        num_focal_agents=1,
-        num_background_bots=3,
+        is_focal=(True,) * 1 + (False,) * 3,
         bots=frozenset({
             'collaborative_cooking_impassable_vmpo_pop_size_ten_0',
             'collaborative_cooking_impassable_vmpo_pop_size_ten_2',
@@ -566,8 +531,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='collaborative_cooking_impassable',
-        num_focal_agents=3,
-        num_background_bots=1,
+        is_focal=(True,) * 3 + (False,) * 1,
         bots=frozenset({
             'collaborative_cooking_impassable_vmpo_pop_size_ten_0',
             'collaborative_cooking_impassable_vmpo_pop_size_ten_2',
@@ -586,8 +550,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='collaborative_cooking_passable',
-        num_focal_agents=1,
-        num_background_bots=3,
+        is_focal=(True,) * 1 + (False,) * 3,
         bots=frozenset({
             'collaborative_cooking_passable_vmpo_pop_size_ten_5',
         }),
@@ -599,8 +562,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_uncoordinated_generalist',
         }),
         substrate='collaborative_cooking_passable',
-        num_focal_agents=3,
-        num_background_bots=1,
+        is_focal=(True,) * 3 + (False,) * 1,
         bots=frozenset({
             'collaborative_cooking_passable_vmpo_pop_size_ten_5',
         }),
@@ -611,8 +573,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='commons_harvest_closed',
-        num_focal_agents=14,
-        num_background_bots=2,
+        is_focal=(True,) * 14 + (False,) * 2,
         bots=frozenset({
             'closed_commons_zapper_0',
             'closed_commons_zapper_1',
@@ -626,8 +587,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='commons_harvest_closed',
-        num_focal_agents=10,
-        num_background_bots=6,
+        is_focal=(True,) * 10 + (False,) * 6,
         bots=frozenset({
             'closed_commons_zapper_0',
             'closed_commons_zapper_1',
@@ -641,8 +601,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='commons_harvest_closed',
-        num_focal_agents=4,
-        num_background_bots=12,
+        is_focal=(True,) * 4 + (False,) * 12,
         bots=frozenset({
             'closed_commons_zapper_0',
             'closed_commons_zapper_1',
@@ -656,8 +615,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='commons_harvest_open',
-        num_focal_agents=14,
-        num_background_bots=2,
+        is_focal=(True,) * 14 + (False,) * 2,
         bots=frozenset({
             'open_commons_zapper_0',
             'open_commons_zapper_1',
@@ -669,8 +627,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='commons_harvest_open',
-        num_focal_agents=10,
-        num_background_bots=6,
+        is_focal=(True,) * 10 + (False,) * 6,
         bots=frozenset({
             'open_commons_zapper_0',
             'open_commons_zapper_1',
@@ -683,8 +640,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_good_partners',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=8,
-        num_background_bots=8,
+        is_focal=(True,) * 8 + (False,) * 8,
         bots=frozenset({
             'partnership_commons_putative_good_partner_4',
             'partnership_commons_putative_good_partner_5',
@@ -698,8 +654,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_good_partners',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=12,
-        num_background_bots=4,
+        is_focal=(True,) * 12 + (False,) * 4,
         bots=frozenset({
             'partnership_commons_putative_good_partner_4',
             'partnership_commons_putative_good_partner_5',
@@ -713,8 +668,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=4,
-        num_background_bots=12,
+        is_focal=(True,) * 4 + (False,) * 12,
         bots=frozenset({
             'partnership_commons_putative_good_partner_4',
             'partnership_commons_putative_good_partner_5',
@@ -728,8 +682,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_zappers',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=14,
-        num_background_bots=2,
+        is_focal=(True,) * 14 + (False,) * 2,
         bots=frozenset({
             'partnership_commons_zapper_1',
             'partnership_commons_zapper_2',
@@ -742,8 +695,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_zappers',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=10,
-        num_background_bots=6,
+        is_focal=(True,) * 10 + (False,) * 6,
         bots=frozenset({
             'partnership_commons_zapper_1',
             'partnership_commons_zapper_2',
@@ -756,8 +708,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='commons_harvest_partnership',
-        num_focal_agents=4,
-        num_background_bots=12,
+        is_focal=(True,) * 4 + (False,) * 12,
         bots=frozenset({
             'partnership_commons_zapper_1',
             'partnership_commons_zapper_2',
@@ -770,8 +721,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'koth_default_vmpo_0',
             'koth_default_vmpo_1',
@@ -790,8 +740,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'koth_zap_while_in_control_a3c_0',
             'koth_zap_while_in_control_a3c_1',
@@ -810,8 +759,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'koth_zap_while_in_control_vmpo_0',
             'koth_zap_while_in_control_vmpo_1',
@@ -830,8 +778,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'koth_default_vmpo_0',
             'koth_default_vmpo_1',
@@ -850,8 +797,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'koth_zap_while_in_control_a3c_0',
             'koth_zap_while_in_control_a3c_1',
@@ -870,8 +816,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='king_of_the_hill',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'koth_zap_while_in_control_vmpo_0',
             'koth_zap_while_in_control_vmpo_1',
@@ -890,8 +835,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'prisoners_dilemma_cooperator_2',
             'prisoners_dilemma_cooperator_4',
@@ -904,8 +848,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_cooperators',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=6,
-        num_background_bots=2,
+        is_focal=(True,) * 6 + (False,) * 2,
         bots=frozenset({
             'prisoners_dilemma_cooperator_2',
             'prisoners_dilemma_cooperator_4',
@@ -918,8 +861,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_defectors',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=6,
-        num_background_bots=2,
+        is_focal=(True,) * 6 + (False,) * 2,
         bots=frozenset({
             'prisoners_dilemma_defector_0',
             'prisoners_dilemma_defector_2',
@@ -933,8 +875,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_free',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'prisoners_dilemma_free_0',
             'prisoners_dilemma_free_1',
@@ -949,8 +890,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'prisoners_dilemma_puppet_grim_threshold_high',
         }),
@@ -963,8 +903,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='prisoners_dilemma_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'prisoners_dilemma_puppet_grim_threshold_low',
         }),
@@ -976,8 +915,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='pure_coordination_in_the_matrix',
-        num_focal_agents=7,
-        num_background_bots=1,
+        is_focal=(True,) * 7 + (False,) * 1,
         bots=frozenset({
             'pure_coordination_type_1_specialist_0',
             'pure_coordination_type_1_specialist_1',
@@ -994,8 +932,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='pure_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'pure_coordination_type_1_specialist_0',
             'pure_coordination_type_1_specialist_1',
@@ -1008,8 +945,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='pure_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'pure_coordination_type_2_specialist_0',
             'pure_coordination_type_2_specialist_1',
@@ -1022,8 +958,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='pure_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'pure_coordination_type_3_specialist_0',
             'pure_coordination_type_3_specialist_1',
@@ -1036,8 +971,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='pure_coordination_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'pure_coordination_type_1_specialist_0',
             'pure_coordination_type_1_specialist_1',
@@ -1054,8 +988,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='rationalizable_coordination_in_the_matrix',
-        num_focal_agents=7,
-        num_background_bots=1,
+        is_focal=(True,) * 7 + (False,) * 1,
         bots=frozenset({
             'rationalizable_coordination_type_1_specialist_0',
             'rationalizable_coordination_type_1_specialist_1',
@@ -1072,8 +1005,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='rationalizable_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'rationalizable_coordination_type_1_specialist_0',
             'rationalizable_coordination_type_1_specialist_1',
@@ -1086,8 +1018,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='rationalizable_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'rationalizable_coordination_type_2_specialist_0',
             'rationalizable_coordination_type_2_specialist_1',
@@ -1100,8 +1031,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='rationalizable_coordination_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'rationalizable_coordination_type_3_specialist_0',
             'rationalizable_coordination_type_3_specialist_1',
@@ -1114,8 +1044,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='rationalizable_coordination_in_the_matrix',
-        num_focal_agents=4,
-        num_background_bots=4,
+        is_focal=(True,) * 4 + (False,) * 4,
         bots=frozenset({
             'rationalizable_coordination_type_1_specialist_0',
             'rationalizable_coordination_type_1_specialist_1',
@@ -1133,8 +1062,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_free',
         }),
         substrate='running_with_scissors_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=1,
+        is_focal=(True,) * 1 + (False,) * 1,
         bots=frozenset({
             'classic_rws_free_0',
             'classic_rws_free_1',
@@ -1148,8 +1076,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_all',
         }),
         substrate='running_with_scissors_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=1,
+        is_focal=(True,) * 1 + (False,) * 1,
         bots=frozenset({
             'classic_rws_pure_paper_0',
             'classic_rws_pure_paper_1',
@@ -1172,8 +1099,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_rock',
         }),
         substrate='running_with_scissors_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=1,
+        is_focal=(True,) * 1 + (False,) * 1,
         bots=frozenset({
             'classic_rws_pure_rock_0',
             'classic_rws_pure_rock_1',
@@ -1188,8 +1114,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_paper',
         }),
         substrate='running_with_scissors_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=1,
+        is_focal=(True,) * 1 + (False,) * 1,
         bots=frozenset({
             'classic_rws_pure_paper_0',
             'classic_rws_pure_paper_1',
@@ -1204,8 +1129,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'versus_pure_scissors',
         }),
         substrate='running_with_scissors_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=1,
+        is_focal=(True,) * 1 + (False,) * 1,
         bots=frozenset({
             'classic_rws_pure_scissors_0',
             'classic_rws_pure_scissors_1',
@@ -1220,8 +1144,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='stag_hunt_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'stag_hunt_stag_specialist_3',
             'stag_hunt_stag_specialist_5',
@@ -1234,8 +1157,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='stag_hunt_in_the_matrix',
-        num_focal_agents=1,
-        num_background_bots=7,
+        is_focal=(True,) * 1 + (False,) * 7,
         bots=frozenset({
             'stag_hunt_hare_specialist_0',
             'stag_hunt_hare_specialist_1',
@@ -1250,8 +1172,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='stag_hunt_in_the_matrix',
-        num_focal_agents=2,
-        num_background_bots=6,
+        is_focal=(True,) * 2 + (False,) * 6,
         bots=frozenset({
             'stag_hunt_puppet_grim',
         }),
@@ -1262,8 +1183,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='territory_open',
-        num_focal_agents=8,
-        num_background_bots=1,
+        is_focal=(True,) * 8 + (False,) * 1,
         bots=frozenset({
             'territory_open_painter_0',
             'territory_open_painter_1',
@@ -1278,8 +1198,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='territory_open',
-        num_focal_agents=1,
-        num_background_bots=8,
+        is_focal=(True,) * 1 + (False,) * 8,
         bots=frozenset({
             'territory_open_painter_0',
             'territory_open_painter_1',
@@ -1293,8 +1212,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'resident',
         }),
         substrate='territory_rooms',
-        num_focal_agents=8,
-        num_background_bots=1,
+        is_focal=(True,) * 8 + (False,) * 1,
         bots=frozenset({
             'territory_closed_reply_to_zapper_0',
             'territory_closed_reply_to_zapper_1',
@@ -1307,8 +1225,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'visitor',
         }),
         substrate='territory_rooms',
-        num_focal_agents=1,
-        num_background_bots=8,
+        is_focal=(True,) * 1 + (False,) * 8,
         bots=frozenset({
             'territory_closed_reply_to_zapper_0',
             'territory_closed_reply_to_zapper_1',
