@@ -13,9 +13,9 @@
 # limitations under the License.
 """Substrate builder."""
 
-import dataclasses
 from typing import Any, Mapping, Sequence, Tuple
 
+import chex
 import dm_env
 from ml_collections import config_dict
 import rx
@@ -30,7 +30,7 @@ from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
 AVAILABLE_SUBSTRATES = substrate_configs.SUBSTRATES
 
 
-@dataclasses.dataclass(frozen=True)
+@chex.dataclass(frozen=True)
 class SubstrateObservables:
   """Observables for a substrate.
 

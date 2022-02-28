@@ -53,6 +53,7 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'absl-py',
+        'chex',
         'dm_env',
         # 'dmlab2d',  # Not yet available for PIP install.
         'immutabledict',
