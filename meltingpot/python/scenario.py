@@ -14,10 +14,10 @@
 """Scenario factory."""
 
 import concurrent
-import dataclasses
 import random
 from typing import Any, Callable, Collection, Iterable, List, Mapping, Sequence, Tuple, TypeVar
 
+import chex
 import dm_env
 import immutabledict
 from ml_collections import config_dict
@@ -188,7 +188,7 @@ def _merge(
   )
 
 
-@dataclasses.dataclass(frozen=True)
+@chex.dataclass(frozen=True)
 class PopulationObservables:
   """Observables for a population.
 
@@ -200,7 +200,7 @@ class PopulationObservables:
   timestep: rx.typing.Observable[dm_env.TimeStep]
 
 
-@dataclasses.dataclass(frozen=True)
+@chex.dataclass(frozen=True)
 class ScenarioObservables(substrate_factory.SubstrateObservables):
   """Observables for a Scenario.
 
