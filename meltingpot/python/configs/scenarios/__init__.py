@@ -180,7 +180,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='capture_the_flag',
-        is_focal=(True,) * 4 + (False,) * 4,
+        is_focal=(True, False) * 4,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_a3c_2',
             'ctf_pseudorewards_for_main_game_events_a3c_6',
@@ -193,7 +193,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='capture_the_flag',
-        is_focal=(True,) * 4 + (False,) * 4,
+        is_focal=(True, False,) * 4,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_vmpo_0',
             'ctf_pseudorewards_for_main_game_events_vmpo_3',
@@ -721,7 +721,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        is_focal=(True,) * 4 + (False,) * 4,
+        is_focal=(True, False) * 4,
         bots=frozenset({
             'koth_default_vmpo_0',
             'koth_default_vmpo_1',
@@ -740,7 +740,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        is_focal=(True,) * 4 + (False,) * 4,
+        is_focal=(True, False) * 4,
         bots=frozenset({
             'koth_zap_while_in_control_a3c_0',
             'koth_zap_while_in_control_a3c_1',
@@ -759,7 +759,7 @@ SCENARIOS: Mapping[str, Scenario] = immutabledict.immutabledict(
             'learned_teamwork',
         }),
         substrate='king_of_the_hill',
-        is_focal=(True,) * 4 + (False,) * 4,
+        is_focal=(True, False) * 4,
         bots=frozenset({
             'koth_zap_while_in_control_vmpo_0',
             'koth_zap_while_in_control_vmpo_1',
