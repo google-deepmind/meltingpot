@@ -17,7 +17,7 @@ import setuptools
 
 setuptools.setup(
     name='dm-meltingpot',
-    version='1.0.2',
+    version='1.0.3',
     license='Apache 2.0',
     license_files=['LICENSE'],
     url='https://github.com/deepmind/meltingpot',

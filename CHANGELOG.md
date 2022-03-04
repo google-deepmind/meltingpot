@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+
+## [1.0.3] - 2022-03-03
+
+### Changed
+
+- Define `is_focal` is in scenario configs.
+- Use `chex.dataclass` for [dm-tree](https://github.com/deepmind/tree)
+  compatibility.
+
+### Fixed
+
+- Use correct `is_focal` settings for team-vs-team games
+  [#16](https://github.com/deepmind/meltingpot/issues/16).
+
 ## [1.0.2] - 2022-02-23
 
 ### Added
