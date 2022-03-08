@@ -13,6 +13,8 @@
 # limitations under the License.
 """Tests for substrate."""
 
+import dataclasses
+
 from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
@@ -137,6 +139,31 @@ class SubstrateTest(parameterized.TestCase):
       self.assertEqual(action_spec, (spec,) * config.num_players)
     with self.subTest('reward_spec'):
       self.assertEqual(reward_spec, [REWARD_SPEC] * config.num_players)
+
+  def test_observables(self):
+    config = substrate.get_config('running_with_scissors_in_the_matrix')
+    with substrate.build(config) as env:
+      received = []
+      observables = env.observables()
+      for field in dataclasses.fields(observables):
+        getattr(observables, field.name).subscribe(
+            on_next=received.append,
+            on_error=lambda e: received.append(type(e)),
+            on_completed=lambda: received.append('DONE'),
+        )
+
+      expected = []
+      timestep = env.reset()
+      events = list(env.events())
+      expected.extend([timestep] + events)
+      for n in range(2):
+        action = [n] * config.num_players
+        timestep = env.step(action)
+        events = list(env.events())
+        expected.extend([action, timestep] + events)
+      expected.extend(['DONE', 'DONE', 'DONE'])
+
+    self.assertEqual(received, expected)
 
 
 if __name__ == '__main__':

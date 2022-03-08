@@ -17,7 +17,7 @@ import setuptools
 
 setuptools.setup(
     name='dm-meltingpot',
-    version='1.0.1',
+    version='1.0.3',
     license='Apache 2.0',
     license_files=['LICENSE'],
     url='https://github.com/deepmind/meltingpot',
@@ -53,6 +53,7 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'absl-py',
+        'chex',
         'dm_env',
         # 'dmlab2d',  # Not yet available for PIP install.
         'immutabledict',
@@ -60,6 +61,7 @@ setuptools.setup(
         'networkx',
         'numpy',
         'pygame',
+        'rx',
         'tensorflow',
     ],
     extras_require={

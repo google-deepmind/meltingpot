@@ -48,6 +48,7 @@ class WrapperTest(absltest.TestCase):
 
   def test_change(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.observation_spec.return_value = [{'RGB': RGB_SPEC}]
     env.reset.return_value = dm_env.restart([{'RGB': RGB_VALUE}])
     env.step.return_value = dm_env.transition(1, [{'RGB': RGB_VALUE}])
@@ -77,6 +78,7 @@ class WrapperTest(absltest.TestCase):
 
   def test_nochange(self):
     env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
     env.observation_spec.return_value = [{
         'RGB': RGB_SPEC,
         TEST_KEY: DEFAULT_SPEC
