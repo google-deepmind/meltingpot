@@ -82,7 +82,8 @@ for an example installation script):
 5.  Test the Melting Pot installation:
 
     ```shell
-    python3 setup.py test
+    pip3 install nose
+    nosetests meltingpot
     ```
 
 ## Example usage
