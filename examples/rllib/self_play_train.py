@@ -16,13 +16,13 @@
 import copy
 import os
 
-from meltingpot.python import substrate
 from ml_collections import config_dict
+import multiagent_wrapper  # pylint: disable=g-bad-import-order
 import ray
 from ray.rllib.agents.registry import get_trainer_class
 from ray.tune.registry import register_env
 
-import multiagent_wrapper  # pylint: disable=g-bad-import-order
+from meltingpot.python import substrate
 
 
 def main():
