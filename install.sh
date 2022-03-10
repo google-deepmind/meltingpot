@@ -32,7 +32,7 @@ if (( ${BUILD_DMLAB2D} )); then
   cd "${MELTINGPOT_ROOT}"
   git clone https://github.com/deepmind/lab2d
   cd lab2d
-  bazel build -c opt --define=lua=5_1 //dmlab2d:dmlab2d_wheel
+  bazel build -c opt --config=lua5_2 //dmlab2d:dmlab2d_wheel
   readonly DMLAB_WHEEL_ROOT="${MELTINGPOT_ROOT}/lab2d/bazel-bin/dmlab2d"
 else
   readonly DMLAB_WHEEL_ROOT='https://github.com/deepmind/lab2d/releases/download/release_candidate_2021-07-13'
