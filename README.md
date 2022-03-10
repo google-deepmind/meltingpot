@@ -101,6 +101,10 @@ between players with `TAB`. There are other substrates available in the
 [human_players](meltingpot/python/human_players) directory. Some have multiple variants,
 which you select with the `--level_name` flag.
 
+NOTE: If you get a `ModuleNotFoundError: No module named 'meltingpot.python'`
+      error, you can solve it by exporting the meltingpot home directory as
+      `PYTHONPATH` (e.g. by calling `export PYTHONPATH=$(pwd)`).
+
 ### Training agents
 
 We provide a simple example using RLLib to train agents in self-play on a
