@@ -508,8 +508,7 @@ of this, see
 To launch them, run
 
 ```sh
-bash python3 meltingpot/python/human_players/play_substrate.py \
-    -- --substrate_name=clean_up`
+bash python3 meltingpot/python/human_players/play_substrate.py --substrate_name=clean_up`
 ```
 
 Since the human players launch a window to render the substrate and capture

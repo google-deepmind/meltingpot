@@ -58,7 +58,7 @@ for an example installation script):
 
     If there is no appropriate wheel (e.g. M1 chipset) you will need to install
     [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel yourself
-    using `bazel build -c opt --define=lua=5_2 //dmlab2d:dmlab2d_wheel`.
+    using `bazel build -c opt --config=lua5_2 //dmlab2d:dmlab2d_wheel`.
 
 3.  Test the `dmlab2d` installation in `python3`:
 
@@ -82,7 +82,8 @@ for an example installation script):
 5.  Test the Melting Pot installation:
 
     ```shell
-    python3 setup.py test
+    pip3 install nose
+    nosetests meltingpot
     ```
 
 ## Example usage
@@ -100,6 +101,10 @@ fire the zapper with `1`, and fire the cleaning beam with `2`. You can switch
 between players with `TAB`. There are other substrates available in the
 [human_players](meltingpot/python/human_players) directory. Some have multiple variants,
 which you select with the `--level_name` flag.
+
+NOTE: If you get a `ModuleNotFoundError: No module named 'meltingpot.python'`
+      error, you can solve it by exporting the meltingpot home directory as
+      `PYTHONPATH` (e.g. by calling `export PYTHONPATH=$(pwd)`).
 
 ### Training agents
 
