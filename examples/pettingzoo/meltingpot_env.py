@@ -99,6 +99,7 @@ class MeltingPotPettingZooEnv(ParallelEnv):
 
   def reset(self):
     """See base class."""
+    breakpoint()
     timestep = self._env.reset()
     self.agents = self.possible_agents[:]
     self.num_cycles = 0
