@@ -15,7 +15,7 @@ can try it out like this:
 
 <code class="lang-shell"><pre>
 $ # Run the empty game
-$ <kbd>python3 meltingpot/examples/tutorial/harvest/play_harvest.py -- --observation WORLD.RGB --display_text</kbd>
+$ <kbd>python3 meltingpot/examples/tutorial/harvest/play_harvest.py --observation WORLD.RGB --display_text</kbd>
 </pre></code>
 
 ![Empty game](images/empty.png)
@@ -60,8 +60,7 @@ python3 meltingpot/tutorial/harvest/play_harvest.py
 for _first person_ view; or
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py \
-    -- --observation WORLD.RGB
+python3 meltingpot/tutorial/harvest/play_harvest.py --observation WORLD.RGB
 ```
 
 for _third person_ view.
@@ -537,8 +536,7 @@ If a component you've added doesn't function in the way you anticipate, an easy
 way to debug the substrate is to launch it with the `--verbose` flag.
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py \
-    -- --verbose True
+python3 meltingpot/tutorial/harvest/play_harvest.py --verbose True
 ```
 
 This flag will activate the `verbose_fn` function in `play_harvest.py`, where
