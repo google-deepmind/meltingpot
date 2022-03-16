@@ -21,8 +21,7 @@ readonly MELTINGPOT_ROOT="$(dirname "$(realpath $0)")"
 
 
 function setup_venv() {
-  echo
-  echo "Creating venv..."
+  echo -e "\nCreating venv..."
   python3 -m venv meltingpot_testing
   source meltingpot_testing/bin/activate
   python --version
@@ -30,8 +29,7 @@ function setup_venv() {
 
 
 function install_bazel() {
-  echo
-  echo "Installing bazel..."
+  echo -e "\nInstalling bazel..."
   apt install apt-transport-https curl gnupg
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg
   mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
@@ -41,12 +39,10 @@ function install_bazel() {
 
 
 function install_dmlab2d() {
-  echo
-  echo "Installing dmlab2d requirements."
+  echo -e "\nInstalling dmlab2d requirements..."
   pip install --upgrade pip packaging
   
-  echo
-  echo "Building dmlab2d wheel..."
+  echo -e "\nBuilding dmlab2d wheel..."
   git clone https://github.com/deepmind/lab2d
   if [[ "$(uname -s)" == 'Linux' ]]; then
     readonly LUA_VERSION=luajit
@@ -64,15 +60,13 @@ function install_dmlab2d() {
       //dmlab2d:dmlab2d_wheel
   popd
 
-  echo
-  echo "Installing dmlab2d..."
+  echo -e "\nInstalling dmlab2d..."
   pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
 }
 
 
 function test_dmlab2d() {
-  echo
-  echo "Testing dmlab2d..."
+  echo -e "\nTesting dmlab2d..."
   python - <<'____HERE'
 import dmlab2d
 import dmlab2d.runfiles_helper
@@ -85,8 +79,7 @@ ____HERE
 
 
 function install_meltingpot() {
-  echo
-  echo "Installing meltingpot..."
+  echo -e "\nInstalling meltingpot..."
   cd "${MELTINGPOT_ROOT}"
   pip install --upgrade pip setuptools
   pip install .
@@ -94,8 +87,7 @@ function install_meltingpot() {
 
 
 function test_meltingpot() {
-  echo
-  echo "Testing meltingpot..."
+  echo -e "\nTesting meltingpot..."
   pip install pytest-xdist
   pytest -n auto -ra --durations=10 meltingpot
 }
