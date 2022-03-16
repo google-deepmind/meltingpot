@@ -38,7 +38,8 @@ function install_bazel_ubuntu() {
 
 function install_bazel_macos() {
   echo -e "\nInstalling bazel..."
-  brew install bazel
+  brew install bazelisk
+  alias bazel=bazelisk
 }
 
 
