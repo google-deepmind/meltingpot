@@ -43,7 +43,7 @@ function install_dmlab2d() {
   if [[ "$(uname -s)" == 'Linux' ]]; then
     # readonly LUA_VERSION=luajit  # PASSES
     # readonly LUA_VERSION=lua5_2  # TESTS FAIL
-    readonly LUA_VERSION=lua5_1
+    readonly LUA_VERSION=lua5_1  # TESTS PASS
   else
     # readonly LUA_VERSION=luajit  # BUILD FAILS
     # readonly LUA_VERSION=lua5_2  # TESTS FAIL
