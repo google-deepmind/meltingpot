@@ -74,33 +74,5 @@ cd "${MELTINGPOT_ROOT}"
 pip install .
 
 echo "Testing meltingpot..."
-python - <<'____HERE'
-from meltingpot.python import scenario
-
-for name in list(scenario.AVAILABLE_SCENARIOS)[:3]:
-  config = scenario.get_config(name)
-  with scenario.build(config) as env:
-    env.reset()
-    action_spec = env.action_spec()
-    action = [spec.generate_value() for spec in action_spec]
-    env.step(action)
-    print(f'{name} OK')
-____HERE
-
-cat <<____HERE
-
-Ran a few tests and everything seems OK.
-
-You can now run all the tests, using:
-    pip install nose
-    nosetests meltingpot
-
-However, this may take some time.
-
-____HERE
-read -n1 -r -p "Would you like to run all the tests now [y/N]? " response
-echo
-if [[ "${response}" =~ ^[Yy]$ ]]; then
-  pip install nose
-  nosetests meltingpot
-fi
+pip install nose
+nosetests meltingpot
