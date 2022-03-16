@@ -62,6 +62,7 @@ function install_dmlab2d() {
 
   echo
   echo "Installing dmlab2d..."
+  pip install --upgrade pip build
   pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
 }
 
@@ -69,7 +70,6 @@ function install_dmlab2d() {
 function test_dmlab2d() {
   echo
   echo "Testing dmlab2d..."
-  pushd "${HOME}"
   python - <<'____HERE'
 import dmlab2d
 import dmlab2d.runfiles_helper
@@ -78,7 +78,6 @@ lab = dmlab2d.Lab2d(dmlab2d.runfiles_helper.find(), {"levelName": "chase_eat"})
 env = dmlab2d.Environment(lab, ["WORLD.RGB"])
 env.step({})
 ____HERE
-  popd
 }
 
 
@@ -86,6 +85,7 @@ function install_meltingpot() {
   echo
   echo "Installing meltingpot..."
   cd "${MELTINGPOT_ROOT}"
+  pip install --upgrade pip setuptools
   pip install .
 }
 
