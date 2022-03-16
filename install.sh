@@ -15,9 +15,7 @@
 
 # Installs meltingpot on Linux/macOS.
 
-set -e  # Fail on any error.
-set -u  # Fail on unset variables.
-set -x  # Echo all comands.
+set -euxo pipefail
 
 readonly MELTINGPOT_ROOT="$(dirname "$(realpath $0)")"
 
@@ -32,9 +30,14 @@ python --version
 echo "Installing build dependencies..."
 pip install --upgrade pip setuptools build
 
+echo "Installing bazel..."
+apt install apt-transport-https curl gnupg
+curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > bazel.gpg
+mv bazel.gpg /etc/apt/trusted.gpg.d/
+echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+apt-get update && apt-get install bazel
+
 echo "Building dmlab2d wheel..."
-apt-get update
-apt-get install bazel
 cd "${MELTINGPOT_ROOT}"
 git clone https://github.com/deepmind/lab2d
 cd lab2d
