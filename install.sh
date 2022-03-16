@@ -69,6 +69,7 @@ function install_dmlab2d() {
 function test_dmlab2d() {
   echo
   echo "Testing dmlab2d..."
+  pushd "${HOME}"
   python - <<'____HERE'
 import dmlab2d
 import dmlab2d.runfiles_helper
@@ -77,6 +78,7 @@ lab = dmlab2d.Lab2d(dmlab2d.runfiles_helper.find(), {"levelName": "chase_eat"})
 env = dmlab2d.Environment(lab, ["WORLD.RGB"])
 env.step({})
 ____HERE
+  popd
 }
 
 
