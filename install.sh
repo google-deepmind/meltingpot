@@ -74,5 +74,5 @@ cd "${MELTINGPOT_ROOT}"
 pip install .
 
 echo "Testing meltingpot..."
-pip install nose
-nosetests meltingpot
+pip install pytest-xdist
+pytest -n auto -ra --durations=10 meltingpot
