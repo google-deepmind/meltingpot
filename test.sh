@@ -18,15 +18,17 @@
 set -euxo pipefail
 
 
-function setup_venv() {
-  echo -e "\nCreating venv..."
-  python3 -m venv meltingpot_testing
-  source meltingpot_testing/bin/activate
+function check_setup() {
+  echo -e "\nChecking python version is >= 3.7..."
   python --version
+  python -c 'import sys; exit(int(sys.version_info.major != 3 or sys.version_info.minor < 7))'
+
+  echo -e "\nChecking bazel installed..."
+  bazel --version
 }
 
 
-function install_dmlab2d() { 
+function install_dmlab2d() {
   echo -e "\nCloning dmlab2d..."
   git clone https://github.com/deepmind/lab2d
 
@@ -35,10 +37,12 @@ function install_dmlab2d() {
 
   echo -e "\nBuilding dmlab2d wheel..."
   if [[ "$(uname -s)" == 'Linux' ]]; then
-    readonly LUA_VERSION=luajit
+    # readonly LUA_VERSION=luajit  # PASSES
+    readonly LUA_VERSION=lua5_2
   else
-    readonly LUA_VERSION=luajit
-    # readonly LUA_VERSION=lua5_2
+    # readonly LUA_VERSION=luajit  # BUILD FAILS
+    # readonly LUA_VERSION=lua5_2  # TESTS FAIL
+    readonly LUA_VERSION=lua5_1
   fi
   pushd lab2d
   bazel build \
@@ -84,7 +88,7 @@ function test_meltingpot() {
 
 
 function main() {
-  setup_venv
+  check_setup
   install_dmlab2d
   test_dmlab2d
   install_meltingpot
