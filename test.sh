@@ -17,8 +17,6 @@
 
 set -euxo pipefail
 
-readonly MELTINGPOT_ROOT="$(dirname "$(realpath $0)")"
-
 
 function setup_venv() {
   echo -e "\nCreating venv..."
