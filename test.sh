@@ -19,6 +19,10 @@ set -euxo pipefail
 
 
 function check_setup() {
+  echo -e "\nChecking OS is Linux or macOS..."
+  uname -s
+  [[ "$(uname -s)" =~ (Linux|Darwin) ]] || exit 1
+
   echo -e "\nChecking python version is >= 3.7..."
   python --version
   python -c 'import sys; exit(0) if sys.version_info.major == 3 and sys.version_info.minor >= 7 else exit(1)' || exit 1
