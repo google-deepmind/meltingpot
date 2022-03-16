@@ -2,7 +2,7 @@
 
 *A suite of test scenarios for multi-agent reinforcement learning.*
 
-[![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg?event=push)](../../actions/workflows/ci.yml)
+[![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 <div align="center">
   <img src="meltingpot/docs/images/meltingpot_montage_360.gif"
