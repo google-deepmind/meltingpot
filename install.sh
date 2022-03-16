@@ -38,18 +38,22 @@ echo "Building dmlab2d wheel..."
 cd "${MELTINGPOT_ROOT}"
 git clone https://github.com/deepmind/lab2d
 cd lab2d
-bazel build -c opt --config=lua5_2 //dmlab2d:dmlab2d_wheel
-readonly DMLAB_WHEEL_ROOT="${MELTINGPOT_ROOT}/lab2d/bazel-bin/dmlab2d"
+if [[ "$(uname -s)" == 'Linux' ]]; then
+  readonly LUA_VERSION=luajit
+else
+  readonly LUA_VERSION=lua5_2
+fi
+bazel build \
+    --compilation_mode=opt \
+    --config="${LUA_VERSION}" \
+    --verbose_failures \
+    --experimental_ui_max_stdouterr_bytes=-1 \
+    --toolchain_resolution_debug \
+    --sandbox_debug \
+    //dmlab2d:dmlab2d_wheel
 
 echo "Installing dmlab2d..."
-readonly VERSION="$(python --version | sed 's/^Python \([0-9]\)\.\([0-9]\+\)\..*$/\1\2/g')"
-readonly PYTHON_VERSION="$(python --version | sed 's/^Python \([0-9]\)\.\([0-9]\+\)\..*$/\1\2/g')"
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  readonly DMLAB_WHEEL="${DMLAB_WHEEL_ROOT}/dmlab2d-1.0-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-macosx_10_15_x86_64.whl"
-else
-  readonly DMLAB_WHEEL="${DMLAB_WHEEL_ROOT}/dmlab2d-1.0-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-manylinux_2_31_x86_64.whl"
-fi
-pip install "${DMLAB_WHEEL}"
+pip install "${MELTINGPOT_ROOT}"/lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
 
 echo "Testing dmlab2d..."
 cd "${HOME}"
