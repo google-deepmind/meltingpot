@@ -95,7 +95,6 @@ ____HERE
 
 function install_meltingpot() {
   echo -e "\nInstalling meltingpot..."
-  cd "${MELTINGPOT_ROOT}"
   pip install --upgrade pip setuptools
   pip install .
 }
