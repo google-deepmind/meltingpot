@@ -21,7 +21,7 @@ set -euxo pipefail
 function check_setup() {
   echo -e "\nChecking python version is >= 3.7..."
   python --version
-  python -c 'import sys; exit(int(sys.version_info.major != 3 or sys.version_info.minor < 7))'
+  python -c 'import sys; exit(0) if sys.version_info.major == 3 and sys.version_info.minor >= 7 else exit(1)' || exit 1
 
   echo -e "\nChecking bazel installed..."
   bazel --version
@@ -38,11 +38,12 @@ function install_dmlab2d() {
   echo -e "\nBuilding dmlab2d wheel..."
   if [[ "$(uname -s)" == 'Linux' ]]; then
     # readonly LUA_VERSION=luajit  # PASSES
-    readonly LUA_VERSION=lua5_2
+    # readonly LUA_VERSION=lua5_2  # TESTS FAIL
+    readonly LUA_VERSION=lua5_1
   else
     # readonly LUA_VERSION=luajit  # BUILD FAILS
     # readonly LUA_VERSION=lua5_2  # TESTS FAIL
-    readonly LUA_VERSION=lua5_1
+    readonly LUA_VERSION=lua5_1  # TESTS PASS
   fi
   pushd lab2d
   bazel build \
