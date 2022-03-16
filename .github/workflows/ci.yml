@@ -44,13 +44,15 @@ jobs:
 #         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
 #             -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
 
-  run-meltingpot-tests:
+  run-meltingpot-tests-ubuntu:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
+      # fail-fast: true
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7"]
+        # python-version: ["3.7"]  # ["3.7", "3.8", "3.9"]
     steps:
     - name: Checkout Melting Pot
       uses: actions/checkout@v2
