@@ -41,7 +41,7 @@ documentation.
 
 Melting Pot is built on top of
 [DeepMind Lab2D](https://github.com/deepmind/lab2d). The installation steps are
-as follows (see [`test.sh`](https://github.com/deepmind/meltingpot/blob/main/test.sh)
+as follows (see [`install.sh`](https://github.com/deepmind/meltingpot/blob/main/install.sh)
 for an example installation script):
 
 1.  (Optional) Activate a virtual environment, e.g.:
@@ -84,8 +84,8 @@ for an example installation script):
 5.  Test the Melting Pot installation:
 
     ```shell
-    pip3 install pytest
-    pytest meltingpot
+    pip3 install nose
+    nosetests meltingpot
     ```
 
 ## Example usage
