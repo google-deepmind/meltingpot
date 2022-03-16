@@ -12,16 +12,34 @@ on:
   workflow_dispatch:
 
 jobs:
-  run-meltingpot-tests:
-    runs-on: ${{ matrix.os }}
+  run-meltingpot-tests-ubuntu:
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
-        os: [macos-latest, ubuntu-latest]
         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
     steps:
     - name: Checkout Melting Pot
       uses: actions/checkout@v2
+    - name: Run tests in docker
+      run: |
+        docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
+            -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
+
+  run-meltingpot-tests-macos:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        docker-image: ["python:3.7", "python:3.8", "python:3.9"]
+    steps:
+    - name: Checkout Melting Pot
+      uses: actions/checkout@v2
+    - name: Install docker
+      run: |
+        mkdir -p ~/.docker/machine/cache
+        curl -Lo ~/.docker/machine/cache/boot2docker.iso https://github.com/boot2docker/boot2docker/releases/download/v19.03.12/boot2docker.iso
+        brew install docker docker-machine
     - name: Run tests in docker
       run: |
         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
