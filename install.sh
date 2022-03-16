@@ -34,7 +34,7 @@ function install_bazel() {
   echo "Installing bazel..."
   apt install apt-transport-https curl gnupg
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg"
-  mv /tmp/bazel.gpg" /etc/apt/trusted.gpg.d/
+  mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
   apt-get update && apt-get install bazel
 }
