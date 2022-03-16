@@ -41,7 +41,7 @@ function install_dmlab2d() {
 
   echo -e "\nBuilding dmlab2d wheel..."
   if [[ "$(uname -s)" == 'Linux' ]]; then
-    # readonly LUA_VERSION=luajit  # PASSES
+    readonly LUA_VERSION=luajit  # PASSES
     # readonly LUA_VERSION=lua5_2  # TESTS FAIL
     readonly LUA_VERSION=lua5_1  # TESTS PASS
   else
