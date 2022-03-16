@@ -57,4 +57,4 @@ jobs:
     - name: Set up Python ${{ matrix.python_version }}
       uses: actions/setup-python@v2
     - name: Install and test
-      run: test.sh
+      run: ./test.sh
