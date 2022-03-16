@@ -26,43 +26,19 @@ function setup_venv() {
 }
 
 
-# function install_bazel_ubuntu() {
-#   echo -e "\nInstalling bazel..."
-#   sudo apt install apt-transport-https curl gnupg
-#   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg
-#   sudo mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
-#   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-#   sudo apt-get update && sudo apt-get install bazel
-# }
+function install_dmlab2d() { 
+  echo -e "\nCloning dmlab2d..."
+  git clone https://github.com/deepmind/lab2d
 
-
-# function install_bazel_macos() {
-#   echo -e "\nInstalling bazel..."
-#   brew install bazelisk
-#   alias bazel=bazelisk
-# }
-
-
-# function install_bazel() {
-#   if [[ "$(uname -s)" == 'Linux' ]]; then
-#     install_bazel_ubuntu
-#   else
-#     install_bazel_macos
-#   fi
-#   bazel --version
-# }
-
-
-function install_dmlab2d() {
   echo -e "\nInstalling dmlab2d requirements..."
   pip install --upgrade pip packaging
-  
+
   echo -e "\nBuilding dmlab2d wheel..."
-  git clone https://github.com/deepmind/lab2d
   if [[ "$(uname -s)" == 'Linux' ]]; then
     readonly LUA_VERSION=luajit
   else
-    readonly LUA_VERSION=lua5_2
+    readonly LUA_VERSION=luajit
+    # readonly LUA_VERSION=lua5_2
   fi
   pushd lab2d
   bazel build \
@@ -108,7 +84,6 @@ function test_meltingpot() {
 
 
 function main() {
-  # install_bazel
   setup_venv
   install_dmlab2d
   test_dmlab2d
