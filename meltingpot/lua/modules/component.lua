@@ -75,4 +75,16 @@ function Component:__init__(kwargs)
 end
 
 
-return {Component = Component}
+--Utility to insert a value in a table if not already present.
+function insertIfNotPresent(tbl, element)
+  for _, value in pairs(tbl) do
+    if value == element then
+      return
+    end
+  end
+  table.insert(tbl, element)
+end
+
+
+return {Component = Component,
+        insertIfNotPresent = insertIfNotPresent}

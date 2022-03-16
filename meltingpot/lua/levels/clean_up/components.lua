@@ -183,7 +183,7 @@ function Cleaner:addHits(worldConfig)
       layer = 'beamClean',
       sprite = 'BeamClean',
   }
-  table.insert(worldConfig.renderOrder, 'beamClean')
+  component.insertIfNotPresent(worldConfig.renderOrder, 'beamClean')
 end
 
 function Cleaner:addSprites(tileSet)

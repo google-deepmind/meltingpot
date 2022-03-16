@@ -562,7 +562,7 @@ function Zapper:addHits(worldConfig)
       layer = 'beamZap',
       sprite = 'BeamZap',
   }
-  table.insert(worldConfig.renderOrder, 'beamZap')
+  component.insertIfNotPresent(worldConfig.renderOrder, 'beamZap')
 end
 
 function Zapper:addSprites(tileSet)
