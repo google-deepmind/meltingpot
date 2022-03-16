@@ -42,6 +42,10 @@ function install_bazel() {
 
 function install_dmlab2d() {
   echo
+  echo "Installing dmlab2d requirements."
+  pip install --upgrade pip packaging
+  
+  echo
   echo "Building dmlab2d wheel..."
   git clone https://github.com/deepmind/lab2d
   if [[ "$(uname -s)" == 'Linux' ]]; then
@@ -62,7 +66,6 @@ function install_dmlab2d() {
 
   echo
   echo "Installing dmlab2d..."
-  pip install --upgrade pip build
   pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
 }
 
