@@ -33,8 +33,8 @@ echo "Installing build dependencies..."
 pip install --upgrade pip setuptools build
 
 echo "Building dmlab2d wheel..."
-# sudo apt-get update
-# sudo apt-get install bazel
+apt-get update
+apt-get install bazel
 cd "${MELTINGPOT_ROOT}"
 git clone https://github.com/deepmind/lab2d
 cd lab2d
