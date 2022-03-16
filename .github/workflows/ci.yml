@@ -12,39 +12,39 @@ on:
   workflow_dispatch:
 
 jobs:
-#   run-meltingpot-tests-ubuntu:
-#     runs-on: ubuntu-latest
-#     strategy:
-#       fail-fast: true
-#       matrix:
-#         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
-#     steps:
-#     - name: Checkout Melting Pot
-#       uses: actions/checkout@v2
-#     - name: Run tests in docker
-#       run: |
-#         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
-#             -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
+  #   run-meltingpot-tests-ubuntu:
+  #     runs-on: ubuntu-latest
+  #     strategy:
+  #       fail-fast: true
+  #       matrix:
+  #         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
+  #     steps:
+  #     - name: Checkout Melting Pot
+  #       uses: actions/checkout@v2
+  #     - name: Run tests in docker
+  #       run: |
+  #         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
+  #             -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
 
-#   run-meltingpot-tests-macos:
-#     runs-on: macos-latest
-#     strategy:
-#       fail-fast: true
-#       matrix:
-#         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
-#     steps:
-#     - name: Install docker
-#       run: |
-#         brew install docker docker-machine
-#         docker --version
-#     - name: Checkout Melting Pot
-#       uses: actions/checkout@v2
-#     - name: Run tests in docker
-#       run: |
-#         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
-#             -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
+  #   run-meltingpot-tests-macos:
+  #     runs-on: macos-latest
+  #     strategy:
+  #       fail-fast: true
+  #       matrix:
+  #         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
+  #     steps:
+  #     - name: Install docker
+  #       run: |
+  #         brew install docker docker-machine
+  #         docker --version
+  #     - name: Checkout Melting Pot
+  #       uses: actions/checkout@v2
+  #     - name: Run tests in docker
+  #       run: |
+  #         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
+  #             -w "/tmp/meltingpot" --rm ${{ matrix.docker-image }} /bin/bash test.sh
 
-  run-meltingpot-tests-ubuntu:
+  run-meltingpot-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
