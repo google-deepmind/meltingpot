@@ -15,86 +15,95 @@
 
 # Installs meltingpot on Linux/macOS.
 
-set -e  # Fail on any error.
-set -u  # Fail on unset variables.
+set -euxo pipefail
 
-readonly MELTINGPOT_ROOT="$(dirname "$(realpath $0)")"
 
-# Set this to where you would like create the virtual env.
-readonly VENV_PATH="${MELTINGPOT_ROOT}/venv"
+function check_setup() {
+  echo -e "\nChecking OS is Linux or macOS..."
+  uname -s
+  [[ "$(uname -s)" =~ (Linux|Darwin) ]] || exit 1
 
-# Build dmlab2d wheel from src if desired.
-readonly BUILD_DMLAB2D=0
-if (( ${BUILD_DMLAB2D} )); then
-  echo "Building dmlab2d wheel..."
-  sudo apt-get update
-  sudo apt-get install bazel
-  cd "${MELTINGPOT_ROOT}"
+  local -r MIN_PYTHON_VERSION=3.7
+  echo -e "\nChecking python version is >=${MIN_PYTHON_VERSION} ..."
+  python --version
+  python --version | awk '($2+0)<'"${MIN_PYTHON_VERSION}"'{exit 1}'
+
+  local -r MIN_GCC_VERSION=8
+  echo -e "\nChecking gcc version is >= ${MIN_GCC_VERSION} ..."
+  gcc --version
+  gcc --version | head -n1 | awk '($4+0)<'"${MIN_GCC_VERSION}"'{exit 1}'
+
+  local -r MIN_BAZEL_VERSION=4.1
+  echo -e "\nChecking bazel version is >= ${MIN_BAZEL_VERSION} ..."
+  bazel --version
+  bazel --version | awk '($2+0)<'"${MIN_BAZEL_VERSION}"'{exit 1}'
+}
+
+
+function install_dmlab2d() {
+  echo -e "\nCloning dmlab2d..."
   git clone https://github.com/deepmind/lab2d
-  cd lab2d
-  bazel build -c opt --config=lua5_2 //dmlab2d:dmlab2d_wheel
-  readonly DMLAB_WHEEL_ROOT="${MELTINGPOT_ROOT}/lab2d/bazel-bin/dmlab2d"
-else
-  readonly DMLAB_WHEEL_ROOT='https://github.com/deepmind/lab2d/releases/download/release_candidate_2021-07-13'
-fi
 
-echo "Creating venv..."
-python3 -m venv "${VENV_PATH}"
-source "${VENV_PATH}/bin/activate"
+  echo -e "\nInstalling dmlab2d requirements..."
+  pip install --upgrade pip packaging
 
-echo "Installing dmlab2d..."
-readonly VERSION="$(python --version | sed 's/^Python \([0-9]\)\.\([0-9]\+\)\..*$/\1\2/g')"
-readonly PYTHON_VERSION="$(python --version | sed 's/^Python \([0-9]\)\.\([0-9]\+\)\..*$/\1\2/g')"
-if [[ "$(uname -s)" == "Darwin" ]]; then
-  readonly DMLAB_WHEEL="${DMLAB_WHEEL_ROOT}/dmlab2d-1.0-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-macosx_10_15_x86_64.whl"
-else
-  readonly DMLAB_WHEEL="${DMLAB_WHEEL_ROOT}/dmlab2d-1.0-cp${PYTHON_VERSION}-cp${PYTHON_VERSION}-manylinux_2_31_x86_64.whl"
-fi
-pip install "${DMLAB_WHEEL}"
+  echo -e "\nBuilding dmlab2d wheel..."
+  if [[ "$(uname -s)" == 'Linux' ]]; then
+    local -r LUA_VERSION=luajit
+  elif [[ "$(uname -s)" == 'Darwin' ]]; then
+    local -r LUA_VERSION=lua5_2
+  else
+    exit 1
+  fi
+  pushd lab2d
+  bazel build \
+      --compilation_mode=opt \
+      --config="${LUA_VERSION}" \
+      --verbose_failures \
+      --experimental_ui_max_stdouterr_bytes=-1 \
+      --toolchain_resolution_debug \
+      --sandbox_debug \
+      //dmlab2d:dmlab2d_wheel
+  popd
 
-echo "Testing dmlab2d..."
-cd "${HOME}"
-python - <<'____HERE'
+  echo -e "\nInstalling dmlab2d..."
+  pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
+}
+
+
+function test_dmlab2d() {
+  echo -e "\nTesting dmlab2d..."
+  python - <<'____HERE'
 import dmlab2d
 import dmlab2d.runfiles_helper
-
 lab = dmlab2d.Lab2d(dmlab2d.runfiles_helper.find(), {"levelName": "chase_eat"})
 env = dmlab2d.Environment(lab, ["WORLD.RGB"])
 env.step({})
 ____HERE
+}
 
-echo "Installing meltingpot..."
-cd "${MELTINGPOT_ROOT}"
-pip install .
 
-echo "Testing meltingpot..."
-python - <<'____HERE'
-from meltingpot.python import scenario
+function install_meltingpot() {
+  echo -e "\nInstalling meltingpot..."
+  pip install --upgrade pip setuptools
+  pip install .
+}
 
-for name in list(scenario.AVAILABLE_SCENARIOS)[:3]:
-  config = scenario.get_config(name)
-  with scenario.build(config) as env:
-    env.reset()
-    action_spec = env.action_spec()
-    action = [spec.generate_value() for spec in action_spec]
-    env.step(action)
-    print(f'{name} OK')
-____HERE
 
-cat <<____HERE
+function test_meltingpot() {
+  echo -e "\nTesting meltingpot..."
+  pip install pytest-xdist
+  pytest -n auto -ra --durations=10 meltingpot
+}
 
-Ran a few tests and everything seems OK.
 
-You can now run all the tests, using:
-    pip install nose
-    nosetests meltingpot
+function main() {
+  check_setup
+  install_dmlab2d
+  test_dmlab2d
+  install_meltingpot
+  test_meltingpot
+}
 
-However, this may take some time.
 
-____HERE
-read -n1 -r -p "Would you like to run all the tests now [y/N]? " response
-echo
-if [[ "${response}" =~ ^[Yy]$ ]]; then
-  pip install nose
-  nosetests meltingpot
-fi
+main "$@"
