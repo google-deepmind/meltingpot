@@ -33,8 +33,6 @@ jobs:
       matrix:
         docker-image: ["python:3.7", "python:3.8", "python:3.9"]
     steps:
-    - name: Checkout Melting Pot
-      uses: actions/checkout@v2
     - name: Install docker
       run: |
         mkdir -p ~/.docker/machine/cache
@@ -44,6 +42,8 @@ jobs:
     - name: Start docker service
       run: |
         sudo service docker start
+    - name: Checkout Melting Pot
+      uses: actions/checkout@v2
     - name: Run tests in docker
       run: |
         docker run --mount "type=bind,src=$(pwd),dst=/tmp/meltingpot" \
