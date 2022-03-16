@@ -26,31 +26,31 @@ function setup_venv() {
 }
 
 
-function install_bazel_ubuntu() {
-  echo -e "\nInstalling bazel..."
-  sudo apt install apt-transport-https curl gnupg
-  curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg
-  sudo mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
-  echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-  sudo apt-get update && sudo apt-get install bazel
-}
+# function install_bazel_ubuntu() {
+#   echo -e "\nInstalling bazel..."
+#   sudo apt install apt-transport-https curl gnupg
+#   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg
+#   sudo mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
+#   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
+#   sudo apt-get update && sudo apt-get install bazel
+# }
 
 
-function install_bazel_macos() {
-  echo -e "\nInstalling bazel..."
-  brew install bazelisk
-  alias bazel=bazelisk
-}
+# function install_bazel_macos() {
+#   echo -e "\nInstalling bazel..."
+#   brew install bazelisk
+#   alias bazel=bazelisk
+# }
 
 
-function install_bazel() {
-  if [[ "$(uname -s)" == 'Linux' ]]; then
-    install_bazel_ubuntu
-  else
-    install_bazel_macos
-  fi
-  bazel --version
-}
+# function install_bazel() {
+#   if [[ "$(uname -s)" == 'Linux' ]]; then
+#     install_bazel_ubuntu
+#   else
+#     install_bazel_macos
+#   fi
+#   bazel --version
+# }
 
 
 function install_dmlab2d() {
@@ -109,7 +109,7 @@ function test_meltingpot() {
 
 
 function main() {
-  install_bazel
+  # install_bazel
   setup_venv
   install_dmlab2d
   test_dmlab2d
