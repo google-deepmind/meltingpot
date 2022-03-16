@@ -26,13 +26,29 @@ function setup_venv() {
 }
 
 
-function install_bazel() {
+function install_bazel_ubuntu() {
   echo -e "\nInstalling bazel..."
-  apt install apt-transport-https curl gnupg
+  sudo apt install apt-transport-https curl gnupg
   curl -fsSL https://bazel.build/bazel-release.pub.gpg | gpg --dearmor > /tmp/bazel.gpg
   mv /tmp/bazel.gpg /etc/apt/trusted.gpg.d/
   echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
-  apt-get update && apt-get install bazel
+  sudo apt-get update && sudo apt-get install bazel
+}
+
+
+function install_bazel_macos() {
+  echo -e "\nInstalling bazel..."
+  brew install bazel
+}
+
+
+function install_bazel() {
+  if [[ "$(uname -s)" == 'Linux' ]]; then
+    install_bazel_ubuntu
+  else
+    install_bazel_macos
+  fi
+  bazel --version
 }
 
 
