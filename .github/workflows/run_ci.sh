@@ -23,12 +23,20 @@ function check_setup() {
   uname -s
   [[ "$(uname -s)" =~ (Linux|Darwin) ]] || exit 1
 
-  echo -e "\nChecking python version is >= 3.7..."
+  local -r MIN_PYTHON_VERSION=3.7
+  echo -e "\nChecking python version is >=${MIN_PYTHON_VERSION} ..."
   python --version
-  python -c 'import sys; exit(0) if sys.version_info.major == 3 and sys.version_info.minor >= 7 else exit(1)' || exit 1
+  python --version | awk "($2+0)<${MIN_PYTHON_VERSION}{exit 1}"
 
-  echo -e "\nChecking bazel installed..."
+  local -r MIN_GCC_VERSION=8
+  echo -e "\nChecking gcc version is >= ${MIN_GCC_VERSION} ..."
+  gcc --version
+  gcc --version | head -n1 | awk "($4+0)<${MIN_GCC_VERSION}{exit 1}"
+
+  local -r MIN_BAZEL_VERSION=4.1
+  echo -e "\nChecking bazel version is >= ${MIN_BAZEL_VERSION} ..."
   bazel --version
+  bazel --version | awk "($2+0)<${MIN_BAZEL_VERSION}{exit 1}"
 }
 
 
