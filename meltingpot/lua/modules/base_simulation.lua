@@ -429,7 +429,7 @@ function BaseSimulation:start(grid)
     end
   end
   self:_avatarStart(grid)
-  log.v("grid\n" .. tostring(grid))
+  log.v(1, "grid\n" .. tostring(grid))
 end
 
 --[[ End of starting callbacks ]]
