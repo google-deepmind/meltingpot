@@ -18,25 +18,27 @@
 set -euxo pipefail
 
 
+function check_version_gt() {
+  local required="$1"
+  local input lowest
+  input="$(grep -o '[^ ]*$' /dev/stdin)"
+  lowest="$(printf "${required}\n${input}" | sort -V | head -n 1)"
+  [[ "${lowest}" == "${required}" ]]
+}
+
+
 function check_setup() {
   echo -e "\nChecking OS is Linux or macOS..."
-  uname -s
-  [[ "$(uname -s)" =~ (Linux|Darwin) ]] || exit 1
+  [[ "$(uname -s)" =~ (Linux|Darwin) ]]
 
-  local -r MIN_PYTHON_VERSION=3.7
-  echo -e "\nChecking python version is >=${MIN_PYTHON_VERSION} ..."
-  python --version
-  python --version | awk '($2+0)<'"${MIN_PYTHON_VERSION}"'{exit 1}'
+  echo -e "\nChecking python version..."
+  python --version | check_version_gt '3.7'
 
-  local -r MIN_GCC_VERSION=8
-  echo -e "\nChecking gcc version is >= ${MIN_GCC_VERSION} ..."
-  gcc --version
-  gcc --version | head -n1 | awk '($4+0)<'"${MIN_GCC_VERSION}"'{exit 1}'
+  echo -e "\nChecking gcc version ..."
+  gcc --version | head -n1 | check_version_gt '8'
 
-  local -r MIN_BAZEL_VERSION=4.1
-  echo -e "\nChecking bazel version is >= ${MIN_BAZEL_VERSION} ..."
-  bazel --version
-  bazel --version | awk '($2+0)<'"${MIN_BAZEL_VERSION}"'{exit 1}'
+  echo -e "\nChecking bazel version..."
+  bazel --version | check_version_gt '4.1'
 }
 
 
