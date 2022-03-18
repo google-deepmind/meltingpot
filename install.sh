@@ -21,7 +21,7 @@ set -euxo pipefail
 function check_version_gt() {
   local required="$1"
   local input lowest
-  input="$(grep -o '[^ ]*$' /dev/stdin)"
+  input="$(grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' /dev/stdin | head -n 1)"
   lowest="$(printf "${required}\n${input}" | sort -V | head -n 1)"
   [[ "${lowest}" == "${required}" ]]
 }
@@ -35,7 +35,7 @@ function check_setup() {
   python --version | check_version_gt '3.7'
 
   echo -e "\nChecking gcc version ..."
-  gcc --version | head -n1 | check_version_gt '8'
+  gcc --version | check_version_gt '8'
 
   echo -e "\nChecking bazel version..."
   bazel --version | check_version_gt '4.1'
