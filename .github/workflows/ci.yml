@@ -27,7 +27,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
-      fail-fast: true
+      fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
       matrix:
         os:
           - macos-latest
@@ -39,9 +39,9 @@ jobs:
           - '3.10'
     steps:
       - name: Checkout Melting Pot
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install and test Melting Pot
