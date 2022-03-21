@@ -51,21 +51,26 @@ function install_dmlab2d() {
 
   echo -e "\nBuilding dmlab2d wheel..."
   if [[ "$(uname -s)" == 'Linux' ]]; then
-    local -r LUA_VERSION=luajit
+    local -r FLAGS=(
+        --compilation_mode=opt \
+        --config=luajit
+    )
   elif [[ "$(uname -s)" == 'Darwin' ]]; then
-    # luajit not available on macOS
-    # lua5_2 leads to continuous integration test failures.
-    local -r LUA_VERSION=lua5_1
+    local -r FLAGS=(
+        --compilation_mode=opt \
+        # luajit not available on macOS
+        # lua5_2 leads to continuous integration test failures.
+        --config=lua5_1
+        --config=libc++
+    )
   else
     exit 1
   fi
   pushd lab2d
-  bazel build \
-      --compilation_mode=opt \
-      --config="${LUA_VERSION}" \
+  C=clang CXX=clang++ bazel build \
+      "${FLAGS[@]}" \
       --verbose_failures \
       --experimental_ui_max_stdouterr_bytes=-1 \
-      --toolchain_resolution_debug \
       --sandbox_debug \
       //dmlab2d:dmlab2d_wheel
   popd
@@ -77,13 +82,7 @@ function install_dmlab2d() {
 
 function test_dmlab2d() {
   echo -e "\nTesting dmlab2d..."
-  python - <<'____HERE'
-import dmlab2d
-import dmlab2d.runfiles_helper
-lab = dmlab2d.Lab2d(dmlab2d.runfiles_helper.find(), {"levelName": "chase_eat"})
-env = dmlab2d.Environment(lab, ["WORLD.RGB"])
-env.step({})
-____HERE
+  python lab2d/dmlab2d/dmlab2d_test.py
 }
 
 
