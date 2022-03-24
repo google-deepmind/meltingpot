@@ -51,24 +51,18 @@ function install_dmlab2d() {
 
   echo -e "\nBuilding dmlab2d wheel..."
   if [[ "$(uname -s)" == 'Linux' ]]; then
-    local -r FLAGS=(
-        --compilation_mode=opt \
-        --config=luajit
-    )
+    local -r LUA_VERSION=luajit
   elif [[ "$(uname -s)" == 'Darwin' ]]; then
-    local -r FLAGS=(
-        --compilation_mode=opt \
-        # luajit not available on macOS
-        # lua5_2 leads to continuous integration test failures.
-        --config=lua5_1
-        --config=libc++
-    )
+    # luajit not available on macOS
+    # lua5_2 leads to continuous integration test failures.
+    local -r LUA_VERSION=lua5_1
   else
     exit 1
   fi
   pushd lab2d
   C=clang CXX=clang++ bazel build \
-      "${FLAGS[@]}" \
+      --compilation_mode=opt \
+      --config="${LUA_VERSION}" \
       --verbose_failures \
       --experimental_ui_max_stdouterr_bytes=-1 \
       --sandbox_debug \
