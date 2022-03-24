@@ -62,6 +62,7 @@ function install_dmlab2d() {
   pushd lab2d
   C=clang CXX=clang++ bazel build \
       --compilation_mode=opt \
+      --dynamic_mode=off \
       --config="${LUA_VERSION}" \
       --verbose_failures \
       --experimental_ui_max_stdouterr_bytes=-1 \
