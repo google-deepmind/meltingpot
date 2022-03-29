@@ -142,7 +142,7 @@ function UpdaterRegistry:registerUpdater(params)
   -- If no group is needed, create one from prefix and counter, but signal that
   -- we need to add this group to the states it affects (by setting _addGroup).
   if group == nil then
-    group = self._groupPrefix .. '_' .. self._updaterCount
+    group = 'UPDATER_GRP__' .. self._groupPrefix .. '_' .. self._updaterCount
     self._updaterCount = self._updaterCount + 1
     addGroup = true
   end

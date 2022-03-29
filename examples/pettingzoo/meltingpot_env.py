@@ -129,7 +129,7 @@ class MeltingPotPettingZooEnv(ParallelEnv):
   def seed(self, seed=None):
     raise NotImplementedError
   
-  def render(self, filename=None, mode="human"):
+  def render(self, mode="human", filename=None):
     rgb_arr = self.state()['WORLD.RGB']
     if mode == "human":
         plt.cla()

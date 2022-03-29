@@ -2,6 +2,9 @@
 
 *A suite of test scenarios for multi-agent reinforcement learning.*
 
+
+[![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+
 <div align="center">
   <img src="meltingpot/docs/images/meltingpot_montage_360.gif"
        alt="Melting Pot substrates" />
@@ -58,7 +61,7 @@ for an example installation script):
 
     If there is no appropriate wheel (e.g. M1 chipset) you will need to install
     [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel yourself
-    using `bazel build -c opt --config=lua5_2 //dmlab2d:dmlab2d_wheel`.
+    using `bazel build -c opt --config=lua5_1 //dmlab2d:dmlab2d_wheel`.
 
 3.  Test the `dmlab2d` installation in `python3`:
 
@@ -82,8 +85,8 @@ for an example installation script):
 5.  Test the Melting Pot installation:
 
     ```shell
-    pip3 install nose
-    nosetests meltingpot
+    pip3 install pytest
+    pytest meltingpot
     ```
 
 ## Example usage

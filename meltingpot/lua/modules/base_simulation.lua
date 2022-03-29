@@ -30,6 +30,13 @@ local component_registry = require(meltingpot .. 'component_registry')
 local prefab_utils = require(meltingpot .. 'prefab_utils')
 local updater_registry = require(meltingpot .. 'updater_registry')
 
+-- Functions to track from components in a game object.
+_COMPONENT_FUNCTIONS = {
+    'awake', 'reset', 'start', 'postStart', 'preUpdate', 'update', 'onBlocked',
+    'onEnter', 'onExit', 'onHit', 'onStateChange', 'registerUpdaters',
+    'addHits', 'addSprites', 'addCustomSprites', 'addObservations',
+    'addPlayerCallbacks'}
+
 --[[ The base class of all Simulations.  This object is the container of all
 GameObjects, and maintains a registry of them, along with a table mapping states
 to GameObjects.
@@ -84,6 +91,13 @@ function BaseSimulation:__init__(kwargs)
   -- Initialize avatar indexing tables to be populated in base avatar manager.
   self._variables.avatarPieceToIndex = {}
   self._variables.avatarIndexToPiece = {}
+
+  -- Table of game objects indexed by component functions, to keep track of
+  -- only game objects which have at least one component with a function.
+  self._variables.objectsByFunctionName = {}
+  for _, fnName in pairs(_COMPONENT_FUNCTIONS) do
+    self._variables.objectsByFunctionName[fnName] = {}
+  end
 
   -- Add the "scene", a static game object that can hold global logic.
   if self._settings.scene ~= nil then
@@ -222,7 +236,12 @@ function BaseSimulation:buildGameObjectFromSettings(gameObjectConfig)
   self._variables.nextGameObjectId = self._variables.nextGameObjectId + 1
 
   gameObject.simulation = self
-  self._variables.gameObjects[gameObject._id] = gameObject
+  table.insert(self._variables.gameObjects, gameObject)
+  for _, fnName in pairs(_COMPONENT_FUNCTIONS) do
+    if gameObject:hasComponentWithFunction(fnName) then
+      table.insert(self._variables.objectsByFunctionName[fnName], gameObject)
+    end
+  end
   if isAvatar then
     self._variables.avatarObjects[gameObject._id] = gameObject
   end
@@ -264,10 +283,19 @@ function BaseSimulation:worldConfig()
       states = {}
   }
   -- By this point, gameObjects already contain the avatar objects
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.registerUpdaters) do
     gameObject:registerUpdaters()
+  end
+  for _, gameObject in pairs(self._variables.gameObjects) do
     gameObject:addStates(config.states)
+  end
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.addHits) do
     gameObject:addHits(config)
+  end
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.addCustomSprites) do
     gameObject:addCustomSprites(config.customSprites)
   end
   self._contacts = {}
@@ -288,13 +316,17 @@ function BaseSimulation:worldConfig()
     self._updaterRegistry:mergeWith(gameObject:getUpdaterRegistry())
   end
   self._updaterRegistry:addUpdateOrder(config.updateOrder)
+
+  log.v(1, 'World Config: ' .. helpers.tostring(config))
+
   return config
 end
 
 function BaseSimulation:addSprites(tileSet)
   tileSet:addColor('OutOfBounds', {0, 0, 0})
   tileSet:addColor('OutOfView', {80, 80, 80})
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.addSprites) do
     gameObject:addSprites(tileSet)
   end
 end
@@ -332,7 +364,8 @@ function BaseSimulation:addObservations(tileSet, world, observations)
   }
   observations[#observations + 1] = spec
   -- Add all observations from GameObjects, including avatars.
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.addObservations) do
     gameObject:addObservations(tileSet, world, observations)
   end
 end
@@ -344,9 +377,13 @@ function BaseSimulation:stateCallbacks(callbacks)
   -- By now we have the hits and the contacts lists.
   for _, gameObject in pairs(self._variables.gameObjects) do
     gameObject:addTypeCallbacks(callbacks)
+  end
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.addPlayerCallbacks) do
     gameObject:addPlayerCallbacks(callbacks)
   end
   self._updaterRegistry:registerCallbacks(callbacks)
+  log.v(1, 'Callbacks: ' .. helpers.tostring(callbacks))
 end
 
 function BaseSimulation:textMap()
@@ -404,7 +441,8 @@ function BaseSimulation:_avatarStart(grid)
     self._variables.pieceToGameObject[avatarPiece] = avatarObject
   end
 
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.postStart) do
     gameObject:postStart(grid)
   end
 end
@@ -416,7 +454,8 @@ function BaseSimulation:start(grid)
   self._updaterRegistry:registerGrid(grid)
   self._variables.continueEpisodeAfterThisFrame = true
   -- Call `reset` on all game objects before calling `start` on any of them.
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.reset) do
     gameObject:reset()
   end
   -- Call `start` on all non-avatar game objects before calling `start` on any
@@ -429,7 +468,7 @@ function BaseSimulation:start(grid)
     end
   end
   self:_avatarStart(grid)
-  log.v("grid\n" .. tostring(grid))
+  log.v(1, "grid\n" .. tostring(grid))
 end
 
 --[[ End of starting callbacks ]]
@@ -437,10 +476,12 @@ end
 
 function BaseSimulation:update(grid)
   -- Call preUpdate on all gameObjects before calling update on any gameObjects.
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.preUpdate) do
     gameObject:preUpdate()
   end
-  for _, gameObject in pairs(self._variables.gameObjects) do
+  for _, gameObject in pairs(
+      self._variables.objectsByFunctionName.update) do
     gameObject:update(grid)
   end
 end
