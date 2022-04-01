@@ -22,6 +22,16 @@ import immutabledict
 
 @dataclasses.dataclass(frozen=True)
 class Scenario:
+  """Scenario config.
+
+  Attributes:
+    description: a description of the scenario.
+    tags: tags for the scenario.
+    substrate: the substrate the scenario is based on.
+    is_focal: indicates whether the corresponding player slot is to be filled by
+      a focal player or a bot.
+    bots: names of the bots to sample from to fill the bot slots.
+  """
   description: str
   tags: AbstractSet[str]
   substrate: str
