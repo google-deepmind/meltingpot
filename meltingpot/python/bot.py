@@ -14,8 +14,6 @@
 """Bot factory."""
 
 import abc
-import os
-import re
 from typing import Mapping, Tuple
 
 import dm_env
@@ -27,9 +25,6 @@ import tree
 from meltingpot.python.configs import bots as bot_config
 from meltingpot.python.utils.bots import permissive_model
 from meltingpot.python.utils.bots import puppeteer_functions
-
-_MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                      __file__)
 
 AVAILABLE_BOTS = frozenset(bot_config.BOTS)
 
@@ -208,7 +203,7 @@ def get_config(bot_name: str) -> config_dict.ConfigDict:
       bot_name=bot_name,
       substrate=bot.substrate,
       puppeteer_fn=bot.puppeteer_fn,
-      saved_model_path=os.path.join(_MODELS_ROOT, bot.substrate, bot.model),
+      saved_model_path=bot.model_path,
   )
   return config.lock()
 
