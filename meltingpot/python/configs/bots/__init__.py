@@ -13,24 +13,61 @@
 # limitations under the License.
 """Library of stored bots for MeltingPot scenarios."""
 
+import dataclasses
+import os
 import re
 from typing import Mapping, Optional
 
-import dataclasses
 import immutabledict
 
 from meltingpot.python.utils.bots import puppeteer_functions
 
+_MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
+                      __file__)
+
 
 @dataclasses.dataclass(frozen=True)
 class Bot:
+  """Bot config.
+
+  Attributes:
+    substrate: the substrate the bot was trained for.
+    model_path: the path to the bot's saved model.
+    puppeteer_fn: an optional puppeteer function used to control the bot.
+  """
   substrate: str
-  puppeteer_fn: Optional[puppeteer_functions.PuppeteerFn]
-  model: str
+  model_path: str
+  puppeteer_fn: Optional[puppeteer_functions.PuppeteerFn] = None
 
 
-_saved_model = lambda **kwargs: Bot(puppeteer_fn=None, **kwargs)
-_puppet = lambda **kwargs: Bot(model='puppet', **kwargs)
+def _saved_model(substrate: str,
+                 model: str,
+                 models_root: str = _MODELS_ROOT) -> Bot:
+  """Returns the config for a saved model bot.
+
+  Args:
+    substrate: the substrate on which the bot was trained.
+    model: the name of the model.
+    models_root: The path to the directory containing the saved_models.
+  """
+  model_path = os.path.join(models_root, substrate, model)
+  return Bot(substrate=substrate, model_path=model_path)
+
+
+def _puppet(substrate: str,
+            puppeteer_fn: puppeteer_functions.PuppeteerFn,
+            models_root: str = _MODELS_ROOT) -> Bot:
+  """Returns the config for a puppet bot.
+
+  Args:
+    substrate: the substrate on which the bot was trained.
+    puppeteer_fn: the puppeteer function that controls the puppet.
+    models_root: The path to the directory containing the saved_models.
+  """
+  puppet_path = os.path.join(models_root, substrate, 'puppet')
+  return Bot(
+      substrate=substrate, model_path=puppet_path, puppeteer_fn=puppeteer_fn)
+
 
 BOTS: Mapping[str, Bot] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes

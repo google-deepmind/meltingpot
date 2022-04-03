@@ -27,20 +27,16 @@ _MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
                       __file__)
 
 
-def _model_path(bot):
-  return os.path.join(_MODELS_ROOT, bot.substrate, bot.model)
-
-
 def _subdirs(root):
   for file in os.listdir(root):
     if os.path.isdir(os.path.join(root, file)):
       yield file
 
 
-def _models():
-  for substrate in _subdirs(_MODELS_ROOT):
-    for model in _subdirs(os.path.join(_MODELS_ROOT, substrate)):
-      yield substrate, model
+def _models(models_root=_MODELS_ROOT):
+  for substrate in _subdirs(models_root):
+    for model in _subdirs(os.path.join(models_root, substrate)):
+      yield models_root, substrate, model
 
 
 class ConfigTest(parameterized.TestCase):
@@ -89,18 +85,23 @@ class ConfigTest(parameterized.TestCase):
 
   @parameterized.named_parameters(bot_configs.BOTS.items())
   def test_bot_model_exists(self, bot):
-    model_path = _model_path(bot)
     self.assertTrue(
-        os.path.isdir(model_path), 'Missing model {bot.substrate}/{bot.model}.')
+        os.path.isdir(bot.model_path), f'Missing model {bot.model_path!r}.')
+
+  @parameterized.named_parameters(bot_configs.BOTS.items())
+  def test_bot_substrate_matches_model(self, bot):
+    substrate = os.path.basename(os.path.dirname(bot.model_path))
+    self.assertEqual(bot.substrate, substrate,
+                     f'{bot} substrate does not match model path.')
 
   @parameterized.named_parameters(
       # TODO(b/220870875): remove disable when fixed.
-      (f'{substrate}_{model}', substrate, model)  # pylint: disable=undefined-variable
-      for substrate, model in _models())
-  def test_asset_used_by_bot(self, substrate, model):
-    used = any(bot.substrate == substrate and bot.model == model
-               for bot in bot_configs.BOTS.values())
-    self.assertTrue(used, f'Model {substrate}/{model} is not used by any bot.')
+      (f'{substrate}_{model}', os.path.join(models_root, substrate, model))  # pylint: disable=undefined-variable
+      for models_root, substrate, model in _models())
+  def test_model_used_by_bot(self, model_path):
+    used = any(
+        bot.model_path == model_path for bot in bot_configs.BOTS.values())
+    self.assertTrue(used, f'Model {model_path} not used by any bot.')
 
 
 if __name__ == '__main__':
