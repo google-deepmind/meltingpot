@@ -142,7 +142,7 @@ class MeltingPotPettingZooEnv(ParallelEnv):
     return rgb_arr
 
 class _parallel_env(MeltingPotPettingZooEnv, EzPickle):
-    metadata = {"render.modes": ["human", "rgb_array"]}
+    metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, env_config, max_cycles):
         EzPickle.__init__(self, env_config, max_cycles)
