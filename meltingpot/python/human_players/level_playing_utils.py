@@ -251,13 +251,15 @@ def run_episode(
       ('1', '2', ..., numPlayers).
   """
   full_config.lab2d_settings.update(config_overrides)
-  player_count = full_config.lab2d_settings.get('numPlayers', 1)
+  if player_prefixes is None:
+    player_count = full_config.lab2d_settings.get('numPlayers', 1)
+    # By default, we use lua indices (which start at 1) as player prefixes.
+    player_prefixes = [f'{i+1}' for i in range(player_count)]
+  else:
+    player_count = len(player_prefixes)
   print(f'Running an episode with {player_count} players.')
   env = env_builder(**full_config)
 
-  if player_prefixes is None:
-    # By default, we use lua indices (which start at 1) as player prefixes.
-    player_prefixes = [f'{i+1}' for i in range(player_count)]
   if len(player_prefixes) != player_count:
     raise ValueError('Player prefixes, when specified, must be of the same '
                      'length as the number of players.')
@@ -362,5 +364,5 @@ def run_episode(
 
   if interactive == RenderType.PYGAME:
     pygame.quit()
-  for player in range(player_count):
-    print('Player %d: score is %g' % (player, score[player]))
+  for prefix in player_prefixes:
+    print('Player %s: score is %g' % (prefix, score[prefix]))

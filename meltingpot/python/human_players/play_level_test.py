@@ -141,13 +141,6 @@ class PlayLevelTest(parameterized.TestCase):
     level_playing_utils.run_episode(
         'RGB', {}, play_module._ACTION_MAP, full_config)
 
-  def test_bad_player_prefixes_raises(self):
-    full_config = mp_running_with_scissors_itm.get_config()
-    with self.assertRaises(ValueError):
-      level_playing_utils.run_episode(
-          'RGB', {}, play_anything_in_the_matrix._ACTION_MAP, full_config,
-          player_prefixes=('wrong',))
-
 
 if __name__ == '__main__':
   absltest.main()
