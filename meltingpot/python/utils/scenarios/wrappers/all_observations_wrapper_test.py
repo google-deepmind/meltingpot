@@ -18,6 +18,7 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
+import immutabledict
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
@@ -34,6 +35,39 @@ OBSERVATION_1 = 'observation_1'
 OBSERVATION_2 = 'observation_2'
 ACTION_SPEC = dm_env.specs.DiscreteArray(num_values=5, dtype=np.int32)
 REWARD_SPEC = dm_env.specs.Array(shape=[], dtype=np.float32)
+
+
+def _restart(observation, reward):
+  return dm_env.restart(observation=observation)._replace(reward=reward)
+
+
+class _ExpectedArray(np.ndarray):
+  """Used for test __eq__ comparisons involving nested numpy arrays."""
+
+  def __eq__(self, other):
+    if not isinstance(other, np.ndarray):
+      return NotImplemented
+    elif self.shape != other.shape:
+      return False
+    elif self.dtype != other.dtype:
+      return False
+    else:
+      return super().__eq__(other).all()
+
+
+def _expect_array(*args, **kwargs):
+  value = np.array(*args, **kwargs)
+  return _ExpectedArray(value.shape, value.dtype, value)
+
+
+def _expect_zeros(*args, **kwargs):
+  value = np.zeros(*args, **kwargs)
+  return _ExpectedArray(value.shape, value.dtype, value)
+
+
+def _expect_ones(*args, **kwargs):
+  value = np.ones(*args, **kwargs)
+  return _ExpectedArray(value.shape, value.dtype, value)
 
 
 class AllObservationsWrapperTest(parameterized.TestCase):
@@ -55,38 +89,55 @@ class AllObservationsWrapperTest(parameterized.TestCase):
         share_rewards=True)
 
     actual = wrapped.observation_spec()
-    expected = [{
-        OBSERVATION_1: dm_env.specs.Array(shape=[1], dtype=np.float32),
-        OBSERVATION_2: dm_env.specs.Array(shape=[2], dtype=np.float32),
-        GLOBAL_KEY: {
-            OBSERVATIONS_KEY: {
-                OBSERVATION_1:
-                    dm_env.specs.Array(
-                        shape=[2, 1], dtype=np.float32, name=OBSERVATION_1)
-            },
-            REWARDS_KEY: REWARD_SPEC.replace(shape=[2], name=REWARDS_KEY),
-            ACTIONS_KEY: dm_env.specs.BoundedArray(
-                shape=[2], dtype=ACTION_SPEC.dtype, minimum=ACTION_SPEC.minimum,
-                maximum=ACTION_SPEC.maximum, name=ACTIONS_KEY),
-        }
-    }] * 2
+    expected = ({
+        OBSERVATION_1:
+            dm_env.specs.Array(shape=[1], dtype=np.float32),
+        OBSERVATION_2:
+            dm_env.specs.Array(shape=[2], dtype=np.float32),
+        GLOBAL_KEY:
+            immutabledict.immutabledict({
+                OBSERVATIONS_KEY:
+                    immutabledict.immutabledict({
+                        OBSERVATION_1:
+                            dm_env.specs.Array(
+                                shape=[2, 1],
+                                dtype=np.float32,
+                                name=OBSERVATION_1)
+                    }),
+                REWARDS_KEY:
+                    REWARD_SPEC.replace(shape=[2], name=REWARDS_KEY),
+                ACTIONS_KEY:
+                    dm_env.specs.BoundedArray(
+                        shape=[2],
+                        dtype=ACTION_SPEC.dtype,
+                        minimum=ACTION_SPEC.minimum,
+                        maximum=ACTION_SPEC.maximum,
+                        name=ACTIONS_KEY),
+            })
+    },) * 2
     self.assertEqual(actual, expected)
 
   def test_reset(self):
     env = mock.Mock(spec_set=base.Substrate)
     env.events.return_value = ()
-    env.action_spec.return_value = [ACTION_SPEC] * 2
-    env.reward_spec.return_value = [REWARD_SPEC] * 2
-    env.reset.return_value = dm_env.restart([
-        {
-            OBSERVATION_1: np.ones([1]),
-            OBSERVATION_2: np.ones([2]),
-        },
-        {
-            OBSERVATION_1: np.ones([1]) * 2,
-            OBSERVATION_2: np.ones([2]) * 2,
-        },
-    ])._replace(reward=[np.array(0), np.array(0)])
+    env.action_spec.return_value = (ACTION_SPEC,) * 2
+    env.reward_spec.return_value = (REWARD_SPEC,) * 2
+    env.reset.return_value = _restart(
+        reward=(
+            np.array(0., dtype=REWARD_SPEC.dtype),
+            np.array(0., dtype=REWARD_SPEC.dtype),
+        ),
+        observation=(
+            immutabledict.immutabledict({
+                OBSERVATION_1: np.ones([1], dtype=np.float32),
+                OBSERVATION_2: np.ones([2], dtype=np.float32),
+            }),
+            immutabledict.immutabledict({
+                OBSERVATION_1: np.ones([1], dtype=np.float32) * 2,
+                OBSERVATION_2: np.ones([2], dtype=np.float32) * 2,
+            }),
+        ),
+    )
     wrapped = all_observations_wrapper.Wrapper(
         env,
         observations_to_share=[OBSERVATION_1],
@@ -94,31 +145,53 @@ class AllObservationsWrapperTest(parameterized.TestCase):
         share_rewards=True)
 
     actual = wrapped.reset()
-    expected = dm_env.restart([
-        {
-            OBSERVATION_1: np.ones([1]),
-            OBSERVATION_2: np.ones([2]),
-            GLOBAL_KEY: {
-                OBSERVATIONS_KEY: {
-                    OBSERVATION_1: np.array([[1.], [2.]])
-                },
-                REWARDS_KEY: np.zeros([2], dtype=REWARD_SPEC.dtype),
-                ACTIONS_KEY: np.zeros([2], dtype=ACTION_SPEC.dtype),
-            }
-        },
-        {
-            OBSERVATION_1: np.ones([1]) * 2,
-            OBSERVATION_2: np.ones([2]) * 2,
-            GLOBAL_KEY: {
-                OBSERVATIONS_KEY: {
-                    OBSERVATION_1: np.array([[1.], [2.]])
-                },
-                REWARDS_KEY: np.zeros([2], dtype=REWARD_SPEC.dtype),
-                ACTIONS_KEY: np.zeros([2], dtype=ACTION_SPEC.dtype),
-            }
-        },
-    ])._replace(reward=[np.array(0), np.array(0)])
-    np.testing.assert_equal(actual, expected)
+    expected = _restart(
+        reward=(
+            _expect_array(0, dtype=REWARD_SPEC.dtype),
+            _expect_array(0, dtype=REWARD_SPEC.dtype),
+        ),
+        observation=(
+            immutabledict.immutabledict({
+                OBSERVATION_1:
+                    _expect_ones([1], dtype=np.float32),
+                OBSERVATION_2:
+                    _expect_ones([2], dtype=np.float32),
+                GLOBAL_KEY:
+                    immutabledict.immutabledict({
+                        OBSERVATIONS_KEY:
+                            immutabledict.immutabledict({
+                                OBSERVATION_1:
+                                    _expect_array([[1.], [2.]],
+                                                  dtype=np.float32)
+                            }),
+                        REWARDS_KEY:
+                            _expect_zeros([2], dtype=REWARD_SPEC.dtype),
+                        ACTIONS_KEY:
+                            _expect_zeros([2], dtype=ACTION_SPEC.dtype),
+                    }),
+            }),
+            immutabledict.immutabledict({
+                OBSERVATION_1:
+                    _expect_ones([1], dtype=np.float32) * 2,
+                OBSERVATION_2:
+                    _expect_ones([2], dtype=np.float32) * 2,
+                GLOBAL_KEY:
+                    immutabledict.immutabledict({
+                        OBSERVATIONS_KEY:
+                            immutabledict.immutabledict({
+                                OBSERVATION_1:
+                                    _expect_array([[1.], [2.]],
+                                                  dtype=np.float32)
+                            }),
+                        REWARDS_KEY:
+                            _expect_zeros([2], dtype=REWARD_SPEC.dtype),
+                        ACTIONS_KEY:
+                            _expect_zeros([2], dtype=ACTION_SPEC.dtype),
+                    }),
+            }),
+        ),
+    )
+    self.assertEqual(actual, expected)
 
   def test_step(self):
     env = mock.Mock(spec_set=base.Substrate)
@@ -126,17 +199,21 @@ class AllObservationsWrapperTest(parameterized.TestCase):
     env.action_spec.return_value = [ACTION_SPEC] * 2
     env.reward_spec.return_value = [REWARD_SPEC] * 2
     env.step.return_value = dm_env.transition(
-        reward=[np.array(1), np.array(2)],
-        observation=[
-            {
-                OBSERVATION_1: np.ones([1]),
-                OBSERVATION_2: np.ones([2]),
-            },
-            {
-                OBSERVATION_1: np.ones([1]) * 2,
-                OBSERVATION_2: np.ones([2]) * 2,
-            },
-        ])
+        reward=(
+            np.array(1, dtype=REWARD_SPEC.dtype),
+            np.array(2, dtype=REWARD_SPEC.dtype),
+        ),
+        observation=(
+            immutabledict.immutabledict({
+                OBSERVATION_1: _expect_ones([1], dtype=np.float32),
+                OBSERVATION_2: _expect_ones([2], dtype=np.float32),
+            }),
+            immutabledict.immutabledict({
+                OBSERVATION_1: _expect_ones([1], dtype=np.float32) * 2,
+                OBSERVATION_2: _expect_ones([2], dtype=np.float32) * 2,
+            }),
+        ),
+    )
     wrapped = all_observations_wrapper.Wrapper(
         env,
         observations_to_share=[OBSERVATION_1],
@@ -145,33 +222,52 @@ class AllObservationsWrapperTest(parameterized.TestCase):
 
     actual = wrapped.step([3, 4])
     expected = dm_env.transition(
-        reward=[np.array(1), np.array(2)],
-        observation=[
-            {
-                OBSERVATION_1: np.ones([1]),
-                OBSERVATION_2: np.ones([2]),
-                GLOBAL_KEY: {
-                    OBSERVATIONS_KEY: {
-                        OBSERVATION_1: np.array([[1.], [2.]])
-                    },
-                    REWARDS_KEY: np.array([1, 2], dtype=REWARD_SPEC.dtype),
-                    ACTIONS_KEY: np.array([3, 4], dtype=ACTION_SPEC.dtype),
-                }
-            },
-            {
-                OBSERVATION_1: np.ones([1]) * 2,
-                OBSERVATION_2: np.ones([2]) * 2,
-                GLOBAL_KEY: {
-                    OBSERVATIONS_KEY: {
-                        OBSERVATION_1: np.array([[1.], [2.]])
-                    },
-                    REWARDS_KEY: np.array([1, 2], dtype=REWARD_SPEC.dtype),
-                    ACTIONS_KEY: np.array([3, 4], dtype=ACTION_SPEC.dtype),
-                }
-            },
-        ],
+        reward=(
+            _expect_array(1, dtype=REWARD_SPEC.dtype),
+            _expect_array(2, dtype=REWARD_SPEC.dtype),
+        ),
+        observation=(
+            immutabledict.immutabledict({
+                OBSERVATION_1:
+                    _expect_ones([1], dtype=np.float32),
+                OBSERVATION_2:
+                    _expect_ones([2], dtype=np.float32),
+                GLOBAL_KEY:
+                    immutabledict.immutabledict({
+                        OBSERVATIONS_KEY:
+                            immutabledict.immutabledict({
+                                OBSERVATION_1:
+                                    _expect_array([[1.], [2.]],
+                                                  dtype=np.float32)
+                            }),
+                        REWARDS_KEY:
+                            _expect_array([1, 2], dtype=REWARD_SPEC.dtype),
+                        ACTIONS_KEY:
+                            _expect_array([3, 4], dtype=ACTION_SPEC.dtype),
+                    }),
+            }),
+            immutabledict.immutabledict({
+                OBSERVATION_1:
+                    _expect_ones([1], dtype=np.float32) * 2,
+                OBSERVATION_2:
+                    _expect_ones([2], dtype=np.float32) * 2,
+                GLOBAL_KEY:
+                    immutabledict.immutabledict({
+                        OBSERVATIONS_KEY:
+                            immutabledict.immutabledict({
+                                OBSERVATION_1:
+                                    _expect_array([[1.], [2.]],
+                                                  dtype=np.float32)
+                            }),
+                        REWARDS_KEY:
+                            _expect_array([1, 2], dtype=REWARD_SPEC.dtype),
+                        ACTIONS_KEY:
+                            _expect_array([3, 4], dtype=ACTION_SPEC.dtype),
+                    }),
+            }),
+        ),
     )
-    np.testing.assert_equal(actual, expected)
+    self.assertEqual(actual, expected)
 
 
 if __name__ == '__main__':
