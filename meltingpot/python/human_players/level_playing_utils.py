@@ -145,31 +145,27 @@ def get_key_x_pressed() -> int:
   return 1 if pygame.key.get_pressed()[pygame.K_x] else 0
 
 
-def _split_key(key: str) -> Tuple[int, str]:
+def _split_key(key: str) -> Tuple[str, str]:
   """Splits the key into player index and name."""
-  tokens = key.split('.')
-  return int(tokens[0]), '.'.join(tokens[1:])
+  return tuple(key.split('.', maxsplit=1))
 
 
-def _get_rewards(timestep: dm_env.TimeStep) -> Sequence[float]:
+def _get_rewards(timestep: dm_env.TimeStep) -> Mapping[str, float]:
   """Gets the list of rewards, one for each player."""
   rewards = {}
   for key in timestep.observation.keys():
     if key.endswith('.REWARD'):
-      lua_index, name = _split_key(key)
+      player_prefix, name = _split_key(key)
       if name == 'REWARD':
-        rewards[lua_index] = timestep.observation[key]
-  reward_list = [0.0] * len(rewards)
-  for lua_index, reward in rewards.items():
-    reward_list[lua_index - 1] = reward
-  return reward_list
+        rewards[player_prefix] = timestep.observation[key]
+  return rewards
 
 
 class ActionReader(object):
   """Convert keyboard actions to environment actions."""
 
   def __init__(self, env: dmlab2d.Environment, action_map: ActionMap):
-    # Actions are named "<lua_player_index>.<action_name>"
+    # Actions are named "<player_prefix>.<action_name>"
     self._action_map = action_map
     self._action_spec = env.action_spec()
     assert isinstance(self._action_spec, dict)
@@ -178,11 +174,11 @@ class ActionReader(object):
       _, action_name = _split_key(action_key)
       self._action_names.add(action_name)
 
-  def step(self, player_index: int) -> Sequence[Sequence[Mapping[str, int]]]:
-    """Update the actions of player `player_index`."""
+  def step(self, player_prefix: str) -> Sequence[Sequence[Mapping[str, int]]]:
+    """Update the actions of player `player_prefix`."""
     actions = {action_key: 0 for action_key in self._action_spec.keys()}
     for action_name in self._action_names:
-      actions[f'{player_index + 1}.{action_name}'] = self._action_map[
+      actions[f'{player_prefix}.{action_name}'] = self._action_map[
           action_name]()
     return actions
 
@@ -204,6 +200,7 @@ def run_episode(
     text_color: Tuple[int, ...] = WHITE,
     env_builder: EnvBuilder = builder.builder,
     print_events: Optional[bool] = False,
+    player_prefixes: Optional[Sequence[str]] = None,
     ) -> None:
   """Run multiplayer environment, with per player rendering and actions.
 
@@ -249,12 +246,23 @@ def run_episode(
       meltingpot.builder.
     print_events: An optional bool that if enabled will print events captured
       from the dmlab2d events API on any timestep where they occur.
+    player_prefixes: If given, use these as the prefixes of player actions.
+      Pressing TAB will cycle through these. If not given, use the standard
+      ('1', '2', ..., numPlayers).
   """
   full_config.lab2d_settings.update(config_overrides)
-  player_count = full_config.lab2d_settings.get('numPlayers', 1)
+  if player_prefixes is None:
+    player_count = full_config.lab2d_settings.get('numPlayers', 1)
+    # By default, we use lua indices (which start at 1) as player prefixes.
+    player_prefixes = [f'{i+1}' for i in range(player_count)]
+  else:
+    player_count = len(player_prefixes)
   print(f'Running an episode with {player_count} players.')
   env = env_builder(**full_config)
 
+  if len(player_prefixes) != player_count:
+    raise ValueError('Player prefixes, when specified, must be of the same '
+                     'length as the number of players.')
   player_index = 0
   timestep = env.reset()
 
@@ -300,23 +308,24 @@ def run_episode(
           if event.key == pygame.K_TAB:
             player_index = (player_index + 1) % player_count
           break
+    player_prefix = player_prefixes[player_index]
 
     if stop:
       break
 
     # Compute next timestep
-    actions = action_reader.step(player_index) if player_count else []
+    actions = action_reader.step(player_prefix) if player_count else []
     timestep = env.step(actions)
     if timestep.step_type == dm_env.StepType.LAST:
       break
 
     rewards = _get_rewards(timestep)
-    for player in range(player_count):
+    for i, prefix in enumerate(player_prefixes):
       if verbose_fn:
-        verbose_fn(timestep, player)
-      score[player] += rewards[player]
-      if player == player_index and rewards[player] != 0:
-        print(f'{player} Score: {score[player]}')
+        verbose_fn(timestep, i)
+      score[prefix] += rewards[prefix]
+      if i == player_index and rewards[prefix] != 0:
+        print(f'Player {prefix} Score: {score[prefix]}')
 
     # Print events if applicable
     if print_events and hasattr(env, 'events'):
@@ -330,8 +339,8 @@ def run_episode(
       # show visual observation
       if render_observation in timestep.observation:
         obs = timestep.observation[render_observation]
-      elif f'{player_index + 1}.{render_observation}' in timestep.observation:
-        obs = timestep.observation[f'{player_index + 1}.{render_observation}']
+      elif f'{player_prefix}.{render_observation}' in timestep.observation:
+        obs = timestep.observation[f'{player_prefix}.{render_observation}']
       obs = np.transpose(obs, (1, 0, 2))  # PyGame is column major!
 
       surface = pygame.surfarray.make_surface(obs)
@@ -355,5 +364,5 @@ def run_episode(
 
   if interactive == RenderType.PYGAME:
     pygame.quit()
-  for player in range(player_count):
-    print('Player %d: score is %g' % (player, score[player]))
+  for prefix in player_prefixes:
+    print('Player %s: score is %g' % (prefix, score[prefix]))

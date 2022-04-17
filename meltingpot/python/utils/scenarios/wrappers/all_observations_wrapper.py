@@ -50,10 +50,10 @@ as the original, single-player versions:
   immediately returned from step().
 """
 
-import copy
 from typing import Collection, Mapping, Sequence, Union
 
 import dm_env
+import immutabledict
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import base
@@ -62,6 +62,11 @@ GLOBAL_KEY = 'global'
 OBSERVATIONS_KEY = 'observations'
 REWARDS_KEY = 'rewards'
 ACTIONS_KEY = 'actions'
+
+
+def _immutable_ndarray(value: np.ndarray) -> np.ndarray:
+  value.setflags(write=False)
+  return value
 
 
 class Wrapper(base.Wrapper):
@@ -98,21 +103,21 @@ class Wrapper(base.Wrapper):
     """Returns shared observations."""
     shared_observation = {}
 
-    additional_observations = {}
-    for name in self._observations_to_share:
-      additional_observations[name] = np.stack(
-          [obs[name] for obs in observations])
+    additional_observations = immutabledict.immutabledict({
+        name: _immutable_ndarray(np.stack([obs[name] for obs in observations]))
+        for name in self._observations_to_share
+    })
     if additional_observations:
       shared_observation[OBSERVATIONS_KEY] = additional_observations
 
     if self._share_rewards:
-      shared_observation[REWARDS_KEY] = np.stack(rewards)
+      shared_observation[REWARDS_KEY] = _immutable_ndarray(np.stack(rewards))
 
     if self._share_actions:
-      shared_observation[ACTIONS_KEY] = np.asarray(
-          actions, dtype=self._action_dtype)
+      shared_observation[ACTIONS_KEY] = _immutable_ndarray(
+          np.array(actions, dtype=self._action_dtype))
 
-    return shared_observation
+    return immutabledict.immutabledict(shared_observation)
 
   def _adjusted_timestep(self, timestep: dm_env.TimeStep,
                          actions: Sequence[int]) -> dm_env.TimeStep:
@@ -123,9 +128,9 @@ class Wrapper(base.Wrapper):
         actions=actions)
     if not shared_observation:
       return timestep
-    observations = [obs.copy() for obs in timestep.observation]
-    for observation in observations:
-      observation[GLOBAL_KEY] = copy.deepcopy(shared_observation)
+    observations = tuple(
+        immutabledict.immutabledict(obs, **{GLOBAL_KEY: shared_observation})
+        for obs in timestep.observation)
     return timestep._replace(observation=observations)
 
   def reset(self) -> dm_env.TimeStep:
@@ -152,7 +157,8 @@ class Wrapper(base.Wrapper):
       additional_spec[name] = spec.replace(
           shape=(self._num_players,) + spec.shape, name=name)
     if additional_spec:
-      shared_observation_spec[OBSERVATIONS_KEY] = additional_spec
+      shared_observation_spec[OBSERVATIONS_KEY] = immutabledict.immutabledict(
+          additional_spec)
 
     if self._share_rewards:
       shared_observation_spec[REWARDS_KEY] = reward_spec.replace(
@@ -166,7 +172,7 @@ class Wrapper(base.Wrapper):
           maximum=action_spec.maximum,
           name=ACTIONS_KEY)
 
-    return shared_observation_spec
+    return immutabledict.immutabledict(shared_observation_spec)
 
   def observation_spec(self):
     """See base class."""
@@ -186,6 +192,6 @@ class Wrapper(base.Wrapper):
         observation_spec=observation_spec,
         reward_spec=reward_spec,
         action_spec=action_spec)
-    observation_spec = dict(observation_spec)
-    observation_spec[GLOBAL_KEY] = shared_observation_spec
-    return [observation_spec] * self._num_players
+    observation_spec = immutabledict.immutabledict(
+        observation_spec, **{GLOBAL_KEY: shared_observation_spec})
+    return (observation_spec,) * self._num_players

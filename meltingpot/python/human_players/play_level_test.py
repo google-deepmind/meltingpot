@@ -57,35 +57,35 @@ class HumanActionReaderTest(parameterized.TestCase):
           {  # Capture the following key events,
               'move': level_playing_utils.get_direction_pressed,
           },  # given this action name, key pressed, for this player index; and
-          pygame.K_w, 0,
+          pygame.K_w, '1',
           # Expecting this action list out.
           {'1.move': 1, '2.move': 0, '3.move': 0},
       ), (
           {  # Capture the following key events,
               'move': level_playing_utils.get_direction_pressed,
           },  # given this action name, key pressed, for this player index; and
-          pygame.K_s, 2,
+          pygame.K_s, '3',
           # Expecting this action list out.
           {'1.move': 0, '2.move': 0, '3.move': 3},
       ), (
           {  # Capture the following key events,
               'move': level_playing_utils.get_direction_pressed,
           },  # given this action name, key pressed, for this player index; and
-          pygame.K_s, 0,
+          pygame.K_s, '1',
           # Expecting this action list out.
           {'1.move': 3, '2.move': 0, '3.move': 0},
       ), (
           {  # Capture the following key events,
               'move': level_playing_utils.get_direction_pressed,
           },  # given action name, irrelevant key pressed, for player 0; and
-          pygame.K_x, 0,
+          pygame.K_x, '1',
           # Expecting this action list out.
           {'1.move': 0, '2.move': 0, '3.move': 0},
       ), (
           {  # Capture the following key events (don't need to make sense),
               'move': level_playing_utils.get_space_key_pressed,
           },  # given action name, irrelevant key pressed, for player 0; and
-          pygame.K_SPACE, 0,
+          pygame.K_SPACE, '1',
           # Expecting this action list out.
           {'1.move': 1, '2.move': 0, '3.move': 0},
       ),
