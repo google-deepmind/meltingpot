@@ -136,10 +136,11 @@ function tests.uniquifyIdsDefault()
   registry:registerUpdater{updateFn = function() end}
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state1'), {'spawnPoints', 'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state1'),
+    {'spawnPoints', 'UPDATER_GRP_____Updater#0'}
   )
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____Updater#0'}
   )
 end
 
@@ -151,10 +152,10 @@ function tests.uniquifyIdsWithGroupPrefix()
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
     gameObject:getGroupsForState('state1'),
-    {'spawnPoints', 'UPDATER_GRP__my_prefix_0'}
+    {'spawnPoints', 'UPDATER_GRP__my_prefix_Updater#0'}
   )
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state2'), {'UPDATER_GRP__my_prefix_0'}
+    gameObject:getGroupsForState('state2'), {'UPDATER_GRP__my_prefix_Updater#0'}
   )
 end
 
@@ -169,11 +170,12 @@ function tests.uniquifyIdsWithMultipleGroupPrefixes()
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
     gameObject:getGroupsForState('state1'),
-    {'spawnPoints', 'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'spawnPoints', 'UPDATER_GRP__my_prefix_Updater#0',
+      'UPDATER_GRP__another_Updater#0'}
   )
   asserts.tablesEQ(
     gameObject:getGroupsForState('state2'),
-    {'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'UPDATER_GRP__my_prefix_Updater#0', 'UPDATER_GRP__another_Updater#0'}
   )
 end
 
@@ -212,19 +214,21 @@ function tests.uniquifyIdsWithMultipleGroupPrefixesTwoGameObjects()
 
   asserts.tablesEQ(
     gameObject1:getGroupsForState('state1'),
-    {'spawnPoints', 'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'spawnPoints', 'UPDATER_GRP__my_prefix_Updater#0',
+      'UPDATER_GRP__another_Updater#0'}
   )
   asserts.tablesEQ(
     gameObject1:getGroupsForState('state2'),
-    {'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'UPDATER_GRP__my_prefix_Updater#0', 'UPDATER_GRP__another_Updater#0'}
   )
   asserts.tablesEQ(
     gameObject2:getGroupsForState('state1'),
-    {'spawnPoints', 'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'spawnPoints', 'UPDATER_GRP__my_prefix_Updater#0',
+      'UPDATER_GRP__another_Updater#0'}
   )
   asserts.tablesEQ(
     gameObject2:getGroupsForState('state2'),
-    {'UPDATER_GRP__my_prefix_0', 'UPDATER_GRP__another_0'}
+    {'UPDATER_GRP__my_prefix_Updater#0', 'UPDATER_GRP__another_Updater#0'}
   )
 
   local merged = updater_registry.UpdaterRegistry()
@@ -234,8 +238,8 @@ function tests.uniquifyIdsWithMultipleGroupPrefixesTwoGameObjects()
   asserts.tablesEQ(merged:getSortedPriorities(), {100, 90})
   local updateOrder = {}
   local expectedOrder = {
-    '__priority__100_UPDATER_GRP__another_0',
-    '__priority__90_UPDATER_GRP__my_prefix_0'}
+    '_priority_100_UPDATER_GRP__another_Updater#0',
+    '_priority_90_UPDATER_GRP__my_prefix_Updater#0'}
   merged:addUpdateOrder(updateOrder)
   asserts.tablesEQ(expectedOrder, updateOrder)
 end
@@ -249,7 +253,8 @@ function tests.uniquifyIdsSomeState()
   }
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state1'), {'spawnPoints', 'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state1'),
+    {'spawnPoints', 'UPDATER_GRP_____Updater#0'}
   )
   asserts.tablesEQ(gameObject:getGroupsForState('state2'), {})
 end
@@ -264,7 +269,7 @@ function tests.uniquifyIdsAnotherState()
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(gameObject:getGroupsForState('state1'), {'spawnPoints'})
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____Updater#0'}
   )
 end
 
@@ -277,7 +282,8 @@ function tests.uniquifyIdsSomeStates()
   }
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state1'), {'spawnPoints', 'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state1'),
+    {'spawnPoints', 'UPDATER_GRP_____Updater#0'}
   )
   asserts.tablesEQ(gameObject:getGroupsForState('state2'), {})
 end
@@ -292,7 +298,7 @@ function tests.uniquifyIdsAnotherStates()
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(gameObject:getGroupsForState('state1'), {'spawnPoints'})
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____Updater#0'}
   )
 end
 
@@ -305,10 +311,11 @@ function tests.uniquifyIdsAllStates()
   }
   registry:uniquifyStatesAndAddGroups(gameObject)
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state1'), {'spawnPoints', 'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state1'),
+    {'spawnPoints', 'UPDATER_GRP_____Updater#0'}
   )
   asserts.tablesEQ(
-    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____0'}
+    gameObject:getGroupsForState('state2'), {'UPDATER_GRP_____Updater#0'}
   )
 end
 
@@ -335,7 +342,7 @@ function tests.mergeRegistries()
   asserts.tablesEQ(merged:getSortedPriorities(), {100})
   local updateOrder = {}
   local expectedNames = {
-    ['__priority__100_UPDATER_GRP_____0'] = 1,
+    ['_priority_100_UPDATER_GRP_____Updater#0'] = 1,
   }
   merged:addUpdateOrder(updateOrder)
   for _, name in ipairs(updateOrder) do
@@ -372,8 +379,8 @@ function tests.mergeRegistriesGeneral()
   asserts.tablesEQ(merged:getSortedPriorities(), {100})
   local updateOrder = {}
   local expectedNames = {
-    ['__priority__100_UPDATER_GRP_____0'] = 1,
-    ['__priority__100_UPDATER_GRP_____1'] = 1,
+    ['_priority_100_UPDATER_GRP_____Updater#0'] = 1,
+    ['_priority_100_UPDATER_GRP_____Updater#1'] = 1,
   }
   merged:addUpdateOrder(updateOrder)
   for _, name in ipairs(updateOrder) do
