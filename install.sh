@@ -71,7 +71,7 @@ function install_dmlab2d() {
   popd
 
   echo -e "\nInstalling dmlab2d..."
-  pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
+  pip install --find-links=lab2d/bazel-bin/dmlab2d dmlab2d
 }
 
 
