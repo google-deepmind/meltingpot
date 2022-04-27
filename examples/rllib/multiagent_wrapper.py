@@ -76,6 +76,12 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   def __init__(self, env: dmlab2d.Environment):
     self._env = env
     self._num_players = len(self._env.observation_spec())
+    self._ordered_agent_ids = [
+        PLAYER_STR_FORMAT.format(index=index)
+        for index in range(self._num_players)
+    ]
+    self._agent_ids = set(self._ordered_agent_ids)
+    super().__init__()
 
   def reset(self):
     """See base class."""
@@ -85,13 +91,12 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   def step(self, action):
     """See base class."""
     actions = [
-        action[PLAYER_STR_FORMAT.format(index=index)]
-        for index in range(self._num_players)
+        action[agent_id] for agent_id in self._ordered_agent_ids
     ]
     timestep = self._env.step(actions)
     rewards = {
-        PLAYER_STR_FORMAT.format(index=index): timestep.reward[index]
-        for index in range(self._num_players)
+        agent_id: timestep.reward[index]
+        for index, agent_id in enumerate(self._ordered_agent_ids)
     }
     done = {'__all__': True if timestep.last() else False}
     info = {}
