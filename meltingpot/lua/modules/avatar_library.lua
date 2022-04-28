@@ -541,6 +541,8 @@ function Zapper:__init__(kwargs)
       {'cooldownTime', args.numberType},
       {'beamLength', args.numberType},
       {'beamRadius', args.numberType},
+      -- The default beam color is yellow.
+      {'beamColor', args.default({252, 252, 106}), args.tableType},
       {'framesTillRespawn', args.numberType},
       {'penaltyForBeingZapped', args.numberType},
       {'rewardForZapping', args.numberType},
@@ -551,6 +553,7 @@ function Zapper:__init__(kwargs)
   self._config.cooldownTime = kwargs.cooldownTime
   self._config.beamLength = kwargs.beamLength
   self._config.beamRadius = kwargs.beamRadius
+  self._config.beamColor = kwargs.beamColor
   self._config.framesTillRespawn = kwargs.framesTillRespawn
   self._config.penaltyForBeingZapped = kwargs.penaltyForBeingZapped
   self._config.rewardForZapping = kwargs.rewardForZapping
@@ -566,8 +569,7 @@ function Zapper:addHits(worldConfig)
 end
 
 function Zapper:addSprites(tileSet)
-  -- This color is yellow.
-  tileSet:addColor('BeamZap', {252, 252, 106})
+  tileSet:addColor('BeamZap', self._config.beamColor)
 end
 
 function Zapper:registerUpdaters(updaterRegistry)
