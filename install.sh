@@ -82,6 +82,10 @@ function test_dmlab2d() {
 
 
 function install_meltingpot() {
+  echo -e "\nDownloading assets..."
+  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+      | tar -xz --directory=meltingpot
+
   echo -e "\nInstalling meltingpot..."
   pip install --upgrade pip setuptools
   pip install .
