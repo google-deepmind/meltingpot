@@ -13,12 +13,21 @@
 # limitations under the License.
 """MeltingPotEnv as a MultiAgentEnv wrapper to interface with RLLib."""
 
+from typing import Tuple
+
 import dm_env
 import dmlab2d
 from gym import spaces
+from ml_collections import config_dict
 import numpy as np
+from ray.rllib.agents import trainer
 from ray.rllib.env import multi_agent_env
+from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 import tree
+
+from meltingpot.python import substrate
+from meltingpot.python.bot import Policy
+from meltingpot.python.bot import State
 
 PLAYER_STR_FORMAT = 'player_{index}'
 
@@ -34,8 +43,8 @@ def _timestep_to_observations(timestep: dm_env.TimeStep):
 
 def _remove_world_observations_from_space(
     observation: spaces.Dict) -> spaces.Dict:
-  return spaces.Dict({
-      key: observation[key] for key in observation if 'WORLD' not in key})
+  return spaces.Dict(
+      {key: observation[key] for key in observation if 'WORLD' not in key})
 
 
 def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
@@ -90,9 +99,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
 
   def step(self, action):
     """See base class."""
-    actions = [
-        action[agent_id] for agent_id in self._ordered_agent_ids
-    ]
+    actions = [action[agent_id] for agent_id in self._ordered_agent_ids]
     timestep = self._env.step(actions)
     rewards = {
         agent_id: timestep.reward[index]
@@ -116,3 +123,57 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   def single_player_action_space(self):
     """The action space for a single player in this environment."""
     return _spec_to_space(self._env.action_spec()[0])
+
+
+def env_creator(env_config):
+  """Outputs an environment for registering."""
+  env = substrate.build(config_dict.ConfigDict(env_config))
+  env = MeltingPotEnv(env)
+  return env
+
+
+class RayModelPolicy(Policy):
+  """Policy wrapping an rllib model for inference.
+
+  Note: Currently only supports a single input, batching is not enabled
+  """
+
+  def __init__(self,
+               model: trainer.Trainer,
+               policy_id: str = DEFAULT_POLICY_ID) -> None:
+    """Initialize a policy instance.
+
+    Args:
+      model_path: Path to the rllib.trainer.Trainer checkpoint.
+      policy_id: Which policy to use (if trained in multi_agent mode)
+    """
+    self._model = model
+    self._prev_action = 0
+    self._policy_id = policy_id
+
+  def step(self, timestep: dm_env.TimeStep,
+           prev_state: State) -> Tuple[int, State]:
+    """See base class."""
+    observations = {
+        key: value
+        for key, value in timestep.observation.items()
+        if 'WORLD' not in key
+    }
+
+    action, state, _ = self._model.compute_single_action(
+        observations,
+        prev_state,
+        policy_id=self._policy_id,
+        prev_action=self._prev_action,
+        prev_reward=timestep.reward)
+
+    self._prev_action = action
+    return action, state
+
+  def initial_state(self) -> State:
+    """See base class."""
+    self._prev_action = 0
+    return self._model.get_policy(self._policy_id).get_initial_state()
+
+  def close(self) -> None:
+    """See base class."""
