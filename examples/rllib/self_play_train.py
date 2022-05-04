@@ -22,7 +22,7 @@ from ray.rllib.policy.policy import PolicySpec
 from ray.tune import tune
 from ray.tune.registry import register_env
 
-from examples.rllib.utils import env_creator
+from examples.rllib import utils
 from meltingpot.python import substrate
 
 
@@ -32,7 +32,7 @@ def main():
   agent_algorithm = "PPO"
   # 2. The name of the MeltingPot substrate, coming
   # from substrate.AVAILABLE_SUBSTRATES.
-  substrate_name = "clean_up"
+  substrate_name = "bach_or_stravinsky_in_the_matrix"
 
   # 1. Gets default training configuration and specifies the POMgame to load.
   config = copy.deepcopy(
@@ -43,11 +43,11 @@ def main():
   config["env_config"] = substrate.get_config(substrate_name)
 
   # 3. Register env
-  register_env("meltingpot", env_creator)
+  register_env("meltingpot", utils.env_creator)
   config["env"] = "meltingpot"
 
   # 4. Extract space dimensions
-  test_env = env_creator(config["env_config"])
+  test_env = utils.env_creator(config["env_config"])
   obs_space = test_env.single_player_observation_space()
   act_space = test_env.single_player_action_space()
 
@@ -67,16 +67,21 @@ def main():
   # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
   config["num_gpus"] = int(os.environ.get("RLLIB_NUM_GPUS", "0"))
   config["log_level"] = "DEBUG"
-  # Fragment length, collected at once from each worker and for each agent!
-  config["rollout_fragment_length"] = 100
-  # Training batch size -> Fragments are concatenated up to this point.
-  # Setting this longer than the horizon ensures that we have a full episode
-  # for computing episodic metrics
-  config["train_batch_size"] = 2 * config["env_config"].lab2d_settings[
-      "maxEpisodeLengthFrames"]
+  config["num_workers"] = 1
   # After n steps, force reset simulation
   config["horizon"] = config["env_config"].lab2d_settings[
       "maxEpisodeLengthFrames"]
+  # each unroll happens exactly over one episode
+  # ensuring that we have a full episode allows a reward to be calculated
+  config["batch_mode"] = "complete_episodes"
+  # Fragment length, in this case the number of episodes
+  # collected at once from each worker and for each agent!
+  config["rollout_fragment_length"] = 1
+  config["train_batch_size"] = config["env_config"].lab2d_settings[
+      "maxEpisodeLengthFrames"]
+  # fix the batch size for a training pass
+  # Default: 128
+  config["sgd_minibatch_size"] = 128
   # Default: False
   config["no_done_at_end"] = False
   # Info: If False, each agents trajectory is expected to have

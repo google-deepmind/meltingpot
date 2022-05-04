@@ -26,8 +26,7 @@ from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 import tree
 
 from meltingpot.python import substrate
-from meltingpot.python.bot import Policy
-from meltingpot.python.bot import State
+from meltingpot.python import bot
 
 PLAYER_STR_FORMAT = 'player_{index}'
 
@@ -132,7 +131,7 @@ def env_creator(env_config):
   return env
 
 
-class RayModelPolicy(Policy):
+class RayModelPolicy(bot.Policy):
   """Policy wrapping an rllib model for inference.
 
   Note: Currently only supports a single input, batching is not enabled
@@ -152,7 +151,7 @@ class RayModelPolicy(Policy):
     self._policy_id = policy_id
 
   def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
+           prev_state: bot.State) -> Tuple[int, bot.State]:
     """See base class."""
     observations = {
         key: value
@@ -170,7 +169,7 @@ class RayModelPolicy(Policy):
     self._prev_action = action
     return action, state
 
-  def initial_state(self) -> State:
+  def initial_state(self) -> bot.State:
     """See base class."""
     self._prev_action = 0
     return self._model.get_policy(self._policy_id).get_initial_state()

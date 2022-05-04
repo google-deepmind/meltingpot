@@ -17,6 +17,8 @@ You must provide experiment_state, expected to be
 ~/ray_results/PPO/experiment_state_YOUR_RUN_ID.json
 """
 
+import argparse
+
 import dm_env
 from dmlab2d.ui_renderer import pygame
 import numpy as np
@@ -24,23 +26,29 @@ from ray.rllib.agents.registry import get_trainer_class
 from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
 from ray.tune.registry import register_env
 
-from examples.rllib.utils import env_creator
-from examples.rllib.utils import RayModelPolicy
+from examples.rllib import utils
 
 
 def main():
-  # This will load the last training run created by self_play_train.py.
-  # If you want to use a specific run, update experiment_state path.
-  # The expected path is "~/ray_results/PPO/experiment_state-DATETIME.json"
-  experiment_state = "~/ray_results/PPO"
+  parser = argparse.ArgumentParser(description=__doc__)
+  parser.add_argument(
+      "--experiment_state",
+      type=str,
+      default="~/ray_results/PPO",
+      help="ray.tune experiment_state to load. The default setting will load"
+      " the last training run created by self_play_train.py. If you want to use"
+      " a specific run, provide a path, expected to be of the format "
+      " ~/ray_results/PPO/experiment_state-DATETIME.json")
+
+  args = parser.parse_args()
 
   agent_algorithm = "PPO"
-  substrate_name = "clean_up"
+  substrate_name = "bach_or_stravinsky_in_the_matrix"
 
-  register_env("meltingpot", env_creator)
+  register_env("meltingpot", utils.env_creator)
 
   experiment = ExperimentAnalysis(
-      experiment_state,
+      args.experiment_state,
       default_metric="episode_reward_mean",
       default_mode="max")
 
@@ -51,10 +59,10 @@ def main():
   trainer.restore(checkpoint_path)
 
   # Create a new environment to visualise
-  env = env_creator(config["env_config"])._env
+  env = utils.env_creator(config["env_config"])._env
 
   num_bots = config["env_config"]["num_players"]
-  bots = [RayModelPolicy(trainer, "av")] * num_bots
+  bots = [utils.RayModelPolicy(trainer, "av")] * num_bots
 
   timestep = env.reset()
   states = [bot.initial_state() for bot in bots]
