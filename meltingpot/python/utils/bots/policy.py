@@ -134,19 +134,19 @@ _GOAL_OBS_NAME = 'GOAL'
 
 
 class PuppetPolicy(Policy):
-  """Wraps a puppet deepfunc as a python bot."""
+  """A puppet policy controlled by a puppeteer function."""
 
   def __init__(self, puppeteer_fn: puppeteer_functions.PuppeteerFn,
-               puppet_path: str) -> None:
+               puppet_policy: Policy) -> None:
     """Creates a new PuppetBot.
 
     Args:
       puppeteer_fn: The puppeteer function. This will be called at every step to
         obtain the goal of that step for the underlying puppet.
-      puppet_path: Path to the puppet's saved model.
+      puppet_policy: The puppet policy. Will be closed with this wrapper.
     """
     self._puppeteer_fn = puppeteer_fn
-    self._puppet = SavedModelPolicy(puppet_path)
+    self._puppet = puppet_policy
 
   def _puppeteer_initial_state(self) -> int:
     return 0

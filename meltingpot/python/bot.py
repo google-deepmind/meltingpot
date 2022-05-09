@@ -54,7 +54,9 @@ def build(config: config_dict.ConfigDict) -> policy.Policy:
   Returns:
     The bot policy.
   """
+  saved_model = policy.SavedModelPolicy(config.saved_model_path)
   if config.puppeteer_fn:
-    return policy.PuppetPolicy(config.puppeteer_fn, config.saved_model_path)
+    return policy.PuppetPolicy(
+        puppeteer_fn=config.puppeteer_fn, puppet_policy=saved_model)
   else:
-    return policy.SavedModelPolicy(config.saved_model_path)
+    return saved_model
