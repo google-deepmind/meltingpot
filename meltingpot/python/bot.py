@@ -13,181 +13,18 @@
 # limitations under the License.
 """Bot factory."""
 
-import abc
-from typing import Mapping, Tuple
-
-import dm_env
 from ml_collections import config_dict
-import numpy as np
-import tensorflow as tf
-import tree
 
 from meltingpot.python.configs import bots as bot_config
-from meltingpot.python.utils.bots import permissive_model
-from meltingpot.python.utils.bots import puppeteer_functions
+from meltingpot.python.utils.bots import policy
 
 AVAILABLE_BOTS = frozenset(bot_config.BOTS)
 
-State = tree.Structure[np.ndarray]
-
-
-class Policy(metaclass=abc.ABCMeta):
-  """Abstract base class for a policy."""
-
-  @abc.abstractmethod
-  def initial_state(self) -> State:
-    """Returns the initial state of the agent."""
-    raise NotImplementedError()
-
-  @abc.abstractmethod
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
-    """Steps the agent.
-
-    Args:
-      timestep: information from the environment
-      prev_state: the previous state of the agent.
-
-    Returns:
-      action: the action to send to the environment.
-      next_state: the state for the next step call.
-    """
-    raise NotImplementedError()
-
-  @abc.abstractmethod
-  def close(self) -> None:
-    """Closes the policy."""
-    raise NotImplementedError()
-
-  def __enter__(self):
-    return self
-
-  def __exit__(self, *args, **kwargs):
-    del args, kwargs
-    self.close()
-
-
-def _tensor_to_numpy(
-    tensors: tree.Structure[tf.Tensor]) -> tree.Structure[np.ndarray]:
-  """Converts tensors to numpy arrays.
-
-  Args:
-    tensors: input tensors.
-
-  Returns:
-    The values of the tensors.
-  """
-  if tf.executing_eagerly():
-    return tree.map_structure(lambda x: x.numpy(), tensors)
-  else:
-    with tf.compat.v1.Session() as sess:
-      return sess.run(tensors)
-
-
-class SavedModelPolicy(Policy):
-  """Policy wrapping a saved model for inference.
-
-  Note: the model should have methods:
-  1. `initial_state(batch_size, trainable)`
-  2. `step(step_type, reward, discount, observation, prev_state)`
-  that accept batched inputs and produce batched outputs.
-  """
-
-  def __init__(self, model_path: str) -> None:
-    """Initialize a policy instance.
-
-    Args:
-      model_path: Path to the SavedModel.
-    """
-    model = tf.saved_model.load(model_path)
-    self._model = permissive_model.PermissiveModel(model)
-
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
-    """See base class."""
-    step_type = np.array(timestep.step_type, dtype=np.int64)[None]
-    reward = np.asarray(timestep.reward, dtype=np.float32)[None]
-    discount = np.asarray(timestep.discount, dtype=np.float32)[None]
-    observation = tree.map_structure(lambda x: x[None], timestep.observation)
-    output, next_state = self._model.step(
-        step_type=step_type,
-        reward=reward,
-        discount=discount,
-        observation=observation,
-        prev_state=prev_state)
-    if isinstance(output.action, Mapping):
-      # Legacy bots trained with older action spec.
-      action = output.action['environment_action']
-    else:
-      action = output.action
-    action = int(_tensor_to_numpy(action[0]))
-    next_state = _tensor_to_numpy(next_state)
-    return action, next_state
-
-  def initial_state(self) -> State:
-    """See base class."""
-    state = self._model.initial_state(batch_size=1, trainable=None)
-    return _tensor_to_numpy(state)
-
-  def close(self) -> None:
-    """See base class."""
-    pass
-
-
-_GOAL_OBS_NAME = 'GOAL'
-
-
-class PuppetPolicy(Policy):
-  """Wraps a puppet deepfunc as a python bot."""
-
-  def __init__(self, puppeteer_fn: puppeteer_functions.PuppeteerFn,
-               puppet_path: str) -> None:
-    """Creates a new PuppetBot.
-
-    Args:
-      puppeteer_fn: The puppeteer function. This will be called at every step to
-        obtain the goal of that step for the underlying puppet.
-      puppet_path: Path to the puppet's saved model.
-    """
-    self._puppeteer_fn = puppeteer_fn
-    self._puppet = SavedModelPolicy(puppet_path)
-
-  def _puppeteer_initial_state(self) -> int:
-    return 0
-
-  def _puppeteer_step(self, timestep: dm_env.TimeStep,
-                      prev_state: int) -> Tuple[dm_env.TimeStep, int]:
-    """Returns the transformed observation for the puppet step."""
-    goal = self._puppeteer_fn(prev_state, timestep.observation)
-    next_state = prev_state + 1
-    puppet_observation = timestep.observation.copy()
-    puppet_observation[_GOAL_OBS_NAME] = goal
-    puppet_timestep = timestep._replace(observation=puppet_observation)
-    return puppet_timestep, next_state
-
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
-    """See base class."""
-    puppet_timestep, puppeteer_state = self._puppeteer_step(
-        timestep, prev_state['puppeteer'])
-    action, puppet_state = self._puppet.step(puppet_timestep,
-                                             prev_state['puppet'])
-    next_state = {
-        'puppeteer': puppeteer_state,
-        'puppet': puppet_state,
-    }
-    return action, next_state
-
-  def initial_state(self) -> State:
-    """See base class."""
-    return {
-        'puppeteer': 0,
-        'puppet': self._puppet.initial_state(),
-    }
-
-  def close(self) -> None:
-    """See base class."""
-    self._puppet.close()
+# TODO(b/227143834): Remove aliases once internal deps have been removed.
+Policy = policy.Policy
+PuppetPolicy = policy.PuppetPolicy
+SavedModelPolicy = policy.SavedModelPolicy
+State = policy.State
 
 
 def get_config(bot_name: str) -> config_dict.ConfigDict:
@@ -208,7 +45,7 @@ def get_config(bot_name: str) -> config_dict.ConfigDict:
   return config.lock()
 
 
-def build(config: config_dict.ConfigDict) -> Policy:
+def build(config: config_dict.ConfigDict) -> policy.Policy:
   """Builds a bot policy for the given config.
 
   Args:
@@ -218,6 +55,6 @@ def build(config: config_dict.ConfigDict) -> Policy:
     The bot policy.
   """
   if config.puppeteer_fn:
-    return PuppetPolicy(config.puppeteer_fn, config.saved_model_path)
+    return policy.PuppetPolicy(config.puppeteer_fn, config.saved_model_path)
   else:
-    return SavedModelPolicy(config.saved_model_path)
+    return policy.SavedModelPolicy(config.saved_model_path)
