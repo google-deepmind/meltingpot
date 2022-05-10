@@ -27,7 +27,7 @@ _MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
 
 
 @dataclasses.dataclass(frozen=True)
-class Bot:
+class BotConfig:
   """Bot config.
 
   Attributes:
@@ -42,7 +42,7 @@ class Bot:
 
 def _saved_model(substrate: str,
                  model: str,
-                 models_root: str = _MODELS_ROOT) -> Bot:
+                 models_root: str = _MODELS_ROOT) -> BotConfig:
   """Returns the config for a saved model bot.
 
   Args:
@@ -51,12 +51,12 @@ def _saved_model(substrate: str,
     models_root: The path to the directory containing the saved_models.
   """
   model_path = os.path.join(models_root, substrate, model)
-  return Bot(substrate=substrate, model_path=model_path)
+  return BotConfig(substrate=substrate, model_path=model_path)
 
 
 def _puppet(substrate: str,
             puppeteer_fn: puppeteer_functions.PuppeteerFn,
-            models_root: str = _MODELS_ROOT) -> Bot:
+            models_root: str = _MODELS_ROOT) -> BotConfig:
   """Returns the config for a puppet bot.
 
   Args:
@@ -65,11 +65,11 @@ def _puppet(substrate: str,
     models_root: The path to the directory containing the saved_models.
   """
   puppet_path = os.path.join(models_root, substrate, 'puppet')
-  return Bot(
+  return BotConfig(
       substrate=substrate, model_path=puppet_path, puppeteer_fn=puppeteer_fn)
 
 
-BOTS: Mapping[str, Bot] = immutabledict.immutabledict(
+BOTS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
     ah3gs_bot_finding_berry_two_the_most_tasty_0=_saved_model(
         substrate='allelopathic_harvest',

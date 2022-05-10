@@ -67,7 +67,7 @@ setuptools.setup(
     extras_require={
         'examples': [
             'gym',
-            'ray[rllib,default]',
+            'ray[rllib,default]==1.11.0',
         ],
     },
 )

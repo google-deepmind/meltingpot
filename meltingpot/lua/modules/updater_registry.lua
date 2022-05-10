@@ -142,7 +142,8 @@ function UpdaterRegistry:registerUpdater(params)
   -- If no group is needed, create one from prefix and counter, but signal that
   -- we need to add this group to the states it affects (by setting _addGroup).
   if group == nil then
-    group = 'UPDATER_GRP__' .. self._groupPrefix .. '_' .. self._updaterCount
+    group = ('UPDATER_GRP__' .. self._groupPrefix .. '_Updater#' ..
+             self._updaterCount)
     self._updaterCount = self._updaterCount + 1
     addGroup = true
   end
@@ -179,6 +180,7 @@ In addition, all states that are relevant for updates will have special groups
 added to them so they can be called by the engine updaters.
 --]]
 function UpdaterRegistry:uniquifyStatesAndAddGroups(gameObject)
+  self._byStateAndUpdaterName = {}
   for priority, specs in pairs(self._updateTable) do
     for _, updateSpec in pairs(specs) do
       if updateSpec.states == nil then
@@ -191,7 +193,7 @@ function UpdaterRegistry:uniquifyStatesAndAddGroups(gameObject)
         updateSpec.state = nil
       end
       updateSpec._updaterName = (
-          '__priority__' .. priority .. '_' .. updateSpec.group)
+          '_priority_' .. priority .. '_' .. updateSpec.group)
 
       -- At this point, we only care about specs.states. Uniquify all of them.
       for i, state in ipairs(updateSpec.states) do
@@ -199,23 +201,57 @@ function UpdaterRegistry:uniquifyStatesAndAddGroups(gameObject)
           table.insert(gameObject:getGroupsForState(state), updateSpec.group)
         end
         updateSpec.states[i] = gameObject:getUniqueState(state)
+        if self._byStateAndUpdaterName[state] == nil then
+          self._byStateAndUpdaterName[state] = {}
+        end
+        self._byStateAndUpdaterName[state][updateSpec._updaterName] = true
       end
     end
   end
 end
 
--- Merges this UpdaterRegistry with another. Typically done after uniquification
+-- Merges this UpdaterRegistry with another. Must be done after uniquification.
 function UpdaterRegistry:mergeWith(updaterRegistry)
+  if self._byStateAndUpdaterName == nil then
+    self._byStateAndUpdaterName = {}
+  end
+  local shouldAdd = true
+  local allStates = true
   for priority, specs in pairs(updaterRegistry._updateTable) do
     for _, updateSpec in pairs(specs) do
-      self:registerUpdater{
-          updateFn = updateSpec.updateFn,
-          priority = priority,
-          startFrame = updateSpec.startFrame,
-          probability = updateSpec.probability,
-          group = updateSpec.group,
-          states = updateSpec.states,
-          _updaterName = updateSpec._updaterName}
+      shouldAdd = true
+      -- Check if all states and updater names are already included in the
+      -- updater. If so, then ignore this spec.
+      allStates = true
+      for _, state in pairs(updateSpec.states) do
+        if not self._byStateAndUpdaterName[state] or
+           not self._byStateAndUpdaterName[state][updateSpec._updaterName] then
+          allStates = false
+          break
+        end
+      end
+      if allStates then
+        shouldAdd = false
+      end
+
+      if shouldAdd then
+        self:registerUpdater{
+            updateFn = updateSpec.updateFn,
+            priority = priority,
+            startFrame = updateSpec.startFrame,
+            probability = updateSpec.probability,
+            group = updateSpec.group,
+            states = updateSpec.states,
+            _updaterName = updateSpec._updaterName}
+
+        -- Mark all states in this updater name as seen.
+        for _, state in pairs(updateSpec.states) do
+          if self._byStateAndUpdaterName[state] == nil then
+            self._byStateAndUpdaterName[state] = {}
+          end
+          self._byStateAndUpdaterName[state][updateSpec._updaterName] = true
+        end
+      end
     end
   end
 end
@@ -247,7 +283,6 @@ function UpdaterRegistry:registerCallbacks(callbacks)
 end
 
 function UpdaterRegistry:registerGrid(grid, callbacks)
-  local priorities = self:getSortedPriorities()
   for priority, specs in pairs(self._updateTable) do
     local updaterNames = {}
     for _, updateSpec in pairs(specs) do

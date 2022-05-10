@@ -76,7 +76,7 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
     ])
     actual = wrapped.action_spec()
     expected = (
-        dm_env.specs.DiscreteArray(num_values=3, dtype=np.int32, name='action'),
+        dm_env.specs.DiscreteArray(num_values=3, dtype=np.int64, name='action'),
     ) * 2
     self.assertEqual(actual, expected)
 

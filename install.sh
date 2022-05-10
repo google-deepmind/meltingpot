@@ -71,7 +71,7 @@ function install_dmlab2d() {
   popd
 
   echo -e "\nInstalling dmlab2d..."
-  pip install lab2d/bazel-bin/dmlab2d/dmlab2d-*.whl
+  pip install --find-links=lab2d/bazel-bin/dmlab2d dmlab2d
 }
 
 
@@ -82,6 +82,10 @@ function test_dmlab2d() {
 
 
 function install_meltingpot() {
+  echo -e "\nDownloading assets..."
+  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+      | tar -xz --directory=meltingpot
+
   echo -e "\nInstalling meltingpot..."
   pip install --upgrade pip setuptools
   pip install .

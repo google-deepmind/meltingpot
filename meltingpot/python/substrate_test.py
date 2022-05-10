@@ -24,7 +24,7 @@ from meltingpot.python import substrate
 
 REWARD_SPEC = dm_env.specs.Array(shape=[], dtype=np.float64, name='REWARD')
 ACTION_SPEC = dm_env.specs.DiscreteArray(
-    num_values=1, dtype=np.int32, name='action')
+    num_values=1, dtype=np.int64, name='action')
 
 
 def _get_lua_randomization_map():

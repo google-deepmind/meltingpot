@@ -4,3 +4,7 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "google"
+src_paths = ["meltingpot", "examples"]

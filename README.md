@@ -79,6 +79,8 @@ for an example installation script):
     ```shell
     git clone -b main https://github.com/deepmind/meltingpot
     cd meltingpot
+    curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+        | tar -xz --directory=meltingpot
     pip3 install .
     ```
 

@@ -201,7 +201,8 @@ def run_episode(
     env_builder: EnvBuilder = builder.builder,
     print_events: Optional[bool] = False,
     player_prefixes: Optional[Sequence[str]] = None,
-    ) -> None:
+    default_observation: str = 'WORLD.RGB',
+) -> None:
   """Run multiplayer environment, with per player rendering and actions.
 
   This function initialises a Melting Pot environment with the given
@@ -249,6 +250,8 @@ def run_episode(
     player_prefixes: If given, use these as the prefixes of player actions.
       Pressing TAB will cycle through these. If not given, use the standard
       ('1', '2', ..., numPlayers).
+    default_observation: Default observation to render if 'render_observation'
+      or '{player_prefix}.{render_observation}' is not found in the dict.
   """
   full_config.lab2d_settings.update(config_overrides)
   if player_prefixes is None:
@@ -283,6 +286,9 @@ def run_episode(
     # This assumes all players have the same observation, which is true for
     # MeltingPot environments.
     obs_spec = observation_spec[f'1.{render_observation}']
+  else:
+    # Falls back to 'default_observation.'
+    obs_spec = observation_spec[default_observation]
 
   observation_shape = obs_spec.shape
   observation_height = observation_shape[0]
@@ -341,6 +347,9 @@ def run_episode(
         obs = timestep.observation[render_observation]
       elif f'{player_prefix}.{render_observation}' in timestep.observation:
         obs = timestep.observation[f'{player_prefix}.{render_observation}']
+      else:
+        # Fall back to default_observation.
+        obs = timestep.observation[default_observation]
       obs = np.transpose(obs, (1, 0, 2))  # PyGame is column major!
 
       surface = pygame.surfarray.make_surface(obs)
