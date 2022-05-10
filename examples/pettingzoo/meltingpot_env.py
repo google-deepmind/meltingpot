@@ -113,7 +113,7 @@ class MeltingPotPettingZooEnv(ParallelEnv):
         for index, agent in enumerate(self.agents)
     }
     self.num_cycles += 1
-    done = timestep.last() or self.num_cycles >= self.max_cycles 
+    done = timestep.last() or self.num_cycles >= self.max_cycles
     dones = {agent: done for agent in self.agents}
     infos = {agent: {} for agent in self.agents}
     if done:
@@ -146,4 +146,4 @@ class _parallel_env(MeltingPotPettingZooEnv, EzPickle):
 
     def __init__(self, env_config, max_cycles):
         EzPickle.__init__(self, env_config, max_cycles)
-        super().__init__(env_config, max_cycles)
+        MeltingPotPettingZooEnv.__init__(self, env_config, max_cycles)
