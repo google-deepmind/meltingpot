@@ -47,7 +47,7 @@ def _validate_action_table(
       _validate_action(action, action_spec)
     except ValueError:
       raise ValueError(f'Action {action_index} ({action}) does not match '
-                       f'action_spec ({action_spec}).')
+                       f'action_spec ({action_spec}).') from None
 
 
 def _immutable_action(
@@ -103,6 +103,8 @@ class Wrapper(base.Wrapper):
   @functools.lru_cache(maxsize=1)
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
-    spec = dm_env.specs.DiscreteArray(num_values=len(self._action_table),
-                                      name='action')
+    spec = dm_env.specs.DiscreteArray(
+        num_values=len(self._action_table),
+        dtype=np.int64,
+        name='action')
     return tuple(spec for _ in super().action_spec())
