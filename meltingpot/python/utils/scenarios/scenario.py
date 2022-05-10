@@ -1,0 +1,249 @@
+# Copyright 2020 DeepMind Technologies Limited.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""Scenario factory."""
+
+from typing import Any, Collection, Iterable, Mapping, Sequence, Tuple, TypeVar
+
+import chex
+import dm_env
+import immutabledict
+from rx import subject
+
+from meltingpot.python import bot as bot_factory
+from meltingpot.python import substrate as substrate_factory
+from meltingpot.python.configs import scenarios as scenario_config
+from meltingpot.python.utils.scenarios import population
+from meltingpot.python.utils.scenarios.wrappers import base
+
+AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIOS)
+
+SCENARIOS_BY_SUBSTRATE: Mapping[
+    str, Collection[str]] = scenario_config.scenarios_by_substrate(
+        scenario_config.SCENARIOS)
+
+PERMITTED_OBSERVATIONS = frozenset({
+    'INVENTORY',
+    'READY_TO_SHOOT',
+    'RGB',
+})
+
+T = TypeVar('T')
+
+
+def _restrict_observation(
+    observation: Mapping[str, T],
+    permitted_observations: Collection[str],
+) -> Mapping[str, T]:
+  """Restricts an observation to only the permitted keys."""
+  return immutabledict.immutabledict({
+      key: observation[key]
+      for key in observation if key in permitted_observations
+  })
+
+
+def _restrict_observations(
+    observations: Iterable[Mapping[str, T]],
+    permitted_observations: Collection[str],
+) -> Sequence[Mapping[str, T]]:
+  """Restricts multiple observations to only the permitted keys."""
+  return tuple(
+      _restrict_observation(observation, permitted_observations)
+      for observation in observations
+  )
+
+
+def _partition(
+    values: Sequence[T],
+    is_focal: Sequence[bool],
+) -> Tuple[Sequence[T], Sequence[T]]:
+  """Partitions a sequence into focal and background sequences."""
+  focal_values = []
+  background_values = []
+  for focal, value in zip(is_focal, values):
+    if focal:
+      focal_values.append(value)
+    else:
+      background_values.append(value)
+  return tuple(focal_values), tuple(background_values)
+
+
+def _merge(
+    focal_values: Sequence[T],
+    background_values: Sequence[T],
+    is_focal: Sequence[bool],
+) -> Sequence[T]:
+  """Merges focal and background sequences into one."""
+  focal_values = iter(focal_values)
+  background_values = iter(background_values)
+  return tuple(
+      next(focal_values if focal else background_values) for focal in is_focal
+  )
+
+
+@chex.dataclass(frozen=True)
+class ScenarioObservables(substrate_factory.SubstrateObservables):
+  """Observables for a Scenario.
+
+  Attributes:
+    action: emits actions sent to the scenario from (focal) players.
+    timestep: emits timesteps sent from the scenario to (focal) players.
+    events: emits environment-specific events resulting from any interactions
+      with the scenario.
+    focal: observables from the perspective of the focal players.
+    background: observables from the perspective of the background players.
+    substrate: observables for the underlying substrate.
+  """
+  focal: population.PopulationObservables
+  background: population.PopulationObservables
+  substrate: substrate_factory.SubstrateObservables
+
+
+class Scenario(base.Wrapper):
+  """An substrate where a number of player slots are filled by bots."""
+
+  def __init__(
+      self,
+      substrate,
+      bots: Mapping[str, bot_factory.Policy],
+      is_focal: Sequence[bool],
+      permitted_observations: Collection[str] = PERMITTED_OBSERVATIONS,
+  ) -> None:
+    """Initializes the scenario.
+
+    Args:
+      substrate: the substrate to add bots to.
+      bots: the bots to sample from (with replacement) each episode.
+      is_focal: which player slots are allocated to focal players.
+      permitted_observations: the observations exposed by the scenario to focal
+        agents.
+    """
+    num_players = len(substrate.action_spec())
+    if len(is_focal) != num_players:
+      raise ValueError(f'is_focal is length {len(is_focal)} but substrate is '
+                       f'{num_players}-player.')
+    super().__init__(substrate)
+    self._is_focal = is_focal
+    self._background_population = population.Population(
+        policies=bots, population_size=num_players - sum(is_focal))
+    self._permitted_observations = frozenset(permitted_observations)
+
+    self._focal_action_subject = subject.Subject()
+    self._focal_timestep_subject = subject.Subject()
+    self._background_action_subject = subject.Subject()
+    self._background_timestep_subject = subject.Subject()
+    self._events_subject = subject.Subject()
+    focal_observables = population.PopulationObservables(
+        action=self._focal_action_subject,
+        timestep=self._focal_timestep_subject,
+    )
+    background_observables = population.PopulationObservables(
+        action=self._background_action_subject,
+        timestep=self._background_timestep_subject,
+    )
+    self._observables = ScenarioObservables(  # pylint: disable=unexpected-keyword-arg
+        action=self._focal_action_subject,
+        events=self._events_subject,
+        timestep=self._focal_timestep_subject,
+        focal=focal_observables,
+        background=background_observables,
+        substrate=super().observables(),
+    )
+
+  def close(self) -> None:
+    """See base class."""
+    self._background_population.close()
+    super().close()
+    self._focal_action_subject.on_completed()
+    self._background_action_subject.on_completed()
+    self._focal_timestep_subject.on_completed()
+    self._background_timestep_subject.on_completed()
+    self._events_subject.on_completed()
+
+  def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
+    """Returns full action after awaiting bot actions."""
+    self._focal_action_subject.on_next(focal_action)
+    background_action = self._background_population.await_action()
+    self._background_action_subject.on_next(background_action)
+    return _merge(focal_action, background_action, self._is_focal)
+
+  def _split_timestep(
+      self, timestep: dm_env.TimeStep
+  ) -> Tuple[dm_env.TimeStep, dm_env.TimeStep]:
+    """Splits multiplayer timestep as needed by agents and bots."""
+    focal_rewards, background_rewards = _partition(timestep.reward,
+                                                   self._is_focal)
+    focal_observations, background_observations = _partition(
+        timestep.observation, self._is_focal)
+    focal_observations = _restrict_observations(focal_observations,
+                                                self._permitted_observations)
+    focal_timestep = timestep._replace(
+        reward=focal_rewards, observation=focal_observations)
+    background_timestep = timestep._replace(
+        reward=background_rewards, observation=background_observations)
+    return focal_timestep, background_timestep
+
+  def _send_full_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
+    """Returns focal timestep and sends background timestep to bots."""
+    focal_timestep, background_timestep = self._split_timestep(timestep)
+    self._background_timestep_subject.on_next(background_timestep)
+    self._background_population.send_timestep(background_timestep)
+    self._focal_timestep_subject.on_next(focal_timestep)
+    return focal_timestep
+
+  def reset(self) -> dm_env.TimeStep:
+    """See base class."""
+    self._background_population.reset()
+    timestep = super().reset()
+    focal_timestep = self._send_full_timestep(timestep)
+    for event in self.events():
+      self._events_subject.on_next(event)
+    return focal_timestep
+
+  def step(self, action: Sequence[int]) -> dm_env.TimeStep:
+    """See base class."""
+    action = self._await_full_action(focal_action=action)
+    timestep = super().step(action)
+    focal_timestep = self._send_full_timestep(timestep)
+    for event in self.events():
+      self._events_subject.on_next(event)
+    return focal_timestep
+
+  def events(self) -> Sequence[Tuple[str, Any]]:
+    """See base class."""
+    # Do not emit substrate events as these may not make sense in the context
+    # of a scenario (e.g. player indices may have changed).
+    return ()
+
+  def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
+    """See base class."""
+    focal_action_spec, _ = _partition(super().action_spec(), self._is_focal)
+    return focal_action_spec
+
+  def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
+    """See base class."""
+    focal_observation_spec, _ = _partition(super().observation_spec(),
+                                           self._is_focal)
+    return _restrict_observations(focal_observation_spec,
+                                  self._permitted_observations)
+
+  def reward_spec(self) -> Sequence[dm_env.specs.Array]:
+    """See base class."""
+    # TODO(b/192925212): better typing to avoid pytype disables.
+    reward_spec: Sequence[dm_env.specs.Array] = super().reward_spec()  # pytype: disable=annotation-type-mismatch
+    focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
+    return focal_reward_spec
+
+  def observables(self) -> ScenarioObservables:
+    """Returns the observables for the scenario."""
+    return self._observables
