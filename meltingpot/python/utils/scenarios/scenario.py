@@ -25,12 +25,6 @@ from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios.wrappers import base
 
-PERMITTED_OBSERVATIONS = frozenset({
-    'INVENTORY',
-    'READY_TO_SHOOT',
-    'RGB',
-})
-
 T = TypeVar('T')
 
 
@@ -110,16 +104,15 @@ class Scenario(base.Wrapper):
       substrate,
       bots: Mapping[str, bot_factory.Policy],
       is_focal: Sequence[bool],
-      permitted_observations: Collection[str] = PERMITTED_OBSERVATIONS,
-  ) -> None:
+      permitted_observations: Collection[str]) -> None:
     """Initializes the scenario.
 
     Args:
       substrate: the substrate to add bots to.
       bots: the bots to sample from (with replacement) each episode.
       is_focal: which player slots are allocated to focal players.
-      permitted_observations: the observations exposed by the scenario to focal
-        agents.
+      permitted_observations: the substrate observation keys permitted to be
+        exposed by the scenario to focal agents.
     """
     num_players = len(substrate.action_spec())
     if len(is_focal) != num_players:
