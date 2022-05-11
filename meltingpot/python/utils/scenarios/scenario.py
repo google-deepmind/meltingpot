@@ -20,7 +20,6 @@ import dm_env
 import immutabledict
 from rx import subject
 
-from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios.wrappers import base
@@ -102,14 +101,15 @@ class Scenario(base.Wrapper):
   def __init__(
       self,
       substrate,
-      bots: Mapping[str, bot_factory.Policy],
+      background_population: population.Population,
       is_focal: Sequence[bool],
       permitted_observations: Collection[str]) -> None:
     """Initializes the scenario.
 
     Args:
-      substrate: the substrate to add bots to.
-      bots: the bots to sample from (with replacement) each episode.
+      substrate: the substrate to add bots to. Will be closed with the scenario.
+      background_population: the background population to sample bots from. Will
+        be closed with the scenario.
       is_focal: which player slots are allocated to focal players.
       permitted_observations: the substrate observation keys permitted to be
         exposed by the scenario to focal agents.
@@ -118,10 +118,10 @@ class Scenario(base.Wrapper):
     if len(is_focal) != num_players:
       raise ValueError(f'is_focal is length {len(is_focal)} but substrate is '
                        f'{num_players}-player.')
+
     super().__init__(substrate)
+    self._background_population = background_population
     self._is_focal = is_focal
-    self._background_population = population.Population(
-        policies=bots, population_size=num_players - sum(is_focal))
     self._permitted_observations = frozenset(permitted_observations)
 
     self._focal_action_subject = subject.Subject()

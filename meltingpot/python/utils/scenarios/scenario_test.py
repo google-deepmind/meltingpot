@@ -23,6 +23,7 @@ import immutabledict
 
 from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.bots import policy
+from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios import scenario as scenario_utils
 
 
@@ -99,10 +100,12 @@ class ScenarioWrapperTest(absltest.TestCase):
       bot.initial_state.return_value = f'bot_state_{n}'
       bot.step.return_value = (n + 10, f'bot_state_{n}')
       bots[f'bot_{n}'] = bot
+    background_population = population.Population(
+        policies=bots, population_size=2)
 
     with scenario_utils.Scenario(
         substrate=substrate_factory.Substrate(substrate),
-        bots=bots,
+        background_population=background_population,
         is_focal=[True, False, True, False],
         permitted_observations={'ok'}) as scenario:
       observables = scenario.observables()

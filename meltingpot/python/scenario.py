@@ -77,10 +77,13 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
     The test scenario.
   """
   substrate = substrate_factory.build(config.substrate)
-  bots = {
-      bot_name: bot_factory.build(bot_config)
-      for bot_name, bot_config in config.bots.items()
-  }
+  background_population = population.Population(
+      policies={
+          bot_name: bot_factory.build(bot_config)
+          for bot_name, bot_config in config.bots.items()
+      },
+      population_size=config.num_bots,
+  )
 
   # Add observations needed by some bots. These are removed for focal players.
   substrate_observations = set(substrate.observation_spec()[0])
@@ -93,6 +96,6 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
 
   return scenario_lib.Scenario(
       substrate=substrate,
-      bots=bots,
+      background_population=background_population,
       is_focal=config.is_focal,
       permitted_observations=PERMITTED_OBSERVATIONS & substrate_observations)
