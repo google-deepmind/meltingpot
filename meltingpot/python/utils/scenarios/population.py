@@ -20,11 +20,12 @@ from typing import Callable, List, Mapping, Sequence
 import chex
 import dm_env
 import rx
+from rx import subject
 
-from meltingpot.python import bot as bot_factory
+from meltingpot.python.utils.bots import policy as policy_lib
 
 
-def _step_fn(policy: bot_factory.Policy) -> Callable[[dm_env.TimeStep], int]:
+def _step_fn(policy: policy_lib.Policy) -> Callable[[dm_env.TimeStep], int]:
   """Returns a stateful step function where the state is encapsulated.
 
   Args:
@@ -43,10 +44,24 @@ def _step_fn(policy: bot_factory.Policy) -> Callable[[dm_env.TimeStep], int]:
   return step
 
 
+@chex.dataclass(frozen=True)  # works with tree.
+class PopulationObservables:
+  """Observables for a population.
+
+  Attributes:
+    names: emits the names of the sampled population on a reset.
+    action: emits actions sent to the substrate by the poulation.
+    timestep: emits timesteps sent from the substrate to the population.
+  """
+  names: rx.typing.Observable[Sequence[str]]
+  action: rx.typing.Observable[Sequence[int]]
+  timestep: rx.typing.Observable[dm_env.TimeStep]
+
+
 class Population:
   """A population of policies to use in a scenario."""
 
-  def __init__(self, policies: Mapping[str, bot_factory.Policy],
+  def __init__(self, policies: Mapping[str, policy_lib.Policy],
                population_size: int) -> None:
     """Initializes the population.
 
@@ -61,6 +76,15 @@ class Population:
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
+    self._names_subject = subject.Subject()
+    self._action_subject = subject.Subject()
+    self._timestep_subject = subject.Subject()
+    self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
+        names=self._names_subject,
+        action=self._action_subject,
+        timestep=self._timestep_subject,
+    )
+
   def close(self):
     """Closes the population."""
     for future in self._action_futures:
@@ -68,6 +92,9 @@ class Population:
     self._executor.shutdown(wait=False)
     for policy in self._policies.values():
       policy.close()
+    self._names_subject.on_completed()
+    self._action_subject.on_completed()
+    self._timestep_subject.on_completed()
 
   def _sample_names(self) -> Sequence[str]:
     """Returns a sample of policy names for the population."""
@@ -76,6 +103,7 @@ class Population:
   def reset(self) -> None:
     """Resamples the population."""
     names = self._sample_names()
+    self._names_subject.on_next(names)
     self._step_fns = [_step_fn(self._policies[name]) for name in names]
     for future in self._action_futures:
       future.cancel()
@@ -92,6 +120,7 @@ class Population:
     """
     if self._action_futures:
       raise RuntimeError('Previous action not retrieved.')
+    self._timestep_subject.on_next(timestep)
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
           observation=timestep.observation[n], reward=timestep.reward[n])
@@ -111,16 +140,9 @@ class Population:
       raise RuntimeError('No timestep sent.')
     actions = tuple(future.result() for future in self._action_futures)
     self._action_futures.clear()
+    self._action_subject.on_next(actions)
     return actions
 
-
-@chex.dataclass(frozen=True)
-class PopulationObservables:
-  """Observables for a population.
-
-  Attributes:
-    action: emits actions sent to the substrate by the poulation.
-    timestep: emits timesteps sent from the substrate to the population.
-  """
-  action: rx.typing.Observable[Sequence[int]]
-  timestep: rx.typing.Observable[dm_env.TimeStep]
+  def observables(self) -> PopulationObservables:
+    """Returns the observables for the population."""
+    return self._observables

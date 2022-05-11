@@ -111,7 +111,6 @@ class ScenarioWrapperTest(absltest.TestCase):
       observables = scenario.observables()
       received = {
           'base': _track(observables, ['events', 'action', 'timestep']),
-          'focal': _track(observables.focal, ['action', 'timestep']),
           'background': _track(observables.background, ['action', 'timestep']),
           'substrate': _track(
               observables.substrate, ['events', 'action', 'timestep']),
@@ -242,30 +241,6 @@ class ScenarioWrapperTest(absltest.TestCase):
           'DONE',
       ]
       self.assertEqual(received['substrate'], expected)
-
-    with self.subTest(name='focal_observables'):
-      expected = [
-          dm_env.TimeStep(
-              step_type=dm_env.StepType.FIRST,
-              discount=0,
-              reward=(10, 30),
-              observation=(
-                  immutabledict.immutabledict(ok=10),
-                  immutabledict.immutabledict(ok=30),
-              ),
-          ),
-          [0, 1],
-          dm_env.transition(
-              reward=(11, 31),
-              observation=(
-                  immutabledict.immutabledict(ok=11),
-                  immutabledict.immutabledict(ok=31),
-              ),
-          ),
-          'DONE',
-          'DONE',
-      ]
-      self.assertEqual(received['focal'], expected)
 
     with self.subTest(name='background_observables'):
       expected = [

@@ -77,7 +77,7 @@ def _merge(
   )
 
 
-@chex.dataclass(frozen=True)
+@chex.dataclass(frozen=True)  # works with tree.
 class ScenarioObservables(substrate_factory.SubstrateObservables):
   """Observables for a Scenario.
 
@@ -86,11 +86,9 @@ class ScenarioObservables(substrate_factory.SubstrateObservables):
     timestep: emits timesteps sent from the scenario to (focal) players.
     events: emits environment-specific events resulting from any interactions
       with the scenario.
-    focal: observables from the perspective of the focal players.
     background: observables from the perspective of the background players.
     substrate: observables for the underlying substrate.
   """
-  focal: population.PopulationObservables
   background: population.PopulationObservables
   substrate: substrate_factory.SubstrateObservables
 
@@ -129,20 +127,11 @@ class Scenario(base.Wrapper):
     self._background_action_subject = subject.Subject()
     self._background_timestep_subject = subject.Subject()
     self._events_subject = subject.Subject()
-    focal_observables = population.PopulationObservables(
-        action=self._focal_action_subject,
-        timestep=self._focal_timestep_subject,
-    )
-    background_observables = population.PopulationObservables(
-        action=self._background_action_subject,
-        timestep=self._background_timestep_subject,
-    )
     self._observables = ScenarioObservables(  # pylint: disable=unexpected-keyword-arg
         action=self._focal_action_subject,
         events=self._events_subject,
         timestep=self._focal_timestep_subject,
-        focal=focal_observables,
-        background=background_observables,
+        background=self._background_population.observables(),
         substrate=super().observables(),
     )
 
@@ -151,16 +140,13 @@ class Scenario(base.Wrapper):
     self._background_population.close()
     super().close()
     self._focal_action_subject.on_completed()
-    self._background_action_subject.on_completed()
     self._focal_timestep_subject.on_completed()
-    self._background_timestep_subject.on_completed()
     self._events_subject.on_completed()
 
   def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
     """Returns full action after awaiting bot actions."""
     self._focal_action_subject.on_next(focal_action)
     background_action = self._background_population.await_action()
-    self._background_action_subject.on_next(background_action)
     return _merge(focal_action, background_action, self._is_focal)
 
   def _split_timestep(
@@ -182,7 +168,6 @@ class Scenario(base.Wrapper):
   def _send_full_timestep(self, timestep: dm_env.TimeStep) -> dm_env.TimeStep:
     """Returns focal timestep and sends background timestep to bots."""
     focal_timestep, background_timestep = self._split_timestep(timestep)
-    self._background_timestep_subject.on_next(background_timestep)
     self._background_population.send_timestep(background_timestep)
     self._focal_timestep_subject.on_next(focal_timestep)
     return focal_timestep
