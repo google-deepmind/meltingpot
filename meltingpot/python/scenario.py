@@ -27,11 +27,11 @@ from meltingpot.python.utils.scenarios.wrappers import agent_slot_wrapper
 from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
 from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
 
-AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIOS)
+AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIO_CONFIGS)
 
 SCENARIOS_BY_SUBSTRATE: Mapping[
     str, Collection[str]] = scenario_config.scenarios_by_substrate(
-        scenario_config.SCENARIOS)
+        scenario_config.SCENARIO_CONFIGS)
 
 PERMITTED_OBSERVATIONS = frozenset({
     'INVENTORY',
@@ -54,7 +54,7 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   """
   if scenario_name not in AVAILABLE_SCENARIOS:
     raise ValueError(f'Unknown scenario {scenario_name!r}')
-  scenario = scenario_config.SCENARIOS[scenario_name]
+  scenario = scenario_config.SCENARIO_CONFIGS[scenario_name]
   substrate = substrate_factory.get_config(scenario.substrate)
   bots = {name: bot_factory.get_config(name) for name in scenario.bots}
   config = config_dict.create(

@@ -22,15 +22,8 @@ from rx import subject
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
-from meltingpot.python.configs import scenarios as scenario_config
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios.wrappers import base
-
-AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIOS)
-
-SCENARIOS_BY_SUBSTRATE: Mapping[
-    str, Collection[str]] = scenario_config.scenarios_by_substrate(
-        scenario_config.SCENARIOS)
 
 PERMITTED_OBSERVATIONS = frozenset({
     'INVENTORY',
