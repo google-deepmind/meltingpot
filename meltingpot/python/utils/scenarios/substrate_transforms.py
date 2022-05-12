@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Scenario factory."""
+"""Substrate transforms."""
 
 from typing import TypeVar
 
@@ -25,7 +25,11 @@ T = TypeVar('T')
 
 
 def with_tf1_bot_required_observations(substrate: T) -> T:
-  """Transforms a substrate to include observations needed by tf bots.
+  """Transforms a substrate to include observations needed by original TF bots.
+
+  We trained the original TF bots with these wrappers present and so we need to
+  add them back in so that they execute in the same context as they were
+  trained and validated. Newly trained bots should not need these wrappers.
 
   Args:
     substrate: substrate to add observations to.
