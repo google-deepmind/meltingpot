@@ -16,16 +16,13 @@
 from typing import Collection, Mapping
 
 from ml_collections import config_dict
-import numpy as np
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.configs import scenarios as scenario_config
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios import scenario as scenario_lib
-from meltingpot.python.utils.scenarios.wrappers import agent_slot_wrapper
-from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
-from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
+from meltingpot.python.utils.scenarios import substrate_transforms
 
 AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIO_CONFIGS)
 
@@ -77,6 +74,12 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
     The test scenario.
   """
   substrate = substrate_factory.build(config.substrate)
+
+  # Add observations needed by some bots. These are removed for focal players.
+  permitted_observations = (
+      set(substrate.observation_spec()[0]) & PERMITTED_OBSERVATIONS)
+  substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
+
   background_population = population.Population(
       policies={
           bot_name: bot_factory.build(bot_config)
@@ -85,17 +88,8 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
       population_size=config.num_bots,
   )
 
-  # Add observations needed by some bots. These are removed for focal players.
-  substrate_observations = set(substrate.observation_spec()[0])
-  substrate = all_observations_wrapper.Wrapper(
-      substrate, observations_to_share=['POSITION'], share_actions=True)
-  substrate = agent_slot_wrapper.Wrapper(substrate)
-  if 'INVENTORY' not in substrate_observations:
-    substrate = default_observation_wrapper.Wrapper(
-        substrate, key='INVENTORY', default_value=np.zeros([1]))
-
   return scenario_lib.Scenario(
       substrate=substrate,
       background_population=background_population,
       is_focal=config.is_focal,
-      permitted_observations=PERMITTED_OBSERVATIONS & substrate_observations)
+      permitted_observations=permitted_observations)
