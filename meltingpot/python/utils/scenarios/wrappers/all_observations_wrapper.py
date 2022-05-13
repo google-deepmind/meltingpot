@@ -50,7 +50,7 @@ as the original, single-player versions:
   immediately returned from step().
 """
 
-from typing import Collection, Mapping, Sequence, Union
+from typing import Any, Collection, Mapping, Sequence, Union
 
 import dm_env
 import immutabledict
@@ -97,18 +97,22 @@ class Wrapper(base.Wrapper):
 
   def _shared_observation(
       self,
-      observations: Sequence[Mapping[str, np.ndarray]],
+      observations: Sequence[Mapping[str, Any]],
       rewards: Sequence[Union[float, np.ndarray]],
       actions: Sequence[int]):
     """Returns shared observations."""
-    shared_observation = {}
+    # We assume that this comes from this wrapper and so all shared observations
+    # are the same for all players.
+    shared_observation = dict(observations[0].get(GLOBAL_KEY, {}))
 
     additional_observations = immutabledict.immutabledict({
         name: _immutable_ndarray(np.stack([obs[name] for obs in observations]))
         for name in self._observations_to_share
     })
     if additional_observations:
-      shared_observation[OBSERVATIONS_KEY] = additional_observations
+      shared_observation[OBSERVATIONS_KEY] = immutabledict.immutabledict(
+          shared_observation.get(OBSERVATIONS_KEY, {}),
+          **additional_observations)
 
     if self._share_rewards:
       shared_observation[REWARDS_KEY] = _immutable_ndarray(np.stack(rewards))
@@ -145,11 +149,11 @@ class Wrapper(base.Wrapper):
 
   def _shared_observation_spec(
       self,
-      observation_spec: Mapping[str, dm_env.specs.Array],
+      observation_spec: Mapping[str, Any],
       reward_spec: dm_env.specs.Array,
       action_spec: dm_env.specs.DiscreteArray):
     """Returns spec of shared observations."""
-    shared_observation_spec = {}
+    shared_observation_spec = dict(observation_spec.get(GLOBAL_KEY, {}))
 
     additional_spec = {}
     for name in self._observations_to_share:
@@ -158,7 +162,7 @@ class Wrapper(base.Wrapper):
           shape=(self._num_players,) + spec.shape, name=name)
     if additional_spec:
       shared_observation_spec[OBSERVATIONS_KEY] = immutabledict.immutabledict(
-          additional_spec)
+          shared_observation_spec.get(OBSERVATIONS_KEY, {}), **additional_spec)
 
     if self._share_rewards:
       shared_observation_spec[REWARDS_KEY] = reward_spec.replace(
