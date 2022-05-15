@@ -69,7 +69,7 @@ def _puppet(substrate: str,
       substrate=substrate, model_path=puppet_path, puppeteer_fn=puppeteer_fn)
 
 
-BOTS: Mapping[str, BotConfig] = immutabledict.immutabledict(
+BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
     ah3gs_bot_finding_berry_two_the_most_tasty_0=_saved_model(
         substrate='allelopathic_harvest',

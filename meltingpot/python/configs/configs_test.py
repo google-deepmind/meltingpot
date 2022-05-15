@@ -41,19 +41,19 @@ def _models(models_root=_MODELS_ROOT):
 
 class ConfigTest(parameterized.TestCase):
 
-  @parameterized.named_parameters(scenario_configs.SCENARIOS.items())
+  @parameterized.named_parameters(scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_has_valid_bots(self, scenario):
-    self.assertContainsSubset(scenario.bots, bot_configs.BOTS)
+    self.assertContainsSubset(scenario.bots, bot_configs.BOT_CONFIGS)
 
-  @parameterized.named_parameters(scenario_configs.SCENARIOS.items())
+  @parameterized.named_parameters(scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_has_valid_substrate(self, scenario):
     self.assertIn(scenario.substrate, substrate_configs.SUBSTRATES)
 
-  @parameterized.named_parameters(scenario_configs.SCENARIOS.items())
+  @parameterized.named_parameters(scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_has_focal_players(self, scenario):
     self.assertTrue(any(scenario.is_focal))
 
-  @parameterized.named_parameters(scenario_configs.SCENARIOS.items())
+  @parameterized.named_parameters(scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_has_valid_sizes(self, scenario):
     substrate = substrate_configs.get_config(scenario.substrate)
     self.assertLen(scenario.is_focal, substrate.num_players)
@@ -61,7 +61,7 @@ class ConfigTest(parameterized.TestCase):
   @parameterized.named_parameters(
       # TODO(b/220870875): remove disable when fixed.
       (name, name, scenario)  # pylint: disable=undefined-variable
-      for name, scenario in scenario_configs.SCENARIOS.items())
+      for name, scenario in scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_name_starts_with_substrate_name(self, name, scenario):
     self.assertStartsWith(name, scenario.substrate)
 
@@ -71,24 +71,24 @@ class ConfigTest(parameterized.TestCase):
       for substrate in substrate_configs.SUBSTRATES)
   def test_substrate_used_by_scenario(self, substrate):
     used = any(substrate == scenario.substrate
-               for scenario in scenario_configs.SCENARIOS.values())
+               for scenario in scenario_configs.SCENARIO_CONFIGS.values())
     self.assertTrue(used, f'{substrate} is not covered by any scenario.')
 
   @parameterized.named_parameters(
       # TODO(b/220870875): remove disable when fixed.
       (bot, bot)   # pylint: disable=undefined-variable
-      for bot in bot_configs.BOTS)
+      for bot in bot_configs.BOT_CONFIGS)
   def test_bot_used_by_scenario(self, bot):
     used = any(bot in scenario.bots
-               for scenario in scenario_configs.SCENARIOS.values())
+               for scenario in scenario_configs.SCENARIO_CONFIGS.values())
     self.assertTrue(used, f'{bot} is not used in any scenario.')
 
-  @parameterized.named_parameters(bot_configs.BOTS.items())
+  @parameterized.named_parameters(bot_configs.BOT_CONFIGS.items())
   def test_bot_model_exists(self, bot):
     self.assertTrue(
         os.path.isdir(bot.model_path), f'Missing model {bot.model_path!r}.')
 
-  @parameterized.named_parameters(bot_configs.BOTS.items())
+  @parameterized.named_parameters(bot_configs.BOT_CONFIGS.items())
   def test_bot_substrate_matches_model(self, bot):
     substrate = os.path.basename(os.path.dirname(bot.model_path))
     self.assertEqual(bot.substrate, substrate,
@@ -99,8 +99,8 @@ class ConfigTest(parameterized.TestCase):
       (f'{substrate}_{model}', os.path.join(models_root, substrate, model))  # pylint: disable=undefined-variable
       for models_root, substrate, model in _models())
   def test_model_used_by_bot(self, model_path):
-    used = any(
-        bot.model_path == model_path for bot in bot_configs.BOTS.values())
+    used = any(bot.model_path == model_path
+               for bot in bot_configs.BOT_CONFIGS.values())
     self.assertTrue(used, f'Model {model_path} not used by any bot.')
 
 

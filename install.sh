@@ -32,7 +32,7 @@ function check_setup() {
   [[ "$(uname -s)" =~ (Linux|Darwin) ]]
 
   echo -e "\nChecking python version..."
-  python --version | check_version_gt '3.7'
+  python --version | check_version_gt '3.9'
 
   echo -e "\nChecking gcc version ..."
   gcc --version | check_version_gt '8'
