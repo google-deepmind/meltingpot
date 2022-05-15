@@ -18,7 +18,7 @@ from ml_collections import config_dict
 from meltingpot.python.configs import bots as bot_config
 from meltingpot.python.utils.bots import policy
 
-AVAILABLE_BOTS = frozenset(bot_config.BOTS)
+AVAILABLE_BOTS = frozenset(bot_config.BOT_CONFIGS)
 
 # TODO(b/227143834): Remove aliases once internal deps have been removed.
 Policy = policy.Policy
@@ -35,7 +35,7 @@ def get_config(bot_name: str) -> config_dict.ConfigDict:
   """
   if bot_name not in AVAILABLE_BOTS:
     raise ValueError(f'Unknown bot {bot_name!r}.')
-  bot = bot_config.BOTS[bot_name]
+  bot = bot_config.BOT_CONFIGS[bot_name]
   config = config_dict.create(
       bot_name=bot_name,
       substrate=bot.substrate,

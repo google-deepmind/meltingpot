@@ -16,14 +16,11 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
-import numpy as np
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
-from meltingpot.python.utils.scenarios.wrappers import agent_slot_wrapper
-from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
+from meltingpot.python.utils.scenarios import substrate_transforms
 from meltingpot.python.utils.scenarios.wrappers import base
-from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
 
 
 class _MultiToSinglePlayer(base.Wrapper):
@@ -69,13 +66,7 @@ class _MultiToSinglePlayer(base.Wrapper):
 def build_environment(substrate):
   config = substrate_factory.get_config(substrate)
   env = substrate_factory.build(config)
-  env = all_observations_wrapper.Wrapper(
-      env,
-      observations_to_share=['POSITION'],
-      share_actions=True)
-  env = agent_slot_wrapper.Wrapper(env)
-  env = default_observation_wrapper.Wrapper(
-      env, key='INVENTORY', default_value=np.zeros([1]))
+  env = substrate_transforms.with_tf1_bot_required_observations(env)
   return _MultiToSinglePlayer(env)
 
 

@@ -39,7 +39,7 @@ class ScenarioConfig:
   bots: AbstractSet[str]
 
 
-SCENARIOS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
+SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
     allelopathic_harvest_0=ScenarioConfig(
         description='focals are resident and a visitor prefers green',

@@ -269,6 +269,65 @@ class AllObservationsWrapperTest(parameterized.TestCase):
     )
     self.assertEqual(actual, expected)
 
+  def test_can_be_applied_twice(self):
+    env = mock.Mock(spec_set=base.Substrate)
+    env.events.return_value = ()
+    env.observation_spec.return_value = [{
+        OBSERVATION_1: dm_env.specs.Array(shape=[1], dtype=np.float32),
+        OBSERVATION_2: dm_env.specs.Array(shape=[2], dtype=np.float32),
+    }] * 2
+    env.action_spec.return_value = (ACTION_SPEC,) * 2
+    env.reward_spec.return_value = (REWARD_SPEC,) * 2
+    env.reset.return_value = _restart(
+        reward=(
+            _expect_array(0, dtype=REWARD_SPEC.dtype),
+            _expect_array(0, dtype=REWARD_SPEC.dtype),
+        ),
+        observation=(
+            immutabledict.immutabledict({
+                OBSERVATION_1: _expect_ones([1], dtype=np.float32),
+                OBSERVATION_2: _expect_ones([2], dtype=np.float32),
+            }),
+            immutabledict.immutabledict({
+                OBSERVATION_1: _expect_ones([1], dtype=np.float32) * 2,
+                OBSERVATION_2: _expect_ones([2], dtype=np.float32) * 2,
+            }),
+        ),
+    )
+
+    wrapped = all_observations_wrapper.Wrapper(
+        env,
+        observations_to_share=[OBSERVATION_1],
+        share_actions=False,
+        share_rewards=True)
+    double_wrapped = all_observations_wrapper.Wrapper(
+        wrapped,
+        observations_to_share=[OBSERVATION_2],
+        share_actions=True,
+        share_rewards=False)
+
+    expected_equivalent = all_observations_wrapper.Wrapper(
+        env,
+        observations_to_share=[OBSERVATION_1, OBSERVATION_2],
+        share_actions=True,
+        share_rewards=True)
+
+    double_wrapped_shared = double_wrapped.reset().observation[0][GLOBAL_KEY]
+    expected_shared = expected_equivalent.reset().observation[0][GLOBAL_KEY]
+
+    with self.subTest('specs'):
+      self.assertEqual(double_wrapped.observation_spec()[0][GLOBAL_KEY],
+                       expected_equivalent.observation_spec()[0][GLOBAL_KEY])
+    with self.subTest('shared_rewards'):
+      np.testing.assert_equal(double_wrapped_shared[REWARDS_KEY],
+                              expected_shared[REWARDS_KEY])
+    with self.subTest('shared_actions'):
+      np.testing.assert_equal(double_wrapped_shared[ACTIONS_KEY],
+                              expected_shared[ACTIONS_KEY])
+    with self.subTest('shared_observations'):
+      np.testing.assert_equal(
+          dict(double_wrapped_shared[OBSERVATIONS_KEY]),
+          dict(expected_shared[OBSERVATIONS_KEY]))
 
 if __name__ == '__main__':
   absltest.main()

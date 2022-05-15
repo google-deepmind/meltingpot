@@ -50,7 +50,7 @@ setuptools.setup(
             'lua/levels/**/*',
         ],
     },
-    python_requires='>=3.7',
+    python_requires='>=3.9',
     install_requires=[
         'absl-py',
         'chex',
