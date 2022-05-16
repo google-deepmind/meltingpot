@@ -60,6 +60,8 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       is_focal=scenario.is_focal,
       num_players=sum(scenario.is_focal),
       num_bots=len(scenario.is_focal) - sum(scenario.is_focal),
+      substrate_transform=lambda x: x,
+      permitted_observations=set(PERMITTED_OBSERVATIONS),
   )
   return config.lock()
 
@@ -74,10 +76,10 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
     The test scenario.
   """
   substrate = substrate_factory.build(config.substrate)
-
+  substrate: substrate_factory.Substrate = config.substrate_transform(substrate)
   # Add observations needed by some bots. These are removed for focal players.
   permitted_observations = (
-      set(substrate.observation_spec()[0]) & PERMITTED_OBSERVATIONS)
+      set(substrate.observation_spec()[0]) & config.permitted_observations)
   substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
 
   background_population = population.Population(
