@@ -116,7 +116,7 @@ class SavedModelPolicy(Policy):
       action = output.action['environment_action']
     else:
       action = output.action
-    action = int(_tensor_to_numpy(action[0]))
+    action = int(_tensor_to_numpy(action)[0])
     next_state = _tensor_to_numpy(next_state)
     return action, next_state
 
