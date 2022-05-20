@@ -89,14 +89,18 @@ class SavedModelPolicy(Policy):
   that accept batched inputs and produce batched outputs.
   """
 
-  def __init__(self, model_path: str) -> None:
+  def __init__(self, model_path: str, device_name: str = 'cpu') -> None:
     """Initialize a policy instance.
 
     Args:
       model_path: Path to the SavedModel.
+      device_name: Device to load SavedModel onto. Defaults to a cpu device.
+        See tf.device for supported device names.
     """
-    model = tf.saved_model.load(model_path)
-    self._model = permissive_model.PermissiveModel(model)
+    self._strategy = tf.distribute.OneDeviceStrategy(device_name)
+    with self._strategy.scope():
+      model = tf.saved_model.load(model_path)
+      self._model = permissive_model.PermissiveModel(model)
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[int, State]:
@@ -105,12 +109,16 @@ class SavedModelPolicy(Policy):
     reward = np.asarray(timestep.reward, dtype=np.float32)[None]
     discount = np.asarray(timestep.discount, dtype=np.float32)[None]
     observation = tree.map_structure(lambda x: x[None], timestep.observation)
-    output, next_state = self._model.step(
-        step_type=step_type,
-        reward=reward,
-        discount=discount,
-        observation=observation,
-        prev_state=prev_state)
+    output, next_state = self._strategy.run(
+        fn=self._model.step,
+        kwargs=dict(
+            step_type=step_type,
+            reward=reward,
+            discount=discount,
+            observation=observation,
+            prev_state=prev_state,
+        ),
+    )
     if isinstance(output.action, Mapping):
       # Legacy bots trained with older action spec.
       action = output.action['environment_action']
@@ -122,12 +130,13 @@ class SavedModelPolicy(Policy):
 
   def initial_state(self) -> State:
     """See base class."""
-    state = self._model.initial_state(batch_size=1, trainable=None)
+    state = self._strategy.run(
+        fn=self._model.initial_state,
+        kwargs=dict(batch_size=1, trainable=None))
     return _tensor_to_numpy(state)
 
   def close(self) -> None:
     """See base class."""
-    pass
 
 
 _GOAL_OBS_NAME = 'GOAL'
