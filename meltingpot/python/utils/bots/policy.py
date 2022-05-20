@@ -14,6 +14,7 @@
 """Bot policy implementations."""
 
 import abc
+import contextlib
 from typing import Mapping, Tuple
 
 import dm_env
@@ -73,15 +74,11 @@ def _tensor_to_numpy(
   Returns:
     The values of the tensors.
   """
-  if tf.executing_eagerly():
-    return tree.map_structure(lambda x: x.numpy(), tensors)
-  else:
-    with tf.compat.v1.Session() as sess:
-      return sess.run(tensors)
+  return tree.map_structure(lambda x: x.numpy(), tensors)
 
 
-class SavedModelPolicy(Policy):
-  """Policy wrapping a saved model for inference.
+class TF2SavedModelPolicy(Policy):
+  """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
   1. `initial_state(batch_size, trainable)`
@@ -137,6 +134,126 @@ class SavedModelPolicy(Policy):
 
   def close(self) -> None:
     """See base class."""
+
+
+def _numpy_to_placeholder(
+    template: tree.Structure[np.ndarray]) -> tree.Structure[tf.Tensor]:
+  """Returns placeholders that matches a given template.
+
+  Args:
+    template: template numpy arrays.
+
+  Returns:
+    A tree of placeholders matching the template arrays' specs.
+  """
+  fn = lambda x: tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype)
+  return tree.map_structure(fn, template)
+
+
+class TF1SavedModelPolicy(Policy):
+  """Policy wrapping a saved model for TF1 inference.
+
+  Note: the model should have methods:
+  1. `initial_state(batch_size, trainable)`
+  2. `step(step_type, reward, discount, observation, prev_state)`
+  that accept batched inputs and produce batched outputs.
+  """
+
+  def __init__(self, model_path: str, device_name: str = 'cpu') -> None:
+    """Initialize a policy instance.
+
+    Args:
+      model_path: Path to the SavedModel.
+      device_name: Device to load SavedModel onto. Defaults to a cpu device.
+        See tf.device for supported device names.
+    """
+    self._device_name = device_name
+    self._graph = tf.compat.v1.Graph()
+    self._session = tf.compat.v1.Session(graph=self._graph)
+
+    with self._build_context():
+      model = tf.compat.v1.saved_model.load_v2(model_path)
+      self._model = permissive_model.PermissiveModel(model)
+
+    self._initial_state_outputs = None
+    self._step_inputs = None
+    self._step_outputs = None
+
+  @contextlib.contextmanager
+  def _build_context(self):
+    with self._graph.as_default():
+      with tf.compat.v1.device(self._device_name):
+        yield
+
+  def _build_initial_state_graph(self) -> None:
+    """Builds the TF1 subgraph for the initial_state operation."""
+    with self._build_context():
+      self._initial_state_outputs = self._model.initial_state(
+          batch_size=1, trainable=None)
+
+  def _build_step_graph(self, timestep, prev_state) -> None:
+    """Builds the TF1 subgraph for the step operation.
+
+    Args:
+      timestep: an example timestep.
+      prev_state: an example previous state.
+    """
+    if not self._initial_state_outputs:
+      self._build_initial_state_graph()
+
+    with self._build_context():
+      step_type_in = tf.compat.v1.placeholder(shape=[], dtype=np.int64)
+      reward_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
+      discount_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
+      observation_in = _numpy_to_placeholder(timestep.observation)
+      prev_state_in = _numpy_to_placeholder(prev_state)
+      output, next_state = self._model.step(
+          step_type=step_type_in[None],
+          reward=reward_in[None],
+          discount=discount_in[None],
+          observation=tree.map_structure(lambda x: x[None], observation_in),
+          prev_state=prev_state_in)
+      if isinstance(output.action, Mapping):
+        # Legacy bots trained with older action spec.
+        action = output.action['environment_action'][0]
+      else:
+        action = output.action[0]
+
+    timestep_in = dm_env.TimeStep(
+        step_type=step_type_in,
+        reward=reward_in,
+        discount=discount_in,
+        observation=observation_in)
+    self._step_inputs = tree.flatten([timestep_in, prev_state_in])
+    self._step_outputs = (action, next_state)
+
+    self._graph.finalize()
+
+  def step(self, timestep: dm_env.TimeStep,
+           prev_state: State) -> Tuple[int, State]:
+    """See base class."""
+    if not self._step_inputs:
+      self._build_step_graph(timestep, prev_state)
+    input_values = tree.flatten([timestep, prev_state])
+    feed_dict = dict(zip(self._step_inputs, input_values))
+    action, next_state = self._session.run(self._step_outputs, feed_dict)
+    return int(action), next_state
+
+  def initial_state(self) -> State:
+    """See base class."""
+    if not self._initial_state_outputs:
+      self._build_initial_state_graph()
+    return self._session.run(self._initial_state_outputs)
+
+  def close(self) -> None:
+    """See base class."""
+    self._session.close()
+
+
+if tf.executing_eagerly():
+  SavedModelPolicy = TF2SavedModelPolicy
+else:
+  SavedModelPolicy = TF1SavedModelPolicy
 
 
 _GOAL_OBS_NAME = 'GOAL'
