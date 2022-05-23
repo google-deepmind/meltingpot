@@ -15,7 +15,7 @@
 
 import abc
 import contextlib
-from typing import Mapping, Tuple
+from typing import Generic, Mapping, Tuple, TypeVar
 
 import dm_env
 import numpy as np
@@ -25,10 +25,10 @@ import tree
 from meltingpot.python.utils.bots import permissive_model
 from meltingpot.python.utils.bots import puppeteer_functions
 
-State = tree.Structure[np.ndarray]
+State = TypeVar('State')
 
 
-class Policy(metaclass=abc.ABCMeta):
+class Policy(Generic[State], metaclass=abc.ABCMeta):
   """Abstract base class for a policy."""
 
   @abc.abstractmethod
@@ -64,20 +64,7 @@ class Policy(metaclass=abc.ABCMeta):
     self.close()
 
 
-def _tensor_to_numpy(
-    tensors: tree.Structure[tf.Tensor]) -> tree.Structure[np.ndarray]:
-  """Converts tensors to numpy arrays.
-
-  Args:
-    tensors: input tensors.
-
-  Returns:
-    The values of the tensors.
-  """
-  return tree.map_structure(lambda x: x.numpy(), tensors)
-
-
-class TF2SavedModelPolicy(Policy):
+class TF2SavedModelPolicy(Policy[tree.Structure[tf.Tensor]]):
   """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
@@ -99,8 +86,11 @@ class TF2SavedModelPolicy(Policy):
       model = tf.saved_model.load(model_path)
       self._model = permissive_model.PermissiveModel(model)
 
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
+  def step(
+      self,
+      timestep: dm_env.TimeStep,
+      prev_state: tree.Structure[tf.Tensor],
+  ) -> Tuple[int, tree.Structure[tf.Tensor]]:
     """See base class."""
     step_type = np.array(timestep.step_type, dtype=np.int64)[None]
     reward = np.asarray(timestep.reward, dtype=np.float32)[None]
@@ -121,16 +111,13 @@ class TF2SavedModelPolicy(Policy):
       action = output.action['environment_action']
     else:
       action = output.action
-    action = int(_tensor_to_numpy(action)[0])
-    next_state = _tensor_to_numpy(next_state)
+    action = int(action.numpy()[0])
     return action, next_state
 
-  def initial_state(self) -> State:
+  def initial_state(self) -> tree.Structure[tf.Tensor]:
     """See base class."""
-    state = self._strategy.run(
-        fn=self._model.initial_state,
-        kwargs=dict(batch_size=1, trainable=None))
-    return _tensor_to_numpy(state)
+    return self._strategy.run(
+        fn=self._model.initial_state, kwargs=dict(batch_size=1, trainable=None))
 
   def close(self) -> None:
     """See base class."""
@@ -150,7 +137,7 @@ def _numpy_to_placeholder(
   return tree.map_structure(fn, template)
 
 
-class TF1SavedModelPolicy(Policy):
+class TF1SavedModelPolicy(Policy[tree.Structure[np.ndarray]]):
   """Policy wrapping a saved model for TF1 inference.
 
   Note: the model should have methods:
@@ -229,8 +216,9 @@ class TF1SavedModelPolicy(Policy):
 
     self._graph.finalize()
 
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
+  def step(
+      self, timestep: dm_env.TimeStep, prev_state: tree.Structure[np.ndarray]
+  ) -> Tuple[int, tree.Structure[np.ndarray]]:
     """See base class."""
     if not self._step_inputs:
       self._build_step_graph(timestep, prev_state)
@@ -239,7 +227,7 @@ class TF1SavedModelPolicy(Policy):
     action, next_state = self._session.run(self._step_outputs, feed_dict)
     return int(action), next_state
 
-  def initial_state(self) -> State:
+  def initial_state(self) -> tree.Structure[np.ndarray]:
     """See base class."""
     if not self._initial_state_outputs:
       self._build_initial_state_graph()
@@ -259,7 +247,7 @@ else:
 _GOAL_OBS_NAME = 'GOAL'
 
 
-class PuppetPolicy(Policy):
+class PuppetPolicy(Policy[State], Generic[State]):
   """A puppet policy controlled by a puppeteer function."""
 
   def __init__(self, puppeteer_fn: puppeteer_functions.PuppeteerFn,
