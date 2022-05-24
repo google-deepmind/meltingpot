@@ -59,25 +59,20 @@ class ConfigTest(parameterized.TestCase):
     self.assertLen(scenario.is_focal, substrate.num_players)
 
   @parameterized.named_parameters(
-      # TODO(b/220870875): remove disable when fixed.
-      (name, name, scenario)  # pylint: disable=undefined-variable
+      (name, name, scenario)
       for name, scenario in scenario_configs.SCENARIO_CONFIGS.items())
   def test_scenario_name_starts_with_substrate_name(self, name, scenario):
     self.assertStartsWith(name, scenario.substrate)
 
   @parameterized.named_parameters(
-      # TODO(b/220870875): remove disable when fixed.
-      (substrate, substrate)  # pylint: disable=undefined-variable
-      for substrate in substrate_configs.SUBSTRATES)
+      (substrate, substrate) for substrate in substrate_configs.SUBSTRATES)
   def test_substrate_used_by_scenario(self, substrate):
     used = any(substrate == scenario.substrate
                for scenario in scenario_configs.SCENARIO_CONFIGS.values())
     self.assertTrue(used, f'{substrate} is not covered by any scenario.')
 
   @parameterized.named_parameters(
-      # TODO(b/220870875): remove disable when fixed.
-      (bot, bot)   # pylint: disable=undefined-variable
-      for bot in bot_configs.BOT_CONFIGS)
+      (bot, bot) for bot in bot_configs.BOT_CONFIGS)
   def test_bot_used_by_scenario(self, bot):
     used = any(bot in scenario.bots
                for scenario in scenario_configs.SCENARIO_CONFIGS.values())
@@ -95,8 +90,7 @@ class ConfigTest(parameterized.TestCase):
                      f'{bot} substrate does not match model path.')
 
   @parameterized.named_parameters(
-      # TODO(b/220870875): remove disable when fixed.
-      (f'{substrate}_{model}', os.path.join(models_root, substrate, model))  # pylint: disable=undefined-variable
+      (f'{substrate}_{model}', os.path.join(models_root, substrate, model))
       for models_root, substrate, model in _models())
   def test_model_used_by_bot(self, model_path):
     used = any(bot.model_path == model_path
