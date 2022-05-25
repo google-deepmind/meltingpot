@@ -48,12 +48,6 @@ PERMITTED_OBSERVATIONS = frozenset({
     'RGB',
 })
 
-# TODO(b/227143834): Remove aliases once internal deps have been removed.
-Scenario = scenario_lib.Scenario
-PopulationObservables = population.PopulationObservables
-ScenarioObservables = scenario_lib.ScenarioObservables
-Population = population.Population
-
 
 def get_config(scenario_name: str) -> config_dict.ConfigDict:
   """Returns a config for the specified scenario.
