@@ -13,8 +13,10 @@
 # limitations under the License.
 """Scenario factory."""
 
-from typing import Collection, Mapping
+import collections
+from typing import AbstractSet, Mapping
 
+import immutabledict
 from ml_collections import config_dict
 
 from meltingpot.python import bot as bot_factory
@@ -26,9 +28,19 @@ from meltingpot.python.utils.scenarios import substrate_transforms
 
 AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIO_CONFIGS)
 
-SCENARIOS_BY_SUBSTRATE: Mapping[
-    str, Collection[str]] = scenario_config.scenarios_by_substrate(
-        scenario_config.SCENARIO_CONFIGS)
+
+def _scenarios_by_substrate() -> Mapping[str, AbstractSet[str]]:
+  """Returns a mapping from substrates to their scenarios."""
+  scenarios_by_substrate = collections.defaultdict(list)
+  for scenario_name, config in scenario_config.SCENARIO_CONFIGS.items():
+    scenarios_by_substrate[config.substrate].append(scenario_name)
+  return immutabledict.immutabledict({
+      substrate: frozenset(scenarios)
+      for substrate, scenarios in scenarios_by_substrate.items()
+  })
+
+
+SCENARIOS_BY_SUBSTRATE = _scenarios_by_substrate()
 
 PERMITTED_OBSERVATIONS = frozenset({
     'INVENTORY',
