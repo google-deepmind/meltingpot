@@ -14,7 +14,6 @@
 """Tests of the configs."""
 
 import os
-import re
 
 from absl.testing import absltest
 from absl.testing import parameterized
@@ -23,9 +22,6 @@ from meltingpot.python.configs import bots as bot_configs
 from meltingpot.python.configs import scenarios as scenario_configs
 from meltingpot.python.configs import substrates as substrate_configs
 
-_MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                      __file__)
-
 
 def _subdirs(root):
   for file in os.listdir(root):
@@ -33,7 +29,7 @@ def _subdirs(root):
       yield file
 
 
-def _models(models_root=_MODELS_ROOT):
+def _models(models_root=bot_configs.MODELS_ROOT):
   for substrate in _subdirs(models_root):
     for model in _subdirs(os.path.join(models_root, substrate)):
       yield models_root, substrate, model
