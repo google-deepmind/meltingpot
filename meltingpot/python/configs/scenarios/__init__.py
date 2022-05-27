@@ -37,6 +37,11 @@ class ScenarioConfig:
   is_focal: Sequence[bool]
   bots: AbstractSet[str]
 
+  def __post_init__(self):
+    object.__setattr__(self, 'tags', frozenset(self.tags))
+    object.__setattr__(self, 'is_focal', tuple(self.is_focal))
+    object.__setattr__(self, 'bots', frozenset(self.bots))
+
 
 SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
