@@ -880,8 +880,6 @@ end
 
 function AvatarConnector:avatarStateChange(behavior)
   local avatarComponent = self._avatarObject:getComponent('Avatar')
-  local avatarAliveState = avatarComponent:getAliveState()
-  local avatarWaitState = avatarComponent:getWaitState()
   -- If the avatar's state has changed, then also update the state of
   -- the avatar connector.
   if behavior == 'respawn' then

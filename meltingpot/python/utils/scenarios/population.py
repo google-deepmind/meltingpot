@@ -15,6 +15,7 @@
 
 import concurrent
 import random
+import threading
 from typing import Callable, List, Mapping, Sequence
 
 import chex
@@ -25,20 +26,24 @@ from rx import subject
 from meltingpot.python.utils.bots import policy as policy_lib
 
 
-def _step_fn(policy: policy_lib.Policy) -> Callable[[dm_env.TimeStep], int]:
-  """Returns a stateful step function where the state is encapsulated.
+def _step_fn(policy: policy_lib.Policy,
+             lock: threading.Lock) -> Callable[[dm_env.TimeStep], int]:
+  """Threadsafe stateful step function where the state is encapsulated.
 
   Args:
     policy: the underlying policy to use.
+    lock: a lock that controls access to the policy.
 
   Returns:
     A step function that returns an action in response to a timestep.
   """
-  state = policy.initial_state()
+  with lock:
+    state = policy.initial_state()
 
   def step(timestep: dm_env.TimeStep) -> int:
     nonlocal state
-    action, state = policy.step(timestep=timestep, prev_state=state)
+    with lock:
+      action, state = policy.step(timestep=timestep, prev_state=state)
     return action
 
   return step
@@ -70,6 +75,7 @@ class Population:
       population_size: the number of policies to sample on each reset.
     """
     self._policies = dict(policies)
+    self._locks = {name: threading.Lock() for name in self._policies}
     self._population_size = population_size
     self._executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=self._population_size)
@@ -104,7 +110,10 @@ class Population:
     """Resamples the population."""
     names = self._sample_names()
     self._names_subject.on_next(names)
-    self._step_fns = [_step_fn(self._policies[name]) for name in names]
+    self._step_fns = [
+        _step_fn(policy=self._policies[name], lock=self._locks[name])
+        for name in names
+    ]
     for future in self._action_futures:
       future.cancel()
     self._action_futures.clear()

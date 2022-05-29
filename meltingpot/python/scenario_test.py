@@ -23,7 +23,7 @@ from meltingpot.python import substrate as substrate_factory
 class ScenarioTest(parameterized.TestCase):
 
   @parameterized.named_parameters(
-      (scenario,) * 2 for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_step_without_error(self, scenario):
     scenario_config = scenario_factory.get_config(scenario)
     num_players = scenario_config.num_players
@@ -32,7 +32,7 @@ class ScenarioTest(parameterized.TestCase):
       scenario.step([0] * num_players)
 
   @parameterized.named_parameters(
-      (scenario,) * 2 for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_permitted_observations(self, scenario):
     scenario_config = scenario_factory.get_config(scenario)
     with scenario_factory.build(scenario_config) as scenario:
