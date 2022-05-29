@@ -13,61 +13,53 @@
 # limitations under the License.
 """Tests of bots."""
 
+import collections
+import functools
+import threading
+
 from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
+import numpy as np
+import tree
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.scenarios import substrate_transforms
-from meltingpot.python.utils.scenarios.wrappers import base
 
 
-class _MultiToSinglePlayer(base.Wrapper):
-  """Adapter to convert a multiplayer environment to a single player version."""
-
-  def __init__(self, env) -> None:
-    """Initializes the environment.
-
-    Args:
-      env: multiplayer environment to make single player.
-    """
-    super().__init__(env)
-    self._num_players = len(super().action_spec())
-
-  def reset(self):
-    """See base class."""
-    timestep = super().reset()
-    return dm_env.TimeStep(
-        step_type=timestep.step_type,
-        reward=timestep.reward[0],
-        discount=timestep.discount,
-        observation=timestep.observation[0])
-
-  def step(self, action):
-    """See base class."""
-    actions = [action] * self._num_players
-    timestep = super().step(actions)
-    return dm_env.TimeStep(
-        step_type=timestep.step_type,
-        reward=timestep.reward[0],
-        discount=timestep.discount,
-        observation=timestep.observation[0])
-
-  def observation_spec(self):
-    """See base class."""
-    return super().observation_spec()[0]
-
-  def action_spec(self):
-    """See base class."""
-    return super().action_spec()[0]
+_STEP_TYPE_SPEC = dm_env.specs.BoundedArray(
+    shape=(),
+    dtype=np.int64,
+    minimum=min(dm_env.StepType),
+    maximum=max(dm_env.StepType),
+)
 
 
-def build_environment(substrate):
+@functools.lru_cache(maxsize=None)
+def _calculate_specs(substrate):
   config = substrate_factory.get_config(substrate)
-  env = substrate_factory.build(config)
-  env = substrate_transforms.with_tf1_bot_required_observations(env)
-  return _MultiToSinglePlayer(env)
+  environment = substrate_factory.build(config)
+  environment = substrate_transforms.with_tf1_bot_required_observations(
+      environment)
+  timestep_spec = dm_env.TimeStep(
+      step_type=_STEP_TYPE_SPEC,
+      reward=environment.reward_spec()[0],
+      discount=environment.discount_spec(),
+      observation=environment.observation_spec()[0])
+  action_spec = environment.action_spec()[0]
+  return timestep_spec, action_spec
+
+
+_lock = threading.Lock()
+_key_locks = collections.defaultdict(threading.Lock)
+
+
+def _get_specs(substrate):
+  with _lock:
+    key_lock = _key_locks[substrate]
+  with key_lock:
+    return _calculate_specs(substrate)
 
 
 class BotTest(parameterized.TestCase):
@@ -77,12 +69,20 @@ class BotTest(parameterized.TestCase):
   )
   def test_step_without_error(self, bot_name):
     bot_config = bot_factory.get_config(bot_name)
+    timestep_spec, action_spec = _get_specs(bot_config.substrate)
     with bot_factory.build(bot_config) as policy:
-      prev_state = policy.initial_state()
-      with build_environment(bot_config.substrate) as env:
-        timestep = env.reset()
-        action, _ = policy.step(timestep, prev_state)
-        env.step(action)
+      self.assert_compatible(policy, timestep_spec, action_spec)
+
+  def assert_compatible(self, policy, timestep_spec, action_spec):
+    timestep = tree.map_structure(
+        lambda spec: spec.generate_value(), timestep_spec)
+    prev_state = policy.initial_state()
+    action, _ = policy.step(timestep, prev_state)
+    try:
+      action_spec.validate(action)
+    except ValueError:
+      self.fail(f'Returned action {action!r} does not match action_spec '
+                f'{action_spec!r}.')
 
 
 if __name__ == '__main__':

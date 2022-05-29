@@ -22,8 +22,8 @@ import immutabledict
 
 from meltingpot.python.utils.bots import puppeteer_functions
 
-_MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                      __file__)
+MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
+                     __file__)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -42,7 +42,7 @@ class BotConfig:
 
 def _saved_model(substrate: str,
                  model: str,
-                 models_root: str = _MODELS_ROOT) -> BotConfig:
+                 models_root: str = MODELS_ROOT) -> BotConfig:
   """Returns the config for a saved model bot.
 
   Args:
@@ -56,7 +56,7 @@ def _saved_model(substrate: str,
 
 def _puppet(substrate: str,
             puppeteer_fn: puppeteer_functions.PuppeteerFn,
-            models_root: str = _MODELS_ROOT) -> BotConfig:
+            models_root: str = MODELS_ROOT) -> BotConfig:
   """Returns the config for a puppet bot.
 
   Args:

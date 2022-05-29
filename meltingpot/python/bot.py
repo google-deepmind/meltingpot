@@ -20,12 +20,6 @@ from meltingpot.python.utils.bots import policy
 
 AVAILABLE_BOTS = frozenset(bot_config.BOT_CONFIGS)
 
-# TODO(b/227143834): Remove aliases once internal deps have been removed.
-Policy = policy.Policy
-PuppetPolicy = policy.PuppetPolicy
-SavedModelPolicy = policy.SavedModelPolicy
-State = policy.State
-
 
 def get_config(bot_name: str) -> config_dict.ConfigDict:
   """Returns a config for the specified bot.

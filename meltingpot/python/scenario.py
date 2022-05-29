@@ -13,8 +13,10 @@
 # limitations under the License.
 """Scenario factory."""
 
-from typing import Collection, Mapping
+import collections
+from typing import AbstractSet, Mapping
 
+import immutabledict
 from ml_collections import config_dict
 
 from meltingpot.python import bot as bot_factory
@@ -26,21 +28,25 @@ from meltingpot.python.utils.scenarios import substrate_transforms
 
 AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIO_CONFIGS)
 
-SCENARIOS_BY_SUBSTRATE: Mapping[
-    str, Collection[str]] = scenario_config.scenarios_by_substrate(
-        scenario_config.SCENARIO_CONFIGS)
+
+def _scenarios_by_substrate() -> Mapping[str, AbstractSet[str]]:
+  """Returns a mapping from substrates to their scenarios."""
+  scenarios_by_substrate = collections.defaultdict(list)
+  for scenario_name, config in scenario_config.SCENARIO_CONFIGS.items():
+    scenarios_by_substrate[config.substrate].append(scenario_name)
+  return immutabledict.immutabledict({
+      substrate: frozenset(scenarios)
+      for substrate, scenarios in scenarios_by_substrate.items()
+  })
+
+
+SCENARIOS_BY_SUBSTRATE = _scenarios_by_substrate()
 
 PERMITTED_OBSERVATIONS = frozenset({
     'INVENTORY',
     'READY_TO_SHOOT',
     'RGB',
 })
-
-# TODO(b/227143834): Remove aliases once internal deps have been removed.
-Scenario = scenario_lib.Scenario
-PopulationObservables = population.PopulationObservables
-ScenarioObservables = scenario_lib.ScenarioObservables
-Population = population.Population
 
 
 def get_config(scenario_name: str) -> config_dict.ConfigDict:
@@ -60,6 +66,8 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       is_focal=scenario.is_focal,
       num_players=sum(scenario.is_focal),
       num_bots=len(scenario.is_focal) - sum(scenario.is_focal),
+      substrate_transform=None,
+      permitted_observations=set(PERMITTED_OBSERVATIONS),
   )
   return config.lock()
 
@@ -74,10 +82,12 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
     The test scenario.
   """
   substrate = substrate_factory.build(config.substrate)
-
+  if config.substrate_transform:
+    substrate = config.substrate_transform(substrate)
+  permitted_observations = set(substrate.observation_spec()[0])
+  if not config.substrate_transform:
+    permitted_observations &= config.permitted_observations
   # Add observations needed by some bots. These are removed for focal players.
-  permitted_observations = (
-      set(substrate.observation_spec()[0]) & PERMITTED_OBSERVATIONS)
   substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
 
   background_population = population.Population(
