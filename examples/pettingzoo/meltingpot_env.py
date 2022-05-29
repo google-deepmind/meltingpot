@@ -7,21 +7,21 @@ from gym import spaces
 import numpy as np
 from functools import lru_cache
 
-from gym.utils import EzPickle
+from gym import utils as gym_utils
+from pettingzoo import utils as pettingzoo_utils
 from pettingzoo.utils import wrappers
-from pettingzoo.utils.conversions import parallel_to_aec_wrapper
-from pettingzoo.utils.env import ParallelEnv
 import tree
 import matplotlib.pyplot as plt
 
 PLAYER_STR_FORMAT = 'player_{index}'
 MAX_CYCLES = 1000
+_WORLD_PREFIX = 'WORLD.'
 
 def _timestep_to_observations(timestep: dm_env.TimeStep):
   gym_observations = {}
   for index, observation in enumerate(timestep.observation):
     gym_observations[PLAYER_STR_FORMAT.format(index=index)] = {
-        key: value for key, value in observation.items() if 'WORLD' not in key
+        key: value for key, value in observation.items() if _WORLD_PREFIX not in key
     }
   return gym_observations
 
@@ -29,7 +29,7 @@ def _timestep_to_observations(timestep: dm_env.TimeStep):
 def _remove_world_observations_from_space(
     observation: spaces.Dict) -> spaces.Dict:
   return spaces.Dict({
-      key: observation[key] for key in observation if 'WORLD' not in key})
+      key: observation[key] for key in observation if _WORLD_PREFIX not in key})
 
 
 def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
@@ -64,10 +64,10 @@ def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
     raise ValueError('Unexpected spec: {}'.format(spec))
 
 def parallel_env(env_config, max_cycles=MAX_CYCLES):
-    return _parallel_env(env_config, max_cycles)
+    return _ParallelEnv(env_config, max_cycles)
 
 def raw_env(env_config, max_cycles=MAX_CYCLES):
-    return parallel_to_aec_wrapper(parallel_env(env_config, max_cycles))
+    return pettingzoo_utils.parallel_to_aec_wrapper(parallel_env(env_config, max_cycles))
 
 def env(env_config, max_cycles=MAX_CYCLES):
     aec_env = raw_env(env_config, max_cycles)
@@ -75,7 +75,7 @@ def env(env_config, max_cycles=MAX_CYCLES):
     aec_env = wrappers.OrderEnforcingWrapper(aec_env)
     return aec_env
 
-class MeltingPotPettingZooEnv(ParallelEnv):
+class MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
   """An adapter between the Melting Pot substrates and PettingZoo's ParallelEnv"""
 
   def __init__(self, env_config, max_cycles):
@@ -97,7 +97,7 @@ class MeltingPotPettingZooEnv(ParallelEnv):
   def state(self):
     return self._env.observation()
 
-  def reset(self):
+  def reset(self, seed=None):
     """See base class."""
     timestep = self._env.reset()
     self.agents = self.possible_agents[:]
@@ -126,9 +126,6 @@ class MeltingPotPettingZooEnv(ParallelEnv):
     """See base class."""
     self._env.close()
   
-  def seed(self, seed=None):
-    raise NotImplementedError
-  
   def render(self, mode="human", filename=None):
     rgb_arr = self.state()['WORLD.RGB']
     if mode == "human":
@@ -141,9 +138,9 @@ class MeltingPotPettingZooEnv(ParallelEnv):
         return None
     return rgb_arr
 
-class _parallel_env(MeltingPotPettingZooEnv, EzPickle):
+class _ParallelEnv(MeltingPotPettingZooEnv, gym_utils.EzPickle):
     metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, env_config, max_cycles):
-        EzPickle.__init__(self, env_config, max_cycles)
+        gym_utils.EzPickle.__init__(self, env_config, max_cycles)
         MeltingPotPettingZooEnv.__init__(self, env_config, max_cycles)

@@ -70,8 +70,8 @@ setuptools.setup(
             'ray[rllib,default]==1.11.0',
         ],
         'pettingzoo': [
-            'pettingzoo>=1.17.0',
-            'supersuit>=3.3.3',
+            'pettingzoo>=1.18.0',
+            'supersuit>=3.3.0',
             'stable-baselines3'
         ],
     },

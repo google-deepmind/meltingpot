@@ -2,21 +2,18 @@ import gym
 import supersuit as ss
 import torch
 import torch.nn.functional as F
-from stable_baselines3 import PPO
-from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
-from stable_baselines3.common.vec_env.vec_monitor import VecMonitor
-from stable_baselines3.common.vec_env.vec_transpose import VecTransposeImage
-from stable_baselines3.common.callbacks import EvalCallback
+import stable_baselines3
+from stable_baselines3.common import torch_layers, vec_env, callbacks
 from torch import nn
 
-from examples.pettingzoo.meltingpot_env import parallel_env
+from examples.pettingzoo import meltingpot_env
 from meltingpot.python import substrate
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 
 # Use this with lambda wrapper returning observations only
-class CustomCNN(BaseFeaturesExtractor):
+class CustomCNN(torch_layers.BaseFeaturesExtractor):
     """
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
@@ -68,7 +65,7 @@ def main():
     # Config
     env_name = "commons_harvest_open"
     env_config = substrate.get_config(env_name)
-    env = parallel_env(env_config)
+    env = meltingpot_env.parallel_env(env_config)
     rollout_len = 1000
     total_timesteps = 2000000
     num_agents = env.max_num_agents
@@ -90,9 +87,9 @@ def main():
     target_kl = 0.01
     grad_clip = 40
     verbose = 3
-    model_path = "results/sb3/harvest_open_ppo_paramsharing/PPO_1/model"
+    model_path = None # Replace this with a saved model
 
-    env = parallel_env(
+    env = meltingpot_env.parallel_env(
         max_cycles=rollout_len,
         env_config=env_config,
     )
@@ -102,10 +99,10 @@ def main():
     env = ss.concat_vec_envs_v1(
         env, num_vec_envs=num_envs, num_cpus=num_cpus, base_class="stable_baselines3"
     )
-    env = VecMonitor(env)
-    env = VecTransposeImage(env, True)
+    env = vec_env.VecMonitor(env)
+    env = vec_env.VecTransposeImage(env, True)
 
-    eval_env = parallel_env(
+    eval_env = meltingpot_env.parallel_env(
         max_cycles=rollout_len,
         env_config=env_config,
     )
@@ -117,8 +114,8 @@ def main():
     eval_env = ss.concat_vec_envs_v1(
         eval_env, num_vec_envs=1, num_cpus=1, base_class="stable_baselines3"
     )
-    eval_env = VecMonitor(eval_env)
-    eval_env = VecTransposeImage(eval_env, True)
+    eval_env = vec_env.VecMonitor(eval_env)
+    eval_env = vec_env.VecTransposeImage(eval_env, True)
     eval_freq = 100000 // (num_envs * num_agents)
 
     policy_kwargs = dict(
@@ -133,7 +130,7 @@ def main():
 
     tensorboard_log = "./results/sb3/harvest_open_ppo_paramsharing"
 
-    model = PPO(
+    model = stable_baselines3.PPO(
         "CnnPolicy",
         env=env,
         learning_rate=lr,
@@ -150,8 +147,8 @@ def main():
         verbose=verbose,
     )
     if model_path != None:
-        model = PPO.load(model_path, env=env)
-    eval_callback = EvalCallback(
+        model = stable_baselines3.PPO.load(model_path, env=env)
+    eval_callback = callbacks.EvalCallback(
         eval_env, eval_freq=eval_freq, best_model_save_path=tensorboard_log
     )
     model.learn(total_timesteps=total_timesteps, callback=eval_callback)
@@ -159,7 +156,7 @@ def main():
     logdir = model.logger.dir
     model.save(logdir + "/model")
     del model
-    model = PPO.load(logdir + "/model")  # noqa: F841
+    model = stable_baselines3.PPO.load(logdir + "/model")  # noqa: F841
 
 
 if __name__ == "__main__":

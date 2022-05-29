@@ -117,7 +117,7 @@ We provide two example scripts using RLlib and [PettingZoo](https://github.com/F
 #### RLlib
 This example uses [RLLib](https://github.com/ray-project/ray) to train agents in self-play on a Melting Pot substrate.
 
-First you will need to install the dependencies needed by the examples:
+First you will need to install the dependencies needed by the RLlib example:
 
 ```shell
 cd <meltingpot_root>
