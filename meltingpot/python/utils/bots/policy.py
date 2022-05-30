@@ -18,6 +18,7 @@ import contextlib
 from typing import Generic, Mapping, Tuple, TypeVar
 
 import dm_env
+import immutabledict
 import numpy as np
 import tensorflow as tf
 import tree
@@ -270,8 +271,8 @@ class PuppetPolicy(Policy[State], Generic[State]):
     """Returns the transformed observation for the puppet step."""
     goal = self._puppeteer_fn(prev_state, timestep.observation)
     next_state = prev_state + 1
-    puppet_observation = timestep.observation.copy()
-    puppet_observation[_GOAL_OBS_NAME] = goal
+    puppet_observation = immutabledict.immutabledict(
+        timestep.observation, **{_GOAL_OBS_NAME: goal})
     puppet_timestep = timestep._replace(observation=puppet_observation)
     return puppet_timestep, next_state
 
