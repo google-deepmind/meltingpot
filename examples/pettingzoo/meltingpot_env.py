@@ -17,6 +17,18 @@ PLAYER_STR_FORMAT = 'player_{index}'
 MAX_CYCLES = 1000
 _WORLD_PREFIX = 'WORLD.'
 
+def parallel_env(env_config, max_cycles=MAX_CYCLES):
+    return _ParallelEnv(env_config, max_cycles)
+
+def raw_env(env_config, max_cycles=MAX_CYCLES):
+    return pettingzoo_utils.parallel_to_aec_wrapper(parallel_env(env_config, max_cycles))
+
+def env(env_config, max_cycles=MAX_CYCLES):
+    aec_env = raw_env(env_config, max_cycles)
+    aec_env = wrappers.AssertOutOfBoundsWrapper(aec_env)
+    aec_env = wrappers.OrderEnforcingWrapper(aec_env)
+    return aec_env
+
 def _timestep_to_observations(timestep: dm_env.TimeStep):
   gym_observations = {}
   for index, observation in enumerate(timestep.observation):
@@ -63,19 +75,7 @@ def _spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
   else:
     raise ValueError('Unexpected spec: {}'.format(spec))
 
-def parallel_env(env_config, max_cycles=MAX_CYCLES):
-    return _ParallelEnv(env_config, max_cycles)
-
-def raw_env(env_config, max_cycles=MAX_CYCLES):
-    return pettingzoo_utils.parallel_to_aec_wrapper(parallel_env(env_config, max_cycles))
-
-def env(env_config, max_cycles=MAX_CYCLES):
-    aec_env = raw_env(env_config, max_cycles)
-    aec_env = wrappers.AssertOutOfBoundsWrapper(aec_env)
-    aec_env = wrappers.OrderEnforcingWrapper(aec_env)
-    return aec_env
-
-class MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
+class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
   """An adapter between the Melting Pot substrates and PettingZoo's ParallelEnv"""
 
   def __init__(self, env_config, max_cycles):
@@ -138,9 +138,9 @@ class MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
         return None
     return rgb_arr
 
-class _ParallelEnv(MeltingPotPettingZooEnv, gym_utils.EzPickle):
+class _ParallelEnv(_MeltingPotPettingZooEnv, gym_utils.EzPickle):
     metadata = {"render_modes": ["human", "rgb_array"]}
 
     def __init__(self, env_config, max_cycles):
         gym_utils.EzPickle.__init__(self, env_config, max_cycles)
-        MeltingPotPettingZooEnv.__init__(self, env_config, max_cycles)
+        _MeltingPotPettingZooEnv.__init__(self, env_config, max_cycles)
