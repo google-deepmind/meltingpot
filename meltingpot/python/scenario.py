@@ -60,6 +60,16 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   scenario = scenario_config.SCENARIO_CONFIGS[scenario_name]
   substrate = substrate_factory.get_config(scenario.substrate)
   bots = {name: bot_factory.get_config(name) for name in scenario.bots}
+  focal_timestep_spec = substrate.timestep_spec._replace(
+      observation=immutabledict.immutabledict({
+          key: spec for key, spec in substrate.timestep_spec.observation.items()
+          if key in PERMITTED_OBSERVATIONS
+      }),
+  )
+  background_timestep_spec = substrate_transforms.tf1_bot_timestep_spec(
+      timestep_spec=substrate.timestep_spec,
+      action_spec=substrate.action_spec,
+      num_players=substrate.num_players)
   config = config_dict.create(
       substrate=substrate,
       bots=bots,
@@ -68,6 +78,10 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       num_bots=len(scenario.is_focal) - sum(scenario.is_focal),
       substrate_transform=None,
       permitted_observations=set(PERMITTED_OBSERVATIONS),
+      timestep_spec=focal_timestep_spec,
+      action_spec=substrate.action_spec,
+      background_timestep_spec=background_timestep_spec,
+      background_action_spec=substrate.action_spec,
   )
   return config.lock()
 

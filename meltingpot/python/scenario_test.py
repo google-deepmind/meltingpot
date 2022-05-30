@@ -17,31 +17,59 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from meltingpot.python import scenario as scenario_factory
-from meltingpot.python import substrate as substrate_factory
 
 
 class ScenarioTest(parameterized.TestCase):
 
   @parameterized.named_parameters(
       (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
-  def test_step_without_error(self, scenario):
-    scenario_config = scenario_factory.get_config(scenario)
-    num_players = scenario_config.num_players
-    with scenario_factory.build(scenario_config) as scenario:
-      scenario.reset()
-      scenario.step([0] * num_players)
+  def test_observations_match_observation_spec(self, name):
+    config = scenario_factory.get_config(name)
+    with scenario_factory.build(config) as env:
+      observation_spec = env.observation_spec()[0]
+      timestep = env.reset()
+      observation = timestep.observation[0]
+
+    with self.subTest('missing'):
+      self.assertSameElements(observation_spec, observation)
+    for name, spec in observation_spec.items():
+      with self.subTest(name):
+        spec.validate(observation[name])
+
+  @parameterized.named_parameters(
+      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
+  def test_spec_in_config_matches_environment(self, name):
+    config = scenario_factory.get_config(name)
+    with scenario_factory.build(config) as env:
+      action_spec = env.action_spec()[0]
+      discount_spec = env.discount_spec()
+      reward_spec = env.reward_spec()[0]
+      observation_spec = env.observation_spec()[0]
+
+    with self.subTest('action_spec'):
+      self.assertEqual(action_spec, config.action_spec)
+
+    with self.subTest('reward_spec'):
+      self.assertEqual(reward_spec, config.timestep_spec.reward)
+
+    with self.subTest('discount_spec'):
+      self.assertEqual(discount_spec, config.timestep_spec.discount)
+
+    with self.subTest('missing'):
+      self.assertSameElements(
+          observation_spec, config.timestep_spec.observation)
+
+    for name, spec in observation_spec.items():
+      with self.subTest(f'observation_spec {name}'):
+        self.assertEqual(spec, config.timestep_spec.observation[name])
 
   @parameterized.named_parameters(
       (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_permitted_observations(self, scenario):
     scenario_config = scenario_factory.get_config(scenario)
-    with scenario_factory.build(scenario_config) as scenario:
-      scenario_spec = set(scenario.observation_spec()[0])
-    with substrate_factory.build(scenario_config.substrate) as substrate:
-      substrate_spec = set(substrate.observation_spec()[0])
-
-    self.assertEqual(scenario_spec,
-                     substrate_spec & scenario_factory.PERMITTED_OBSERVATIONS)
+    self.assertContainsSubset(
+        scenario_config.timestep_spec.observation,
+        scenario_factory.PERMITTED_OBSERVATIONS)
 
 
 if __name__ == '__main__':
