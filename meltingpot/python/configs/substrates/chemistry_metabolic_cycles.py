@@ -37,7 +37,7 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import reaction_graph_utils as graph_utils
 from meltingpot.python.utils.substrates import shapes
-
+from meltingpot.python.utils.substrates import specs
 
 # Map reaction to rewards.
 DEFAULT_REWARDING_REACTIONS = {"MetabolizeFood1": 1,
@@ -402,5 +402,14 @@ def get_config():
   config.global_observation_names = [
       "WORLD.RGB",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.OBSERVATION["RGB"],
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "WORLD.RGB": specs.rgb(112, 200),
+  })
 
   return config

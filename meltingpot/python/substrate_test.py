@@ -17,14 +17,10 @@ import dataclasses
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import dm_env
 import numpy as np
 
 from meltingpot.python import substrate
-
-REWARD_SPEC = dm_env.specs.Array(shape=[], dtype=np.float64, name='REWARD')
-ACTION_SPEC = dm_env.specs.DiscreteArray(
-    num_values=1, dtype=np.int64, name='action')
+from meltingpot.python.utils.substrates import specs
 
 
 def _get_lua_randomization_map():
@@ -135,10 +131,10 @@ class SubstrateTest(parameterized.TestCase):
     with self.subTest('observation_spec'):
       self.assertLen(observation_spec, config.num_players)
     with self.subTest('action_spec'):
-      spec = ACTION_SPEC.replace(num_values=len(config.action_set))
-      self.assertEqual(action_spec, (spec,) * config.num_players)
+      spec = specs.action(len(config.action_set))
+      self.assertSequenceEqual(action_spec, [spec] * config.num_players)
     with self.subTest('reward_spec'):
-      self.assertEqual(reward_spec, [REWARD_SPEC] * config.num_players)
+      self.assertSequenceEqual(reward_spec, [specs.REWARD] * config.num_players)
 
   def test_observables(self):
     config = substrate.get_config('running_with_scissors_in_the_matrix')
@@ -165,6 +161,47 @@ class SubstrateTest(parameterized.TestCase):
 
     self.assertEqual(received, expected)
 
+  @parameterized.named_parameters(
+      (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
+  def test_observations_match_observation_spec(self, name):
+    config = substrate.get_config(name)
+    with substrate.build(config) as env:
+      observation_spec = env.observation_spec()[0]
+      timestep = env.reset()
+      observation = timestep.observation[0]
+
+    with self.subTest('missing'):
+      self.assertSameElements(observation_spec, observation)
+    for name, spec in observation_spec.items():
+      with self.subTest(name):
+        spec.validate(observation[name])
+
+  @parameterized.named_parameters(
+      (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
+  def test_spec_in_config_matches_environment(self, name):
+    config = substrate.get_config(name)
+    with substrate.build(config) as env:
+      action_spec = env.action_spec()[0]
+      discount_spec = env.discount_spec()
+      reward_spec = env.reward_spec()[0]
+      observation_spec = env.observation_spec()[0]
+
+    with self.subTest('action_spec'):
+      self.assertEqual(action_spec, config.action_spec)
+
+    with self.subTest('reward_spec'):
+      self.assertEqual(reward_spec, config.timestep_spec.reward)
+
+    with self.subTest('discount_spec'):
+      self.assertEqual(discount_spec, config.timestep_spec.discount)
+
+    with self.subTest('missing'):
+      self.assertSameElements(
+          observation_spec, config.timestep_spec.observation)
+
+    for name, spec in observation_spec.items():
+      with self.subTest(f'observation_spec {name}'):
+        self.assertEqual(spec, config.timestep_spec.observation[name])
 
 if __name__ == '__main__':
   absltest.main()

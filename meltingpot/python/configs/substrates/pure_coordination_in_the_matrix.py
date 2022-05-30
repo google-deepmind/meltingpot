@@ -31,6 +31,7 @@ from ml_collections import config_dict
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
+from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
@@ -582,5 +583,17 @@ def get_config(factory=create_lab2d_settings):
   config.global_observation_names = [
       "WORLD.RGB",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.OBSERVATION["RGB"],
+      "INVENTORY": specs.inventory(3),
+      "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "INTERACTION_INVENTORIES": specs.interaction_inventories(3),
+      "WORLD.RGB": specs.rgb(192, 200),
+  })
 
   return config
