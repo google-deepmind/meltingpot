@@ -61,6 +61,7 @@ from ml_collections import config_dict
 
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
+from meltingpot.python.utils.substrates import specs
 
 # The number of resources must match the (square) size of the matrix.
 NUM_RESOURCES = 3
@@ -593,5 +594,17 @@ def get_config():
   config.global_observation_names = [
       "WORLD.RGB",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.rgb(40, 40),
+      "INVENTORY": specs.inventory(3),
+      "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "INTERACTION_INVENTORIES": specs.interaction_inventories(3),
+      "WORLD.RGB": specs.rgb(120, 184),
+  })
 
   return config

@@ -29,7 +29,7 @@ from ml_collections import config_dict
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
-
+from meltingpot.python.utils.substrates import specs
 
 COOKING_TIME = 20
 items = ["empty", "tomato", "dish", "soup"]
@@ -968,5 +968,18 @@ def get_config(ascii_map: str):
   config.global_observation_names = [
       "WORLD.RGB",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  if ascii_map == "passable":
+    world_size = 72, 104
+  else:
+    world_size = 80, 72
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.rgb(40, 40),
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "WORLD.RGB": specs.rgb(*world_size),
+  })
 
   return config

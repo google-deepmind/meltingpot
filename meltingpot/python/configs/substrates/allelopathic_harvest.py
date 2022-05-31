@@ -41,6 +41,7 @@ from ml_collections import config_dict
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
+from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
@@ -969,5 +970,38 @@ def get_config(factory=create_lab2d_settings):
       "WORLD.BERRIES_PER_TYPE_BY_TASTE_OF_COLORER",
       "WORLD.WHO_ZAPPED_WHO",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.OBSERVATION["RGB"],
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      "COLOR_ID": specs.float64(),
+      "MOST_TASTY_BERRY_ID": specs.float64(),
+      "AVATAR_IDS_IN_VIEW": specs.int32(NUM_PLAYERS),
+      "AVATAR_IDS_IN_RANGE_TO_ZAP": specs.int32(NUM_PLAYERS),
+      "WORLD.RGB": specs.rgb(240, 232),
+      "WORLD.PLAYER_TIMEOUT_COUNT": specs.int32(NUM_PLAYERS, NUM_PLAYERS),
+      "WORLD.RIPE_BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
+      "WORLD.UNRIPE_BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
+      "WORLD.BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
+      "WORLD.COLOR_BY_COLOR_ZAP_COUNTS": specs.int32(
+          NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),
+      "WORLD.COLOR_BY_TASTE_ZAP_COUNTS": specs.int32(
+          NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),
+      "WORLD.TASTE_BY_COLOR_ZAP_COUNTS": specs.int32(
+          NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+      "WORLD.TASTE_BY_TASTE_ZAP_COUNTS": specs.int32(
+          NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+      "WORLD.COLORING_BY_PLAYER": specs.int32(NUM_BERRY_TYPES, NUM_PLAYERS),
+      "WORLD.EATING_TYPES_BY_PLAYER": specs.int32(NUM_BERRY_TYPES, NUM_PLAYERS),
+      "WORLD.BERRIES_PER_TYPE_BY_COLOR_OF_COLORER": specs.int32(
+          NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+      "WORLD.BERRIES_PER_TYPE_BY_TASTE_OF_COLORER": specs.int32(
+          NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+      "WORLD.WHO_ZAPPED_WHO": specs.int32(NUM_PLAYERS, NUM_PLAYERS),
+  })
 
   return config

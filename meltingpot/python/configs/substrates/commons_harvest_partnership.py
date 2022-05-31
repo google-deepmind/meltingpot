@@ -36,7 +36,7 @@ import numpy as np
 
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
-
+from meltingpot.python.utils.substrates import specs
 
 APPLE_RESPAWN_RADIUS = 2.0
 REGROWTH_PROBABILITIES = [0.0, 0.001, 0.005, 0.025]
@@ -517,5 +517,15 @@ def get_config():
   config.global_observation_names = [
       "WORLD.RGB",
   ]
+
+  # The specs of the environment (from a single-agent perspective).
+  config.action_spec = specs.action(len(ACTION_SET))
+  config.timestep_spec = specs.timestep({
+      "RGB": specs.OBSERVATION["RGB"],
+      "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      "POSITION": specs.OBSERVATION["POSITION"],
+      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      "WORLD.RGB": specs.rgb(336, 504),
+  })
 
   return config

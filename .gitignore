@@ -4,5 +4,6 @@
 # Ignore default venv created by install.sh
 venv/
 
+# Ignored because these are saved agent models added by the pettingzoo example.
 examples/results/
 *.egg-info

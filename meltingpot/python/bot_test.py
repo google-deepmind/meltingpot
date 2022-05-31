@@ -13,14 +13,8 @@
 # limitations under the License.
 """Tests of bots."""
 
-import collections
-import functools
-import threading
-
 from absl.testing import absltest
 from absl.testing import parameterized
-import dm_env
-import numpy as np
 import tree
 
 from meltingpot.python import bot as bot_factory
@@ -28,38 +22,13 @@ from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.scenarios import substrate_transforms
 
 
-_STEP_TYPE_SPEC = dm_env.specs.BoundedArray(
-    shape=(),
-    dtype=np.int64,
-    minimum=min(dm_env.StepType),
-    maximum=max(dm_env.StepType),
-)
-
-
-@functools.lru_cache(maxsize=None)
-def _calculate_specs(substrate):
-  config = substrate_factory.get_config(substrate)
-  environment = substrate_factory.build(config)
-  environment = substrate_transforms.with_tf1_bot_required_observations(
-      environment)
-  timestep_spec = dm_env.TimeStep(
-      step_type=_STEP_TYPE_SPEC,
-      reward=environment.reward_spec()[0],
-      discount=environment.discount_spec(),
-      observation=environment.observation_spec()[0])
-  action_spec = environment.action_spec()[0]
-  return timestep_spec, action_spec
-
-
-_lock = threading.Lock()
-_key_locks = collections.defaultdict(threading.Lock)
-
-
 def _get_specs(substrate):
-  with _lock:
-    key_lock = _key_locks[substrate]
-  with key_lock:
-    return _calculate_specs(substrate)
+  config = substrate_factory.get_config(substrate)
+  timestep_spec = substrate_transforms.tf1_bot_timestep_spec(
+      timestep_spec=config.timestep_spec,
+      action_spec=config.action_spec,
+      num_players=config.num_players)
+  return timestep_spec, config.action_spec
 
 
 class BotTest(parameterized.TestCase):
@@ -77,7 +46,10 @@ class BotTest(parameterized.TestCase):
     timestep = tree.map_structure(
         lambda spec: spec.generate_value(), timestep_spec)
     prev_state = policy.initial_state()
-    action, _ = policy.step(timestep, prev_state)
+    try:
+      action, _ = policy.step(timestep, prev_state)
+    except Exception:  # pylint: disable=broad-except
+      self.fail(f'Step with spec-defined timestep {timestep!r} failed.')
     try:
       action_spec.validate(action)
     except ValueError:
