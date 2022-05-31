@@ -112,17 +112,16 @@ NOTE: If you get a `ModuleNotFoundError: No module named 'meltingpot.python'`
       `PYTHONPATH` (e.g. by calling `export PYTHONPATH=$(pwd)`).
 
 ### Training agents
+We provide two example scripts using RLlib and [PettingZoo](https://github.com/Farama-Foundation/PettingZoo) with [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) (SB3) respectively. Note that Melting Pot is agnostic to how you train your agents, and as such, these scripts are not meant to be a suggestion on how to achieve good scores in the task suite.
 
-We provide a simple example using RLLib to train agents in self-play on a
-Melting Pot substrate. Note that Melting Pot is agnostic to how you train your
-agents, and this example is not meant to be a suggestion on how to achieve good
-scores in the task suite.
+#### RLlib
+This example uses [RLLib](https://github.com/ray-project/ray) to train agents in self-play on a Melting Pot substrate.
 
-First you will need to install the dependencies needed by the examples:
+First you will need to install the dependencies needed by the RLlib example:
 
 ```shell
 cd <meltingpot_root>
-pip3 install -e .[examples]
+pip3 install -e .[rllib]
 ```
 
 Then you can run the training experiment using:
@@ -130,6 +129,22 @@ Then you can run the training experiment using:
 ```shell
 cd <meltingpot_root>/examples/rllib
 python3 self_play_train.py
+```
+
+#### PettingZoo and Stable-Baselines3
+This example uses a PettingZoo wrapper with a fully parameter shared PPO agent from SB3.
+
+The PettingZoo wrapper can be used separately from SB3 and
+can be found at [meltingpot_env.py](examples/pettingzoo/meltingpot_env.py)
+
+```shell
+cd <meltingpot_root>
+pip3 install -e .[pettingzoo]
+```
+
+```shell
+cd <meltingpot_root>/examples/pettingzoo
+python3 sb3_train.py
 ```
 
 ### Documentation
