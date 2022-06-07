@@ -75,6 +75,16 @@ def int32(*shape: int, name: Optional[str] = None) -> dm_env.specs.Array:
   return dm_env.specs.Array(shape=shape, dtype=np.int32, name=name)
 
 
+def int64(*shape: int, name: Optional[str] = None) -> dm_env.specs.Array:
+  """Returns the spec for an np.int32 tensor.
+
+  Args:
+    *shape: the shape of the tensor.
+    name: optional name for the spec.
+  """
+  return dm_env.specs.Array(shape=shape, dtype=np.int64, name=name)
+
+
 def action(num_actions: int) -> dm_env.specs.DiscreteArray:
   """Returns the spec for an action.
 
