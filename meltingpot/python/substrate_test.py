@@ -20,7 +20,7 @@ from absl.testing import parameterized
 import numpy as np
 
 from meltingpot.python import substrate
-from meltingpot.python.utils.substrates import specs
+from meltingpot.python.testing import substrates as test_utils
 
 
 def _get_lua_randomization_map():
@@ -36,7 +36,7 @@ _LUA_RANDOMIZED_LINE = 1
 _LUA_RANDOMIZATION_MAP = _get_lua_randomization_map()
 
 
-class SubstrateTest(parameterized.TestCase):
+class GeneralTestCase(parameterized.TestCase):
 
   @parameterized.product(seed=[42, 123, 1337, 12481632])
   def test_seed_causes_determinism(self, seed):
@@ -114,28 +114,6 @@ class SubstrateTest(parameterized.TestCase):
           AssertionError, msg=f'Episode {episode} match {obs1} == {obs2}'):
         np.testing.assert_equal(obs1, obs2)
 
-  @parameterized.named_parameters(
-      (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
-  def test_substrate_creation(self, substrate_name):
-    config = substrate.get_config(substrate_name)
-    with substrate.build(config) as env:
-      reset_timestep = env.reset()
-      action_spec = env.action_spec()
-      observation_spec = env.observation_spec()
-      reward_spec = env.reward_spec()
-
-    with self.subTest('reset_reward'):
-      self.assertNotEqual(reset_timestep.reward, None)
-    with self.subTest('reset_discount'):
-      self.assertNotEqual(reset_timestep.discount, None)
-    with self.subTest('observation_spec'):
-      self.assertLen(observation_spec, config.num_players)
-    with self.subTest('action_spec'):
-      spec = specs.action(len(config.action_set))
-      self.assertSequenceEqual(action_spec, [spec] * config.num_players)
-    with self.subTest('reward_spec'):
-      self.assertSequenceEqual(reward_spec, [specs.REWARD] * config.num_players)
-
   def test_observables(self):
     config = substrate.get_config('running_with_scissors_in_the_matrix')
     with substrate.build(config) as env:
@@ -161,47 +139,36 @@ class SubstrateTest(parameterized.TestCase):
 
     self.assertEqual(received, expected)
 
-  @parameterized.named_parameters(
-      (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
-  def test_observations_match_observation_spec(self, name):
+
+@parameterized.named_parameters(
+    (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
+class SubstrateTestCase(test_utils.SubstrateTestCase):
+
+  def test_matches_spec(self, name):
     config = substrate.get_config(name)
     with substrate.build(config) as env:
-      observation_spec = env.observation_spec()[0]
-      timestep = env.reset()
-      observation = timestep.observation[0]
+      with self.subTest('discount'):
+        self.assert_discount_matches_spec(env)
+      with self.subTest('reward'):
+        self.assert_reward_matches_spec(env)
+      with self.subTest('observation'):
+        self.assert_observation_matches_spec(env)
 
-    with self.subTest('missing'):
-      self.assertSameElements(observation_spec, observation)
-    for name, spec in observation_spec.items():
-      with self.subTest(name):
-        spec.validate(observation[name])
-
-  @parameterized.named_parameters(
-      (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
   def test_spec_in_config_matches_environment(self, name):
     config = substrate.get_config(name)
+    action_spec = [config.action_spec] * config.num_players
+    reward_spec = [config.timestep_spec.reward] * config.num_players
+    observation_spec = [
+        dict(config.timestep_spec.observation)] * config.num_players
     with substrate.build(config) as env:
-      action_spec = env.action_spec()[0]
-      discount_spec = env.discount_spec()
-      reward_spec = env.reward_spec()[0]
-      observation_spec = env.observation_spec()[0]
-
-    with self.subTest('action_spec'):
-      self.assertEqual(action_spec, config.action_spec)
-
-    with self.subTest('reward_spec'):
-      self.assertEqual(reward_spec, config.timestep_spec.reward)
-
-    with self.subTest('discount_spec'):
-      self.assertEqual(discount_spec, config.timestep_spec.discount)
-
-    with self.subTest('missing'):
-      self.assertSameElements(
-          observation_spec, config.timestep_spec.observation)
-
-    for name, spec in observation_spec.items():
-      with self.subTest(f'observation_spec {name}'):
-        self.assertEqual(spec, config.timestep_spec.observation[name])
+      with self.subTest('discount_spec'):
+        self.assertSequenceEqual(env.action_spec(), action_spec)
+      with self.subTest('reward_spec'):
+        self.assertSequenceEqual(env.reward_spec(), reward_spec)
+      with self.subTest('discount_spec'):
+        self.assertEqual(env.discount_spec(), config.timestep_spec.discount)
+      with self.subTest('observation_spec'):
+        self.assertSequenceEqual(env.observation_spec(), observation_spec)
 
 if __name__ == '__main__':
   absltest.main()

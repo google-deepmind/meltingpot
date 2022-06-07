@@ -17,56 +17,41 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from meltingpot.python import scenario as scenario_factory
+from meltingpot.python.testing import substrates as test_utils
 
 
-class ScenarioTest(parameterized.TestCase):
+@parameterized.named_parameters(
+    (name, name) for name in scenario_factory.AVAILABLE_SCENARIOS)
+class ScenarioTest(test_utils.SubstrateTestCase):
 
-  @parameterized.named_parameters(
-      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
-  def test_observations_match_observation_spec(self, name):
+  def test_matches_spec(self, name):
     config = scenario_factory.get_config(name)
     with scenario_factory.build(config) as env:
-      observation_spec = env.observation_spec()[0]
-      timestep = env.reset()
-      observation = timestep.observation[0]
+      with self.subTest('discount'):
+        self.assert_discount_matches_spec(env)
+      with self.subTest('reward'):
+        self.assert_reward_matches_spec(env)
+      with self.subTest('observation'):
+        self.assert_observation_matches_spec(env)
 
-    with self.subTest('missing'):
-      self.assertSameElements(observation_spec, observation)
-    for name, spec in observation_spec.items():
-      with self.subTest(name):
-        spec.validate(observation[name])
-
-  @parameterized.named_parameters(
-      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
   def test_spec_in_config_matches_environment(self, name):
     config = scenario_factory.get_config(name)
+    action_spec = [config.action_spec] * config.num_players
+    reward_spec = [config.timestep_spec.reward] * config.num_players
+    observation_spec = [
+        dict(config.timestep_spec.observation)] * config.num_players
     with scenario_factory.build(config) as env:
-      action_spec = env.action_spec()[0]
-      discount_spec = env.discount_spec()
-      reward_spec = env.reward_spec()[0]
-      observation_spec = env.observation_spec()[0]
+      with self.subTest('discount_spec'):
+        self.assertSequenceEqual(env.action_spec(), action_spec)
+      with self.subTest('reward_spec'):
+        self.assertSequenceEqual(env.reward_spec(), reward_spec)
+      with self.subTest('discount_spec'):
+        self.assertEqual(env.discount_spec(), config.timestep_spec.discount)
+      with self.subTest('observation_spec'):
+        self.assertSequenceEqual(env.observation_spec(), observation_spec)
 
-    with self.subTest('action_spec'):
-      self.assertEqual(action_spec, config.action_spec)
-
-    with self.subTest('reward_spec'):
-      self.assertEqual(reward_spec, config.timestep_spec.reward)
-
-    with self.subTest('discount_spec'):
-      self.assertEqual(discount_spec, config.timestep_spec.discount)
-
-    with self.subTest('missing'):
-      self.assertSameElements(
-          observation_spec, config.timestep_spec.observation)
-
-    for name, spec in observation_spec.items():
-      with self.subTest(f'observation_spec {name}'):
-        self.assertEqual(spec, config.timestep_spec.observation[name])
-
-  @parameterized.named_parameters(
-      (scenario, scenario) for scenario in scenario_factory.AVAILABLE_SCENARIOS)
-  def test_permitted_observations(self, scenario):
-    scenario_config = scenario_factory.get_config(scenario)
+  def test_permitted_observations(self, name):
+    scenario_config = scenario_factory.get_config(name)
     self.assertContainsSubset(
         scenario_config.timestep_spec.observation,
         scenario_factory.PERMITTED_OBSERVATIONS)
