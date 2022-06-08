@@ -15,46 +15,27 @@
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import tree
 
 from meltingpot.python import bot as bot_factory
-from meltingpot.python import substrate as substrate_factory
-from meltingpot.python.utils.scenarios import substrate_transforms
+from meltingpot.python import scenario as scenario_factory
+from meltingpot.python.testing import bots as test_utils
 
 
 def _get_specs(substrate):
-  config = substrate_factory.get_config(substrate)
-  timestep_spec = substrate_transforms.tf1_bot_timestep_spec(
-      timestep_spec=config.timestep_spec,
-      action_spec=config.action_spec,
-      num_players=config.num_players)
-  return timestep_spec, config.action_spec
+  scenario = next(iter(scenario_factory.SCENARIOS_BY_SUBSTRATE[substrate]))
+  config = scenario_factory.get_config(scenario)
+  return config.background_timestep_spec, config.background_action_spec
 
 
-class BotTest(parameterized.TestCase):
+@parameterized.named_parameters(
+    (name, name) for name in bot_factory.AVAILABLE_BOTS)
+class BotTest(test_utils.BotTestCase):
 
-  @parameterized.named_parameters(
-      (bot, bot) for bot in bot_factory.AVAILABLE_BOTS
-  )
-  def test_step_without_error(self, bot_name):
-    bot_config = bot_factory.get_config(bot_name)
+  def test_step_without_error(self, name):
+    bot_config = bot_factory.get_config(name)
     timestep_spec, action_spec = _get_specs(bot_config.substrate)
     with bot_factory.build(bot_config) as policy:
       self.assert_compatible(policy, timestep_spec, action_spec)
-
-  def assert_compatible(self, policy, timestep_spec, action_spec):
-    timestep = tree.map_structure(
-        lambda spec: spec.generate_value(), timestep_spec)
-    prev_state = policy.initial_state()
-    try:
-      action, _ = policy.step(timestep, prev_state)
-    except Exception:  # pylint: disable=broad-except
-      self.fail(f'Step with spec-defined timestep {timestep!r} failed.')
-    try:
-      action_spec.validate(action)
-    except ValueError:
-      self.fail(f'Returned action {action!r} does not match action_spec '
-                f'{action_spec!r}.')
 
 
 if __name__ == '__main__':
