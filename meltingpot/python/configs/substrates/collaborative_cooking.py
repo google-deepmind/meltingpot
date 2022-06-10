@@ -777,7 +777,6 @@ def create_game_objects(ascii_map_string):
         ascii_map_string, char)
     for transform in transforms:
       # Add inventory game object for holding and visualising items.
-      # TODO(b/192925080): generalise if container is present.
       if char == "#" or char == "O" or char == "D":
         inventory_object = copy.deepcopy(PREFABS["inventory"])
         go_transform = game_object_utils.get_first_named_component(
