@@ -23,7 +23,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from examples.pettingzoo import meltingpot_env
+from examples.pettingzoo import utils
 from meltingpot.python import substrate
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
@@ -85,7 +85,7 @@ def main():
   # Config
   env_name = "commons_harvest_open"
   env_config = substrate.get_config(env_name)
-  env = meltingpot_env.parallel_env(env_config)
+  env = utils.parallel_env(env_config)
   rollout_len = 1000
   total_timesteps = 2000000
   num_agents = env.max_num_agents
@@ -112,7 +112,7 @@ def main():
   verbose = 3
   model_path = None  # Replace this with a saved model
 
-  env = meltingpot_env.parallel_env(
+  env = utils.parallel_env(
       max_cycles=rollout_len,
       env_config=env_config,
   )
@@ -127,7 +127,7 @@ def main():
   env = vec_env.VecMonitor(env)
   env = vec_env.VecTransposeImage(env, True)
 
-  eval_env = meltingpot_env.parallel_env(
+  eval_env = utils.parallel_env(
       max_cycles=rollout_len,
       env_config=env_config,
   )
