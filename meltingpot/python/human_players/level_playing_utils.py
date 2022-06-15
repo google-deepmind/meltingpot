@@ -260,7 +260,7 @@ def run_episode(
     player_prefixes = [f'{i+1}' for i in range(player_count)]
   else:
     player_count = len(player_prefixes)
-  print(f'Running an episode with {player_count} players.')
+  print(f'Running an episode with {player_count} players: {player_prefixes}.')
   env = env_builder(**full_config)
 
   if len(player_prefixes) != player_count:
@@ -314,7 +314,7 @@ def run_episode(
           if event.key == pygame.K_TAB:
             player_index = (player_index + 1) % player_count
           break
-    player_prefix = player_prefixes[player_index]
+    player_prefix = player_prefixes[player_index] if player_prefixes else ''
 
     if stop:
       break
