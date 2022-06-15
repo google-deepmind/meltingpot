@@ -450,6 +450,11 @@ function Avatar:disallowMovementUntil(numFrames)
   self._freezeCounter = numFrames
 end
 
+--[[ Return true if movement is allowed and false otherwise.]]
+function Avatar:isMovementAllowed()
+  return self._movementAllowed
+end
+
 --[[ Remove the avatar (set it to wait state) after `delay` elapsed timesteps.]]
 function Avatar:removeAfterDelay(delay)
   self._removalCounter = delay
