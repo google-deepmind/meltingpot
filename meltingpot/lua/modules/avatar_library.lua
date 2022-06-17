@@ -87,6 +87,10 @@ function Avatar:__init__(kwargs)
       -- `skipWaitStateRewards` (bool) default True. When true, do not reward
       -- avatars when they are in wait state.
       {'skipWaitStateRewards', args.default(true), args.booleanType},
+      -- `randomizeInitialOrientation` (bool) default True. Avatar orientations
+      -- are assigned randomly at the start of each episode. If you instead
+      -- set this to false then initial Avatar orientation is always North.
+      {'randomizeInitialOrientation', args.default(true), args.booleanType},
   })
   Avatar.Base.__init__(self, kwargs)
   self._config.kwargs = kwargs
@@ -107,6 +111,7 @@ function Avatar:__init__(kwargs)
   self._config.liveStatesSet = set.Set(self._config.liveStates)
 
   self._config.skipWaitStateRewards = kwargs.skipWaitStateRewards
+  self._config.randomizeInitialOrientation = kwargs.randomizeInitialOrientation
 end
 
 -- Call initializeVolatileVariables during `awake` and `reset`.
@@ -282,7 +287,11 @@ function Avatar:start(locator)
       actions = actions
   }
   local targetTransform = self.gameObject._grid:transform(locator)
-  targetTransform.orientation = random:choice(_COMPASS)
+  if self._config.randomizeInitialOrientation then
+    targetTransform.orientation = random:choice(_COMPASS)
+  else
+    targetTransform.orientation = 'N'
+  end
 
   local uniqueState = self.gameObject:getUniqueState(
     self.gameObject:getState())
