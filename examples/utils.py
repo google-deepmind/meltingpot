@@ -13,7 +13,7 @@
 # limitations under the License.
 """Shared utils for third-party library examples."""
 
-from typing import Any, Mapping
+from typing import Any, List, Mapping
 
 import dm_env
 from gym import spaces
@@ -24,21 +24,22 @@ PLAYER_STR_FORMAT = 'player_{index}'
 _WORLD_PREFIX = 'WORLD.'
 
 
-def timestep_to_observations(timestep: dm_env.TimeStep) -> Mapping[str, Any]:
+def timestep_to_observations(timestep: dm_env.TimeStep,
+                             individual_obs: List[str]) -> Mapping[str, Any]:
   gym_observations = {}
   for index, observation in enumerate(timestep.observation):
     gym_observations[PLAYER_STR_FORMAT.format(index=index)] = {
         key: value
         for key, value in observation.items()
-        if _WORLD_PREFIX not in key
+        if key in individual_obs
     }
   return gym_observations
 
 
 def remove_world_observations_from_space(
-    observation: spaces.Dict) -> spaces.Dict:
+    observation: spaces.Dict, individual_obs: List[str]) -> spaces.Dict:
   return spaces.Dict({
-      key: observation[key] for key in observation if _WORLD_PREFIX not in key
+      key: observation[key] for key in observation if key in individual_obs
   })
 
 

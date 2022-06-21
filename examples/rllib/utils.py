@@ -13,7 +13,7 @@
 # limitations under the License.
 """MeltingPotEnv as a MultiAgentEnv wrapper to interface with RLLib."""
 
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
 import dm_env
 import dmlab2d
@@ -41,13 +41,14 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     Converts a tuple to a dictionary and optionally removes non-player observations.
     """
     return spaces.Dict({
-        agent_id: utils.remove_world_observations_from_space(input[i])
+        agent_id: utils.remove_world_observations_from_space(input[i], self._individual_obs)
         if remove_world_observations else input[i]
         for i, agent_id in enumerate(self._ordered_agent_ids)
     })
 
-  def __init__(self, env: dmlab2d.Environment):
+  def __init__(self, env: dmlab2d.Environment, individual_obs: List[str]):
     self._env = env
+    self._individual_obs = individual_obs
     self._num_players = len(self._env.observation_spec())
     self._ordered_agent_ids = [
         PLAYER_STR_FORMAT.format(index=index)
@@ -66,7 +67,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   def reset(self):
     """See base class."""
     timestep = self._env.reset()
-    return utils.timestep_to_observations(timestep)
+    return utils.timestep_to_observations(timestep, self._individual_obs)
 
   def step(self, action):
     """See base class."""
@@ -79,7 +80,8 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     done = {'__all__': True if timestep.last() else False}
     info = {}
 
-    observations = utils.timestep_to_observations(timestep)
+    observations = utils.timestep_to_observations(timestep,
+                                                  self._individual_obs)
     return observations, rewards, done, info
 
   def close(self):
@@ -90,11 +92,10 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     """Returns the underlying DM Lab2D environment."""
     return self._env
 
-
 def env_creator(env_config):
   """Outputs an environment for registering."""
   env = substrate.build(config_dict.ConfigDict(env_config))
-  env = MeltingPotEnv(env)
+  env = MeltingPotEnv(env, env_config["individual_observation_names"])
   return env
 
 
@@ -106,16 +107,19 @@ class RayModelPolicy(policy.Policy):
 
   def __init__(self,
                model: trainer.Trainer,
+               individual_obs: List[str],
                policy_id: str = DEFAULT_POLICY_ID) -> None:
     """Initialize a policy instance.
 
     Args:
       model: An rllib.trainer.Trainer checkpoint.
+      individual_obs: observation keys for the agent (not global observations)
       policy_id: Which policy to use (if trained in multi_agent mode)
     """
     self._model = model
-    self._prev_action = 0
+    self._individual_obs = individual_obs
     self._policy_id = policy_id
+    self._prev_action = 0
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: policy.State) -> Tuple[int, policy.State]:
@@ -123,7 +127,7 @@ class RayModelPolicy(policy.Policy):
     observations = {
         key: value
         for key, value in timestep.observation.items()
-        if 'WORLD' not in key
+        if key in self._individual_obs
     }
 
     action, state, _ = self._model.compute_single_action(

@@ -473,7 +473,7 @@ def get_config():
   config.action_set = ACTION_SET
   # Observation format configuration.
   config.individual_observation_names = [
-      "RGB",
+      "WORLD.RGB",
       # "READY_TO_SHOOT",
       # "POSITION",
       # "ORIENTATION",
