@@ -61,7 +61,9 @@ for an example installation script):
 
     If there is no appropriate wheel (e.g. M1 chipset) you will need to install
     [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel yourself
-    using `bazel build -c opt --config=lua5_1 //dmlab2d:dmlab2d_wheel`.
+    (see
+    [`install.sh`](https://github.com/deepmind/meltingpot/blob/main/install.sh)
+    for an example installation script that can be adapted to your setup).
 
 3.  Test the `dmlab2d` installation in `python3`:
 
