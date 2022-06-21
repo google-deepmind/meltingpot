@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Runs the bots trained in self_play_train.py and renders in pygame.
+"""
+Runs the bots trained in self_play_train.py and renders in pygame.
 
 You must provide experiment_state, expected to be
 ~/ray_results/PPO/experiment_state_YOUR_RUN_ID.json
@@ -27,6 +28,7 @@ from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
 from ray.tune.registry import register_env
 
 from examples.rllib import utils
+from meltingpot.python.human_players import level_playing_utils
 
 
 def main():
@@ -60,8 +62,14 @@ def main():
   # Create a new environment to visualise
   env = utils.env_creator(config["env_config"]).get_dmlab2d_env()
 
+  human = False
   num_bots = config["env_config"]["num_players"]
-  bots = [utils.RayModelPolicy(trainer, "av")] * num_bots
+  if human:
+    num_bots = num_bots - 1
+  bots = [
+      utils.RayModelPolicy(
+          trainer, config["env_config"]["individual_observation_names"], "av")
+  ] * num_bots
 
   timestep = env.reset()
   states = [bot.initial_state() for bot in bots]
@@ -91,6 +99,21 @@ def main():
     pygame.display.update()
     clock.tick(fps)
 
+    if human:
+      while True:
+        a = 0
+        for event in pygame.event.get():
+          if event.type == pygame.KEYDOWN:
+            a = level_playing_utils.get_direction_pressed()
+            break
+
+        if a != 0:
+          break
+
+      human_action = [a]
+    else:
+      human_action = []
+
     for i, bot in enumerate(bots):
       timestep_bot = dm_env.TimeStep(
           step_type=timestep.step_type,
@@ -100,7 +123,8 @@ def main():
 
       actions[i], states[i] = bot.step(timestep_bot, states[i])
 
-    timestep = env.step(actions)
+    timestep = env.step(actions + human_action)
+    print(actions + human_action, timestep.reward)
 
 
 if __name__ == "__main__":
