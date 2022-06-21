@@ -56,6 +56,9 @@ def main():
   config = experiment.best_config
   checkpoint_path = experiment.best_checkpoint
 
+  # config["explore"] = False
+  # config["in_evaluation"] = True
+
   trainer = get_trainer_class(agent_algorithm)(config=config)
   trainer.restore(checkpoint_path)
 
