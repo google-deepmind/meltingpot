@@ -71,4 +71,4 @@ def spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
   elif isinstance(spec, dict):
     return spaces.Dict({key: spec_to_space(s) for key, s in spec.items()})
   else:
-    raise ValueError('Unexpected spec: {}'.format(spec))
+    raise ValueError('Unexpected spec of type {}: {}'.format(type(spec), spec))

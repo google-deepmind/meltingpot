@@ -48,8 +48,6 @@ def main():
 
   # 4. Extract space dimensions
   test_env = utils.env_creator(config["env_config"])
-  obs_space = test_env.single_player_observation_space()
-  act_space = test_env.single_player_action_space()
 
   # 5. Configuration for multiagent setup with policy sharing:
   config["multiagent"] = {
@@ -57,11 +55,12 @@ def main():
           "av":
               PolicySpec(
                   policy_class=None,  # use default policy
-                  observation_space=obs_space,
-                  action_space=act_space,
+                  observation_space=test_env.observation_space["player_0"],
+                  action_space=test_env.action_space["player_0"],
                   config={}),
       },
-      "policy_mapping_fn": lambda agent_id, **kwargs: "av"
+      "policy_mapping_fn": lambda agent_id, episode, worker, **kwargs: "av",
+      "count_steps_by": "env_steps",
   }
 
   # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.

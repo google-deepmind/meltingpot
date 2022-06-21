@@ -66,7 +66,7 @@ setuptools.setup(
     extras_require={
         'rllib': [
             'gym',
-            'ray[rllib,default]==1.11.0',
+            'ray[rllib,default]==1.13.0',
         ],
         'pettingzoo': [
             'pettingzoo>=1.18.0', 'supersuit>=3.3.0', 'stable-baselines3'
