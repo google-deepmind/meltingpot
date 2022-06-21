@@ -7,3 +7,7 @@ venv/
 # Ignored because these are saved agent models added by the pettingzoo example.
 examples/results/
 *.egg-info
+
+# Ignore build & assets
+build
+assets
