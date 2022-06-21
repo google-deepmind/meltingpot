@@ -60,4 +60,5 @@ SUBSTRATES: AbstractSet[str] = frozenset({
     'territory_open',
     'territory_rooms',
     # keep-sorted end
+    'commons_harvest_open_simple',
 })
