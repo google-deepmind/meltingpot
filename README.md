@@ -49,7 +49,7 @@ for an example installation script):
 
     ```shell
     python3 -m venv "${HOME}/meltingpot_venv"
-    source meltingpot_venv/bin/activate
+    source "${HOME}/meltingpot_venv/bin/activate"
     ```
 
 2.  Install `dmlab2d` from the
