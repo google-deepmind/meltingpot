@@ -38,7 +38,7 @@ function check_setup() {
   gcc --version | check_version_gt '8'
 
   echo -e "\nChecking bazel version..."
-  bazel --version | check_version_gt '4.1'
+  bazel --version | check_version_gt '5.2.0'
 }
 
 
@@ -64,6 +64,7 @@ function install_dmlab2d() {
       --compilation_mode=opt \
       --dynamic_mode=off \
       --config="${LUA_VERSION}" \
+      --subcommands \
       --verbose_failures \
       --experimental_ui_max_stdouterr_bytes=-1 \
       --sandbox_debug \

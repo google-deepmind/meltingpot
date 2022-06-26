@@ -13,7 +13,10 @@
 # limitations under the License.
 """Install script for setuptools."""
 
+import platform
 import setuptools
+
+IS_M1_MAC = platform.system() == 'Darwin' and platform.machine() == 'arm64'
 
 setuptools.setup(
     name='dm-meltingpot',
@@ -61,7 +64,7 @@ setuptools.setup(
         'numpy',
         'pygame',
         'rx',
-        'tensorflow',
+        'tensorflow-macos' if IS_M1_MAC else 'tensorflow',
     ],
     extras_require={
         'rllib': [
