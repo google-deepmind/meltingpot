@@ -33,14 +33,14 @@ from meltingpot.python import substrate
 # rllib, so they used a different configuration for the second convolutional
 # layer. It was 32 channels, [4, 4] kernel shape, and stride = 1.
 custom_model = {
-    "conv_filters": [[16, [8, 8], 8], [128, [7, 7], 1]],
-    "conv_activation": "relu",
-    "post_fcnet_hiddens": [128],
-    "post_fcnet_activation": "relu",
-    "use_lstm": True,
-    "lstm_use_prev_action": True,
-    "lstm_use_prev_reward": False,
-    "lstm_cell_size": 128
+  "conv_filters": [[16, [8, 8], 8], [128, [7, 7], 1]],
+  "conv_activation": "relu",
+  "post_fcnet_hiddens": [128],
+  "post_fcnet_activation": "relu",
+  "use_lstm": True,
+  "lstm_use_prev_action": True,
+  "lstm_use_prev_reward": False,
+  "lstm_cell_size": 128
 }
 
 
@@ -67,32 +67,36 @@ def main():
 
   # Configure the PPO Alogrithm
   config = PPOConfig().training(
-      model=custom_model,
-      gamma=0.99,
-      lr=1e-4
-      # Previously was 2 * config["num_workers"] * horizon *
-      # config["num_envs_per_worker"]
-      # train_batch_size=4000, # Default=4000
-      # num_sgd_iter=30, # Default=30
-      # sgd_minibatch_size = 128 # Default=128
+    model=custom_model,
+    gamma=0.99,
+    lr=1e-4
+    # Previously was 2 * config["num_workers"] * horizon *
+    # config["num_envs_per_worker"]
+    # train_batch_size=4000, # Default=4000
+    # num_sgd_iter=30, # Default=30
+    # sgd_minibatch_size = 128 # Default=128
   ).resources(
-      # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
-      num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0"))
+    # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
+    num_gpus=int(os.environ.get("RLLIB_NUM_GPUS", "0")),
+    num_cpus_per_worker=1
   ).rollouts(
-      num_rollout_workers=0,
-      horizon=horizon,
-      batch_mode="complete_episodes",
-      rollout_fragment_length=horizon
+    num_rollout_workers=0,
+    horizon=horizon,
+    batch_mode="complete_episodes",
+    rollout_fragment_length=horizon
   ).environment(
-    env="meltingpot", clip_rewards=False, normalize_actions=True
+    env="meltingpot",
+    clip_rewards=False,
+    normalize_actions=True,
+    env_config=env_config
   ).multi_agent(
     policies={
-        "av":
-            PolicySpec(
-                policy_class=None,  # use default policy
-                observation_space=test_env.observation_space["player_0"],
-                action_space=test_env.action_space["player_0"],
-                config={}),
+      "av":
+      PolicySpec(
+        policy_class=None,  # use default policy
+        observation_space=test_env.observation_space["player_0"],
+        action_space=test_env.action_space["player_0"],
+        config={}),
     },
     policy_mapping_fn=lambda agent_id, episode, worker, **kwargs: "av",
     count_steps_by="env_steps"
@@ -102,29 +106,29 @@ def main():
   ray.init(logging_level="info")
 
   scheduler = PopulationBasedTraining(
-      # time_attr="time_total_s",
-      time_attr="training_iteration",
-      metric="episode_reward_mean",
-      mode="max",
-      perturbation_interval=5,
-      burn_in_period=10,
-      hyperparam_mutations={
-          "lr": [1e-3, 3e-4, 1e-4, 3e-5, 1e-5],
-      },
-      quantile_fraction=0.25,
-      resample_probability=0.25,
-      log_config=True)
+    # time_attr="time_total_s",
+    time_attr="training_iteration",
+    metric="episode_reward_mean",
+    mode="max",
+    perturbation_interval=5,
+    burn_in_period=10,
+    hyperparam_mutations={
+      "lr": [1e-3, 3e-4, 1e-4, 3e-5, 1e-5],
+    },
+    quantile_fraction=0.25,
+    resample_probability=0.25,
+    log_config=True)
 
   # TODO: use torch or tf2
   tune.run(
-      "PPO",
-      stop={"training_iteration": 1000},
-      scheduler=scheduler,
-      config=config.to_dict(),
-      log_to_file=True,
-      checkpoint_freq=25,
-      checkpoint_at_end=True,
-      num_samples=4,  # how many trials to run concurrentl
+    "PPO",
+    stop={"training_iteration": 1000},
+    scheduler=scheduler,
+    config=config.to_dict(),
+    log_to_file=True,
+    checkpoint_freq=25,
+    checkpoint_at_end=True,
+    num_samples=4,  # how many trials to run concurrentl
   )
 
 
