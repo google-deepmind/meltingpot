@@ -1,9 +1,14 @@
 # Ignore byte-compiled Python code
 *.py[cod]
 
-# Ignore default venv created by install.sh
+# Setup files created by install.sh
 venv/
+assets/
+lab2d/
 
 # Ignored because these are saved agent models added by the pettingzoo example.
 examples/results/
 *.egg-info
+
+# Build output
+build/
