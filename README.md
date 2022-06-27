@@ -53,10 +53,10 @@ for an example installation script):
     ```
 
 2.  Install `dmlab2d` from the
-    [dmlab2d wheel files](https://github.com/deepmind/lab2d/releases/tag/release_candidate_2021-07-13), e.g.:
+    [dmlab2d wheel files](https://github.com/deepmind/lab2d/releases/tag/release_candidate_2022-03-24), e.g.:
 
     ```shell
-    pip3 install https://github.com/deepmind/lab2d/releases/download/release_candidate_2021-07-13/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl
+    pip3 install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl
     ```
 
     If there is no appropriate wheel (e.g. M1 chipset) you will need to install
