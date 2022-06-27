@@ -7,9 +7,13 @@ FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
 RUN pip install pytest
 
 # Install lab2d (appropriate version for architecture)
-RUN if [[ $(dpkg --print-architecture) = arm64 ]] ;\
-  then pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-macosx_10_15_x86_64.whl ; \
-  else pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl ; \
+RUN if [[ "$(uname -m)" != 'x86_64' ]] ; then \
+  echo "No Lab2d wheel available for $(uname -m) machines." >&2 \
+  exit 1 \
+  else if [[ "$(uname -s)" == 'Linux' ]]; then \
+  pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl \
+  else \
+  pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-macosx_10_15_x86_64.whl \
   fi
 
 # Download assets
