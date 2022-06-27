@@ -43,7 +43,9 @@ documentation.
 Melting Pot is built on top of
 [DeepMind Lab2D](https://github.com/deepmind/lab2d). 
 
-### Devcontainer
+### Devcontainer (x86 only)
+
+*NOTE: This Devcontainer only works for x86 platforms. For arm64 (newer M1 Macs) users will have to follow the manual installation steps.*
 
 This project includes a pre-configured development environment ([devcontainer](https://containers.dev)).
 
