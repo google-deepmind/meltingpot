@@ -41,7 +41,21 @@ documentation.
 ## Installation
 
 Melting Pot is built on top of
-[DeepMind Lab2D](https://github.com/deepmind/lab2d). The installation steps are
+[DeepMind Lab2D](https://github.com/deepmind/lab2d). 
+
+### Devcontainer (x86 only)
+
+*NOTE: This Devcontainer only works for x86 platforms. For arm64 (newer M1 Macs) users will have to follow the manual installation steps.*
+
+This project includes a pre-configured development environment ([devcontainer](https://containers.dev)).
+
+You can launch a working development environment with one click, using e.g. [Github
+Codespaces](https://github.com/features/codespaces) or the [VSCode
+Containers](https://code.visualstudio.com/docs/remote/containers-tutorial) extension.
+
+### Manual install
+
+The installation steps are
 as follows (see [`install.sh`](https://github.com/deepmind/meltingpot/blob/main/install.sh)
 for an example installation script):
 
