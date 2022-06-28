@@ -33,6 +33,22 @@ PLAYER_STR_FORMAT = 'player_{index}'
 class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   """An adapter between the Melting Pot substrates and RLLib MultiAgentEnv."""
 
+  def _convert_spaces_tuple_to_dict(
+      self,
+      input_tuple: spaces.Tuple,
+      remove_world_observations: bool = False) -> spaces.Dict:
+    """Returns spaces tuple converted to a dictionary.
+
+    Args:
+      input_tuple: tuple to convert.
+      remove_world_observations: If True will remove non-player observations.
+    """
+    return spaces.Dict({
+        agent_id: (utils.remove_world_observations_from_space(input_tuple[i])
+                   if remove_world_observations else input_tuple[i])
+        for i, agent_id in enumerate(self._ordered_agent_ids)
+    })
+
   def __init__(self, env: dmlab2d.Environment):
     self._env = env
     self._num_players = len(self._env.observation_spec())
@@ -40,7 +56,16 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
         PLAYER_STR_FORMAT.format(index=index)
         for index in range(self._num_players)
     ]
+    # RLLib requires environments to have the following member variables:
+    # observation_space, action_space, and _agent_ids
     self._agent_ids = set(self._ordered_agent_ids)
+    # RLLib expects a dictionary of agent_id to observation or action,
+    # Melting Pot uses a tuple, so we convert
+    self.observation_space = self._convert_spaces_tuple_to_dict(
+        utils.spec_to_space(self._env.observation_spec()),
+        remove_world_observations=True)
+    self.action_space = self._convert_spaces_tuple_to_dict(
+        utils.spec_to_space(self._env.action_spec()))
     super().__init__()
 
   def reset(self):
@@ -56,7 +81,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
         agent_id: timestep.reward[index]
         for index, agent_id in enumerate(self._ordered_agent_ids)
     }
-    done = {'__all__': True if timestep.last() else False}
+    done = {'__all__': timestep.last()}
     info = {}
 
     observations = utils.timestep_to_observations(timestep)
@@ -70,15 +95,6 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     """Returns the underlying DM Lab2D environment."""
     return self._env
 
-  def single_player_observation_space(self) -> spaces.Space:
-    """The observation space for a single player in this environment."""
-    return utils.remove_world_observations_from_space(
-        utils.spec_to_space(self._env.observation_spec()[0]))
-
-  def single_player_action_space(self):
-    """The action space for a single player in this environment."""
-    return utils.spec_to_space(self._env.action_spec()[0])
-
 
 def env_creator(env_config):
   """Outputs an environment for registering."""
@@ -88,7 +104,7 @@ def env_creator(env_config):
 
 
 class RayModelPolicy(policy.Policy):
-  """Policy wrapping an rllib model for inference.
+  """Policy wrapping an RLLib model for inference.
 
   Note: Currently only supports a single input, batching is not enabled
   """
