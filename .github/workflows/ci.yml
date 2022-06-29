@@ -25,6 +25,26 @@ concurrency:
 permissions: read-all
 
 jobs:
+  pylint:
+    name: Lint Melting Pot
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+      - name: Set up Python 3.9
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
+        with:
+          python-version: '3.9'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+      - name: Run PyLint
+        run: pylint --disable=C,W,R --recursive=y meltingpot examples
+
   run-meltingpot-tests:
     name: Test Melting Pot
     runs-on: ${{ matrix.os }}
@@ -40,9 +60,9 @@ jobs:
           - '3.10'
     steps:
       - name: Checkout Melting Pot
-        uses: actions/checkout@v3
+        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
       - name: Set up Python ${{ matrix.python_version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@d09bd5e6005b175076f227b13d9730d56e9dcfcb
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install and test Melting Pot
