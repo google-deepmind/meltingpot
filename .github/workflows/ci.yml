@@ -21,6 +21,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
+# Declare default permissions as read only.
+permissions: read-all
+
 jobs:
   run-meltingpot-tests:
     name: Test Melting Pot
