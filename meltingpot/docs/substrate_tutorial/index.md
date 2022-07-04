@@ -76,7 +76,7 @@ individual observation to the config in
 
 ```python
   config.num_players = 1
-  config.substrate.individual_observation_names = ["RGB"]
+  config.individual_observation_names = ["RGB"]
 ```
 
 Everything in our substrate, including avatars, is a `GameObject`. You can think
