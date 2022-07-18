@@ -137,6 +137,10 @@ def get_right_shift_pressed() -> int:
   return 1 if pygame.key.get_pressed()[pygame.K_RSHIFT] else 0
 
 
+def get_key_c_pressed() -> int:
+  return 1 if pygame.key.get_pressed()[pygame.K_c] else 0
+
+
 def get_key_z_pressed() -> int:
   return 1 if pygame.key.get_pressed()[pygame.K_z] else 0
 
