@@ -6,7 +6,7 @@
 [![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 <div align="center">
-  <img src="meltingpot/docs/images/meltingpot_montage_360.gif"
+  <img src="docs/images/meltingpot_montage_360.gif"
        alt="Melting Pot substrates" />
 </div>
 
@@ -35,8 +35,7 @@ reinforcement learning. We plan to maintain it, and will be extending it in the
 coming years to cover more social interactions and generalization scenarios.
 
 If you are interested in extending Melting Pot, please refer to the
-[Extending Melting Pot](meltingpot/docs/extending.md)
-documentation.
+[Extending Melting Pot](docs/extending.md) documentation.
 
 ## Installation
 
@@ -165,8 +164,7 @@ python3 sb3_train.py
 
 ### Documentation
 
-Full documentation is available
-[here](meltingpot/docs/index.md)
+Full documentation is available [here](docs/index.md).
 
 ## Citing Melting Pot
 
