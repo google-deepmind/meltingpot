@@ -127,23 +127,25 @@ NOTE: If you get a `ModuleNotFoundError: No module named 'meltingpot.python'`
       `PYTHONPATH` (e.g. by calling `export PYTHONPATH=$(pwd)`).
 
 ### Training agents
+
 We provide two example scripts using RLlib and [PettingZoo](https://github.com/Farama-Foundation/PettingZoo) with [Stable-Baselines3](https://github.com/DLR-RM/stable-baselines3) (SB3) respectively. Note that Melting Pot is agnostic to how you train your agents, and as such, these scripts are not meant to be a suggestion on how to achieve good scores in the task suite.
 
 #### RLlib
-This example uses [RLLib](https://github.com/ray-project/ray) to train agents in self-play on a Melting Pot substrate.
 
-First you will need to install the dependencies needed by the RLlib example:
+[RLLib](https://github.com/ray-project/ray) is an open-source reinforcement
+learning library, with support for distributed workloads.
+
+The example trains multiple agents using a shared policy, with the
+hyperparameters used in the original Melting Pot paper. It saves the trained
+model as
+[checkpoints](https://docs.ray.io/en/latest/tune/tutorials/tune-checkpoints.html)
+in `examples/rllib/.results` and videos of gameplay to `examples/rllib/.videos`.
+
+To use, install the specific requirements and then run the training script:
 
 ```shell
-cd <meltingpot_root>
-pip3 install -e .[rllib]
-```
-
-Then you can run the training experiment using:
-
-```shell
-cd <meltingpot_root>/examples/rllib
-python3 self_play_train.py
+pip3 install .[rllib]
+python ./examples/rllib/a3c.py
 ```
 
 #### PettingZoo and Stable-Baselines3
