@@ -649,6 +649,12 @@ function Zapper:onHit(hittingGameObject, hitName)
     -- Temporarily store the index of the zapper avatar in state so it can
     -- be observed elsewhere.
     self.zapperIndex = zapperIndex
+    -- Temporarily record that the zapper hit another player on this frame.
+    if hittingGameObject:hasComponent('Zapper') then
+      local hittingZapper = hittingGameObject:getComponent('Zapper')
+      hittingZapper.num_others_player_zapped_this_step = (
+          hittingZapper.num_others_player_zapped_this_step + 1)
+    end
     -- return `true` to prevent the beam from passing through a hit player.
     return true
   end
@@ -662,6 +668,7 @@ function Zapper:reset()
   self.playerRespawnedThisStep = false
   self._disallowZapping = false
   self._noZappingCounter = 0
+  self.num_others_player_zapped_this_step = 0
 end
 
 function Zapper:start()
@@ -687,6 +694,7 @@ function Zapper:update()
   -- Metrics must be read from preUpdate since they will get reset in update.
   self.playerRespawnedThisStep = false
   self.zapperIndex = nil
+  self.num_others_player_zapped_this_step = 0
   -- Note: After zapping is allowed again after having been disallowed, players
   -- still need to wait another `cooldownTime` frames before they can zap again.
   if self._disallowZapping then
