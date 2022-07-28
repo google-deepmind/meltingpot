@@ -1,9 +1,34 @@
-# Python 3.9-bullseye variant from https://github.com/microsoft/vscode-dev-containers/python-3/.devcontainer/base.Dockerfile
-# Note bullseye version is multi-architecture (supports arm64)
-FROM mcr.microsoft.com/vscode/devcontainers/python:3.9-bullseye@sha256:29ca94ddf0f254cb36e311ae59520c4dee33a35de7c0b2f1bd7b91650d368ee0
+# Use Nvidia Ubuntu 20 base (includes CUDA if a supported GPU is present)
+# https://hub.docker.com/r/nvidia/cuda
+FROM nvidia/cuda:11.2.1-cudnn8-devel-ubuntu20.04@sha256:cf6c4023f17d22d5f37b38b7e22f0aef7e9f3183aa7ce5743c5e248670be86a1
 
-# Install pytest
-RUN pip install pytest
+# Install dependencies
+RUN apt-get update && \
+  DEBIAN_FRONTEND=noninteractive apt-get -qq -y install \
+  build-essential \
+  curl \
+  ffmpeg \
+  git \
+  python3.9 \
+  python3.9-dev \
+  python3.9-distutils \
+  rsync
+
+# Install pip (we need the latest version not the standard Ubuntu version, to
+# support modern wheels)
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.9 get-pip.py
+
+# Set python aliases
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.9 1
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+
+# Install python dev dependencies
+RUN pip install \
+  jedi \
+  pytest \
+  pylance \
+  toml \
+  yapf
 
 # Install lab2d (appropriate version for architecture)
 RUN if [ "$(uname -m)" != 'x86_64' ]; then \
@@ -16,7 +41,9 @@ RUN if [ "$(uname -m)" != 'x86_64' ]; then \
   fi
 
 # Download assets
-ADD https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz /workspaces/meltingpot/meltingpot/
+RUN mkdir -p /workspaces/meltingpot/meltingpot && \
+  curl -SL https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+  | tar -xz --directory=/workspaces/meltingpot/meltingpot
 
 # Set Python path
 ENV PYTHONPATH="/workspaces/meltingpot"
