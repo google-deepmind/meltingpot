@@ -50,7 +50,16 @@ This project includes a pre-configured development environment ([devcontainer](h
 
 You can launch a working development environment with one click, using e.g. [Github
 Codespaces](https://github.com/features/codespaces) or the [VSCode
-Containers](https://code.visualstudio.com/docs/remote/containers-tutorial) extension.
+Containers](https://code.visualstudio.com/docs/remote/containers-tutorial)
+extension.
+
+#### CUDA support
+
+To enable CUDA support (required for GPU training), make sure you have the
+[nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
+package installed, and then run Docker with the `---gpus all` flag enabled. Note
+that for GitHub Codespaces this isn't necessary, as it's done for you
+automatically.
 
 ### Manual install
 

@@ -1,5 +1,4 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
-// https://github.com/microsoft/vscode-dev-containers/tree/v0.236.0/containers/python-3
+// For format details, see https://aka.ms/devcontainer.json
 {
     "name": "Meltingpot (Python 3)",
     "build": {
@@ -11,32 +10,23 @@
         // Configure properties specific to VS Code.
         "vscode": {
             "settings": {
-                "python.defaultInterpreterPath": "/usr/local/bin/python",
                 "python.linting.enabled": true,
-                "python.linting.pylintEnabled": true,
                 "python.formatting.provider": "yapf",
-                "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
-                "python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
-                "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
-                "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
-                "python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
-                "python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
-                "python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
+                "python.formatting.yapfPath": "yapf"
             },
             "extensions": [
                 "ms-python.python",
                 "ms-python.vscode-pylance",
-                "ms-azuretools.vscode-docker"
+                "ms-azuretools.vscode-docker",
+                "donjayamanne.githistory"
             ]
         }
     },
     // Run the install script on create
     "postCreateCommand": "pip install .[rllib] .[pettingzoo]",
-    // Vscode only user fix - see https://aka.ms/vscode-remote/containers/non-root.
-    "remoteUser": "vscode",
     "runArgs": [
         // Increase SHM sufficiently for RlLib. Note you can increase this further for 
         // performance gains (recommended to be at least 30% of RAM on large machines).
-        "--shm-size=6g"
+        "--shm-size=6gb"
     ]
 }
