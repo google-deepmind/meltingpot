@@ -19,6 +19,7 @@ import dm_env
 import dmlab2d
 from gym import spaces
 from ml_collections import config_dict
+import numpy as np
 from ray.rllib.agents import trainer
 from ray.rllib.env import multi_agent_env
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
@@ -94,6 +95,34 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   def get_dmlab2d_env(self):
     """Returns the underlying DM Lab2D environment."""
     return self._env
+
+  # Metadata is required by the gym `Env` class that we are extending, to show
+  # which modes the `render` method supports.
+  metadata = {'render.modes': ['rgb_array']}
+
+  def render(self, mode: str) -> np.ndarray:
+    """Render the environment.
+
+    This allows you to set `record_env` in your training config, to record
+    videos of gameplay.
+
+    Args:
+        mode (str): The mode to render with (see
+        `MeltingPotEnv.metadata["render.modes"]` for supported modes).
+
+    Returns:
+        np.ndarray: This returns a numpy.ndarray with shape (x, y, 3),
+        representing RGB values for an x-by-y pixel image, suitable for turning
+        into a video.
+    """
+    observation = self._env.observation()
+    world_rgb = observation['WORLD.RGB']
+
+    # RGB mode is used for recording videos
+    if mode == 'rgb_array':
+      return world_rgb
+    else:
+      return super().render(mode=mode)
 
 
 def env_creator(env_config):
