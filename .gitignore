@@ -10,5 +10,9 @@
 /lab2d/
 
 # Ignore saved models.
-/examples/results/
 /meltingpot/assets/
+
+# Ignore results.
+/examples/results/
+/examples/rllib/.results/
+/examples/rllib/.videos/
