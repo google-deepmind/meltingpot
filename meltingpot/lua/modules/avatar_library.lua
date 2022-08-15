@@ -43,7 +43,12 @@ function Avatar:__init__(kwargs)
       {'name', args.default('Avatar')},
       -- `index` (int): player index for the game object bearing this component.
       {'index', args.numberType},
+      -- `spawnGroup` (str): group of objects where this avatar may spawn.
       {'spawnGroup', args.stringType},
+      -- `postInitialSpawnGroup` (str): group of objects where this avatar may
+      --   spawn after its initial spawn (optional, if not provided then it will
+      --   default to taking the same value as `spawnGroup`.
+      {'postInitialSpawnGroup', args.default('_DEFAULT'), args.stringType},
       -- `aliveState` (str): the state of this object when it is live, i.e.,
       --     when agents and humans can control it.
       {'aliveState', args.stringType},
@@ -100,7 +105,7 @@ function Avatar:__init__(kwargs)
   self._config.view = kwargs.view
 
   self._config._index = kwargs.index
-  self._config.spawnGroup = kwargs.spawnGroup
+  self._config.initialSpawnGroup = kwargs.spawnGroup
   self._config.spriteMap = kwargs.spriteMap
 
   self._config.aliveState = kwargs.aliveState
@@ -112,6 +117,11 @@ function Avatar:__init__(kwargs)
 
   self._config.skipWaitStateRewards = kwargs.skipWaitStateRewards
   self._config.randomizeInitialOrientation = kwargs.randomizeInitialOrientation
+
+  if kwargs.postInitialSpawnGroup ~= '_DEFAULT' then
+    self._config.postInitialSpawnGroup = kwargs.postInitialSpawnGroup
+  end
+  self._spawnGroup = self._config.initialSpawnGroup
 end
 
 -- Call initializeVolatileVariables during `awake` and `reset`.
@@ -309,6 +319,14 @@ function Avatar:start(locator)
   return piece
 end
 
+function Avatar:postStart()
+  if self._config.postInitialSpawnGroup then
+    -- The first spawn was at the externally provided `spawnGroup`. Subsequent
+    -- spawns will be at the provided `postInitialSpawnGroup` if applicable.
+    self._spawnGroup = self._config.postInitialSpawnGroup
+  end
+end
+
 function Avatar:preUpdate()
   self:_startFrame()
 end
@@ -340,7 +358,7 @@ function Avatar:getIndex()
 end
 
 function Avatar:getSpawnGroup()
-  return self._config.spawnGroup
+  return self._spawnGroup
 end
 
 function Avatar:addReward(amount)
