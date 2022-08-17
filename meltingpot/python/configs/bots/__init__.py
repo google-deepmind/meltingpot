@@ -15,15 +15,20 @@
 
 import dataclasses
 import os
-import re
 from typing import Mapping, Optional
 
 import immutabledict
 
 from meltingpot.python.utils.bots import puppeteer_functions
 
-MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                     __file__)
+
+def _find_models_root() -> str:
+  import re  # pylint: disable=g-import-not-at-top
+  return re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
+                __file__)
+
+
+MODELS_ROOT = _find_models_root()
 
 
 @dataclasses.dataclass(frozen=True)

@@ -16,7 +16,6 @@
 import copy
 import itertools
 import os
-import pathlib  # pylint: disable=unused-import
 import random
 from typing import Any, Dict, Optional, Union
 
@@ -36,7 +35,14 @@ Prefabs = Dict[str, Settings]
 
 _MAX_SEED = 2 ** 32 - 1
 _DMLAB2D_ROOT = runfiles_helper.find()
-_MELTINGPOT_ROOT = str(pathlib.Path(__file__).parent.parent.parent.parent.parent)
+
+
+def _find_root() -> str:
+  import re  # pylint: disable=g-import-not-at-top
+  return re.sub('meltingpot/python/.*', '', __file__)
+
+
+_MELTINGPOT_ROOT = _find_root()
 
 
 # Although to_dict in ConfigDict is recursive, it is not enough for our use case
