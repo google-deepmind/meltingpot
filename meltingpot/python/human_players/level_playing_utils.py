@@ -206,6 +206,7 @@ def run_episode(
     print_events: Optional[bool] = False,
     player_prefixes: Optional[Sequence[str]] = None,
     default_observation: str = 'WORLD.RGB',
+    reset_env_when_done: bool = False,
 ) -> None:
   """Run multiplayer environment, with per player rendering and actions.
 
@@ -256,6 +257,9 @@ def run_episode(
       ('1', '2', ..., numPlayers).
     default_observation: Default observation to render if 'render_observation'
       or '{player_prefix}.{render_observation}' is not found in the dict.
+    reset_env_when_done: if True, reset the environment once the episode has
+      terminated; useful for playing multiple episodes in a row. Note this
+      will cause this function to loop infinitely.
   """
   full_config.lab2d_settings.update(config_overrides)
   if player_prefixes is None:
@@ -327,7 +331,10 @@ def run_episode(
     actions = action_reader.step(player_prefix) if player_count else []
     timestep = env.step(actions)
     if timestep.step_type == dm_env.StepType.LAST:
-      break
+      if reset_env_when_done:
+        timestep = env.reset()
+      else:
+        break
 
     rewards = _get_rewards(timestep)
     for i, prefix in enumerate(player_prefixes):
