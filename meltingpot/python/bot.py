@@ -33,7 +33,7 @@ def get_config(bot_name: str) -> config_dict.ConfigDict:
   config = config_dict.create(
       bot_name=bot_name,
       substrate=bot.substrate,
-      puppeteer_fn=bot.puppeteer_fn,
+      puppeteer_fn_builder=bot.puppeteer_fn_builder,
       saved_model_path=bot.model_path,
   )
   return config.lock()
@@ -49,8 +49,9 @@ def build(config: config_dict.ConfigDict) -> policy.Policy:
     The bot policy.
   """
   saved_model = policy.SavedModelPolicy(config.saved_model_path)
-  if config.puppeteer_fn:
+  if config.puppeteer_fn_builder:
     return policy.PuppetPolicy(
-        puppeteer_fn=config.puppeteer_fn, puppet_policy=saved_model)
+        puppeteer_fn_builder=config.puppeteer_fn_builder,
+        puppet_policy=saved_model)
   else:
     return saved_model

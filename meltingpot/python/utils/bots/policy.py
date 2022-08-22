@@ -15,7 +15,7 @@
 
 import abc
 import contextlib
-from typing import Generic, Mapping, Tuple, TypeVar
+from typing import Callable, Generic, Mapping, Tuple, TypeVar
 
 import dm_env
 import immutabledict
@@ -30,17 +30,25 @@ State = TypeVar('State')
 
 
 class Policy(Generic[State], metaclass=abc.ABCMeta):
-  """Abstract base class for a policy."""
+  """Abstract base class for a policy.
+
+  Must not possess any mutable state not in `initial_state`.
+  """
 
   @abc.abstractmethod
   def initial_state(self) -> State:
-    """Returns the initial state of the agent."""
+    """Returns the initial state of the agent.
+
+    Must not have any side effects.
+    """
     raise NotImplementedError()
 
   @abc.abstractmethod
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[int, State]:
     """Steps the agent.
+
+    Must not have any side effects.
 
     Args:
       timestep: information from the environment
@@ -248,53 +256,82 @@ else:
 _GOAL_OBS_NAME = 'GOAL'
 
 
-class PuppetPolicy(Policy[State], Generic[State]):
-  """A puppet policy controlled by a puppeteer function."""
+class _Puppeteer(Generic[State]):
+  """A puppeteer that controls the timestep forwarded to the puppet."""
 
-  def __init__(self, puppeteer_fn: puppeteer_functions.PuppeteerFn,
-               puppet_policy: Policy) -> None:
-    """Creates a new PuppetBot.
+  def __init__(
+      self,
+      puppeteer_fn_builder: Callable[[], puppeteer_functions.PuppeteerFn],
+  ) -> None:
+    """Initializes the instance.
 
     Args:
-      puppeteer_fn: The puppeteer function. This will be called at every step to
-        obtain the goal of that step for the underlying puppet.
-      puppet_policy: The puppet policy. Will be closed with this wrapper.
+      puppeteer_fn_builder: Builds the puppeteer function that will be called at
+        every step to obtain the goal of that step for the underlying puppet.
     """
-    self._puppeteer_fn = puppeteer_fn
-    self._puppet = puppet_policy
+    self._puppeteer_fn_builder = puppeteer_fn_builder
 
-  def _puppeteer_initial_state(self) -> int:
-    return 0
+  def initial_state(self) -> State:
+    """Returns the initial state of the puppeteer."""
+    step_count = 0
+    puppeteer_fn = self._puppeteer_fn_builder()
+    return (step_count, puppeteer_fn)
 
-  def _puppeteer_step(self, timestep: dm_env.TimeStep,
-                      prev_state: int) -> Tuple[dm_env.TimeStep, int]:
-    """Returns the transformed observation for the puppet step."""
-    goal = self._puppeteer_fn(prev_state, timestep.observation)
-    next_state = prev_state + 1
+  def step(self, timestep: dm_env.TimeStep,
+           prev_state: State) -> Tuple[dm_env.TimeStep, State]:
+    """Steps the puppeteer.
+
+    Args:
+      timestep: information from the environment.
+      prev_state: the previous state of the puppeteer.
+
+    Returns:
+      timestep: the timestep to forward to the puppet.
+      next_state: the state for the next step call.
+    """
+    step_count, puppeteer_fn = prev_state
+    goal = puppeteer_fn(step_count, timestep.observation)
+    if timestep.step_type == dm_env.StepType.LAST:
+      next_state = self.initial_state()
+    else:
+      next_state = (step_count + 1, puppeteer_fn)
+
     puppet_observation = immutabledict.immutabledict(
         timestep.observation, **{_GOAL_OBS_NAME: goal})
     puppet_timestep = timestep._replace(observation=puppet_observation)
     return puppet_timestep, next_state
 
+
+class PuppetPolicy(Policy[State], Generic[State]):
+  """A puppet policy controlled by a puppeteer function."""
+
+  def __init__(
+      self,
+      puppeteer_fn_builder: Callable[[], puppeteer_functions.PuppeteerFn],
+      puppet_policy: Policy) -> None:
+    """Creates a new PuppetBot.
+
+    Args:
+      puppeteer_fn_builder: Builds the puppeteer function that will be called at
+        every step to obtain the goal of that step for the underlying puppet.
+      puppet_policy: The puppet policy. Will be closed with this wrapper.
+    """
+    self._puppeteer = _Puppeteer(puppeteer_fn_builder)
+    self._puppet = puppet_policy
+
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[int, State]:
     """See base class."""
-    puppet_timestep, puppeteer_state = self._puppeteer_step(
-        timestep, prev_state['puppeteer'])
-    action, puppet_state = self._puppet.step(puppet_timestep,
-                                             prev_state['puppet'])
-    next_state = {
-        'puppeteer': puppeteer_state,
-        'puppet': puppet_state,
-    }
+    puppeteer_state, puppet_state = prev_state
+    puppet_timestep, puppeteer_state = self._puppeteer.step(
+        timestep, puppeteer_state)
+    action, puppet_state = self._puppet.step(puppet_timestep, puppet_state)
+    next_state = (puppeteer_state, puppet_state)
     return action, next_state
 
   def initial_state(self) -> State:
     """See base class."""
-    return {
-        'puppeteer': 0,
-        'puppet': self._puppet.initial_state(),
-    }
+    return (self._puppeteer.initial_state(), self._puppet.initial_state())
 
   def close(self) -> None:
     """See base class."""

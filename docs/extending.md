@@ -30,7 +30,8 @@ Then structure its bot entry like this:
 ```python
 my_puppet_bot_0=_puppet(
     substrate='name_of_substrate_where_bot_operates',
-    puppeteer_fn=puppeteer_functions.name_of_puppeteer_function,
+    puppeteer_fn_builder=functools.partial(
+        puppeteer_functions.name_of_puppeteer_function, **kwargs)
 ),
 ```
 
