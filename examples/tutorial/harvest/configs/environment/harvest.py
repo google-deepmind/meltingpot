@@ -29,7 +29,7 @@ def get_config():
       "levelName":
           "harvest",
       "levelDirectory":
-          "examples//tutorial/harvest/levels",
+          "examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames":
           100,
       "numPlayers":
