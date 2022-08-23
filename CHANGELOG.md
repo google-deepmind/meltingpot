@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [1.0.4] - 2022-08-22
+
+### Changed
+
+- Drop support for Python 3.7 and 3.8.
+- Store saved models on Google Cloud Platform rather than in the Git repo.
+- x2 speed improvement to some substrates
+- Improved `install.sh` script and installation documentation.
+- Various improvements to `examples` and their documentation.
+
+### Fixed
+
+- Puppets were sharing state in Scenarios.
+  [#70](https://github.com/deepmind/meltingpot/issues/70)
+- Various issues with RLlib examples.
+
+### Added
+
+- `.devcontainer` for the project.
+- `pettingzoo` example.
+- TF1-compatible version of `SavedModelPolicy`.
+
 ## [1.0.3] - 2022-03-03
 
 ### Changed
