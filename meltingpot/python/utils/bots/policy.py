@@ -15,16 +15,15 @@
 
 import abc
 import contextlib
-from typing import Callable, Generic, Mapping, Tuple, TypeVar
+from typing import Generic, Mapping, Tuple, TypeVar
 
 import dm_env
-import immutabledict
 import numpy as np
 import tensorflow as tf
 import tree
 
 from meltingpot.python.utils.bots import permissive_model
-from meltingpot.python.utils.bots import puppeteer_functions
+from meltingpot.python.utils.bots import puppeteers
 
 State = TypeVar('State')
 
@@ -253,71 +252,22 @@ else:
   SavedModelPolicy = TF1SavedModelPolicy
 
 
-_GOAL_OBS_NAME = 'GOAL'
-
-
-class _Puppeteer(Generic[State]):
-  """A puppeteer that controls the timestep forwarded to the puppet."""
-
-  def __init__(
-      self,
-      puppeteer_fn_builder: Callable[[], puppeteer_functions.PuppeteerFn],
-  ) -> None:
-    """Initializes the instance.
-
-    Args:
-      puppeteer_fn_builder: Builds the puppeteer function that will be called at
-        every step to obtain the goal of that step for the underlying puppet.
-    """
-    self._puppeteer_fn_builder = puppeteer_fn_builder
-
-  def initial_state(self) -> State:
-    """Returns the initial state of the puppeteer."""
-    step_count = 0
-    puppeteer_fn = self._puppeteer_fn_builder()
-    return (step_count, puppeteer_fn)
-
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[dm_env.TimeStep, State]:
-    """Steps the puppeteer.
-
-    Args:
-      timestep: information from the environment.
-      prev_state: the previous state of the puppeteer.
-
-    Returns:
-      timestep: the timestep to forward to the puppet.
-      next_state: the state for the next step call.
-    """
-    step_count, puppeteer_fn = prev_state
-    goal = puppeteer_fn(step_count, timestep.observation)
-    if timestep.step_type == dm_env.StepType.LAST:
-      next_state = self.initial_state()
-    else:
-      next_state = (step_count + 1, puppeteer_fn)
-
-    puppet_observation = immutabledict.immutabledict(
-        timestep.observation, **{_GOAL_OBS_NAME: goal})
-    puppet_timestep = timestep._replace(observation=puppet_observation)
-    return puppet_timestep, next_state
-
-
 class PuppetPolicy(Policy[State], Generic[State]):
   """A puppet policy controlled by a puppeteer function."""
 
   def __init__(
       self,
-      puppeteer_fn_builder: Callable[[], puppeteer_functions.PuppeteerFn],
-      puppet_policy: Policy) -> None:
+      puppeteer: puppeteers.Puppeteer,
+      puppet: Policy) -> None:
     """Creates a new PuppetBot.
 
     Args:
-      puppeteer_fn_builder: Builds the puppeteer function that will be called at
-        every step to obtain the goal of that step for the underlying puppet.
-      puppet_policy: The puppet policy. Will be closed with this wrapper.
+      puppeteer: Puppeteer that will be called at every step to modify the
+        timestep forwarded to the underlying puppet.
+      puppet: The puppet policy. Will be closed with this wrapper.
     """
-    self._puppeteer = _Puppeteer(puppeteer_fn_builder)
-    self._puppet = puppet_policy
+    self._puppeteer = puppeteer
+    self._puppet = puppet
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[int, State]:
