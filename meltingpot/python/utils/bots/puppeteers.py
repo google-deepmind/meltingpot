@@ -95,6 +95,8 @@ class CleanupAlternateCleanFirst(Puppeteer[State], Generic[State]):
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
     """See base class."""
+    if timestep.first():
+      prev_state = self.initial_state()
     goal = self._goal(prev_state)
     next_state = prev_state + 1
     return puppet_timestep(timestep, goal), next_state
@@ -120,6 +122,8 @@ class CleanupAlternateEatFirst(Puppeteer[State], Generic[State]):
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
     """See base class."""
+    if timestep.first():
+      prev_state = self.initial_state()
     goal = self._goal(prev_state)
     next_state = prev_state + 1
     return puppet_timestep(timestep, goal), next_state
@@ -147,6 +151,8 @@ class ConditionalCleaner(Puppeteer[State], Generic[State]):
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
     """See base class."""
+    if timestep.first():
+      prev_state = self.initial_state()
     observation = timestep.observation
     step_count = prev_state['step_count']
     clean_until = prev_state['clean_until']
@@ -227,6 +233,8 @@ class GrimTwoResourceInTheMatrix(Puppeteer[State], Generic[State]):
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
     """See base class."""
+    if timestep.first():
+      prev_state = self.initial_state()
     partner_defections = prev_state
 
     # Accumulate partner defections over the episode.
