@@ -231,9 +231,8 @@ Lua components can have the following methods, all of which are optional:
 *   `registerUpdaters(updaterRegistry)`: Used instead of `update`, offers fine
     control over the order in which updates happen across components, as well as
     functionality to delay execution & update probabilisitically (see below).
-*   `onBlocked(blockedGameObject)`: Called when another object attempts and
-    fails to enter the same `(x, y, layer)` absolute location as the containing
-    object.
+*   `onBlocked(blockingGameObject)`: called when this object attempts and fails
+    to enter an occupied (x, y, layer) absolute location.
 *   `onEnter(enteringGameObject, contactName)`: Called when another object
     enters the same `(x, y)` location (but in another `layer`) as the containing
     object. `contactName` is the `contact` string associated with the state
