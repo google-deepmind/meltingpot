@@ -72,6 +72,7 @@ class Population:
 
     Args:
       policies: the policies to sample from (with replacement) each episode.
+        Will be closed when the Population is closed.
       population_size: the number of policies to sample on each reset.
     """
     self._policies = dict(policies)
