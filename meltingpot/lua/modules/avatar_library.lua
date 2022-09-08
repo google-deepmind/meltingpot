@@ -473,8 +473,10 @@ end
 
 --[[ Prevent movement for `numFrames` steps, then allow it again.]]
 function Avatar:disallowMovementUntil(numFrames)
-  self:disallowMovement()
-  self._freezeCounter = numFrames
+  if numFrames > 0 then
+    self:disallowMovement()
+    self._freezeCounter = numFrames
+  end
 end
 
 --[[ Return true if movement is allowed and false otherwise.]]
