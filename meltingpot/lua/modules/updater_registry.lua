@@ -85,7 +85,7 @@ except the update function `updateFn`:
     function registered here called on them. If group is not given, it defaults
     to grouping (corresponding) updates from the same component across all game
     objects.
-*   state: The game object state for which this functioon should be called. If
+*   state: The game object state for which this function should be called. If
     not provided, the function will be called for all states.
 *   states: a list of states for which this update should be called. This takes
     precedence over `state`. If both are provided, only the value of `states` is
