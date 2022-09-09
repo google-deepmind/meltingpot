@@ -768,10 +768,19 @@ function AvatarMetricReporter:__init__(kwargs)
       --   `component` (string) which component to reference on the same game
       --     object as the AvatarMetricReporter component.
       --   `variable` (string) the name of the variable to report.
+      --   `index` (int) [OPTIONAL] an index on a tensor. Assumes `variable` is
+      --     a one-dimensional tensor, and that the metric of interest is at
+      --     this index in the tensor.
       {'metrics', args.tableType},
   })
   AvatarMetricReporter.Base.__init__(self, kwargs)
   self._config.metrics = kwargs.metrics
+  -- Check if any metrics have an index, and add that field to the metric. We do
+  -- this with `rawget` because the arguments to the constructor are a metatable
+  -- with its own index that autocreates keys when first accessed.
+  for _, metric in ipairs(self._config.metrics) do
+    metric.hasIndex = (rawget(metric, 'index') ~= nil)
+  end
 end
 
 function AvatarMetricReporter:addObservations(tileSet, world, observations)
@@ -782,7 +791,12 @@ function AvatarMetricReporter:addObservations(tileSet, world, observations)
         type = metric.type,
         shape = metric.shape,
         func = function(grid)
-          return self.gameObject:getComponent(metric.component)[metric.variable]
+          local value = self.gameObject:getComponent(
+              metric.component)[metric.variable]
+          if metric.hasIndex then
+            value = value(metric.index):val()
+          end
+          return value
         end
     }
   end
