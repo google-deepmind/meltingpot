@@ -207,6 +207,7 @@ def run_episode(
     player_prefixes: Optional[Sequence[str]] = None,
     default_observation: str = 'WORLD.RGB',
     reset_env_when_done: bool = False,
+    initial_player_index: int = 0,
 ) -> None:
   """Run multiplayer environment, with per player rendering and actions.
 
@@ -260,6 +261,8 @@ def run_episode(
     reset_env_when_done: if True, reset the environment once the episode has
       terminated; useful for playing multiple episodes in a row. Note this
       will cause this function to loop infinitely.
+    initial_player_index: Initial index of the player to play as. Defaults to 0.
+      (Players are always switchable via the tab key.)
   """
   full_config.lab2d_settings.update(config_overrides)
   if player_prefixes is None:
@@ -274,7 +277,7 @@ def run_episode(
   if len(player_prefixes) != player_count:
     raise ValueError('Player prefixes, when specified, must be of the same '
                      'length as the number of players.')
-  player_index = 0
+  player_index = initial_player_index
   timestep = env.reset()
 
   score = collections.defaultdict(float)
