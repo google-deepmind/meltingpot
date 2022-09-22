@@ -1003,7 +1003,7 @@ end
 
 
 --[[ The `FixedRateRegrow` component enables a game object that is in a
-particular (traditionally thought of as "dormant") state tochage its state
+particular (traditionally thought of as "dormant") state to change its state
 probabilistically (at a fixed rate). Used primarily for respawning objects.
 ]]
 local FixedRateRegrow = class.Class(component.Component)
