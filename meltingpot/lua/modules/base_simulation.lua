@@ -469,6 +469,8 @@ function BaseSimulation:start(grid)
   end
   self:_avatarStart(grid)
   log.v(1, "grid\n" .. tostring(grid))
+  -- Keep a reference to the grid.
+  self._grid = grid
 end
 
 --[[ End of starting callbacks ]]
@@ -567,8 +569,54 @@ function BaseSimulation:getNumPlayers()
   return self._settings.numPlayers
 end
 
+-- Return a reference to the scene object.
 function BaseSimulation:getSceneObject()
   return self._settings.sceneObject
+end
+
+-- Returns the number of objects currently in a state belonging to `group`.
+function BaseSimulation:getGroupCount(group)
+  return self._grid:groupCount(group)
+end
+
+-- Returns a random object currently in a state belonging to a given group.
+function BaseSimulation:getGroupRandom(group)
+  local piece = self._grid:groupRandom(random, group)
+  return self:getGameObjectFromPiece(piece)
+end
+
+--[[ Returns objects currently assigned to states belonging to `group` in a
+random order.]]
+function BaseSimulation:getGroupShuffled(group)
+  local pieces = self._grid:groupShuffled(random, group)
+  local objects = {}
+  for _, piece in ipairs(pieces) do
+    table.insert(objects, self:getGameObjectFromPiece(piece))
+  end
+  return objects
+end
+
+--[[ Returns `count` random objects currently assigned to states that belong to
+the given group in a random order.]]
+function BaseSimulation:getGroupShuffledWithCount(group, count)
+  local pieces = self._grid:groupShuffledWithCount(random, group, count)
+  local objects = {}
+  for _, piece in ipairs(pieces) do
+    table.insert(objects, self:getGameObjectFromPiece(piece))
+  end
+  return objects
+end
+
+--[[Returns objects currently assigned to states belonging to a certain group in
+a random order, where each object has the given probability of being returned.]]
+function BaseSimulation:getGroupShuffledWithProbability(group, probability)
+  local pieces = self._grid:groupShuffledWithProbability(
+      random, group, probability)
+  local objects = {}
+  for _, piece in ipairs(pieces) do
+    table.insert(objects, self:getGameObjectFromPiece(piece))
+  end
+  return objects
 end
 
 function BaseSimulation:getReward()
