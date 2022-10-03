@@ -178,7 +178,7 @@ class ActionReader(object):
       _, action_name = _split_key(action_key)
       self._action_names.add(action_name)
 
-  def step(self, player_prefix: str) -> Sequence[Sequence[Mapping[str, int]]]:
+  def step(self, player_prefix: str) -> Mapping[str, int]:
     """Update the actions of player `player_prefix`."""
     actions = {action_key: 0 for action_key in self._action_spec.keys()}
     for action_name in self._action_names:
