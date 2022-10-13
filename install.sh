@@ -34,6 +34,9 @@ function check_setup() {
   echo -e "\nChecking python version..."
   python --version | check_version_gt '3.9'
 
+  echo -e "\nEnsuring pip is installed..."
+  python -m ensurepip
+
   echo -e "\nChecking gcc version ..."
   gcc --version | check_version_gt '8'
 
