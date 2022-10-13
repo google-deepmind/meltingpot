@@ -20,7 +20,9 @@ from typing import Callable, Mapping, Optional
 
 import immutabledict
 
-from meltingpot.python.utils.bots import puppeteers
+from meltingpot.python.utils.puppeteers import clean_up
+from meltingpot.python.utils.puppeteers import in_the_matrix
+from meltingpot.python.utils.puppeteers import puppeteer
 
 
 def _find_models_root() -> str:
@@ -44,7 +46,7 @@ class BotConfig:
   """
   substrate: str
   model_path: str
-  puppeteer_builder: Optional[Callable[[], puppeteers.Puppeteer]] = None
+  puppeteer_builder: Optional[Callable[[], puppeteer.Puppeteer]] = None
 
 
 def _saved_model(substrate: str,
@@ -62,7 +64,7 @@ def _saved_model(substrate: str,
 
 
 def _puppet(substrate: str,
-            puppeteer_builder: Callable[[], puppeteers.Puppeteer],
+            puppeteer_builder: Callable[[], puppeteer.Puppeteer],
             models_root: str = MODELS_ROOT) -> BotConfig:
   """Returns the config for a puppet bot.
 
@@ -227,7 +229,7 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     chicken_puppet_grim=_puppet(
         substrate='chicken_in_the_matrix',
         puppeteer_builder=functools.partial(
-            puppeteers.GrimTwoResourceInTheMatrix, threshold=2),
+            in_the_matrix.GrimTwoResource, threshold=2),
     ),
     chicken_pure_dove_0=_saved_model(
         substrate='chicken_in_the_matrix',
@@ -343,21 +345,21 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     ),
     cleanup_puppet_alternate_clean_first=_puppet(
         substrate='clean_up',
-        puppeteer_builder=puppeteers.CleanupAlternateCleanFirst,
+        puppeteer_builder=clean_up.AlternateCleanFirst,
     ),
     cleanup_puppet_alternate_eat_first=_puppet(
         substrate='clean_up',
-        puppeteer_builder=puppeteers.CleanupAlternateEatFirst,
+        puppeteer_builder=clean_up.AlternateEatFirst,
     ),
     cleanup_puppet_reciprocator_threshold_low=_puppet(
         substrate='clean_up',
         puppeteer_builder=functools.partial(
-            puppeteers.ConditionalCleaner, threshold=1),
+            clean_up.ConditionalCleaner, threshold=1),
     ),
     cleanup_puppet_reciprocator_threshold_mid=_puppet(
         substrate='clean_up',
         puppeteer_builder=functools.partial(
-            puppeteers.ConditionalCleaner, threshold=2),
+            clean_up.ConditionalCleaner, threshold=2),
     ),
     closed_commons_zapper_0=_saved_model(
         substrate='commons_harvest_closed',
@@ -590,12 +592,12 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     prisoners_dilemma_puppet_grim_threshold_high=_puppet(
         substrate='prisoners_dilemma_in_the_matrix',
         puppeteer_builder=functools.partial(
-            puppeteers.GrimTwoResourceInTheMatrix, threshold=2),
+            in_the_matrix.GrimTwoResource, threshold=2),
     ),
     prisoners_dilemma_puppet_grim_threshold_low=_puppet(
         substrate='prisoners_dilemma_in_the_matrix',
         puppeteer_builder=functools.partial(
-            puppeteers.GrimTwoResourceInTheMatrix, threshold=1),
+            in_the_matrix.GrimTwoResource, threshold=1),
     ),
     pure_coordination_type_1_specialist_0=_saved_model(
         substrate='pure_coordination_in_the_matrix',
@@ -660,7 +662,7 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     stag_hunt_puppet_grim=_puppet(
         substrate='stag_hunt_in_the_matrix',
         puppeteer_builder=functools.partial(
-            puppeteers.GrimTwoResourceInTheMatrix, threshold=1),
+            in_the_matrix.GrimTwoResource, threshold=1),
     ),
     stag_hunt_stag_specialist_3=_saved_model(
         substrate='stag_hunt_in_the_matrix',

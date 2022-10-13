@@ -23,7 +23,7 @@ import tensorflow as tf
 import tree
 
 from meltingpot.python.utils.bots import permissive_model
-from meltingpot.python.utils.bots import puppeteers
+from meltingpot.python.utils.puppeteers import puppeteer as puppeteer_lib
 
 State = TypeVar('State')
 
@@ -257,7 +257,7 @@ class PuppetPolicy(Policy[State], Generic[State]):
 
   def __init__(
       self,
-      puppeteer: puppeteers.Puppeteer,
+      puppeteer: puppeteer_lib.Puppeteer,
       puppet: Policy) -> None:
     """Creates a new PuppetBot.
 
