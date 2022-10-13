@@ -23,7 +23,7 @@ import dm_env
 import rx
 from rx import subject
 
-from meltingpot.python.utils.bots import policy as policy_lib
+from meltingpot.python.utils.policies import policy as policy_lib
 
 
 def _step_fn(policy: policy_lib.Policy,

@@ -26,7 +26,7 @@ from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 
 from examples import utils
 from meltingpot.python import substrate
-from meltingpot.python.utils.bots import policy
+from meltingpot.python.utils.policies import policy
 
 PLAYER_STR_FORMAT = 'player_{index}'
 

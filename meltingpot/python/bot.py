@@ -16,7 +16,9 @@
 from ml_collections import config_dict
 
 from meltingpot.python.configs import bots as bot_config
-from meltingpot.python.utils.bots import policy
+from meltingpot.python.utils.policies import policy
+from meltingpot.python.utils.policies import puppet_policy
+from meltingpot.python.utils.policies import saved_model_policy
 
 AVAILABLE_BOTS = frozenset(bot_config.BOT_CONFIGS)
 
@@ -48,9 +50,9 @@ def build(config: config_dict.ConfigDict) -> policy.Policy:
   Returns:
     The bot policy.
   """
-  saved_model = policy.SavedModelPolicy(config.saved_model_path)
+  saved_model = saved_model_policy.SavedModelPolicy(config.saved_model_path)
   if config.puppeteer_builder:
     puppeteer = config.puppeteer_builder()
-    return policy.PuppetPolicy(puppeteer=puppeteer, puppet=saved_model)
+    return puppet_policy.PuppetPolicy(puppeteer=puppeteer, puppet=saved_model)
   else:
     return saved_model

@@ -21,7 +21,7 @@ import dm_env
 import immutabledict
 
 from meltingpot.python import substrate as substrate_factory
-from meltingpot.python.utils.bots import policy
+from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios import scenario as scenario_utils
 

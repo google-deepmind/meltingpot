@@ -11,68 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Bot policy implementations."""
+"""Policy from a Saved Model."""
 
-import abc
 import contextlib
-from typing import Generic, Mapping, Tuple, TypeVar
+from typing import Mapping, Tuple, TypeVar
 
 import dm_env
 import numpy as np
 import tensorflow as tf
 import tree
 
-from meltingpot.python.utils.bots import permissive_model
-from meltingpot.python.utils.puppeteers import puppeteer as puppeteer_lib
+from meltingpot.python.utils.policies import permissive_model
+from meltingpot.python.utils.policies import policy
 
 State = TypeVar('State')
 
 
-class Policy(Generic[State], metaclass=abc.ABCMeta):
-  """Abstract base class for a policy.
-
-  Must not possess any mutable state not in `initial_state`.
-  """
-
-  @abc.abstractmethod
-  def initial_state(self) -> State:
-    """Returns the initial state of the agent.
-
-    Must not have any side effects.
-    """
-    raise NotImplementedError()
-
-  @abc.abstractmethod
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
-    """Steps the agent.
-
-    Must not have any side effects.
-
-    Args:
-      timestep: information from the environment
-      prev_state: the previous state of the agent.
-
-    Returns:
-      action: the action to send to the environment.
-      next_state: the state for the next step call.
-    """
-    raise NotImplementedError()
-
-  @abc.abstractmethod
-  def close(self) -> None:
-    """Closes the policy."""
-    raise NotImplementedError()
-
-  def __enter__(self):
-    return self
-
-  def __exit__(self, *args, **kwargs):
-    del args, kwargs
-    self.close()
-
-
-class TF2SavedModelPolicy(Policy[tree.Structure[tf.Tensor]]):
+class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
   """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
@@ -145,7 +100,7 @@ def _numpy_to_placeholder(
   return tree.map_structure(fn, template)
 
 
-class TF1SavedModelPolicy(Policy[tree.Structure[np.ndarray]]):
+class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
   """Policy wrapping a saved model for TF1 inference.
 
   Note: the model should have methods:
@@ -250,39 +205,3 @@ if tf.executing_eagerly():
   SavedModelPolicy = TF2SavedModelPolicy
 else:
   SavedModelPolicy = TF1SavedModelPolicy
-
-
-class PuppetPolicy(Policy[State], Generic[State]):
-  """A puppet policy controlled by a puppeteer function."""
-
-  def __init__(
-      self,
-      puppeteer: puppeteer_lib.Puppeteer,
-      puppet: Policy) -> None:
-    """Creates a new PuppetBot.
-
-    Args:
-      puppeteer: Puppeteer that will be called at every step to modify the
-        timestep forwarded to the underlying puppet.
-      puppet: The puppet policy. Will be closed with this wrapper.
-    """
-    self._puppeteer = puppeteer
-    self._puppet = puppet
-
-  def step(self, timestep: dm_env.TimeStep,
-           prev_state: State) -> Tuple[int, State]:
-    """See base class."""
-    puppeteer_state, puppet_state = prev_state
-    puppet_timestep, puppeteer_state = self._puppeteer.step(
-        timestep, puppeteer_state)
-    action, puppet_state = self._puppet.step(puppet_timestep, puppet_state)
-    next_state = (puppeteer_state, puppet_state)
-    return action, next_state
-
-  def initial_state(self) -> State:
-    """See base class."""
-    return (self._puppeteer.initial_state(), self._puppet.initial_state())
-
-  def close(self) -> None:
-    """See base class."""
-    self._puppet.close()
