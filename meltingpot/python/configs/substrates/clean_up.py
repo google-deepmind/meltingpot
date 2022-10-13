@@ -185,7 +185,7 @@ POTENTIAL_APPLE = {
             "kwargs": {
                 "renderMode": "ascii_shape",
                 "spriteNames": ["Apple"],
-                "spriteShapes": [shapes.APPLE],
+                "spriteShapes": [shapes.LEGACY_APPLE],
                 "palettes": [{"*": (102, 255, 0, 255),
                               "@": (230, 255, 0, 255),
                               "&": (117, 255, 26, 255),

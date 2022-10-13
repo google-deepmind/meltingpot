@@ -277,7 +277,7 @@ def create_apple_prefab(regrowth_radius=-1.0,  # pylint: disable=dangerous-defau
               "kwargs": {
                   "renderMode": "ascii_shape",
                   "spriteNames": ["Apple", "AppleWait"],
-                  "spriteShapes": [shapes.APPLE, shapes.APPLE],
+                  "spriteShapes": [shapes.LEGACY_APPLE, shapes.LEGACY_APPLE],
                   "palettes": [{"*": (102, 255, 0, 255),
                                 "@": (230, 255, 0, 255),
                                 "&": (117, 255, 26, 255),
