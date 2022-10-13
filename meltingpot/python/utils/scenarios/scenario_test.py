@@ -13,7 +13,6 @@
 # limitations under the License.
 """Tests of scenarios."""
 
-import random
 from unittest import mock
 
 from absl.testing import absltest
@@ -101,7 +100,10 @@ class ScenarioWrapperTest(absltest.TestCase):
       bot.step.return_value = (n + 10, f'bot_state_{n}')
       bots[f'bot_{n}'] = bot
     background_population = population.Population(
-        policies=bots, population_size=2)
+        policies=bots,
+        names_by_role={'role_0': {'bot_0'}, 'role_1': {'bot_1'}},
+        roles=['role_0', 'role_1'],
+    )
 
     with scenario_utils.Scenario(
         substrate=substrate_factory.Substrate(substrate),
@@ -118,9 +120,7 @@ class ScenarioWrapperTest(absltest.TestCase):
       action_spec = scenario.action_spec()
       observation_spec = scenario.observation_spec()
       reward_spec = scenario.reward_spec()
-      with mock.patch.object(
-          random, 'choices', return_value=['bot_0', 'bot_1']):
-        initial_timestep = scenario.reset()
+      initial_timestep = scenario.reset()
       step_timestep = scenario.step([0, 1])
 
     with self.subTest(name='action_spec'):

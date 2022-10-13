@@ -109,7 +109,8 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
           bot_name: bot_factory.build(bot_config)
           for bot_name, bot_config in config.bots.items()
       },
-      population_size=config.num_bots,
+      names_by_role={'default': set(config.bots)},
+      roles=('default',) * config.num_bots,
   )
 
   return scenario_lib.Scenario(

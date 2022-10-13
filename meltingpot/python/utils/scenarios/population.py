@@ -16,7 +16,7 @@
 import concurrent
 import random
 import threading
-from typing import Callable, List, Mapping, Sequence
+from typing import Callable, Collection, List, Mapping, Sequence
 
 import chex
 import dm_env
@@ -66,20 +66,28 @@ class PopulationObservables:
 class Population:
   """A population of policies to use in a scenario."""
 
-  def __init__(self, policies: Mapping[str, policy_lib.Policy],
-               population_size: int) -> None:
+  def __init__(
+      self,
+      *,
+      policies: Mapping[str, policy_lib.Policy],
+      names_by_role: Mapping[str, Collection[str]],
+      roles: Sequence[str]) -> None:
     """Initializes the population.
 
     Args:
       policies: the policies to sample from (with replacement) each episode.
         Will be closed when the Population is closed.
-      population_size: the number of policies to sample on each reset.
+      names_by_role: dict mapping role to bot names that can fill it.
+      roles: specifies which role should fill the corresponding player slot.
     """
     self._policies = dict(policies)
+    self._names_by_role = {
+        role: tuple(set(names)) for role, names in names_by_role.items()}
+    self._roles = tuple(roles)
+
     self._locks = {name: threading.Lock() for name in self._policies}
-    self._population_size = population_size
     self._executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=self._population_size)
+        max_workers=len(roles))
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
@@ -105,7 +113,7 @@ class Population:
 
   def _sample_names(self) -> Sequence[str]:
     """Returns a sample of policy names for the population."""
-    return random.choices(tuple(self._policies), k=self._population_size)
+    return [random.choice(self._names_by_role[role]) for role in self._roles]
 
   def reset(self) -> None:
     """Resamples the population."""
