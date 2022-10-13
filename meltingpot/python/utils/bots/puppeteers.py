@@ -14,15 +14,17 @@
 """Puppeteers for puppet bots."""
 
 import abc
-from typing import Generic, Tuple, TypeVar
+from typing import Generic, Mapping, NewType, Sequence, Tuple, TypeVar
 
 import dm_env
 import immutabledict
 import numpy as np
 
 State = TypeVar('State')
+PuppetGoal = NewType('PuppetGoal', np.ndarray)
 
-_GOAL_OBS_NAME = 'GOAL'
+_GOAL_OBSERVATION_KEY = 'GOAL'
+_GOAL_DTYPE = np.int32
 
 
 class Puppeteer(Generic[State], metaclass=abc.ABCMeta):
@@ -56,23 +58,28 @@ class Puppeteer(Generic[State], metaclass=abc.ABCMeta):
 
 
 def puppet_timestep(timestep: dm_env.TimeStep,
-                    goal: np.ndarray) -> dm_env.TimeStep:
+                    goal: PuppetGoal) -> dm_env.TimeStep:
   """Returns a timestep with a goal observation added."""
-  puppet_observation = immutabledict.immutabledict(timestep.observation,
-                                                   **{_GOAL_OBS_NAME: goal})
+  puppet_observation = immutabledict.immutabledict(
+      timestep.observation, **{_GOAL_OBSERVATION_KEY: goal})
   return timestep._replace(observation=puppet_observation)
 
 
-def _immutable_array(data: ...) -> np.ndarray:
-  """Returns an immutable ndarray."""
-  array = np.array(data)
-  array.setflags(write=False)
-  return array
+def puppet_goals(names: Sequence[str],
+                 dtype: np.dtype = _GOAL_DTYPE) -> Mapping[str, PuppetGoal]:
+  """Returns a mapping from goal name to a one-hot goal vector for a puppet.
+
+  Args:
+    names: names for each of the corresponding goals.
+    dtype: dtype of the one-hot goals to return.
+  """
+  goals = np.eye(len(names), dtype=dtype)
+  goals.setflags(write=False)
+  return immutabledict.immutabledict(zip(names, goals))
 
 
-CLEAN_UP_CLEAN_GOAL = _immutable_array([1., 0.])
-CLEAN_UP_EAT_GOAL = _immutable_array([0., 1.])
-CLEAN_UP_CLEAN_ACTION = 8
+_CLEAN_UP_GOALS = puppet_goals(['CLEAN', 'EAT'], dtype=np.float64)
+_CLEAN_UP_CLEAN_ACTION = 8
 
 
 class CleanupAlternateCleanFirst(Puppeteer[State], Generic[State]):
@@ -84,13 +91,13 @@ class CleanupAlternateCleanFirst(Puppeteer[State], Generic[State]):
 
   def _goal(self, step_count):
     if step_count < 250:
-      return CLEAN_UP_CLEAN_GOAL
+      return _CLEAN_UP_GOALS['CLEAN']
     elif step_count < 500:
-      return CLEAN_UP_EAT_GOAL
+      return _CLEAN_UP_GOALS['EAT']
     elif step_count < 750:
-      return CLEAN_UP_CLEAN_GOAL
+      return _CLEAN_UP_GOALS['CLEAN']
     else:
-      return CLEAN_UP_EAT_GOAL
+      return _CLEAN_UP_GOALS['EAT']
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
@@ -111,13 +118,13 @@ class CleanupAlternateEatFirst(Puppeteer[State], Generic[State]):
 
   def _goal(self, step_count):
     if step_count < 250:
-      return CLEAN_UP_EAT_GOAL
+      return _CLEAN_UP_GOALS['EAT']
     elif step_count < 500:
-      return CLEAN_UP_CLEAN_GOAL
+      return _CLEAN_UP_GOALS['CLEAN']
     elif step_count < 750:
-      return CLEAN_UP_EAT_GOAL
+      return _CLEAN_UP_GOALS['EAT']
     else:
-      return CLEAN_UP_CLEAN_GOAL
+      return _CLEAN_UP_GOALS['CLEAN']
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: State) -> Tuple[dm_env.TimeStep, State]:
@@ -163,7 +170,7 @@ class ConditionalCleaner(Puppeteer[State], Generic[State]):
     near_river = (observation['global']['observations']['POSITION'][..., 1] < 9)
 
     # Smooth the cleaning binary vector across 2 timesteps.
-    cleaning = observation['global']['actions'] == CLEAN_UP_CLEAN_ACTION
+    cleaning = observation['global']['actions'] == _CLEAN_UP_CLEAN_ACTION
     if prev_cleaning is None:
       prev_cleaning = cleaning
     smooth_cleaning = np.logical_or(cleaning, prev_cleaning)
@@ -175,9 +182,9 @@ class ConditionalCleaner(Puppeteer[State], Generic[State]):
       clean_until = step_count + 100
 
     if step_count < clean_until:
-      goal = CLEAN_UP_CLEAN_GOAL
+      goal = _CLEAN_UP_GOALS['CLEAN']
     else:
-      goal = CLEAN_UP_EAT_GOAL
+      goal = _CLEAN_UP_GOALS['EAT']
     timestep = puppet_timestep(timestep, goal)
 
     next_state = dict(
@@ -192,11 +199,13 @@ class ConditionalCleaner(Puppeteer[State], Generic[State]):
 # For PrisonersDilemma, resource 0 is `cooperate` and resource 1 is `defect`.
 # For Stag hunt, resource 0 is `stag` and resource 1 is `hare`.
 # For Chicken, resource 0 is `dove` and resource 1 is `hawk`.
-TWO_RESOURCE_IN_THE_MATRIX_COLLECT_C = _immutable_array([1., 0., 0., 0., 0.])
-TWO_RESOURCE_IN_THE_MATRIX_COLLECT_D = _immutable_array([0., 1., 0., 0., 0.])
-TWO_RESOURCE_IN_THE_MATRIX_DESTROY_C = _immutable_array([0., 0., 1., 0., 0.])
-TWO_RESOURCE_IN_THE_MATRIX_DESTROY_D = _immutable_array([0., 0., 0., 1., 0.])
-TWO_RESOURCE_IN_THE_MATRIX_INTERACT = _immutable_array([0., 0., 0., 0., 1.])
+_TWO_RESOURCE_GOALS = puppet_goals([
+    'COLLECT_COOPERATE',
+    'COLLECT_DEFECT',
+    'DESTROY_COOPERATE',
+    'DESTROY_DEFECT',
+    'INTERACT',
+], dtype=np.float64)
 
 
 class GrimTwoResourceInTheMatrix(Puppeteer[State], Generic[State]):
@@ -255,13 +264,13 @@ class GrimTwoResourceInTheMatrix(Puppeteer[State], Generic[State]):
       # Collect either C or D when not ready to interact.
       if partner_defections < self._threshold:
         # When defection is below threshold, then collect cooperate resources.
-        goal = TWO_RESOURCE_IN_THE_MATRIX_COLLECT_C
+        goal = _TWO_RESOURCE_GOALS['COLLECT_COOPERATE']
       else:
         # When defection exceeds threshold, then collect D resources.
-        goal = TWO_RESOURCE_IN_THE_MATRIX_COLLECT_D
+        goal = _TWO_RESOURCE_GOALS['COLLECT_DEFECT']
     else:
       # Interact when ready.
-      goal = TWO_RESOURCE_IN_THE_MATRIX_INTERACT
+      goal = _TWO_RESOURCE_GOALS['INTERACT']
     timestep = puppet_timestep(timestep, goal)
     next_state = partner_defections
     return timestep, next_state
