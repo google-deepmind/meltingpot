@@ -13,7 +13,7 @@
 # limitations under the License.
 """Base class for wrappers."""
 
-from meltingpot.python import substrate
+from meltingpot.python.utils.substrates import substrate
 
 Substrate = substrate.Substrate
 

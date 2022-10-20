@@ -20,9 +20,9 @@ import dm_env
 import immutabledict
 from rx import subject
 
-from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios.wrappers import base
+from meltingpot.python.utils.substrates import substrate as substrate_lib
 
 T = TypeVar('T')
 
@@ -78,7 +78,7 @@ def _merge(
 
 
 @chex.dataclass(frozen=True)  # works with tree.
-class ScenarioObservables(substrate_factory.SubstrateObservables):
+class ScenarioObservables(substrate_lib.SubstrateObservables):
   """Observables for a Scenario.
 
   Attributes:
@@ -90,7 +90,7 @@ class ScenarioObservables(substrate_factory.SubstrateObservables):
     substrate: observables for the underlying substrate.
   """
   background: population.PopulationObservables
-  substrate: substrate_factory.SubstrateObservables
+  substrate: substrate_lib.SubstrateObservables
 
 
 class Scenario(base.Wrapper):

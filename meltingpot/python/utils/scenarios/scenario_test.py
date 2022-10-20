@@ -20,10 +20,10 @@ from absl.testing import parameterized
 import dm_env
 import immutabledict
 
-from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios import scenario as scenario_utils
+from meltingpot.python.utils.substrates import substrate as substrate_lib
 
 
 def _track(source, fields):
@@ -58,7 +58,7 @@ class PartitionMergeTest(parameterized.TestCase):
 class ScenarioWrapperTest(absltest.TestCase):
 
   def test_scenario(self):
-    substrate = mock.Mock(spec_set=substrate_factory.Substrate)
+    substrate = mock.Mock(spec_set=substrate_lib.Substrate)
     substrate.reset.return_value = dm_env.TimeStep(
         step_type=dm_env.StepType.FIRST,
         discount=0,
@@ -106,7 +106,7 @@ class ScenarioWrapperTest(absltest.TestCase):
     )
 
     with scenario_utils.Scenario(
-        substrate=substrate_factory.Substrate(substrate),
+        substrate=substrate_lib.Substrate(substrate),
         background_population=background_population,
         is_focal=[True, False, True, False],
         permitted_observations={'ok'}) as scenario:
