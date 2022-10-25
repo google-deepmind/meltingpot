@@ -404,7 +404,7 @@ and immaterial. You'll have to add these states to the `StateManager`.
 
 #### Apple states
 
-Let's start similar to our `WALL` prefab, except using the `shapes.APPLE`
+Let's start similar to our `WALL` prefab, except using the `shapes.LEGACY_APPLE`
 sprite, and the `shapes.GREEN_COIN_PALETTE`. The `StateManager` should have two
 states. One of them (call its `state` `"apple"`) having a `layer` and `sprite`.
 The other one, only a state (call it `"appleWait"`). The `StateManager`
@@ -470,7 +470,7 @@ APPLE = {
             "kwargs": {
                 "renderMode": "ascii_shape",
                 "spriteNames": ["Apple",],
-                "spriteShapes": [shapes.APPLE],
+                "spriteShapes": [shapes.LEGACY_APPLE],
                 "palettes": [shapes.GREEN_COIN_PALETTE],
                 "noRotates": [True],
             }

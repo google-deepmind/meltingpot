@@ -149,7 +149,7 @@ APPLE = {
             "kwargs": {
                 "renderMode": "ascii_shape",
                 "spriteNames": ["Apple",],
-                "spriteShapes": [shapes.APPLE],
+                "spriteShapes": [shapes.LEGACY_APPLE],
                 "palettes": [shapes.GREEN_COIN_PALETTE],
                 "noRotates": [True],
             }
