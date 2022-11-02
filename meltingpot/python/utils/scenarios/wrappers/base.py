@@ -18,7 +18,7 @@ from meltingpot.python.utils.substrates import substrate
 Substrate = substrate.Substrate
 
 
-class Wrapper(substrate.Substrate):
+class SubstrateWrapper(substrate.Substrate):
   """Base class for Substrate wrappers."""
 
   def __init__(self, env: substrate.Substrate):

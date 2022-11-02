@@ -69,7 +69,7 @@ def _immutable_ndarray(value: np.ndarray) -> np.ndarray:
   return value
 
 
-class Wrapper(base.Wrapper):
+class Wrapper(base.SubstrateWrapper):
   """Exposes actions/observations/rewards from all players to all players."""
 
   def __init__(self, env: base.Substrate,

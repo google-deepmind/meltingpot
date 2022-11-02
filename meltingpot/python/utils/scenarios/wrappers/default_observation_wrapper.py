@@ -44,7 +44,7 @@ def _setdefault(dictionary: Dict[str, Any], key: str,
     return dict(dictionary, **{key: value})
 
 
-class Wrapper(base.Wrapper):
+class Wrapper(base.SubstrateWrapper):
   """Wrapper to add observations with default values if not actually present."""
 
   def __init__(self,

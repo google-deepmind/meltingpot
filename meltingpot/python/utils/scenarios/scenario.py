@@ -93,7 +93,7 @@ class ScenarioObservables(substrate_lib.SubstrateObservables):
   substrate: substrate_lib.SubstrateObservables
 
 
-class Scenario(base.Wrapper):
+class Scenario(base.SubstrateWrapper):
   """An substrate where a number of player slots are filled by bots."""
 
   def __init__(

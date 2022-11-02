@@ -31,7 +31,7 @@ def _augment_timestep(timestep: dm_env.TimeStep) -> dm_env.TimeStep:
   return timestep._replace(observation=observations)
 
 
-class Wrapper(base.Wrapper):
+class Wrapper(base.SubstrateWrapper):
   """Adds agent's player slot as a one-hot observation."""
 
   def reset(self):
