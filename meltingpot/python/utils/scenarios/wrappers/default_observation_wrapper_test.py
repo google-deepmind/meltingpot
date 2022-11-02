@@ -19,8 +19,8 @@ from absl.testing import absltest
 import dm_env
 import numpy as np
 
-from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.scenarios.wrappers import default_observation_wrapper
+from meltingpot.python.utils.substrates import substrate
 
 TEST_KEY = 'test_key'
 RGB_SPEC = dm_env.specs.Array(shape=(8, 8, 3), dtype=np.int8)
@@ -47,7 +47,7 @@ class WrapperTest(absltest.TestCase):
       self.assertEqual(actual, {'a': 0, 'b': 100})
 
   def test_change(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.observation_spec.return_value = [{'RGB': RGB_SPEC}]
     env.reset.return_value = dm_env.restart([{'RGB': RGB_VALUE}])
@@ -77,7 +77,7 @@ class WrapperTest(absltest.TestCase):
           }]))
 
   def test_nochange(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.observation_spec.return_value = [{
         'RGB': RGB_SPEC,

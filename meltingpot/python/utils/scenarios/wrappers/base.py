@@ -15,8 +15,6 @@
 
 from meltingpot.python.utils.substrates import substrate
 
-Substrate = substrate.Substrate
-
 
 class SubstrateWrapper(substrate.Substrate):
   """Base class for Substrate wrappers."""
@@ -25,8 +23,7 @@ class SubstrateWrapper(substrate.Substrate):
     """Initializer.
 
     Args:
-      env: An environment to wrap. This environment will be closed with this
-        wrapper.
+      env: A substrate to wrap. Will be closed with this wrapper.
     """
     self._env = env
 

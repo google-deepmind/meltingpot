@@ -57,6 +57,7 @@ import immutabledict
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import base
+from meltingpot.python.utils.substrates import substrate
 
 GLOBAL_KEY = 'global'
 OBSERVATIONS_KEY = 'observations'
@@ -72,7 +73,7 @@ def _immutable_ndarray(value: np.ndarray) -> np.ndarray:
 class Wrapper(base.SubstrateWrapper):
   """Exposes actions/observations/rewards from all players to all players."""
 
-  def __init__(self, env: base.Substrate,
+  def __init__(self, env: substrate.Substrate,
                observations_to_share: Collection[str] = (),
                share_actions: bool = False,
                share_rewards: bool = False) -> None:

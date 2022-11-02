@@ -24,6 +24,7 @@ import dm_env
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import base
+from meltingpot.python.utils.substrates import substrate
 
 
 def _setdefault(dictionary: Dict[str, Any], key: str,
@@ -48,7 +49,7 @@ class Wrapper(base.SubstrateWrapper):
   """Wrapper to add observations with default values if not actually present."""
 
   def __init__(self,
-               env: base.Substrate,
+               env: substrate.Substrate,
                key: str,
                default_value: np.ndarray,
                default_spec: Optional[dm_env.specs.Array] = None):

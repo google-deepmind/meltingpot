@@ -22,7 +22,7 @@ import immutabledict
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import all_observations_wrapper
-from meltingpot.python.utils.scenarios.wrappers import base
+from meltingpot.python.utils.substrates import substrate
 
 GLOBAL_KEY = all_observations_wrapper.GLOBAL_KEY
 REWARDS_KEY = all_observations_wrapper.REWARDS_KEY
@@ -73,7 +73,7 @@ def _expect_ones(*args, **kwargs):
 class AllObservationsWrapperTest(parameterized.TestCase):
 
   def test_observation_spec(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.observation_spec.return_value = [{
         OBSERVATION_1: dm_env.specs.Array(shape=[1], dtype=np.float32),
@@ -118,7 +118,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
   def test_reset(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.action_spec.return_value = (ACTION_SPEC,) * 2
     env.reward_spec.return_value = (REWARD_SPEC,) * 2
@@ -194,7 +194,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
   def test_step(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.action_spec.return_value = [ACTION_SPEC] * 2
     env.reward_spec.return_value = [REWARD_SPEC] * 2
@@ -270,7 +270,7 @@ class AllObservationsWrapperTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
   def test_can_be_applied_twice(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.observation_spec.return_value = [{
         OBSERVATION_1: dm_env.specs.Array(shape=[1], dtype=np.float32),

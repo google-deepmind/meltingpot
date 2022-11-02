@@ -20,7 +20,7 @@ import dm_env
 import numpy as np
 
 from meltingpot.python.utils.scenarios.wrappers import agent_slot_wrapper
-from meltingpot.python.utils.scenarios.wrappers import base
+from meltingpot.python.utils.substrates import substrate
 
 AGENT_SLOT = agent_slot_wrapper.AGENT_SLOT
 RGB_SPEC = dm_env.specs.Array(shape=(8, 8, 3), dtype=np.int8)
@@ -53,7 +53,7 @@ class AgentSlotWrapperTest(absltest.TestCase):
       np.testing.assert_equal(actual, expected)
 
   def test_added_slot(self):
-    env = mock.Mock(spec_set=base.Substrate)
+    env = mock.Mock(spec_set=substrate.Substrate)
     env.events.return_value = ()
     env.observation_spec.return_value = [{'RGB': RGB_SPEC}] * 3
     env.reset.return_value = dm_env.restart([{'RGB': RGB_VALUE}] * 3)
