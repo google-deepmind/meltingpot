@@ -43,7 +43,7 @@ def _player_observations(observations: Mapping[str, T], suffix: str,
       yield player_index, value
 
 
-class Wrapper(base.Wrapper):
+class Wrapper(base.Lab2dWrapper):
   """Wrapper that converts the environment to multiplayer lists.
 
   Ensures:

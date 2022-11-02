@@ -40,7 +40,7 @@ class SubstrateObservables:
   events: rx.typing.Observable[tuple[str, Any]]
 
 
-class Substrate(base.Wrapper):
+class Substrate(base.Lab2dWrapper):
   """Specific subclass of Wrapper with overridden spec types."""
 
   def __init__(self, env: ...) -> None:

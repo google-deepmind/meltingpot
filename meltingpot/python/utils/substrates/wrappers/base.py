@@ -23,7 +23,7 @@ Wrappers are assumed to own the wrapped environment and that they have the
 import dmlab2d
 
 
-class Wrapper(dmlab2d.Environment):
+class Lab2dWrapper(dmlab2d.Environment):
   """Base class for wrappers of dmlab2d.Environments."""
 
   def __init__(self, env):

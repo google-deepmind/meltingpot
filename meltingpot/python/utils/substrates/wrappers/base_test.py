@@ -32,7 +32,7 @@ class WrapperTest(parameterized.TestCase):
 
   def test_instance(self):
     env = mock.Mock(spec_set=dmlab2d.Environment)
-    wrapped = base.Wrapper(env=env)
+    wrapped = base.Lab2dWrapper(env=env)
     self.assertIsInstance(wrapped, dmlab2d.Environment)
 
   @parameterized.named_parameters(
@@ -43,7 +43,7 @@ class WrapperTest(parameterized.TestCase):
     env_method = getattr(env, method)
     env_method.return_value = mock.sentinel
 
-    wrapped = base.Wrapper(env=env)
+    wrapped = base.Lab2dWrapper(env=env)
     args = [object()]
     kwargs = {'a': object()}
     actual = getattr(wrapped, method)(*args, **kwargs)

@@ -21,7 +21,7 @@ import dmlab2d
 from meltingpot.python.utils.substrates.wrappers import base
 
 
-class ResetWrapper(base.Wrapper):
+class ResetWrapper(base.Lab2dWrapper):
   """Wrapper that rebuilds the environment on reset."""
 
   def __init__(self, build_environment: Callable[[], dmlab2d.Environment]):
