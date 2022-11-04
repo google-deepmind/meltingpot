@@ -21,7 +21,7 @@ set -euxo pipefail
 function check_version_gt() {
   local required="$1"
   local input lowest
-  input="$(grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' /dev/stdin | head -n 1)"
+  input="$(grep -Eo '[0-9]+\.[0-9]+' /dev/stdin | head -n 1)"
   lowest="$(printf "${required}\n${input}" | sort -V | head -n 1)"
   [[ "${lowest}" == "${required}" ]]
 }
@@ -41,7 +41,7 @@ function check_setup() {
   gcc --version | check_version_gt '8'
 
   echo -e "\nChecking bazel version..."
-  bazel --version | check_version_gt '5.2.0'
+  bazel --version | check_version_gt '5.2'
 }
 
 
