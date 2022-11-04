@@ -13,8 +13,6 @@
 # limitations under the License.
 """Tests for substrate."""
 
-import dataclasses
-
 from absl.testing import absltest
 from absl.testing import parameterized
 import numpy as np
@@ -113,31 +111,6 @@ class GeneralTestCase(parameterized.TestCase):
       with self.assertRaises(
           AssertionError, msg=f'Episode {episode} match {obs1} == {obs2}'):
         np.testing.assert_equal(obs1, obs2)
-
-  def test_observables(self):
-    config = substrate.get_config('running_with_scissors_in_the_matrix')
-    with substrate.build(config) as env:
-      received = []
-      observables = env.observables()
-      for field in dataclasses.fields(observables):
-        getattr(observables, field.name).subscribe(
-            on_next=received.append,
-            on_error=lambda e: received.append(type(e)),
-            on_completed=lambda: received.append('DONE'),
-        )
-
-      expected = []
-      timestep = env.reset()
-      events = list(env.events())
-      expected.extend([timestep] + events)
-      for n in range(2):
-        action = [n] * config.num_players
-        timestep = env.step(action)
-        events = list(env.events())
-        expected.extend([action, timestep] + events)
-      expected.extend(['DONE', 'DONE', 'DONE'])
-
-    self.assertEqual(received, expected)
 
 
 @parameterized.named_parameters(
