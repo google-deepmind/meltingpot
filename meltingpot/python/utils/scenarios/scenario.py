@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Scenario factory."""
+"""Scenario class."""
 
 from typing import Any, Collection, Iterable, Mapping, Sequence, Tuple, TypeVar
 
 import chex
 import dm_env
 import immutabledict
+import numpy as np
 from rx import subject
 
 from meltingpot.python.utils.scenarios import population
@@ -84,8 +85,8 @@ class ScenarioObservables(substrate_lib.SubstrateObservables):
   Attributes:
     action: emits actions sent to the scenario from (focal) players.
     timestep: emits timesteps sent from the scenario to (focal) players.
-    events: emits environment-specific events resulting from any interactions
-      with the scenario.
+    events: will never emit any events since things like player index are hard
+      to interpret for a Scenario. Use substrate.events instead.
     background: observables from the perspective of the background players.
     substrate: observables for the underlying substrate.
   """
@@ -98,7 +99,7 @@ class Scenario(base.SubstrateWrapper):
 
   def __init__(
       self,
-      substrate,
+      substrate: substrate_lib.Substrate,
       background_population: population.Population,
       is_focal: Sequence[bool],
       permitted_observations: Collection[str]) -> None:
@@ -190,6 +191,13 @@ class Scenario(base.SubstrateWrapper):
       self._events_subject.on_next(event)
     return focal_timestep
 
+  def observation(self) -> Sequence[Mapping[str, np.ndarray]]:
+    observations = super().observation()
+    focal_observations, _ = _partition(observations, self._is_focal)
+    focal_observations = _restrict_observations(focal_observations,
+                                                self._permitted_observations)
+    return focal_observations
+
   def events(self) -> Sequence[Tuple[str, Any]]:
     """See base class."""
     # Do not emit substrate events as these may not make sense in the context
@@ -198,20 +206,20 @@ class Scenario(base.SubstrateWrapper):
 
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
-    focal_action_spec, _ = _partition(super().action_spec(), self._is_focal)
+    action_spec = super().action_spec()
+    focal_action_spec, _ = _partition(action_spec, self._is_focal)
     return focal_action_spec
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    focal_observation_spec, _ = _partition(super().observation_spec(),
-                                           self._is_focal)
+    observation_spec = super().observation_spec()
+    focal_observation_spec, _ = _partition(observation_spec, self._is_focal)
     return _restrict_observations(focal_observation_spec,
                                   self._permitted_observations)
 
   def reward_spec(self) -> Sequence[dm_env.specs.Array]:
     """See base class."""
-    # TODO(b/192925212): better typing to avoid pytype disables.
-    reward_spec: Sequence[dm_env.specs.Array] = super().reward_spec()  # pytype: disable=annotation-type-mismatch
+    reward_spec = super().reward_spec()
     focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
     return focal_reward_spec
 

@@ -249,5 +249,36 @@ class Lab2DToListsWrapperTest(absltest.TestCase):
         ])
     np.testing.assert_equal(actual, expected)
 
+  def test_observation(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = {
+        '1.MOVE': ACT_SPEC,
+        '2.MOVE': ACT_SPEC,
+        '3.MOVE': ACT_SPEC,
+    }
+    env.observation.return_value = {
+        '1.RGB': RGB_VALUE * 1,
+        '2.RGB': RGB_VALUE * 2,
+        '3.RGB': RGB_VALUE * 3,
+        '1.OTHER': RGB_VALUE,
+        '2.OTHER': RGB_VALUE,
+        '3.OTHER': RGB_VALUE,
+        '1.REWARD': REWARD_VALUE * 0,
+        '2.REWARD': REWARD_VALUE * 0,
+        '3.REWARD': REWARD_VALUE * 0,
+        'WORLD.RGB': RGB_VALUE,
+    }
+    wrapped = multiplayer_wrapper.Wrapper(
+        env,
+        individual_observation_names=['RGB'],
+        global_observation_names=['WORLD.RGB'])
+    actual = wrapped.observation()
+    expected = [
+        {'RGB': RGB_VALUE * 1, 'WORLD.RGB': RGB_VALUE},
+        {'RGB': RGB_VALUE * 2, 'WORLD.RGB': RGB_VALUE},
+        {'RGB': RGB_VALUE * 3, 'WORLD.RGB': RGB_VALUE},
+    ]
+    np.testing.assert_equal(actual, expected)
+
 if __name__ == '__main__':
   absltest.main()

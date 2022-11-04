@@ -140,6 +140,11 @@ class Wrapper(base.Lab2dWrapper):
     timestep = super().step(action)
     return self._get_timestep(timestep)
 
+  def observation(self) -> Sequence[Mapping[str, np.ndarray]]:
+    """See base class."""
+    observation = super().observation()
+    return self._get_observations(observation)
+
   def action_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
     source = super().action_spec()
