@@ -44,7 +44,7 @@ def build(config: config_dict.ConfigDict) -> substrate.Substrate:
   Returns:
     The training substrate.
   """
-  env = builder.builder(**config)
+  env = builder.builder(config.lab2d_settings)
   env = multiplayer_wrapper.Wrapper(
       env,
       individual_observation_names=config.individual_observation_names,
