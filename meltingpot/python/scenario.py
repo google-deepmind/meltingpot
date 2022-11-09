@@ -66,10 +66,6 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
           if key in PERMITTED_OBSERVATIONS
       }),
   )
-  background_timestep_spec = substrate_transforms.tf1_bot_timestep_spec(
-      timestep_spec=substrate.timestep_spec,
-      action_spec=substrate.action_spec,
-      num_players=substrate.num_players)
   config = config_dict.create(
       substrate=substrate,
       bots=bots,
@@ -80,8 +76,6 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       permitted_observations=set(PERMITTED_OBSERVATIONS),
       timestep_spec=focal_timestep_spec,
       action_spec=substrate.action_spec,
-      background_timestep_spec=background_timestep_spec,
-      background_action_spec=substrate.action_spec,
   )
   return config.lock()
 
@@ -102,6 +96,7 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
   if not config.substrate_transform:
     permitted_observations &= config.permitted_observations
   # Add observations needed by some bots. These are removed for focal players.
+  # TODO(b/258239516): remove this wrapper in a future release.
   substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
 
   background_population = population.Population(

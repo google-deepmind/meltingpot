@@ -17,14 +17,19 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 from meltingpot.python import bot as bot_factory
-from meltingpot.python import scenario as scenario_factory
+from meltingpot.python import substrate as substrate_factory
 from meltingpot.python.testing import bots as test_utils
+from meltingpot.python.utils.scenarios import substrate_transforms
 
 
 def _get_specs(substrate):
-  scenario = next(iter(scenario_factory.SCENARIOS_BY_SUBSTRATE[substrate]))
-  config = scenario_factory.get_config(scenario)
-  return config.background_timestep_spec, config.background_action_spec
+  config = substrate_factory.get_config(substrate)
+  # TODO(b/258239516): remove this when wrapper is removed from scenario.py.
+  timestep_spec = substrate_transforms.tf1_bot_timestep_spec(
+      timestep_spec=config.timestep_spec,
+      action_spec=config.action_spec,
+      num_players=config.num_players)
+  return timestep_spec, config.action_spec
 
 
 @parameterized.named_parameters(
