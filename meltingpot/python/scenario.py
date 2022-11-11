@@ -43,9 +43,11 @@ def _scenarios_by_substrate() -> Mapping[str, AbstractSet[str]]:
 SCENARIOS_BY_SUBSTRATE = _scenarios_by_substrate()
 
 PERMITTED_OBSERVATIONS = frozenset({
+    # The primary visual input.
+    'RGB',
+    # Extra observations used in some substrates.
     'INVENTORY',
     'READY_TO_SHOOT',
-    'RGB',
 })
 
 
@@ -59,7 +61,10 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
     raise ValueError(f'Unknown scenario {scenario_name!r}')
   scenario = scenario_config.SCENARIO_CONFIGS[scenario_name]
   substrate = substrate_factory.get_config(scenario.substrate)
-  bots = {name: bot_factory.get_config(name) for name in scenario.bots}
+  bots = {
+      name: bot_factory.get_config(name)
+      for name in set().union(*scenario.bots_by_role.values())
+  }
   focal_timestep_spec = substrate.timestep_spec._replace(
       observation=immutabledict.immutabledict({
           key: spec for key, spec in substrate.timestep_spec.observation.items()
@@ -68,10 +73,11 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   )
   config = config_dict.create(
       substrate=substrate,
-      bots=bots,
+      roles=scenario.roles,
       is_focal=scenario.is_focal,
       num_players=sum(scenario.is_focal),
-      num_bots=len(scenario.is_focal) - sum(scenario.is_focal),
+      bots=bots,
+      bots_by_role=scenario.bots_by_role,
       substrate_transform=None,
       permitted_observations=set(PERMITTED_OBSERVATIONS),
       timestep_spec=focal_timestep_spec,
@@ -89,6 +95,7 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
   Returns:
     The test scenario.
   """
+  # TODO(b/227143834): pass roles to substrate when building.
   substrate = substrate_factory.build(config.substrate)
   if config.substrate_transform:
     substrate = config.substrate_transform(substrate)
@@ -104,8 +111,10 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
           bot_name: bot_factory.build(bot_config)
           for bot_name, bot_config in config.bots.items()
       },
-      names_by_role={'default': set(config.bots)},
-      roles=('default',) * config.num_bots,
+      names_by_role=config.bots_by_role,
+      roles=[
+          role for n, role in enumerate(config.roles) if not config.is_focal[n]
+      ],
   )
 
   return scenario_lib.Scenario(

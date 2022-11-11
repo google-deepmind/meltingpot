@@ -16,7 +16,7 @@
 import dataclasses
 import functools
 import os
-from typing import Callable, Mapping, Optional
+from typing import AbstractSet, Callable, Mapping, Optional
 
 import immutabledict
 
@@ -40,13 +40,18 @@ class BotConfig:
 
   Attributes:
     substrate: the substrate the bot was trained for.
+    roles: the roles the bot supports.
     model_path: the path to the bot's saved model.
     puppeteer_builder: an optional function that returns the puppeteer
       used to control the bot.
   """
   substrate: str
+  roles: AbstractSet[str]
   model_path: str
-  puppeteer_builder: Optional[Callable[[], puppeteer.Puppeteer]] = None
+  puppeteer_builder: Optional[Callable[[], puppeteer.Puppeteer]]
+
+  def __post_init__(self):
+    object.__setattr__(self, 'roles', frozenset(self.roles))
 
 
 def _saved_model(substrate: str,
@@ -60,7 +65,11 @@ def _saved_model(substrate: str,
     models_root: The path to the directory containing the saved_models.
   """
   model_path = os.path.join(models_root, substrate, model)
-  return BotConfig(substrate=substrate, model_path=model_path)
+  return BotConfig(
+      substrate=substrate,
+      roles={'default'},
+      model_path=model_path,
+      puppeteer_builder=None)
 
 
 def _puppet(substrate: str,
@@ -76,6 +85,7 @@ def _puppet(substrate: str,
   puppet_path = os.path.join(models_root, substrate, 'puppet')
   return BotConfig(
       substrate=substrate,
+      roles={'default'},
       model_path=puppet_path,
       puppeteer_builder=puppeteer_builder)
 

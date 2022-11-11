@@ -27,25 +27,42 @@ class ScenarioConfig:
     description: a description of the scenario.
     tags: tags for the scenario.
     substrate: the substrate the scenario is based on.
+    roles: indicates what role the player in the corresponding player slot has.
     is_focal: indicates whether the corresponding player slot is to be filled by
       a focal player or a bot.
-    bots: names of the bots to sample from to fill the bot slots.
+    bots_by_role: names of the bots to sample from to fill the bot slots with
+      the corresponding role.
   """
   description: str
   tags: AbstractSet[str]
   substrate: str
+  roles: Sequence[str]
   is_focal: Sequence[bool]
-  bots: AbstractSet[str]
+  bots_by_role: Mapping[str, AbstractSet[str]]
 
   def __post_init__(self):
     object.__setattr__(self, 'tags', frozenset(self.tags))
+    object.__setattr__(self, 'roles', tuple(self.roles))
     object.__setattr__(self, 'is_focal', tuple(self.is_focal))
-    object.__setattr__(self, 'bots', frozenset(self.bots))
+    bots_by_role = immutabledict.immutabledict({
+        role: frozenset(bots) for role, bots in self.bots_by_role.items()
+    })
+    object.__setattr__(self, 'bots_by_role', bots_by_role)
+
+
+def _homogeneous_scenario(is_focal: Sequence[bool], bots: AbstractSet[str],
+                          **kwargs) -> ScenarioConfig:
+  """Returns a ScenarioConfig for a scenario with homogeneous roles."""
+  return ScenarioConfig(
+      roles=('default',) * len(is_focal),
+      is_focal=is_focal,
+      bots_by_role={'default': bots},
+      **kwargs)
 
 
 SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
-    allelopathic_harvest_0=ScenarioConfig(
+    allelopathic_harvest_0=_homogeneous_scenario(
         description='focals are resident and a visitor prefers green',
         tags=frozenset({
             'resident',
@@ -59,7 +76,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ah3gs_bot_finding_berry_two_the_most_tasty_5',
         }),
     ),
-    allelopathic_harvest_1=ScenarioConfig(
+    allelopathic_harvest_1=_homogeneous_scenario(
         description='visiting a green preferring population',
         tags=frozenset({
             'convention_following',
@@ -74,7 +91,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ah3gs_bot_finding_berry_two_the_most_tasty_5',
         }),
     ),
-    arena_running_with_scissors_in_the_matrix_0=ScenarioConfig(
+    arena_running_with_scissors_in_the_matrix_0=_homogeneous_scenario(
         description='versus gullible bots',
         tags=frozenset({
             'deception',
@@ -89,7 +106,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'arena_rws_free_2',
         }),
     ),
-    arena_running_with_scissors_in_the_matrix_1=ScenarioConfig(
+    arena_running_with_scissors_in_the_matrix_1=_homogeneous_scenario(
         description='versus mixture of pure bots',
         tags=frozenset({
             'half_and_half',
@@ -112,7 +129,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'arena_rws_pure_scissors_3',
         }),
     ),
-    arena_running_with_scissors_in_the_matrix_2=ScenarioConfig(
+    arena_running_with_scissors_in_the_matrix_2=_homogeneous_scenario(
         description='versus pure rock bots',
         tags=frozenset({
             'half_and_half',
@@ -127,7 +144,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'arena_rws_pure_rock_3',
         }),
     ),
-    arena_running_with_scissors_in_the_matrix_3=ScenarioConfig(
+    arena_running_with_scissors_in_the_matrix_3=_homogeneous_scenario(
         description='versus pure paper bots',
         tags=frozenset({
             'half_and_half',
@@ -142,7 +159,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'arena_rws_pure_paper_3',
         }),
     ),
-    arena_running_with_scissors_in_the_matrix_4=ScenarioConfig(
+    arena_running_with_scissors_in_the_matrix_4=_homogeneous_scenario(
         description='versus pure scissors bots',
         tags=frozenset({
             'half_and_half',
@@ -157,7 +174,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'arena_rws_pure_scissors_3',
         }),
     ),
-    bach_or_stravinsky_in_the_matrix_0=ScenarioConfig(
+    bach_or_stravinsky_in_the_matrix_0=_homogeneous_scenario(
         description='visiting pure bach fans',
         tags=frozenset({
             'convention_following',
@@ -172,7 +189,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'bach_fan_2',
         }),
     ),
-    bach_or_stravinsky_in_the_matrix_1=ScenarioConfig(
+    bach_or_stravinsky_in_the_matrix_1=_homogeneous_scenario(
         description='visiting pure stravinsky fans',
         tags=frozenset({
             'convention_following',
@@ -187,7 +204,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'stravinsky_fan_2',
         }),
     ),
-    capture_the_flag_0=ScenarioConfig(
+    capture_the_flag_0=_homogeneous_scenario(
         description='focal team versus shaped a3c bot team',
         tags=frozenset({
             'half_and_half',
@@ -200,14 +217,17 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ctf_pseudorewards_for_main_game_events_a3c_6',
         }),
     ),
-    capture_the_flag_1=ScenarioConfig(
+    capture_the_flag_1=_homogeneous_scenario(
         description='focal team versus shaped vmpo bot team',
         tags=frozenset({
             'half_and_half',
             'learned_teamwork',
         }),
         substrate='capture_the_flag',
-        is_focal=(True, False,) * 4,
+        is_focal=(
+            True,
+            False,
+        ) * 4,
         bots=frozenset({
             'ctf_pseudorewards_for_main_game_events_vmpo_0',
             'ctf_pseudorewards_for_main_game_events_vmpo_3',
@@ -216,7 +236,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ctf_pseudorewards_for_main_game_events_vmpo_7',
         }),
     ),
-    capture_the_flag_2=ScenarioConfig(
+    capture_the_flag_2=_homogeneous_scenario(
         description='ad hoc teamwork with shaped a3c bots',
         tags=frozenset({
             'ad_hoc_teamwork',
@@ -229,7 +249,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ctf_pseudorewards_for_main_game_events_a3c_6',
         }),
     ),
-    capture_the_flag_3=ScenarioConfig(
+    capture_the_flag_3=_homogeneous_scenario(
         description='ad hoc teamwork with shaped vmpo bots',
         tags=frozenset({
             'ad_hoc_teamwork',
@@ -245,7 +265,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ctf_pseudorewards_for_main_game_events_vmpo_7',
         }),
     ),
-    chemistry_branched_chain_reaction_0=ScenarioConfig(
+    chemistry_branched_chain_reaction_0=_homogeneous_scenario(
         description='focals meet X preferring bots',
         tags=frozenset({
             'half_and_half',
@@ -258,7 +278,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_branched_chain_reaction_X_specialist_2',
         }),
     ),
-    chemistry_branched_chain_reaction_1=ScenarioConfig(
+    chemistry_branched_chain_reaction_1=_homogeneous_scenario(
         description='focals meet Y preferring bots',
         tags=frozenset({
             'half_and_half',
@@ -271,7 +291,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_branched_chain_reaction_Y_specialist_2',
         }),
     ),
-    chemistry_branched_chain_reaction_2=ScenarioConfig(
+    chemistry_branched_chain_reaction_2=_homogeneous_scenario(
         description='focals are resident',
         tags=frozenset({
             'resident',
@@ -287,7 +307,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_branched_chain_reaction_Y_specialist_2',
         }),
     ),
-    chemistry_branched_chain_reaction_3=ScenarioConfig(
+    chemistry_branched_chain_reaction_3=_homogeneous_scenario(
         description='visiting another population',
         tags=frozenset({
             'convention_following',
@@ -304,7 +324,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_branched_chain_reaction_Y_specialist_2',
         }),
     ),
-    chemistry_metabolic_cycles_0=ScenarioConfig(
+    chemistry_metabolic_cycles_0=_homogeneous_scenario(
         description='focals meet food1 preferring bots',
         tags=frozenset({
             'half_and_half',
@@ -316,7 +336,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_metabolic_cycles_food1_specialist_1',
         }),
     ),
-    chemistry_metabolic_cycles_1=ScenarioConfig(
+    chemistry_metabolic_cycles_1=_homogeneous_scenario(
         description='focals meet food2 preferring bots',
         tags=frozenset({
             'half_and_half',
@@ -328,7 +348,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_metabolic_cycles_food2_specialist_1',
         }),
     ),
-    chemistry_metabolic_cycles_2=ScenarioConfig(
+    chemistry_metabolic_cycles_2=_homogeneous_scenario(
         description='focals are resident',
         tags=frozenset({
             'resident',
@@ -342,7 +362,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_metabolic_cycles_food2_specialist_1',
         }),
     ),
-    chemistry_metabolic_cycles_3=ScenarioConfig(
+    chemistry_metabolic_cycles_3=_homogeneous_scenario(
         description='visiting another population',
         tags=frozenset({
             'visitor',
@@ -356,7 +376,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chemistry_metabolic_cycles_food2_specialist_1',
         }),
     ),
-    chicken_in_the_matrix_0=ScenarioConfig(
+    chicken_in_the_matrix_0=_homogeneous_scenario(
         description='meeting a mixture of pure bots',
         tags=frozenset({
             'half_and_half',
@@ -375,7 +395,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chicken_pure_hawk_3',
         }),
     ),
-    chicken_in_the_matrix_1=ScenarioConfig(
+    chicken_in_the_matrix_1=_homogeneous_scenario(
         description='visiting a pure dove population',
         tags=frozenset({
             'versus_pure_dove',
@@ -390,7 +410,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chicken_pure_dove_3',
         }),
     ),
-    chicken_in_the_matrix_2=ScenarioConfig(
+    chicken_in_the_matrix_2=_homogeneous_scenario(
         description='focals are resident and visitors are hawks',
         tags=frozenset({
             'resident',
@@ -405,7 +425,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chicken_pure_hawk_3',
         }),
     ),
-    chicken_in_the_matrix_3=ScenarioConfig(
+    chicken_in_the_matrix_3=_homogeneous_scenario(
         description='visiting a gullible population',
         tags=frozenset({
             'deception',
@@ -421,7 +441,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chicken_free_3',
         }),
     ),
-    chicken_in_the_matrix_4=ScenarioConfig(
+    chicken_in_the_matrix_4=_homogeneous_scenario(
         description='visiting grim reciprocators',
         tags=frozenset({
             'reciprocity',
@@ -434,7 +454,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'chicken_puppet_grim',
         }),
     ),
-    clean_up_0=ScenarioConfig(
+    clean_up_0=_homogeneous_scenario(
         description='visiting an altruistic population',
         tags=frozenset({
             'versus_cleaners',
@@ -447,7 +467,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_cleaner_2',
         }),
     ),
-    clean_up_1=ScenarioConfig(
+    clean_up_1=_homogeneous_scenario(
         description='focals are resident and visitors free ride',
         tags=frozenset({
             'resident',
@@ -461,7 +481,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_consumer_2',
         }),
     ),
-    clean_up_2=ScenarioConfig(
+    clean_up_2=_homogeneous_scenario(
         description='visiting a turn-taking population that cleans first',
         tags=frozenset({
             'versus_puppet',
@@ -473,7 +493,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_puppet_alternate_clean_first',
         }),
     ),
-    clean_up_3=ScenarioConfig(
+    clean_up_3=_homogeneous_scenario(
         description='visiting a turn-taking population that eats first',
         tags=frozenset({
             'versus_puppet',
@@ -485,7 +505,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_puppet_alternate_eat_first',
         }),
     ),
-    clean_up_4=ScenarioConfig(
+    clean_up_4=_homogeneous_scenario(
         description='focals are visited by one reciprocator',
         tags=frozenset({
             'resident',
@@ -497,7 +517,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_puppet_reciprocator_threshold_low',
         }),
     ),
-    clean_up_5=ScenarioConfig(
+    clean_up_5=_homogeneous_scenario(
         description='focals are visited by two suspicious reciprocators',
         tags=frozenset({
             'resident',
@@ -509,7 +529,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_puppet_reciprocator_threshold_mid',
         }),
     ),
-    clean_up_6=ScenarioConfig(
+    clean_up_6=_homogeneous_scenario(
         description='focals are visited by one suspicious reciprocator',
         tags=frozenset({
             'resident',
@@ -521,7 +541,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'cleanup_puppet_reciprocator_threshold_mid',
         }),
     ),
-    collaborative_cooking_impassable_0=ScenarioConfig(
+    collaborative_cooking_impassable_0=_homogeneous_scenario(
         description='visiting a vmpo population',
         tags=frozenset({
             'convention_following',
@@ -539,7 +559,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'collaborative_cooking_impassable_vmpo_pop_size_ten_9',
         }),
     ),
-    collaborative_cooking_impassable_1=ScenarioConfig(
+    collaborative_cooking_impassable_1=_homogeneous_scenario(
         description='focals are resident',
         tags=frozenset({
             'resident',
@@ -556,7 +576,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'collaborative_cooking_impassable_vmpo_pop_size_ten_9',
         }),
     ),
-    collaborative_cooking_passable_0=ScenarioConfig(
+    collaborative_cooking_passable_0=_homogeneous_scenario(
         description='visiting uncoordinated generalists',
         tags=frozenset({
             'convention_following',
@@ -569,7 +589,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'collaborative_cooking_passable_vmpo_pop_size_ten_5',
         }),
     ),
-    collaborative_cooking_passable_1=ScenarioConfig(
+    collaborative_cooking_passable_1=_homogeneous_scenario(
         description='focals are resident and visited by an uncoordinated generalist',
         tags=frozenset({
             'resident',
@@ -581,7 +601,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'collaborative_cooking_passable_vmpo_pop_size_ten_5',
         }),
     ),
-    commons_harvest_closed_0=ScenarioConfig(
+    commons_harvest_closed_0=_homogeneous_scenario(
         description='focals are resident and visited by two zappers',
         tags=frozenset({
             'resident',
@@ -595,7 +615,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'closed_commons_zapper_3',
         }),
     ),
-    commons_harvest_closed_1=ScenarioConfig(
+    commons_harvest_closed_1=_homogeneous_scenario(
         description='focals are resident and visited by six zappers',
         tags=frozenset({
             'resident',
@@ -609,7 +629,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'closed_commons_zapper_3',
         }),
     ),
-    commons_harvest_closed_2=ScenarioConfig(
+    commons_harvest_closed_2=_homogeneous_scenario(
         description='visiting a population of zappers',
         tags=frozenset({
             'visitor',
@@ -623,7 +643,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'closed_commons_zapper_3',
         }),
     ),
-    commons_harvest_open_0=ScenarioConfig(
+    commons_harvest_open_0=_homogeneous_scenario(
         description='focals are resident and visited by two zappers',
         tags=frozenset({
             'resident',
@@ -635,7 +655,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'open_commons_zapper_1',
         }),
     ),
-    commons_harvest_open_1=ScenarioConfig(
+    commons_harvest_open_1=_homogeneous_scenario(
         description='focals are resident and visited by six zappers',
         tags=frozenset({
             'resident',
@@ -647,7 +667,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'open_commons_zapper_1',
         }),
     ),
-    commons_harvest_partnership_0=ScenarioConfig(
+    commons_harvest_partnership_0=_homogeneous_scenario(
         description='meeting good partners',
         tags=frozenset({
             'half_and_half',
@@ -661,7 +681,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_putative_good_partner_7',
         }),
     ),
-    commons_harvest_partnership_1=ScenarioConfig(
+    commons_harvest_partnership_1=_homogeneous_scenario(
         description='focals are resident and visitors are good partners',
         tags=frozenset({
             'resident',
@@ -675,7 +695,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_putative_good_partner_7',
         }),
     ),
-    commons_harvest_partnership_2=ScenarioConfig(
+    commons_harvest_partnership_2=_homogeneous_scenario(
         description='visiting a population of good partners',
         tags=frozenset({
             'versus_good_partners',
@@ -689,7 +709,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_putative_good_partner_7',
         }),
     ),
-    commons_harvest_partnership_3=ScenarioConfig(
+    commons_harvest_partnership_3=_homogeneous_scenario(
         description='focals are resident and visited by two zappers',
         tags=frozenset({
             'resident',
@@ -702,7 +722,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_zapper_2',
         }),
     ),
-    commons_harvest_partnership_4=ScenarioConfig(
+    commons_harvest_partnership_4=_homogeneous_scenario(
         description='focals are resident and visited by six zappers',
         tags=frozenset({
             'resident',
@@ -715,7 +735,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_zapper_2',
         }),
     ),
-    commons_harvest_partnership_5=ScenarioConfig(
+    commons_harvest_partnership_5=_homogeneous_scenario(
         description='visiting a population of zappers',
         tags=frozenset({
             'versus_zappers',
@@ -728,7 +748,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'partnership_commons_zapper_2',
         }),
     ),
-    king_of_the_hill_0=ScenarioConfig(
+    king_of_the_hill_0=_homogeneous_scenario(
         description='focal team versus default vmpo bot team',
         tags=frozenset({
             'half_and_half',
@@ -747,7 +767,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_default_vmpo_7',
         }),
     ),
-    king_of_the_hill_1=ScenarioConfig(
+    king_of_the_hill_1=_homogeneous_scenario(
         description='focal team versus shaped a3c bot team',
         tags=frozenset({
             'half_and_half',
@@ -766,7 +786,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_zap_while_in_control_a3c_7',
         }),
     ),
-    king_of_the_hill_2=ScenarioConfig(
+    king_of_the_hill_2=_homogeneous_scenario(
         description='focal team versus shaped vmpo bot team',
         tags=frozenset({
             'half_and_half',
@@ -785,7 +805,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_zap_while_in_control_vmpo_7',
         }),
     ),
-    king_of_the_hill_3=ScenarioConfig(
+    king_of_the_hill_3=_homogeneous_scenario(
         description='ad hoc teamwork with default vmpo bots',
         tags=frozenset({
             'ad_hoc_teamwork',
@@ -804,7 +824,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_default_vmpo_7',
         }),
     ),
-    king_of_the_hill_4=ScenarioConfig(
+    king_of_the_hill_4=_homogeneous_scenario(
         description='ad hoc teamwork with shaped a3c bots',
         tags=frozenset({
             'ad_hoc_teamwork',
@@ -823,7 +843,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_zap_while_in_control_a3c_7',
         }),
     ),
-    king_of_the_hill_5=ScenarioConfig(
+    king_of_the_hill_5=_homogeneous_scenario(
         description='ad hoc teamwork with shaped vmpo bots',
         tags=frozenset({
             'ad_hoc_teamwork',
@@ -842,7 +862,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'koth_zap_while_in_control_vmpo_7',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_0=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_0=_homogeneous_scenario(
         description='visiting unconditional cooperators',
         tags=frozenset({
             'versus_pure_cooperators',
@@ -855,7 +875,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_cooperator_4',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_1=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_1=_homogeneous_scenario(
         description='focals are resident and visitors are unconditional cooperators',
         tags=frozenset({
             'resident',
@@ -868,7 +888,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_cooperator_4',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_2=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_2=_homogeneous_scenario(
         description='focals are resident and visitors defect',
         tags=frozenset({
             'resident',
@@ -881,7 +901,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_defector_2',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_3=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_3=_homogeneous_scenario(
         description='meeting gullible bots',
         tags=frozenset({
             'deception',
@@ -896,7 +916,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_free_2',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_4=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_4=_homogeneous_scenario(
         description='visiting a population of grim reciprocators',
         tags=frozenset({
             'reciprocity',
@@ -909,7 +929,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_puppet_grim_threshold_high',
         }),
     ),
-    prisoners_dilemma_in_the_matrix_5=ScenarioConfig(
+    prisoners_dilemma_in_the_matrix_5=_homogeneous_scenario(
         description='visiting a population of hair-trigger grim reciprocators',
         tags=frozenset({
             'reciprocity',
@@ -922,7 +942,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'prisoners_dilemma_puppet_grim_threshold_low',
         }),
     ),
-    pure_coordination_in_the_matrix_0=ScenarioConfig(
+    pure_coordination_in_the_matrix_0=_homogeneous_scenario(
         description='focals are resident and visitor is mixed',
         tags=frozenset({
             'resident',
@@ -939,7 +959,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'pure_coordination_type_3_specialist_1',
         }),
     ),
-    pure_coordination_in_the_matrix_1=ScenarioConfig(
+    pure_coordination_in_the_matrix_1=_homogeneous_scenario(
         description='visiting resource 1 fans',
         tags=frozenset({
             'versus_pure_type_1',
@@ -952,7 +972,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'pure_coordination_type_1_specialist_1',
         }),
     ),
-    pure_coordination_in_the_matrix_2=ScenarioConfig(
+    pure_coordination_in_the_matrix_2=_homogeneous_scenario(
         description='visiting resource 2 fans',
         tags=frozenset({
             'versus_pure_type_2',
@@ -965,7 +985,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'pure_coordination_type_2_specialist_1',
         }),
     ),
-    pure_coordination_in_the_matrix_3=ScenarioConfig(
+    pure_coordination_in_the_matrix_3=_homogeneous_scenario(
         description='visiting resource 3 fans',
         tags=frozenset({
             'versus_pure_type_3',
@@ -978,7 +998,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'pure_coordination_type_3_specialist_1',
         }),
     ),
-    pure_coordination_in_the_matrix_4=ScenarioConfig(
+    pure_coordination_in_the_matrix_4=_homogeneous_scenario(
         description='meeting uncoordinated strangers',
         tags=frozenset({
             'half_and_half',
@@ -995,7 +1015,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'pure_coordination_type_3_specialist_1',
         }),
     ),
-    rationalizable_coordination_in_the_matrix_0=ScenarioConfig(
+    rationalizable_coordination_in_the_matrix_0=_homogeneous_scenario(
         description='focals are resident and visitor is mixed',
         tags=frozenset({
             'resident',
@@ -1012,7 +1032,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'rationalizable_coordination_type_3_specialist_1',
         }),
     ),
-    rationalizable_coordination_in_the_matrix_1=ScenarioConfig(
+    rationalizable_coordination_in_the_matrix_1=_homogeneous_scenario(
         description='visiting resource 1 fans',
         tags=frozenset({
             'versus_pure_type_1',
@@ -1025,7 +1045,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'rationalizable_coordination_type_1_specialist_1',
         }),
     ),
-    rationalizable_coordination_in_the_matrix_2=ScenarioConfig(
+    rationalizable_coordination_in_the_matrix_2=_homogeneous_scenario(
         description='visiting resource 2 fans',
         tags=frozenset({
             'versus_pure_type_2',
@@ -1038,7 +1058,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'rationalizable_coordination_type_2_specialist_1',
         }),
     ),
-    rationalizable_coordination_in_the_matrix_3=ScenarioConfig(
+    rationalizable_coordination_in_the_matrix_3=_homogeneous_scenario(
         description='visiting resource 3 fans',
         tags=frozenset({
             'versus_pure_type_3',
@@ -1051,7 +1071,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'rationalizable_coordination_type_3_specialist_1',
         }),
     ),
-    rationalizable_coordination_in_the_matrix_4=ScenarioConfig(
+    rationalizable_coordination_in_the_matrix_4=_homogeneous_scenario(
         description='meeting uncoordinated strangers',
         tags=frozenset({
             'half_and_half',
@@ -1068,7 +1088,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'rationalizable_coordination_type_3_specialist_1',
         }),
     ),
-    running_with_scissors_in_the_matrix_0=ScenarioConfig(
+    running_with_scissors_in_the_matrix_0=_homogeneous_scenario(
         description='versus gullible opponent',
         tags=frozenset({
             'deception',
@@ -1083,7 +1103,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'classic_rws_free_2',
         }),
     ),
-    running_with_scissors_in_the_matrix_1=ScenarioConfig(
+    running_with_scissors_in_the_matrix_1=_homogeneous_scenario(
         description='versus mixed strategy opponent',
         tags=frozenset({
             'half_and_half',
@@ -1106,7 +1126,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'classic_rws_pure_scissors_3',
         }),
     ),
-    running_with_scissors_in_the_matrix_2=ScenarioConfig(
+    running_with_scissors_in_the_matrix_2=_homogeneous_scenario(
         description='versus pure rock opponent',
         tags=frozenset({
             'half_and_half',
@@ -1121,7 +1141,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'classic_rws_pure_rock_3',
         }),
     ),
-    running_with_scissors_in_the_matrix_3=ScenarioConfig(
+    running_with_scissors_in_the_matrix_3=_homogeneous_scenario(
         description='versus pure paper opponent',
         tags=frozenset({
             'half_and_half',
@@ -1136,7 +1156,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'classic_rws_pure_paper_3',
         }),
     ),
-    running_with_scissors_in_the_matrix_4=ScenarioConfig(
+    running_with_scissors_in_the_matrix_4=_homogeneous_scenario(
         description='versus pure scissors opponent',
         tags=frozenset({
             'half_and_half',
@@ -1151,7 +1171,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'classic_rws_pure_scissors_3',
         }),
     ),
-    stag_hunt_in_the_matrix_0=ScenarioConfig(
+    stag_hunt_in_the_matrix_0=_homogeneous_scenario(
         description='visiting a population of stags',
         tags=frozenset({
             'versus_pure_stag',
@@ -1164,7 +1184,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'stag_hunt_stag_specialist_5',
         }),
     ),
-    stag_hunt_in_the_matrix_1=ScenarioConfig(
+    stag_hunt_in_the_matrix_1=_homogeneous_scenario(
         description='visiting a population of hares',
         tags=frozenset({
             'versus_pure_hare',
@@ -1178,7 +1198,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'stag_hunt_hare_specialist_2',
         }),
     ),
-    stag_hunt_in_the_matrix_2=ScenarioConfig(
+    stag_hunt_in_the_matrix_2=_homogeneous_scenario(
         description='visiting a population of grim reciprocators',
         tags=frozenset({
             'reciprocity',
@@ -1191,7 +1211,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'stag_hunt_puppet_grim',
         }),
     ),
-    territory_open_0=ScenarioConfig(
+    territory_open_0=_homogeneous_scenario(
         description='focals are resident and visited by a shaped bot',
         tags=frozenset({
             'resident',
@@ -1205,7 +1225,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'territory_open_painter_3',
         }),
     ),
-    territory_open_1=ScenarioConfig(
+    territory_open_1=_homogeneous_scenario(
         description='visiting a population of shaped bots',
         tags=frozenset({
             'convention_following',
@@ -1220,7 +1240,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'territory_open_painter_3',
         }),
     ),
-    territory_rooms_0=ScenarioConfig(
+    territory_rooms_0=_homogeneous_scenario(
         description='focals are resident and visited by an aggressor',
         tags=frozenset({
             'resident',
@@ -1232,7 +1252,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'territory_closed_reply_to_zapper_1',
         }),
     ),
-    territory_rooms_1=ScenarioConfig(
+    territory_rooms_1=_homogeneous_scenario(
         description='visiting a population of aggressors',
         tags=frozenset({
             'convention_following',
