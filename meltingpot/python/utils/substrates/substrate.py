@@ -13,7 +13,7 @@
 # limitations under the License.
 """Substrate builder."""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from typing import Any
 
 import chex
@@ -21,7 +21,10 @@ import dm_env
 import rx
 from rx import subject
 
+from meltingpot.python.utils.substrates import builder
 from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
+from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
 
 
 @chex.dataclass(frozen=True)
@@ -94,3 +97,34 @@ class Substrate(base.Lab2dWrapper):
   def observables(self) -> SubstrateObservables:
     """Returns observables for the substrate."""
     return self._observables
+
+
+def build_substrate(
+    *,
+    lab2d_settings: builder.Settings,
+    individual_observations: Collection[str],
+    global_observations: Collection[str],
+    action_table: Sequence[Mapping[str, int]],
+) -> Substrate:
+  """Builds a Melting Pot substrate.
+
+  Args:
+    lab2d_settings: the lab2d settings for building the lab2d environment.
+    individual_observations: names of the player-specific observations to make
+      available to each player.
+    global_observations: names of the dmlab2d observations to make available to
+      all players.
+    action_table: the possible actions. action_table[i] defines the dmlab2d
+      action that will be forwarded to the wrapped dmlab2d environment for the
+      discrete Melting Pot action i.
+
+  Returns:
+    The constructed substrate.
+  """
+  env = builder.builder(lab2d_settings)
+  env = multiplayer_wrapper.Wrapper(
+      env,
+      individual_observation_names=individual_observations,
+      global_observation_names=global_observations)
+  env = discrete_action_wrapper.Wrapper(env, action_table=action_table)
+  return Substrate(env)

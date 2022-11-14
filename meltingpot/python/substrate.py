@@ -16,10 +16,7 @@
 from ml_collections import config_dict
 
 from meltingpot.python.configs import substrates as substrate_configs
-from meltingpot.python.utils.substrates import builder
 from meltingpot.python.utils.substrates import substrate
-from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
-from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
 
 AVAILABLE_SUBSTRATES = substrate_configs.SUBSTRATES
 
@@ -44,10 +41,8 @@ def build(config: config_dict.ConfigDict) -> substrate.Substrate:
   Returns:
     The training substrate.
   """
-  env = builder.builder(config.lab2d_settings)
-  env = multiplayer_wrapper.Wrapper(
-      env,
-      individual_observation_names=config.individual_observation_names,
-      global_observation_names=config.global_observation_names)
-  env = discrete_action_wrapper.Wrapper(env, action_table=config.action_set)
-  return substrate.Substrate(env)
+  return substrate.build_substrate(
+      lab2d_settings=config.lab2d_settings,
+      individual_observations=config.individual_observation_names,
+      global_observations=config.global_observation_names,
+      action_table=config.action_set)

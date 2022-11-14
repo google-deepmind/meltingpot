@@ -14,25 +14,24 @@
 """Scenario factory."""
 
 import collections
-from typing import AbstractSet, Mapping
+from collections.abc import Mapping, Set
 
 import immutabledict
 from ml_collections import config_dict
 
 from meltingpot.python import bot as bot_factory
 from meltingpot.python import substrate as substrate_factory
-from meltingpot.python.configs import scenarios as scenario_config
-from meltingpot.python.utils.scenarios import population
+from meltingpot.python.configs import scenarios as scenario_configs
 from meltingpot.python.utils.scenarios import scenario as scenario_lib
 from meltingpot.python.utils.scenarios import substrate_transforms
 
-AVAILABLE_SCENARIOS = frozenset(scenario_config.SCENARIO_CONFIGS)
+AVAILABLE_SCENARIOS = frozenset(scenario_configs.SCENARIO_CONFIGS)
 
 
-def _scenarios_by_substrate() -> Mapping[str, AbstractSet[str]]:
+def _scenarios_by_substrate() -> Mapping[str, Set[str]]:
   """Returns a mapping from substrates to their scenarios."""
   scenarios_by_substrate = collections.defaultdict(list)
-  for scenario_name, config in scenario_config.SCENARIO_CONFIGS.items():
+  for scenario_name, config in scenario_configs.SCENARIO_CONFIGS.items():
     scenarios_by_substrate[config.substrate].append(scenario_name)
   return immutabledict.immutabledict({
       substrate: frozenset(scenarios)
@@ -59,12 +58,15 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
   """
   if scenario_name not in AVAILABLE_SCENARIOS:
     raise ValueError(f'Unknown scenario {scenario_name!r}')
-  scenario = scenario_config.SCENARIO_CONFIGS[scenario_name]
+  scenario = scenario_configs.SCENARIO_CONFIGS[scenario_name]
   substrate = substrate_factory.get_config(scenario.substrate)
   bots = {
       name: bot_factory.get_config(name)
       for name in set().union(*scenario.bots_by_role.values())
   }
+  focal_player_roles = tuple(
+      role for n, role in enumerate(scenario.roles) if scenario.is_focal[n]
+  )
   focal_timestep_spec = substrate.timestep_spec._replace(
       observation=immutabledict.immutabledict({
           key: spec for key, spec in substrate.timestep_spec.observation.items()
@@ -80,6 +82,7 @@ def get_config(scenario_name: str) -> config_dict.ConfigDict:
       bots_by_role=scenario.bots_by_role,
       substrate_transform=None,
       permitted_observations=set(PERMITTED_OBSERVATIONS),
+      focal_player_roles=focal_player_roles,
       timestep_spec=focal_timestep_spec,
       action_spec=substrate.action_spec,
   )
@@ -105,20 +108,14 @@ def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
   # Add observations needed by some bots. These are removed for focal players.
   # TODO(b/258239516): remove this wrapper in a future release.
   substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
-
-  background_population = population.Population(
-      policies={
-          bot_name: bot_factory.build(bot_config)
-          for bot_name, bot_config in config.bots.items()
-      },
-      names_by_role=config.bots_by_role,
-      roles=[
-          role for n, role in enumerate(config.roles) if not config.is_focal[n]
-      ],
-  )
-
-  return scenario_lib.Scenario(
+  bots = {
+      bot_name: bot_factory.build(bot_config)
+      for bot_name, bot_config in config.bots.items()
+  }
+  return scenario_lib.build_scenario(
       substrate=substrate,
-      background_population=background_population,
+      bots=bots,
+      bots_by_role=config.bots_by_role,
+      roles=config.roles,
       is_focal=config.is_focal,
       permitted_observations=permitted_observations)
