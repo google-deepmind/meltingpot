@@ -13,11 +13,12 @@
 # limitations under the License.
 """Multi-player environment builder for Melting Pot levels."""
 
+from collections.abc import Mapping
 import copy
 import itertools
 import os
 import random
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 from absl import logging
 from ml_collections import config_dict
@@ -30,8 +31,7 @@ from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates.wrappers import reset_wrapper
 
 
-Settings = Union[config_dict.ConfigDict, Dict[str, Any]]
-Prefabs = Dict[str, Settings]
+Settings = Union[config_dict.ConfigDict, Mapping[str, Any]]
 
 _MAX_SEED = 2 ** 32 - 1
 _DMLAB2D_ROOT = runfiles_helper.find()
@@ -55,7 +55,7 @@ def _config_dict_to_dict(value):
 
 
 def parse_python_settings_for_dmlab2d(
-    lab2d_settings: config_dict.ConfigDict) -> Settings:
+    lab2d_settings: config_dict.ConfigDict) -> dict[str, Any]:
   """Flatten lab2d_settings into Lua-friendly properties."""
   # Since config_dicts disallow "." in keys, we must use a different character,
   # "$", in our config and then convert it to "." here. This is particularly
@@ -71,7 +71,7 @@ def parse_python_settings_for_dmlab2d(
 
 def apply_prefab_overrides(
     lab2d_settings: config_dict.ConfigDict,
-    prefab_overrides: Optional[Settings] = None):
+    prefab_overrides: Optional[Settings] = None) -> None:
   """Apply prefab overrides to lab2d_settings."""
   if "gameObjects" not in lab2d_settings.simulation:
     lab2d_settings.simulation.gameObjects = []
@@ -89,7 +89,8 @@ def apply_prefab_overrides(
               component)["kwargs"][arg_name] = arg_override
 
 
-def maybe_build_and_add_avatar_objects(lab2d_settings: config_dict.ConfigDict):
+def maybe_build_and_add_avatar_objects(
+    lab2d_settings: config_dict.ConfigDict) -> None:
   """If requested, build the avatar objects and add them to lab2d_settings.
 
   Avatars will be built here if and only if:
@@ -130,7 +131,7 @@ def maybe_build_and_add_avatar_objects(lab2d_settings: config_dict.ConfigDict):
 
 
 def locate_and_overwrite_level_directory(
-    lab2d_settings: config_dict.ConfigDict):
+    lab2d_settings: config_dict.ConfigDict) -> None:
   """Locates the run files, and overwrites the levelDirectory with it."""
   # Locate runfiles.
   level_name = lab2d_settings.get("levelName")
