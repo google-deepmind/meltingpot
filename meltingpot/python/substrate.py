@@ -18,7 +18,8 @@ from ml_collections import config_dict
 from meltingpot.python.configs import substrates as substrate_configs
 from meltingpot.python.utils.substrates import substrate
 
-AVAILABLE_SUBSTRATES = substrate_configs.SUBSTRATES
+SUBSTRATES = substrate_configs.SUBSTRATES
+AVAILABLE_SUBSTRATES = SUBSTRATES
 
 
 def get_config(substrate_name: str) -> config_dict.ConfigDict:

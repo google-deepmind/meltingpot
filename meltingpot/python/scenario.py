@@ -25,7 +25,8 @@ from meltingpot.python.configs import scenarios as scenario_configs
 from meltingpot.python.utils.scenarios import scenario as scenario_lib
 from meltingpot.python.utils.scenarios import substrate_transforms
 
-AVAILABLE_SCENARIOS = frozenset(scenario_configs.SCENARIO_CONFIGS)
+SCENARIOS = frozenset(scenario_configs.SCENARIO_CONFIGS)
+AVAILABLE_SCENARIOS = SCENARIOS
 
 
 def _scenarios_by_substrate() -> Mapping[str, Set[str]]:

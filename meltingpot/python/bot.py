@@ -20,7 +20,8 @@ from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.policies import puppet_policy
 from meltingpot.python.utils.policies import saved_model_policy
 
-AVAILABLE_BOTS = frozenset(bot_config.BOT_CONFIGS)
+BOTS = frozenset(bot_config.BOT_CONFIGS)
+AVAILABLE_BOTS = BOTS
 
 
 def get_config(bot_name: str) -> config_dict.ConfigDict:
