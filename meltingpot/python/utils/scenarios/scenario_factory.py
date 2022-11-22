@@ -120,7 +120,7 @@ class ScenarioFactory:
     substrate = self._substrate.build(self._roles)
     if substrate_transform:
       substrate = substrate_transform(substrate)
-    all_observations = frozenset(substrate.observation_spec())
+    all_observations = frozenset().union(*substrate.observation_spec())
     return scenario_lib.build_scenario(
         substrate=substrate,
         bots={name: factory.build() for name, factory in self._bots.items()},
