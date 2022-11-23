@@ -35,7 +35,7 @@ class SubstrateFactory:
       timestep_spec: dm_env.TimeStep,
       action_spec: dm_env.specs.DiscreteArray,
       valid_roles: Collection[str],
-      scenario_player_roles: Collection[Sequence[str]],
+      default_player_roles: Sequence[str],
   ) -> None:
     """Initializes the factory.
 
@@ -52,8 +52,8 @@ class SubstrateFactory:
       timestep_spec: spec of timestep sent to a single player.
       action_spec: spec of action expected from a single player.
       valid_roles: player roles the substrate supports.
-      scenario_player_roles: player roles vectors that are used in scenarios
-        involving this substrate.
+      default_player_roles: the default player roles vector that should be used
+        for training.
     """
     self._lab2d_settings_builder = lab2d_settings_builder
     self._individual_observations = frozenset(individual_observations)
@@ -62,17 +62,15 @@ class SubstrateFactory:
     self._timestep_spec = timestep_spec
     self._action_spec = action_spec
     self._valid_roles = frozenset(valid_roles)
-    self._scenario_player_roles = frozenset({
-        tuple(roles) for roles in scenario_player_roles
-    })
+    self._default_player_roles = tuple(default_player_roles)
 
   def valid_roles(self) -> Set[str]:
     """Returns the roles the substrate supports."""
     return self._valid_roles
 
-  def scenario_player_roles(self) -> Set[Sequence[str]]:
+  def default_player_roles(self) -> Sequence[str]:
     """Returns the player roles used by scenarios."""
-    return self._scenario_player_roles
+    return self._default_player_roles
 
   def timestep_spec(self) -> dm_env.TimeStep:
     """Returns spec of timestep sent to a single player."""
