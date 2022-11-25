@@ -10,6 +10,8 @@
        alt="Melting Pot substrates" />
 </div>
 
+[Melting Pot 2.0 Tech Report](https://storage.googleapis.com/dm-meltingpot/meltingpot-tech-report-2.0.0.pdf)
+
 ## About
 
 Melting Pot assesses generalization to novel social situations involving both
