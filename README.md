@@ -6,9 +6,11 @@
 [![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 <div align="center">
-  <img src="docs/images/meltingpot_montage_360.gif"
+  <img src="docs/images/meltingpot_preview.gif"
        alt="Melting Pot substrates" />
 </div>
+
+[Melting Pot 2.0 Tech Report](https://storage.googleapis.com/dm-meltingpot/meltingpot-tech-report-2.0.0.pdf)
 
 ## About
 
