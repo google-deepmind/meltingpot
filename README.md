@@ -6,8 +6,9 @@
 [![meltingpot-tests](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 <div align="center">
-  <img src="docs/images/meltingpot_preview.gif"
-       alt="Melting Pot substrates" />
+  <img src="docs/images/meltingpot_montage.gif"
+       alt="Melting Pot substrates"
+       height="250" width="250" />
 </div>
 
 [Melting Pot 2.0 Tech Report](https://storage.googleapis.com/dm-meltingpot/meltingpot-tech-report-2.0.0.pdf)
@@ -42,7 +43,7 @@ If you are interested in extending Melting Pot, please refer to the
 ## Installation
 
 Melting Pot is built on top of
-[DeepMind Lab2D](https://github.com/deepmind/lab2d). 
+[DeepMind Lab2D](https://github.com/deepmind/lab2d).
 
 ### Devcontainer (x86 only)
 
