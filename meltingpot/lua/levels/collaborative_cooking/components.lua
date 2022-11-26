@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ function InteractBeam:addHits(worldConfig)
       layer = self.hitAndSpriteName,
       sprite = self.hitAndSpriteName,
   }
-  table.insert(worldConfig.renderOrder, self.hitAndSpriteName)
+  component.insertIfNotPresent(worldConfig.renderOrder, self.hitAndSpriteName)
 end
 
 function InteractBeam:addSprites(tileSet)
@@ -384,7 +384,7 @@ function CookingPot:onHit(hittingGameObject, hitName)
     local avatarsHeldItem = avatarsInventory:getHeldItem()
     local itemsInPot = #self._containedItems
     if self._config.acceptedItems[avatarsHeldItem] and itemsInPot < 3 then
-      -- Drop onion from avatar to cooking pot.
+      -- Drop item from avatar to cooking pot.
       table.insert(self._containedItems, avatarsHeldItem)
       avatar:addReward(self._config.reward)
       avatarsInventory:setHeldItem('empty')
@@ -393,6 +393,10 @@ function CookingPot:onHit(hittingGameObject, hitName)
                  'player_index', avatar:getIndex(),  -- int
                  'pot', self.name,  -- string
                  'item', avatarsHeldItem) -- string
+      if hittingGameObject:hasComponent('AvatarCumulants') then
+        local cumulants = hittingGameObject:getComponent('AvatarCumulants')
+        cumulants.addedIngredientToCookingPot = 1
+      end
     elseif avatarsHeldItem == 'dish' and self._cooked then
       -- Collect soup from cooking pot.
       local cookedItem = 'soup'
@@ -406,6 +410,10 @@ function CookingPot:onHit(hittingGameObject, hitName)
                  'player_index', avatar:getIndex(),  -- int
                  'pot', self.name,  -- string
                  'cooked_item', cookedItem) -- string
+      if hittingGameObject:hasComponent('AvatarCumulants') then
+        local cumulants = hittingGameObject:getComponent('AvatarCumulants')
+        cumulants.collectedSoupFromCookingPot = 1
+      end
     end
     -- Update state based on items on in the pot.
     if not self._cooked then
@@ -501,9 +509,31 @@ function LoadingBarVisualiser:registerUpdaters(updaterRegistry)
 end
 
 
+local AvatarCumulants = class.Class(component.Component)
+
+function AvatarCumulants:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('AvatarCumulants')},
+  })
+  self.Base.__init__(self, kwargs)
+
+  self.addedIngredientToCookingPot = 0
+  self.collectedSoupFromCookingPot = 0
+end
+
+function AvatarCumulants:update()
+  self.addedIngredientToCookingPot = 0
+  self.collectedSoupFromCookingPot = 0
+end
+
+
 local allComponents = {
+  -- Avatar components.
   Inventory = Inventory,
   InteractBeam = InteractBeam,
+  AvatarCumulants = AvatarCumulants,
+
+  -- Object components.
   Container = Container,
   Receiver = Receiver,
   CookingPot = CookingPot,

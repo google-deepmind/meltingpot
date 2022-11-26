@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -145,6 +145,9 @@ function DirtCleaning:onHit(hittingGameObject, hitName)
     if hittingGameObject:hasComponent('Taste') then
       hittingGameObject:getComponent('Taste'):cleaned()
     end
+    if hittingGameObject:hasComponent('Cleaner') then
+      hittingGameObject:getComponent('Cleaner'):setCumulant()
+    end
     local avatar = hittingGameObject:getComponent('Avatar')
     events:add('player_cleaned', 'dict',
                'player_index', avatar:getIndex()) -- int
@@ -219,6 +222,14 @@ function Cleaner:registerUpdaters(updaterRegistry)
       updateFn = clean,
       priority = 140,
   }
+
+  local function resetCumulant()
+    self.player_cleaned = 0
+  end
+  updaterRegistry:registerUpdater{
+      updateFn = resetCumulant,
+      priority = 400,
+  }
 end
 
 function Cleaner:reset()
@@ -232,6 +243,15 @@ end
 
 function Cleaner:getWaitState()
   return self.gameObject:getComponent('Avatar'):getWaitState()
+end
+
+function Cleaner:setCumulant()
+  self.player_cleaned = self.player_cleaned + 1
+
+  local globalData = self.gameObject.simulation:getSceneObject():getComponent(
+      'GlobalData')
+  local playerIndex = self.gameObject:getComponent('Avatar'):getIndex()
+  globalData:setCleanedThisStep(playerIndex)
 end
 
 
@@ -404,6 +424,16 @@ function Taste:__init__(kwargs)
   self._config.rewardAmount = kwargs.rewardAmount
 end
 
+function Taste:registerUpdaters(updaterRegistry)
+  local function resetCumulant()
+    self.player_ate_apple = 0
+  end
+  updaterRegistry:registerUpdater{
+      updateFn = resetCumulant,
+      priority = 400,
+  }
+end
+
 function Taste:cleaned()
   if self._config.role == 'cleaner' then
     self.gameObject:getComponent('Avatar'):addReward(self._config.rewardAmount)
@@ -421,6 +451,109 @@ function Taste:consumed(edibleDefaultReward)
   else
     self.gameObject:getComponent('Avatar'):addReward(edibleDefaultReward)
   end
+  self:setCumulant()
+end
+
+function Taste:setCumulant()
+  self.player_ate_apple = self.player_ate_apple + 1
+
+  local globalData = self.gameObject.simulation:getSceneObject():getComponent(
+      'GlobalData')
+  local playerIndex = self.gameObject:getComponent('Avatar'):getIndex()
+  globalData:setAteThisStep(playerIndex)
+end
+
+
+local GlobalData = class.Class(component.Component)
+
+function GlobalData:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('GlobalData')},
+  })
+  GlobalData.Base.__init__(self, kwargs)
+end
+
+function GlobalData:reset()
+  local numPlayers = self.gameObject.simulation:getNumPlayers()
+
+  self.playersWhoCleanedThisStep = tensor.Tensor(numPlayers):fill(0)
+  self.playersWhoAteThisStep = tensor.Tensor(numPlayers):fill(0)
+end
+
+function GlobalData:registerUpdaters(updaterRegistry)
+  local function resetCumulants()
+    self.playersWhoCleanedThisStep:fill(0)
+    self.playersWhoAteThisStep:fill(0)
+  end
+  updaterRegistry:registerUpdater{
+      updateFn = resetCumulants,
+      priority = 2,
+  }
+end
+
+function GlobalData:setCleanedThisStep(playerIndex)
+  self.playersWhoCleanedThisStep(playerIndex):val(1)
+end
+
+function GlobalData:setAteThisStep(playerIndex)
+  self.playersWhoAteThisStep(playerIndex):val(1)
+end
+
+
+local AllNonselfCumulants = class.Class(component.Component)
+
+function AllNonselfCumulants:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('AllNonselfCumulants')},
+  })
+  AllNonselfCumulants.Base.__init__(self, kwargs)
+end
+
+function AllNonselfCumulants:reset()
+  self._playerIndex = self.gameObject:getComponent('Avatar'):getIndex()
+  self._globalData = self.gameObject.simulation:getSceneObject():getComponent(
+      'GlobalData')
+
+  local numPlayers = self.gameObject.simulation:getNumPlayers()
+  self._tmpTensor = tensor.Tensor(numPlayers):fill(0)
+
+  self.num_others_who_cleaned_this_step = 0
+  self.num_others_who_ate_this_step = 0
+end
+
+function AllNonselfCumulants:sumNonself(vector)
+  -- Copy the vector so as not to modify the original.
+  self._tmpTensor:copy(vector)
+  self._tmpTensor(self._playerIndex):val(0)
+  local result = self._tmpTensor:sum()
+  self._tmpTensor:fill(0)
+  return result
+end
+
+function AllNonselfCumulants:registerUpdaters(updaterRegistry)
+
+  local function getCumulants()
+    self.num_others_who_cleaned_this_step = self:sumNonself(
+        self._globalData.playersWhoCleanedThisStep)
+    self.num_others_who_ate_this_step = self:sumNonself(
+        self._globalData.playersWhoAteThisStep)
+  end
+
+  updaterRegistry:registerUpdater{
+      updateFn = getCumulants,
+      priority = 4,
+  }
+
+  local function resetCumulants()
+    self.num_others_who_cleaned_this_step = 0
+    self.num_others_who_ate_this_step = 0
+    self._tmpTensor:fill(0)
+  end
+
+  updaterRegistry:registerUpdater{
+      updateFn = resetCumulants,
+      priority = 400,
+  }
 end
 
 
@@ -434,10 +567,12 @@ local allComponents = {
     -- Avatar components.
     Cleaner = Cleaner,
     Taste = Taste,
+    AllNonselfCumulants = AllNonselfCumulants,
 
     -- Scene components.
     RiverMonitor = RiverMonitor,
     DirtSpawner = DirtSpawner,
+    GlobalData = GlobalData,
 }
 
 component_registry.registerAllComponents(allComponents)

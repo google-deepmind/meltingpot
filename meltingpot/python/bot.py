@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,47 +13,75 @@
 # limitations under the License.
 """Bot factory."""
 
-from ml_collections import config_dict
+import functools
 
-from meltingpot.python.configs import bots as bot_config
+from meltingpot.python import substrate
+from meltingpot.python.configs import bots as bot_configs
+from meltingpot.python.utils.policies import fixed_action_policy
 from meltingpot.python.utils.policies import policy
+from meltingpot.python.utils.policies import policy_factory
 from meltingpot.python.utils.policies import puppet_policy
 from meltingpot.python.utils.policies import saved_model_policy
+from meltingpot.python.utils.substrates import specs
 
-BOTS = frozenset(bot_config.BOT_CONFIGS)
-AVAILABLE_BOTS = BOTS
+NOOP_BOT_NAME = 'noop_bot'
+NOOP_ACTION = 0
 
-
-def get_config(bot_name: str) -> config_dict.ConfigDict:
-  """Returns a config for the specified bot.
-
-  Args:
-    bot_name: name of the bot. Must be in AVAILABLE_BOTS.
-  """
-  if bot_name not in AVAILABLE_BOTS:
-    raise ValueError(f'Unknown bot {bot_name!r}.')
-  bot = bot_config.BOT_CONFIGS[bot_name]
-  config = config_dict.create(
-      bot_name=bot_name,
-      substrate=bot.substrate,
-      puppeteer_builder=bot.puppeteer_builder,
-      saved_model_path=bot.model_path,
-  )
-  return config.lock()
+BOTS = frozenset(bot_configs.BOT_CONFIGS) | {NOOP_BOT_NAME}
 
 
-def build(config: config_dict.ConfigDict) -> policy.Policy:
-  """Builds a bot policy for the given config.
+def get_config(bot_name: str) -> bot_configs.BotConfig:
+  """Returns the config for the specified bot."""
+  return bot_configs.BOT_CONFIGS[bot_name]
+
+
+def build(name: str) -> policy.Policy:
+  """Builds a policy for the specified bot.
 
   Args:
-    config: bot config resulting from `get_config`.
+    name: the name of the bot.
 
   Returns:
     The bot policy.
   """
-  saved_model = saved_model_policy.SavedModelPolicy(config.saved_model_path)
+  return get_factory(name).build()
+
+
+def build_from_config(config: bot_configs.BotConfig) -> policy.Policy:
+  """Builds a policy from the provided bot config.
+
+  Args:
+    config: bot config.
+
+  Returns:
+    The bot policy.
+  """
+  saved_model = saved_model_policy.SavedModelPolicy(config.model_path)
   if config.puppeteer_builder:
     puppeteer = config.puppeteer_builder()
     return puppet_policy.PuppetPolicy(puppeteer=puppeteer, puppet=saved_model)
   else:
     return saved_model
+
+
+def get_factory(name: str) -> policy_factory.PolicyFactory:
+  """Returns a factory for the specified bot."""
+  if name == NOOP_BOT_NAME:
+    return policy_factory.PolicyFactory(
+        timestep_spec=specs.timestep({}),
+        action_spec=specs.action(NOOP_ACTION + 1),
+        builder=functools.partial(fixed_action_policy.FixedActionPolicy,
+                                  NOOP_ACTION))
+  else:
+    config = bot_configs.BOT_CONFIGS[name]
+    return get_factory_from_config(config)
+
+
+def get_factory_from_config(
+    config: bot_configs.BotConfig) -> policy_factory.PolicyFactory:
+  """Returns a factory from the provided config."""
+  substrate_factory = substrate.get_factory(config.substrate)
+  return policy_factory.PolicyFactory(
+      timestep_spec=substrate_factory.timestep_spec(),
+      action_spec=substrate_factory.action_spec(),
+      builder=lambda: build_from_config(config))

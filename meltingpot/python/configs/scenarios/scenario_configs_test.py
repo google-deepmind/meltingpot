@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,24 +18,21 @@ import collections
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from meltingpot.python import bot as bot_factory
 from meltingpot.python.configs import bots
 from meltingpot.python.configs import scenarios
 from meltingpot.python.configs import substrates
 
 SCENARIO_CONFIGS = scenarios.SCENARIO_CONFIGS
-AVAILABLE_BOTS = frozenset(bots.BOT_CONFIGS)
+AVAILABLE_BOTS = bot_factory.BOTS
 AVAILABLE_SUBSTRATES = frozenset(substrates.SUBSTRATES)
 
 
 def _is_compatible(bot_name, substrate, role):
+  if bot_name == bot_factory.NOOP_BOT_NAME:
+    return True
   bot_config = bots.BOT_CONFIGS[bot_name]
   return substrate == bot_config.substrate and role in bot_config.roles
-
-
-def _substrate_roles(substrate):
-  # TODO(b/227143834): Replace with functional code when adding new substrates.
-  del substrate
-  return {'default'}
 
 
 class ScenarioConfigTest(parameterized.TestCase):
@@ -62,17 +59,13 @@ class ScenarioConfigTest(parameterized.TestCase):
     self.assertTrue(any(scenario.is_focal))
 
   @parameterized.named_parameters(SCENARIO_CONFIGS.items())
-  def test_has_valid_sizes(self, scenario):
-    substrate = substrates.get_config(scenario.substrate)
-    with self.subTest('is_focal'):
-      self.assertLen(scenario.is_focal, substrate.num_players)
-    with self.subTest('roles'):
-      self.assertLen(scenario.roles, substrate.num_players)
+  def test_has_matching_sizes(self, scenario):
+    self.assertLen(scenario.is_focal, len(scenario.roles))
 
   @parameterized.named_parameters(SCENARIO_CONFIGS.items())
   def test_has_valid_roles(self, scenario):
-    substrate_roles = _substrate_roles(scenario.substrate)
-    self.assertContainsSubset(set(scenario.roles), substrate_roles)
+    valid_roles = substrates.get_config(scenario.substrate).valid_roles
+    self.assertContainsSubset(scenario.roles, valid_roles)
 
   @parameterized.named_parameters(SCENARIO_CONFIGS.items())
   def test_has_valid_bots(self, scenario):
@@ -129,6 +122,7 @@ class ScenarioConfigTest(parameterized.TestCase):
       used.update(*scenario.bots_by_role.values())
     unused = AVAILABLE_BOTS - used
     self.assertEmpty(unused, f'Bots not used by any scenario: {unused!r}')
+
 
 if __name__ == '__main__':
   absltest.main()

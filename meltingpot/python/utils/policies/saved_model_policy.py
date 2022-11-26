@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 """Policy from a Saved Model."""
 
 import contextlib
-from typing import Mapping, Tuple, TypeVar
+import random
 
 import dm_env
 import numpy as np
@@ -24,16 +24,40 @@ import tree
 from meltingpot.python.utils.policies import permissive_model
 from meltingpot.python.utils.policies import policy
 
-State = TypeVar('State')
+
+def _numpy_to_placeholder(
+    template: tree.Structure[np.ndarray]) -> tree.Structure[tf.Tensor]:
+  """Returns placeholders that matches a given template.
+
+  Args:
+    template: template numpy arrays.
+
+  Returns:
+    A tree of placeholders matching the template arrays' specs.
+  """
+  fn = lambda x: tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype)
+  return tree.map_structure(fn, template)
+
+
+def _downcast(x):
+  """Downcasts input to 32-bit precision."""
+  if not isinstance(x, np.ndarray):
+    return x
+  elif x.dtype == np.float64:
+    return np.asarray(x, dtype=np.float32)
+  elif x.dtype == np.int64:
+    return np.asarray(x, dtype=np.int32)
+  else:
+    return x
 
 
 class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
   """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
-  1. `initial_state(batch_size, trainable)`
-  2. `step(step_type, reward, discount, observation, prev_state)`
-  that accept batched inputs and produce batched outputs.
+  1. `initial_state(random_key)`
+  2. `step(key, timestep, prev_state)`
+  that accept unbatched inputs.
   """
 
   def __init__(self, model_path: str, device_name: str = 'cpu') -> None:
@@ -53,51 +77,27 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
       self,
       timestep: dm_env.TimeStep,
       prev_state: tree.Structure[tf.Tensor],
-  ) -> Tuple[int, tree.Structure[tf.Tensor]]:
+  ) -> tuple[int, tree.Structure[tf.Tensor]]:
     """See base class."""
-    step_type = np.array(timestep.step_type, dtype=np.int64)[None]
-    reward = np.asarray(timestep.reward, dtype=np.float32)[None]
-    discount = np.asarray(timestep.discount, dtype=np.float32)[None]
-    observation = tree.map_structure(lambda x: x[None], timestep.observation)
-    output, next_state = self._strategy.run(
-        fn=self._model.step,
-        kwargs=dict(
-            step_type=step_type,
-            reward=reward,
-            discount=discount,
-            observation=observation,
-            prev_state=prev_state,
-        ),
+    prev_key, prev_state = prev_state
+    timestep = timestep._replace(
+        step_type=int(timestep.step_type),
+        observation=tree.map_structure(_downcast, timestep.observation),
     )
-    if isinstance(output.action, Mapping):
-      # Legacy bots trained with older action spec.
-      action = output.action['environment_action']
-    else:
-      action = output.action
-    action = int(action.numpy()[0])
-    return action, next_state
+    next_key, outputs = self._strategy.run(
+        self._model.step, [prev_key, timestep, prev_state])
+    (action, _), next_state = outputs
+    return int(action.numpy()), (next_key, next_state)
 
   def initial_state(self) -> tree.Structure[tf.Tensor]:
     """See base class."""
-    return self._strategy.run(
-        fn=self._model.initial_state, kwargs=dict(batch_size=1, trainable=None))
+    random_seed = random.getrandbits(32)
+    seed_key = np.array([0, random_seed], dtype=np.uint32)
+    key, state = self._strategy.run(self._model.initial_state, [seed_key])
+    return key, state
 
   def close(self) -> None:
     """See base class."""
-
-
-def _numpy_to_placeholder(
-    template: tree.Structure[np.ndarray]) -> tree.Structure[tf.Tensor]:
-  """Returns placeholders that matches a given template.
-
-  Args:
-    template: template numpy arrays.
-
-  Returns:
-    A tree of placeholders matching the template arrays' specs.
-  """
-  fn = lambda x: tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype)
-  return tree.map_structure(fn, template)
 
 
 class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
@@ -138,8 +138,9 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
   def _build_initial_state_graph(self) -> None:
     """Builds the TF1 subgraph for the initial_state operation."""
     with self._build_context():
-      self._initial_state_outputs = self._model.initial_state(
-          batch_size=1, trainable=None)
+      key_in = tf.compat.v1.placeholder(shape=[2], dtype=np.uint32)
+      self._initial_state_outputs = self._model.initial_state(key_in)
+      self._initial_state_input = key_in
 
   def _build_step_graph(self, timestep, prev_state) -> None:
     """Builds the TF1 subgraph for the step operation.
@@ -152,37 +153,33 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
       self._build_initial_state_graph()
 
     with self._build_context():
-      step_type_in = tf.compat.v1.placeholder(shape=[], dtype=np.int64)
+      step_type_in = tf.compat.v1.placeholder(shape=[], dtype=np.int32)
       reward_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
       discount_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
       observation_in = _numpy_to_placeholder(timestep.observation)
-      prev_state_in = _numpy_to_placeholder(prev_state)
-      output, next_state = self._model.step(
-          step_type=step_type_in[None],
-          reward=reward_in[None],
-          discount=discount_in[None],
-          observation=tree.map_structure(lambda x: x[None], observation_in),
-          prev_state=prev_state_in)
-      if isinstance(output.action, Mapping):
-        # Legacy bots trained with older action spec.
-        action = output.action['environment_action'][0]
-      else:
-        action = output.action[0]
-
-    timestep_in = dm_env.TimeStep(
-        step_type=step_type_in,
-        reward=reward_in,
-        discount=discount_in,
-        observation=observation_in)
-    self._step_inputs = tree.flatten([timestep_in, prev_state_in])
-    self._step_outputs = (action, next_state)
+      timestep_in = dm_env.TimeStep(
+          step_type=step_type_in,
+          reward=reward_in,
+          discount=discount_in,
+          observation=observation_in)
+      prev_key_in, prev_state_in = _numpy_to_placeholder(prev_state)
+      next_key, outputs = self._model.step(prev_key_in, timestep_in,
+                                           prev_state_in)
+      (action, _), next_state = outputs
+      self._step_inputs = tree.flatten(
+          [timestep_in, (prev_key_in, prev_state_in)])
+      self._step_outputs = (action, (next_key, next_state))
 
     self._graph.finalize()
 
   def step(
       self, timestep: dm_env.TimeStep, prev_state: tree.Structure[np.ndarray]
-  ) -> Tuple[int, tree.Structure[np.ndarray]]:
+  ) -> tuple[int, tree.Structure[np.ndarray]]:
     """See base class."""
+    timestep = timestep._replace(
+        step_type=int(timestep.step_type),
+        observation=tree.map_structure(_downcast, timestep.observation),
+    )
     if not self._step_inputs:
       self._build_step_graph(timestep, prev_state)
     input_values = tree.flatten([timestep, prev_state])
@@ -194,7 +191,10 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
     """See base class."""
     if not self._initial_state_outputs:
       self._build_initial_state_graph()
-    return self._session.run(self._initial_state_outputs)
+    random_seed = random.getrandbits(32)
+    seed_key = np.array([0, random_seed], dtype=np.uint32)
+    feed_dict = {self._initial_state_input: seed_key}
+    return self._session.run(self._initial_state_outputs, feed_dict)
 
   def close(self) -> None:
     """See base class."""

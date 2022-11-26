@@ -16,22 +16,21 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python import scenario as scenario_factory
+from meltingpot.python import scenario
 from meltingpot.python.testing import substrates as test_utils
 
 
-@parameterized.named_parameters(
-    (name, name) for name in scenario_factory.AVAILABLE_SCENARIOS)
+@parameterized.named_parameters((name, name) for name in scenario.SCENARIOS)
 class ScenarioTest(test_utils.SubstrateTestCase):
 
   def test_scenario(self, name):
-    config = scenario_factory.get_config(name)
-    action_spec = [config.action_spec] * config.num_players
-    discount_spec = config.timestep_spec.discount
-    reward_spec = [config.timestep_spec.reward] * config.num_players
-    observation_spec = [
-        dict(config.timestep_spec.observation)] * config.num_players
-    with scenario_factory.build(config) as env:
+    factory = scenario.get_factory(name)
+    num_players = factory.num_focal_players()
+    action_spec = [factory.action_spec()] * num_players
+    reward_spec = [factory.timestep_spec().reward] * num_players
+    discount_spec = factory.timestep_spec().discount
+    observation_spec = [factory.timestep_spec().observation] * num_players
+    with factory.build() as env:
       with self.subTest('step'):
         self.assert_step_matches_specs(env)
       with self.subTest('discount_spec'):
@@ -43,9 +42,8 @@ class ScenarioTest(test_utils.SubstrateTestCase):
       with self.subTest('observation_spec'):
         self.assertSequenceEqual(env.observation_spec(), observation_spec)
       with self.subTest('only_permitted'):
-        self.assertContainsSubset(
-            config.timestep_spec.observation,
-            scenario_factory.PERMITTED_OBSERVATIONS)
+        self.assertContainsSubset(factory.timestep_spec().observation,
+                                  scenario.PERMITTED_OBSERVATIONS)
 
 
 if __name__ == '__main__':

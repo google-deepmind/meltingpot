@@ -19,16 +19,21 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import numpy as np
 
-from meltingpot.python.configs.substrates import running_with_scissors_in_the_matrix
+from meltingpot.python.configs.substrates import running_with_scissors_in_the_matrix__repeated as test_substrate
 from meltingpot.python.utils.substrates import builder
 
 
-_TEST_SETTINGS = running_with_scissors_in_the_matrix.get_config().lab2d_settings
+def _get_test_settings():
+  config = test_substrate.get_config()
+  return test_substrate.build(config, config.default_player_roles)
+
+
+_TEST_SETTINGS = _get_test_settings()
 
 
 def _get_lua_randomization_map():
   """Replaces first row of walls with items randomized by Lua."""
-  head, line, *tail = _TEST_SETTINGS.simulation.map.split('\n')
+  head, line, *tail = _TEST_SETTINGS['simulation']['map'].split('\n')
   # Replace line 1 (walls) with a row of 'a' (items randomized by Lua).
   new_map = '\n'.join([head, 'a' * len(line), *tail])
   return new_map
@@ -76,7 +81,7 @@ class GeneralTestCase(parameterized.TestCase):
   @parameterized.product(seed=[None, 42, 123, 1337, 12481632])
   def test_episodes_are_randomized_in_lua(self, seed):
     lab2d_settings = copy.deepcopy(_TEST_SETTINGS)
-    lab2d_settings.simulation.map = _LUA_RANDOMIZATION_MAP
+    lab2d_settings['simulation']['map'] = _LUA_RANDOMIZATION_MAP
     env = self.enter_context(builder.builder(lab2d_settings, env_seed=seed))
 
     obs = env.reset().observation['WORLD.RGB'][_LUA_RANDOMIZED_LINE]
@@ -90,7 +95,7 @@ class GeneralTestCase(parameterized.TestCase):
 
   def test_no_seed_causes_nondeterminism_for_lua(self):
     lab2d_settings = copy.deepcopy(_TEST_SETTINGS)
-    lab2d_settings.simulation.map = _LUA_RANDOMIZATION_MAP
+    lab2d_settings['simulation']['map'] = _LUA_RANDOMIZATION_MAP
 
     env1 = self.enter_context(builder.builder(lab2d_settings))
     env2 = self.enter_context(builder.builder(lab2d_settings))

@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -76,15 +76,15 @@ function Cell:onHit(hitterObject, hitName)
     local groups = set.Set(self.gameObject:getGroups())
     if not groups['immovables'] then
       local hitterIO = hitterObject:getComponent('IOBeam')
-      local stomach = hitterIO:getStomachObject():getComponent('AvatarStomach')
-      -- Stomach must not be activated, cell old enough, and not blocked for IO.
+      local vesicle = hitterIO:getVesicleObject():getComponent('AvatarVesicle')
+      -- Vesicle must not be activated, cell old enough, and not blocked for IO.
       local blocked = self.gameObject:getComponent('Product'):isBlocked()
-      if not stomach:isBlocked() and not blocked and self:_oldEnough() then
-        local next_stomach_state = self.gameObject:getState()
-        local next_ground_state = stomach:pop()
-        stomach:add(next_stomach_state)
+      if not vesicle:isBlocked() and not blocked and self:_oldEnough() then
+        local next_vesicle_state = self.gameObject:getState()
+        local next_ground_state = vesicle:pop()
+        vesicle:add(next_vesicle_state)
         self.gameObject:setState(next_ground_state)
-        stomach:block()
+        vesicle:block()
         self.gameObject:getComponent('Reactant'):block()
       end
     end
@@ -590,6 +590,7 @@ end
 
 function IOBeam:reset()
   self._coolingTimer = 0
+  self._IOAllowed = true
 end
 
 function IOBeam:registerUpdaters(updaterRegistry)
@@ -602,7 +603,7 @@ function IOBeam:registerUpdaters(updaterRegistry)
       if self._coolingTimer > 0 then
         self._coolingTimer = self._coolingTimer - 1
       else
-        if actions['ioAction'] == 1 then
+        if actions['ioAction'] == 1 and self._IOAllowed then
           self._coolingTimer = self._config.cooldownTime
 
           local cellBelowCurrentLocation = self:getCellComponentUnderneath()
@@ -610,6 +611,7 @@ function IOBeam:registerUpdaters(updaterRegistry)
         end
       end
     end
+    self._IOAllowed = true
   end
 
   updaterRegistry:registerUpdater{
@@ -628,10 +630,10 @@ function IOBeam:start()
   self._avatarComponent = self.gameObject:getComponent('Avatar')
 end
 
-function IOBeam:getStomachObject()
-  -- Assume there will only be one connected object with an AvatarStomach.
+function IOBeam:getVesicleObject()
+  -- Assume there will only be one connected object with an AvatarVesicle.
   return self._avatarComponent:getAllConnectedObjectsWithNamedComponent(
-    'AvatarStomach')[1]
+    'AvatarVesicle')[1]
 end
 
 function IOBeam:getCellComponentUnderneath()
@@ -641,12 +643,16 @@ function IOBeam:getCellComponentUnderneath()
   return cellObjectBelow:getComponent('Cell')
 end
 
+function IOBeam:disallowIO()
+  self._IOAllowed = false
+end
 
-local AvatarStomach = class.Class(component.Component)
 
-function AvatarStomach:__init__(kwargs)
+local AvatarVesicle = class.Class(component.Component)
+
+function AvatarVesicle:__init__(kwargs)
   kwargs = args.parse(kwargs, {
-      {'name', args.default('AvatarStomach')},
+      {'name', args.default('AvatarVesicle')},
       -- `playerIndex` (int): player index for the avatar to connect to.
       {'playerIndex', args.numberType},
       {'preInitState', args.stringType},
@@ -657,7 +663,7 @@ function AvatarStomach:__init__(kwargs)
   self._kwargs = kwargs
 end
 
-function AvatarStomach:reset()
+function AvatarVesicle:reset()
   local kwargs = self._kwargs
   self._playerIndex = kwargs.playerIndex
   self._preInitState = kwargs.preInitState
@@ -670,7 +676,7 @@ end
 
 --[[ Note that postStart is called from the avatar manager, after start has been
 called on all other game objects, even avatars.]]
-function AvatarStomach:postStart()
+function AvatarVesicle:postStart()
   local sim = self.gameObject.simulation
   self._avatarObject = sim:getAvatarFromIndex(self._playerIndex)
 
@@ -686,10 +692,10 @@ function AvatarStomach:postStart()
   avatarComponent:connect(self.gameObject)
 end
 
-function AvatarStomach:update()
+function AvatarVesicle:update()
   local avatarComponent = self._avatarObject:getComponent('Avatar')
 
-  -- Provide rewards based on stomach contents.
+  -- Provide rewards based on vesicle contents.
   local productComponent = self.gameObject:getComponent('Product')
   if productComponent:didTransition() then
     local reactionName = productComponent:getLatestReaction()
@@ -700,46 +706,48 @@ function AvatarStomach:update()
       local rewardValue = rewardsComponent:getRewardValue(reactionName)
       avatarComponent:addReward(rewardValue)
     end
-    -- Report an event whenever a reaction occurs involving an avatar stomach.
+    -- Report an event whenever a reaction occurs involving an avatar vesicle.
     local replacedReactant = productComponent:getLatestReplacedReactant()
-    events:add('stomach_reaction', 'dict',
+    events:add('vesicle_reaction', 'dict',
                'player_index', avatarComponent:getIndex(), -- int
-               -- Use stomach_name to disambiguate if we have multiple stomachs.
-               'stomach_name', self.gameObject.name, -- str
+               -- Use vesicle_name to disambiguate if we have multiple vesicles.
+               'vesicle_name', self.gameObject.name, -- str
                'reaction_name', reactionName, -- str
                'reactant_compound', replacedReactant, -- str
                'product_compound', self.gameObject:getState()) -- str
   end
 
   -- Prevent avatar movement while still allowing IOBeam actions whenever an
-  -- immovable molecule is within the stomach.
+  -- immovable molecule is within the vesicle.
   avatarComponent:allowMovement()
   local groups = set.Set(self.gameObject:getGroups())
   if groups['immovables'] then
     avatarComponent:disallowMovement()
+    local ioComponent = self._avatarObject:getComponent('IOBeam')
+    ioComponent:disallowIO()
   end
 
   self._blocked = false
 end
 
-function AvatarStomach:isEmpty()
+function AvatarVesicle:isEmpty()
   return self.gameObject:getState() == self._emptyState
 end
 
-function AvatarStomach:block()
+function AvatarVesicle:block()
   self._blocked = true
 end
 
-function AvatarStomach:isBlocked()
+function AvatarVesicle:isBlocked()
   return self.gameObject:getComponent('Product'):isBlocked() and
       not self._blocked
 end
 
-function AvatarStomach:add(state)
+function AvatarVesicle:add(state)
   self.gameObject:setState(state)
 end
 
-function AvatarStomach:pop()
+function AvatarVesicle:pop()
   local output = self.gameObject:getState()
   return output
 end
@@ -781,6 +789,71 @@ function ReactionsToRewards:getRewardValue(reactionName)
 end
 
 
+local VesicleManager = class.Class(component.Component)
+
+function VesicleManager:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('VesicleManager')},
+      {'orderedVesicles', args.tableType},
+      {'cytoavatarStates', args.tableType},
+  })
+  self.Base.__init__(self, kwargs)
+  self._orderedVesicles = kwargs.orderedVesicles
+  self._cytoavatarStates = kwargs.cytoavatarStates
+end
+
+function VesicleManager:reset()
+  self._numOccupied = 0
+  self._avatarComponent = self.gameObject:getComponent('Avatar')
+  self._started = false
+end
+
+function VesicleManager:push()
+  self._numOccupied = self._numOccupied + 1
+end
+
+function VesicleManager:pop()
+  self._numOccupied = self._numOccupied - 1
+end
+
+function VesicleManager:setInitialCompounds()
+  local allVesicles =
+      self._avatarComponent:getAllConnectedObjectsWithNamedComponent(
+          'AvatarVesicle')
+   for _, vesicle in ipairs(allVesicles) do
+     vesicle:setState('empty')
+   end
+end
+
+function VesicleManager:update()
+  if not self._started then
+    self:setInitialCompounds()
+  end
+  self._started = true
+
+  -- First update the count of the number of occupied vesicles.
+  self._numOccupied = 0
+  local allVesicles =
+      self._avatarComponent:getAllConnectedObjectsWithNamedComponent(
+          'AvatarVesicle')
+  for _, vesicle in ipairs(allVesicles) do
+    local vesicleComponent = vesicle:getComponent('AvatarVesicle')
+    if not vesicleComponent:isEmpty() then
+      -- Add 1 to numOccupied if vesicle is nonempty.
+      self._numOccupied = self._numOccupied + 1
+    end
+  end
+  -- Set state of the avatar object accordingly to its num occupied vesicles.
+  if self._numOccupied == 0 then
+    self.gameObject:setState(self._cytoavatarStates['empty'])
+  elseif self._numOccupied == 1 then
+    self.gameObject:setState(self._cytoavatarStates['holdingOne'])
+  else
+    assert(False, 'Nonsensical numOccupied: ' .. tostring(self._numOccupied))
+  end
+end
+
+
 local allComponents = {
     -- Grid cell components.
     Cell = Cell,
@@ -788,8 +861,9 @@ local allComponents = {
     Product = Product,
     -- Avatar components.
     IOBeam = IOBeam,
-    AvatarStomach = AvatarStomach,
+    AvatarVesicle = AvatarVesicle,
     ReactionsToRewards = ReactionsToRewards,
+    VesicleManager = VesicleManager,
     -- Global components,
     ReactionAlgebra = ReactionAlgebra,
     GlobalMetricTracker = GlobalMetricTracker,

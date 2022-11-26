@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [2.0.0] - 2022-11-25
+
+Melting Pot Version 2.0.0 release. See
+[Melting Pot 2.0 Tech Report](https://storage.googleapis.com/dm-meltingpot/meltingpot-tech-report-2.0.0.pdf)
+for detailed information on the new substrates, bots, and scenarios.
+
+### Changed
+
+- Removed all v1 scenarios, bots, and substrates and replaced with new versions.
+- Scenarios now support heterogenous roles, which must be specified at build
+  time.
+- Various improvements to `examples` and their documentation.
+
+### Added
+
+- New puppeteers and policies to implement new bots.
+- New utils to handle sprites, colors, and maps.
+- Mocks for use in testing.
+
+
 ## [1.0.4] - 2022-08-22
 
 ### Changed

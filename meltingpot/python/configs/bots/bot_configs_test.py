@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ class BotConfigTest(parameterized.TestCase):
     duplicates = {names for _, names in seen.items() if len(names) > 1}
     self.assertEmpty(duplicates, f'Duplicate configs found: {duplicates!r}.')
 
-  def test_all_models_used_by_bots(self):
+  def test_models_used_by_bots(self):
     used = {bot.model_path for bot in BOT_CONFIGS.values()}
     unused = AVAILABLE_MODELS - used
     self.assertEmpty(unused, f'Models not used by any bot: {unused!r}')

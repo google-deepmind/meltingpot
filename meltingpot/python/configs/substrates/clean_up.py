@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 """Configuration for Clean Up.
 
-Example video: https://youtu.be/jOeIunFtTS0
+Example video: https://youtu.be/TqiJYxOwdxw
 
 Clean Up is a seven player game. Players are rewarded for collecting apples. In
 Clean Up, apples grow in an orchard at a rate inversely related to the
@@ -39,9 +39,10 @@ Proceedings of the 32nd International Conference on Neural Information
 Processing Systems (pp. 3330-3340).
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Mapping, Sequence
 
 from ml_collections import config_dict
+
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
@@ -57,17 +58,17 @@ WHFHFHFFHFHFHFHFHFHFHHFHFFFHFW
 WHFFHFFHHFHFHFHFHFHFHHFHFFFHFW
 WHFHFHFFHFHFHFHFHFHFHHFHFFFHFW
 WHFFFFFFHFHFHFHFHFHFHHFHFFFHFW
-W               HFHHHHHH     W
-W   P    P          SSS      W
-W     P     P   P   SS   P   W
-W             P   PPSS       W
-W   P    P          SS    P  W
-W               P   SS P     W
-W     P           P SS       W
-W           P       SS  P    W
-W  P             P PSS       W
-W B B B B B B B B B SSB B B BW
-WBBBBBBBBBBBBBBBBBBBBBBBBBBBBW
+W==============+~FHHHHHHf====W
+W   P    P      ===+~SSf     W
+W     P     P   P  <~Sf  P   W
+W             P   P<~S>      W
+W   P    P         <~S>   P  W
+W               P  <~S>P     W
+W     P           P<~S>      W
+W           P      <~S> P    W
+W  P             P <~S>      W
+W^T^T^T^T^T^T^T^T^T;~S,^T^T^TW
+WBBBBBBBBBBBBBBBBBBBssBBBBBBBW
 WBBBBBBBBBBBBBBBBBBBBBBBBBBBBW
 WBBBBBBBBBBBBBBBBBBBBBBBBBBBBW
 WBBBBBBBBBBBBBBBBBBBBBBBBBBBBW
@@ -77,14 +78,211 @@ WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 # Map a character to the prefab it represents in the ASCII map.
 CHAR_PREFAB_MAP = {
     "W": "wall",
-    "P": "spawn_point",
-    "B": "potential_apple",
+    " ": "sand",
+    "P": {"type": "all", "list": ["sand", "spawn_point"]},
+    "B": {"type": "all", "list": ["grass", "potential_apple"]},
+    "s": {"type": "all", "list": ["grass", "shadow_n"]},
+    "+": {"type": "all", "list": ["sand", "shadow_e", "shadow_n"]},
+    "f": {"type": "all", "list": ["sand", "shadow_w", "shadow_n"]},
+    ";": {"type": "all", "list": ["sand", "grass_edge", "shadow_e"]},
+    ",": {"type": "all", "list": ["sand", "grass_edge", "shadow_w"]},
+    "^": {"type": "all", "list": ["sand", "grass_edge",]},
+    "=": {"type": "all", "list": ["sand", "shadow_n",]},
+    ">": {"type": "all", "list": ["sand", "shadow_w",]},
+    "<": {"type": "all", "list": ["sand", "shadow_e",]},
+    "~": {"type": "all", "list": ["river", "shadow_w",]},
+    "T": {"type": "all", "list": ["sand", "grass_edge", "potential_apple"]},
     "S": "river",
     "H": {"type": "all", "list": ["river", "potential_dirt"]},
     "F": {"type": "all", "list": ["river", "actual_dirt"]},
 }
 
 _COMPASS = ["N", "E", "S", "W"]
+
+SAND = {
+    "name": "sand",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "sand",
+                "stateConfigs": [{
+                    "state": "sand",
+                    "layer": "background",
+                    "sprite": "Sand",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["Sand"],
+                "spriteShapes": [shapes.GRAINY_FLOOR],
+                "palettes": [{"+": (222, 221, 189, 255),
+                              "*": (219, 218, 186, 255)}],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+GRASS = {
+    "name": "grass",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "grass",
+                "stateConfigs": [{
+                    "state": "grass",
+                    "layer": "background",
+                    "sprite": "Grass",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["Grass"],
+                "spriteShapes": [shapes.GRASS_STRAIGHT],
+                "palettes": [{"*": (164, 189, 75, 255),
+                              "@": (182, 207, 95, 255),
+                              "x": (0, 0, 0, 0)}],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+GRASS_EDGE = {
+    "name": "grass_edge",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "grass_edge",
+                "stateConfigs": [{
+                    "state": "grass_edge",
+                    "layer": "lowerPhysical",
+                    "sprite": "GrassEdge",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["GrassEdge"],
+                "spriteShapes": [shapes.GRASS_STRAIGHT_N_EDGE],
+                "palettes": [{"*": (164, 189, 75, 255),
+                              "@": (182, 207, 95, 255),
+                              "x": (0, 0, 0, 0)}],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+SHADOW_W = {
+    "name": "shadow_w",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "shadow_w",
+                "stateConfigs": [{
+                    "state": "shadow_w",
+                    "layer": "upperPhysical",
+                    "sprite": "ShadowW",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["ShadowW"],
+                "spriteShapes": [shapes.SHADOW_W],
+                "palettes": [shapes.SHADOW_PALETTE],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+SHADOW_E = {
+    "name": "shadow_e",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "shadow_e",
+                "stateConfigs": [{
+                    "state": "shadow_e",
+                    "layer": "upperPhysical",
+                    "sprite": "ShadowE",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["ShadowE"],
+                "spriteShapes": [shapes.SHADOW_E],
+                "palettes": [shapes.SHADOW_PALETTE],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+SHADOW_N = {
+    "name": "shadow_n",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "shadow_n",
+                "stateConfigs": [{
+                    "state": "shadow_n",
+                    "layer": "overlay",
+                    "sprite": "ShadowN",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["ShadowN"],
+                "spriteShapes": [shapes.SHADOW_N],
+                "palettes": [shapes.SHADOW_PALETTE],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
 
 WALL = {
     "name": "wall",
@@ -95,7 +293,7 @@ WALL = {
                 "initialState": "wall",
                 "stateConfigs": [{
                     "state": "wall",
-                    "layer": "upperPhysical",
+                    "layer": "superOverlay",
                     "sprite": "Wall",
                 }],
             }
@@ -147,10 +345,6 @@ SPAWN_POINT = {
         },
         {
             "component": "Transform",
-            "kwargs": {
-                "position": (0, 0),
-                "orientation": "N"
-            }
         },
     ]
 }
@@ -166,7 +360,7 @@ POTENTIAL_APPLE = {
                     {
                         "state": "apple",
                         "sprite": "Apple",
-                        "layer": "lowerPhysical",
+                        "layer": "upperPhysical",
                     },
                     {
                         "state": "appleWait"
@@ -175,23 +369,20 @@ POTENTIAL_APPLE = {
         },
         {
             "component": "Transform",
-            "kwargs": {
-                "position": (0, 0),
-                "orientation": "N"
-            }
         },
         {
             "component": "Appearance",
             "kwargs": {
                 "renderMode": "ascii_shape",
                 "spriteNames": ["Apple"],
-                "spriteShapes": [shapes.LEGACY_APPLE],
-                "palettes": [{"*": (102, 255, 0, 255),
-                              "@": (230, 255, 0, 255),
-                              "&": (117, 255, 26, 255),
-                              "#": (255, 153, 0, 255),
-                              "x": (0, 0, 0, 0)}],
-                "noRotates": [False]
+                "spriteShapes": [shapes.APPLE],
+                "palettes": [{
+                    "x": (0, 0, 0, 0),
+                    "*": (212, 80, 57, 255),
+                    "#": (173, 66, 47, 255),
+                    "o": (43, 127, 53, 255),
+                    "|": (79, 47, 44, 255)}],
+                "noRotates": [True]
             }
         },
         {
@@ -230,7 +421,7 @@ def create_dirt_prefab(initial_state):
                       },
                       {
                           "state": "dirt",
-                          "layer": "lowerPhysical",
+                          "layer": "upperPhysical",
                           "sprite": "Dirt",
                       },
                   ],
@@ -238,10 +429,6 @@ def create_dirt_prefab(initial_state):
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              }
           },
           {
               "component": "Appearance",
@@ -249,7 +436,7 @@ def create_dirt_prefab(initial_state):
                   "spriteNames": ["Dirt"],
                   # This color is greenish, and quite transparent to expose the
                   # animated water below.
-                  "spriteRGBColors": [(2, 230, 80, 50)],
+                  "spriteRGBColors": [(2, 245, 80, 50)],
               }
           },
           {
@@ -294,10 +481,13 @@ ACTION_SET = (
     FIRE_CLEAN
 )
 
+# Remove the first entry from human_readable_colors after using it for the self
+# color to prevent it from being used again as another avatar color.
+human_readable_colors = list(colors.human_readable)
 TARGET_SPRITE_SELF = {
     "name": "Self",
     "shape": shapes.CUTE_AVATAR,
-    "palette": shapes.get_palette((50, 100, 200)),
+    "palette": shapes.get_palette(human_readable_colors.pop(0)),
     "noRotate": True,
 }
 
@@ -340,7 +530,11 @@ def get_water():
                   "spriteNames": ["water_1", "water_2", "water_3", "water_4"],
                   "spriteShapes": [shapes.WATER_1, shapes.WATER_2,
                                    shapes.WATER_3, shapes.WATER_4],
-                  "palettes": [shapes.WATER_PALETTE] * 4,
+                  "palettes": [{
+                      "@": (66, 173, 212, 255),
+                      "*": (35, 133, 168, 255),
+                      "o": (34, 129, 163, 255),
+                      "~": (33, 125, 158, 255),}] * 4,
               }
           },
           {
@@ -366,6 +560,12 @@ def create_prefabs() -> PrefabConfig:
   """
   prefabs = {
       "wall": WALL,
+      "sand": SAND,
+      "grass": GRASS,
+      "grass_edge": GRASS_EDGE,
+      "shadow_w": SHADOW_W,
+      "shadow_e": SHADOW_E,
+      "shadow_n": SHADOW_N,
       "spawn_point": SPAWN_POINT,
       "potential_apple": POTENTIAL_APPLE,
       "river": get_water(),
@@ -391,10 +591,6 @@ def create_scene():
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              },
           },
           {
               "component": "RiverMonitor",
@@ -406,6 +602,17 @@ def create_scene():
                   "dirtSpawnProbability": 0.5,
                   "delayStartOfDirtSpawning": 50,
               },
+          },
+          {
+              "component": "StochasticIntervalEpisodeEnding",
+              "kwargs": {
+                  "minimumFramesPerEpisode": 1000,
+                  "intervalLength": 100,  # Set equal to unroll length.
+                  "probabilityTerminationPerInterval": 0.2
+              }
+          },
+          {
+              "component": "GlobalData",
           },
       ]
   }
@@ -424,7 +631,7 @@ def create_avatar_object(player_idx: int,
 
   live_state_name = "player{}".format(lua_index)
   avatar_object = {
-      "name": "avatar",
+      "name": f"avatar{lua_index}",
       "components": [
           {
               "component": "StateManager",
@@ -433,7 +640,7 @@ def create_avatar_object(player_idx: int,
                   "stateConfigs": [
                       # Initial player state.
                       {"state": live_state_name,
-                       "layer": "upperPhysical",
+                       "layer": "superOverlay",
                        "sprite": source_sprite_self,
                        "contact": "avatar",
                        "groups": ["players"]},
@@ -446,10 +653,6 @@ def create_avatar_object(player_idx: int,
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              }
           },
           {
               "component": "Appearance",
@@ -457,7 +660,8 @@ def create_avatar_object(player_idx: int,
                   "renderMode": "ascii_shape",
                   "spriteNames": [source_sprite_self],
                   "spriteShapes": [shapes.CUTE_AVATAR],
-                  "palettes": [shapes.get_palette(colors.palette[player_idx])],
+                  "palettes": [shapes.get_palette(
+                      human_readable_colors[player_idx])],
                   "noRotates": [True]
               }
           },
@@ -535,6 +739,51 @@ def create_avatar_object(player_idx: int,
                   "alsoReportOrientation": True
               }
           },
+          {
+              "component": "AllNonselfCumulants",
+          },
+          {
+              "component": "AvatarMetricReporter",
+              "kwargs": {
+                  "metrics": [
+                      {
+                          "name": "PLAYER_CLEANED",
+                          "type": "Doubles",
+                          "shape": [],
+                          "component": "Cleaner",
+                          "variable": "player_cleaned",
+                      },
+                      {
+                          "name": "PLAYER_ATE_APPLE",
+                          "type": "Doubles",
+                          "shape": [],
+                          "component": "Taste",
+                          "variable": "player_ate_apple",
+                      },
+                      {
+                          "name": "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP",
+                          "type": "Doubles",
+                          "shape": [],
+                          "component": "Zapper",
+                          "variable": "num_others_player_zapped_this_step",
+                      },
+                      {
+                          "name": "NUM_OTHERS_WHO_CLEANED_THIS_STEP",
+                          "type": "Doubles",
+                          "shape": [],
+                          "component": "AllNonselfCumulants",
+                          "variable": "num_others_who_cleaned_this_step",
+                      },
+                      {
+                          "name": "NUM_OTHERS_WHO_ATE_THIS_STEP",
+                          "type": "Doubles",
+                          "shape": [],
+                          "component": "AllNonselfCumulants",
+                          "variable": "num_others_who_ate_this_step",
+                      },
+                  ]
+              }
+          },
       ]
   }
   return avatar_object
@@ -551,36 +800,9 @@ def create_avatar_objects(num_players):
   return avatar_objects
 
 
-def create_lab2d_settings(num_players: int) -> Dict[str, Any]:
-  """Returns the lab2d settings."""
-  lab2d_settings = {
-      "levelName": "clean_up",
-      "levelDirectory":
-          "meltingpot/lua/levels",
-      "numPlayers": num_players,
-      "maxEpisodeLengthFrames": 1000,
-      "spriteSize": 8,
-      "topology": "BOUNDED",  # Choose from ["BOUNDED", "TORUS"],
-      "simulation": {
-          "map": ASCII_MAP,
-          "gameObjects": create_avatar_objects(num_players),
-          "prefabs": create_prefabs(),
-          "charPrefabMap": CHAR_PREFAB_MAP,
-          "scene": create_scene(),
-      },
-  }
-  return lab2d_settings
-
-
 def get_config():
-  """Default configuration for training on the clean_up level."""
+  """Default configuration for the clean_up level."""
   config = config_dict.ConfigDict()
-
-  # Basic configuration.
-  config.num_players = 7
-
-  # Lua script configuration.
-  config.lab2d_settings = create_lab2d_settings(config.num_players)
 
   # Action set configuration.
   config.action_set = ACTION_SET
@@ -588,6 +810,14 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
+      # Cumulants.
+      "PLAYER_ATE_APPLE",
+      "PLAYER_CLEANED",
+      "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP",
+      # Global switching signals for puppeteers.
+      "NUM_OTHERS_WHO_CLEANED_THIS_STEP",
+      "NUM_OTHERS_WHO_ATE_THIS_STEP",
+      # Debug only (do not use the following observations in policies).
       "POSITION",
       "ORIENTATION",
   ]
@@ -600,9 +830,48 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      # Cumulants.
+      "PLAYER_ATE_APPLE": specs.float64(),
+      "PLAYER_CLEANED": specs.float64(),
+      "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP": specs.float64(),
+      # Global switching signals for puppeteers.
+      "NUM_OTHERS_WHO_CLEANED_THIS_STEP": specs.float64(),
+      "NUM_OTHERS_WHO_ATE_THIS_STEP": specs.float64(),
+      # Debug only (do not use the following observations in policies).
       "POSITION": specs.OBSERVATION["POSITION"],
       "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(168, 240),
   })
 
+  # The roles assigned to each player.
+  config.valid_roles = frozenset({"default"})
+  config.default_player_roles = ("default",) * 7
+
   return config
+
+
+def build(
+    roles: Sequence[str],
+    config: config_dict.ConfigDict,
+) -> Mapping[str, Any]:
+  """Build the clean_up substrate given roles."""
+  del config
+  num_players = len(roles)
+  # Build the rest of the substrate definition.
+  substrate_definition = dict(
+      levelName="clean_up",
+      levelDirectory="meltingpot/lua/levels",
+      numPlayers=num_players,
+      # Define upper bound of episode length since episodes end stochastically.
+      maxEpisodeLengthFrames=5000,
+      spriteSize=8,
+      topology="BOUNDED",  # Choose from ["BOUNDED", "TORUS"],
+      simulation={
+          "map": ASCII_MAP,
+          "gameObjects": create_avatar_objects(num_players),
+          "scene": create_scene(),
+          "prefabs": create_prefabs(),
+          "charPrefabMap": CHAR_PREFAB_MAP,
+      },
+    )
+  return substrate_definition

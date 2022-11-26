@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,19 +13,22 @@
 # limitations under the License.
 """Configuration for Collaborative Cooking.
 
-Example video: https://youtu.be/R_TBitc3hto
-
-A pure common interest cooking game inspired by Carroll et al. (2019).
+A pure common interest cooking game inspired by Carroll et al. (2019) and
+Strouse et al. (2021).
 
 Carroll, M., Shah, R., Ho, M.K., Griffiths, T.L., Seshia, S.A., Abbeel, P. and
 Dragan, A., 2019. On the utility of learning about humans for human-AI
 coordination. arXiv preprint arXiv:1910.05789.
+
+Strouse, D.J., McKee, K.R., Botvinick, M., Hughes, E. and Everett, R., 2021.
+Collaborating with Humans without Human Data. arXiv preprint arXiv:2110.08176.
 """
 
 import copy
-from typing import Any, Dict
+from typing import Any, Dict, Mapping, Sequence
 
-from ml_collections import config_dict
+from ml_collections import config_dict as configdict
+
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
@@ -42,40 +45,6 @@ CHAR_PREFAB_MAP = {
     "D": "dish_dispenser",
     "T": "delivery_location",
     "C": "cooking_pot",
-}
-
-##############
-# ASCII maps #
-##############
-
-impassable = """
-##T######
-## ###D##
-#P      #
-#    P  C
-#       #
-#########
-#       #
-C P   P #
-#       #
-##O###O##
-"""
-
-passable = """
-###D###O#O###
-#    #     ##
-#    #   P ##
-C P  #     ##
-#    #      T
-C   P#     ##
-#    #  P  ##
-#          ##
-#############
-"""
-
-ASCII_MAPS = {
-    "impassable": impassable,
-    "passable": passable,
 }
 
 ###########
@@ -433,10 +402,6 @@ SPAWN_POINT = {
         },
         {
             "component": "Transform",
-            "kwargs": {
-                "position": (0, 0),
-                "orientation": "N"
-            }
         },
     ]
 }
@@ -465,10 +430,7 @@ INVENTORY = {
         },
         {
             "component": "Transform",
-            "kwargs": {
-                "position": (0, 0),
-                "orientation": "N"
-            }
+            "kwargs": {}
         },
         {
             "component": "Appearance",
@@ -509,10 +471,7 @@ LOADING_BAR = {
         }
     }, {
         "component": "Transform",
-        "kwargs": {
-            "position": (0, 0),
-            "orientation": "N"
-        }
+        "kwargs": {}
     }, {
         "component": "Appearance",
         "kwargs": {
@@ -550,10 +509,7 @@ def create_base_prefab(name, layer="upperPhysical"):
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              }
+              "kwargs": {}
           },
           {
               "component": "Appearance",
@@ -685,10 +641,7 @@ def create_cooking_pot(time_to_cook, reward=1):
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              }
+              "kwargs": {}
           },
           {
               "component": "Appearance",
@@ -714,24 +667,26 @@ def create_cooking_pot(time_to_cook, reward=1):
 
   return cooking_pot
 
-# PREFABS is a dictionary mapping names to template game objects that can
-# be cloned and placed in multiple locations according to an ascii map.
-PREFABS = {
-    "spawn_point": SPAWN_POINT,
-    "inventory": INVENTORY,
-    "loading_bar": LOADING_BAR,
-    "counter": create_counter(),
-    "dish_dispenser": create_dispenser(prefab_name="dish_dispenser",
-                                       item_name="dish"),
-    "tomato_dispenser": create_dispenser(prefab_name="tomato_dispenser",
-                                         item_name="tomato"),
-    "delivery_location": create_receiver(prefab_name="delivery_location",
-                                         item_name="soup",
-                                         reward=20,
-                                         global_reward=True),
-    "cooking_pot": create_cooking_pot(time_to_cook=COOKING_TIME,
-                                      reward=0),
-}
+
+def create_prefabs(cooking_pot_pseudoreward: float = 0.0):
+  """Creates a dictionary mapping names to template game objects."""
+  prefabs = {
+      "spawn_point": SPAWN_POINT,
+      "inventory": INVENTORY,
+      "loading_bar": LOADING_BAR,
+      "counter": create_counter(),
+      "dish_dispenser": create_dispenser(prefab_name="dish_dispenser",
+                                         item_name="dish"),
+      "tomato_dispenser": create_dispenser(prefab_name="tomato_dispenser",
+                                           item_name="tomato"),
+      "delivery_location": create_receiver(prefab_name="delivery_location",
+                                           item_name="soup",
+                                           reward=20,
+                                           global_reward=True),
+      "cooking_pot": create_cooking_pot(time_to_cook=COOKING_TIME,
+                                        reward=cooking_pot_pseudoreward),
+  }
+  return prefabs
 
 ###########
 # ACTIONS #
@@ -767,7 +722,7 @@ ACTION_SET = (
 ###########
 
 
-def create_game_objects(ascii_map_string):
+def create_game_objects(ascii_map_string, prefabs):
   """Returns list of game objects from 'ascii_map' and 'char_prefab' mapping."""
 
   # Create all game objects.
@@ -778,7 +733,7 @@ def create_game_objects(ascii_map_string):
     for transform in transforms:
       # Add inventory game object for holding and visualising items.
       if char == "#" or char == "O" or char == "D":
-        inventory_object = copy.deepcopy(PREFABS["inventory"])
+        inventory_object = copy.deepcopy(prefabs["inventory"])
         go_transform = game_object_utils.get_first_named_component(
             inventory_object, "Transform")
         go_transform["kwargs"]["position"] = (transform.position.x,
@@ -787,7 +742,7 @@ def create_game_objects(ascii_map_string):
 
       # Add loading bar object to cooking pots.
       if char == "C":
-        loading_object = copy.deepcopy(PREFABS["loading_bar"])
+        loading_object = copy.deepcopy(prefabs["loading_bar"])
         go_transform = game_object_utils.get_first_named_component(
             loading_object, "Transform")
         go_transform["kwargs"]["position"] = (transform.position.x,
@@ -834,10 +789,6 @@ def create_avatar_object(player_idx: int,
           },
           {
               "component": "Transform",
-              "kwargs": {
-                  "position": (0, 0),
-                  "orientation": "N"
-              }
           },
           {
               "component": "Appearance",
@@ -891,6 +842,24 @@ def create_avatar_object(player_idx: int,
                   "palettes": [interact_palette]
               }
           },
+          {"component": "AvatarCumulants",},
+          {
+              "component": "AvatarMetricReporter",
+              "kwargs": {
+                  "metrics": [
+                      {"name": "ADDED_INGREDIENT_TO_COOKING_POT",
+                       "type": "Doubles",
+                       "shape": [],
+                       "component": "AvatarCumulants",
+                       "variable": "addedIngredientToCookingPot"},
+                      {"name": "COLLECTED_SOUP_FROM_COOKING_POT",
+                       "type": "Doubles",
+                       "shape": [],
+                       "component": "AvatarCumulants",
+                       "variable": "collectedSoupFromCookingPot"},
+                  ]
+              }
+          },
           {
               "component": "LocationObserver",
               "kwargs": {
@@ -903,7 +872,7 @@ def create_avatar_object(player_idx: int,
   return avatar_object
 
 
-def create_avatar_objects(num_players):
+def create_avatar_objects(num_players, prefabs):
   """Returns list of avatar objects of length 'num_players'."""
   game_objects = []
   for player_idx in range(0, num_players):
@@ -913,7 +882,7 @@ def create_avatar_objects(num_players):
     game_objects.append(game_object)
 
     # Add inventory game object which will be connected to player at init.
-    inventory_object = copy.deepcopy(PREFABS["inventory"])
+    inventory_object = copy.deepcopy(prefabs["inventory"])
     game_object_utils.get_first_named_component(
         inventory_object,
         "Inventory")["kwargs"]["playerIndex"] = lua_index
@@ -922,45 +891,25 @@ def create_avatar_objects(num_players):
   return game_objects
 
 
-def create_lab2d_settings(ascii_map: str,
-                          num_players: int) -> Dict[str, Any]:
-  """Returns the lab2d settings."""
-  ascii_map = ASCII_MAPS[ascii_map]
-  game_objects = create_game_objects(ascii_map)
-  extra_game_objects = create_avatar_objects(num_players)
-  game_objects += extra_game_objects
-
-  # Lua script configuration.
-  lab2d_settings = {
-      "levelName": "collaborative_cooking",
-      "levelDirectory":
-          "meltingpot/lua/levels",
-      "numPlayers": num_players,
-      "maxEpisodeLengthFrames": 1000,
-      "spriteSize": 8,
-      "simulation": {
-          "map": ascii_map,
-          "gameObjects": game_objects,
-          "prefabs": PREFABS,
-          "charPrefabMap": CHAR_PREFAB_MAP,
-      },
-  }
-  return lab2d_settings
-
-
-def get_config(ascii_map: str):
+def get_config():
   """Default configuration for training on the collaborative cooking level."""
-  config = config_dict.ConfigDict()
+  config = configdict.ConfigDict()
 
-  config.num_players = 4
-  # Lua script configuration.
-  config.lab2d_settings = create_lab2d_settings(ascii_map, config.num_players)
+  # Cooking pot pseudoreward should be 0.0 for the canonical version of this
+  # environment, but in order to train background bots it is sometimes useful
+  # to give them a pseudoreward when they put items in the cooking pot. It has
+  # the effect of shaping their behavior a bit in the right direction.
+  config.cooking_pot_pseudoreward = 0.0
 
   # Action set configuration.
   config.action_set = ACTION_SET
   # Observation format configuration.
   config.individual_observation_names = [
       "RGB",
+      # Cumulants (do not use in policies).
+      "ADDED_INGREDIENT_TO_COOKING_POT",
+      "COLLECTED_SOUP_FROM_COOKING_POT",
+      # Debug only (do not use the following observations in policies).
       "POSITION",
       "ORIENTATION",
   ]
@@ -968,17 +917,36 @@ def get_config(ascii_map: str):
       "WORLD.RGB",
   ]
 
-  # The specs of the environment (from a single-agent perspective).
   config.action_spec = specs.action(len(ACTION_SET))
-  if ascii_map == "passable":
-    world_size = 72, 104
-  else:
-    world_size = 80, 72
-  config.timestep_spec = specs.timestep({
-      "RGB": specs.rgb(40, 40),
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
-      "WORLD.RGB": specs.rgb(*world_size),
-  })
 
   return config
+
+
+def build(
+    roles: Sequence[str],
+    config: configdict.ConfigDict,
+) -> Mapping[str, Any]:
+  """Build the substrate given player roles."""
+  num_players = len(roles)
+  ascii_map = config.layout.ascii_map
+  prefabs = create_prefabs(
+      cooking_pot_pseudoreward=config.cooking_pot_pseudoreward)
+  game_objects = create_game_objects(ascii_map, prefabs)
+  extra_game_objects = create_avatar_objects(num_players, prefabs)
+  game_objects += extra_game_objects
+  # Build the rest of the substrate definition.
+  substrate_definition = dict(
+      levelName="collaborative_cooking",
+      levelDirectory="meltingpot/lua/levels",
+      numPlayers=num_players,
+      maxEpisodeLengthFrames=1000,
+      spriteSize=8,
+      topology="BOUNDED",  # Choose from ["BOUNDED", "TORUS"],
+      simulation={
+          "map": ascii_map,
+          "gameObjects": game_objects,
+          "prefabs": prefabs,
+          "charPrefabMap": CHAR_PREFAB_MAP,
+      },
+  )
+  return substrate_definition

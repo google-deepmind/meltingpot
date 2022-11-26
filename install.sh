@@ -87,7 +87,7 @@ function test_dmlab2d() {
 
 function install_meltingpot() {
   echo -e "\nDownloading assets..."
-  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.0.0.tar.gz \
       | tar -xz --directory=meltingpot
 
   echo -e "\nInstalling meltingpot..."
@@ -99,7 +99,7 @@ function install_meltingpot() {
 function test_meltingpot() {
   echo -e "\nTesting meltingpot..."
   pip install pytest-xdist
-  pytest -n auto -ra --durations=10 meltingpot
+  pytest -n auto -rax --durations=10 meltingpot
 }
 
 

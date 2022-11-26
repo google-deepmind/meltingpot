@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -118,7 +118,6 @@ end
 function Ground:onHit(hittingGameObject, hittingTeam)
   -- Assume teamNames are identical to color states e.g. red, blue etc.
   if self._teamNames[hittingTeam] then
-    local oldTeam = self.gameObject:getState(oldTeam)
     self.gameObject:setState(hittingTeam)
     -- Beams always pass through.
     return false
@@ -139,6 +138,9 @@ function ColorZapper:__init__(kwargs)
       {'cooldownTime', args.numberType},
       {'beamLength', args.numberType},
       {'beamRadius', args.numberType},
+      {'secondaryBeamCooldownTime', args.numberType},
+      {'secondaryBeamLength', args.numberType},
+      {'secondaryBeamRadius', args.numberType},
       {'aliveStates', args.tableType},
       {'groundLayer', args.default('alternateLogic'), args.stringType},
   })
@@ -149,6 +151,9 @@ function ColorZapper:__init__(kwargs)
   self._config.cooldownTime = kwargs.cooldownTime
   self._config.beamLength = kwargs.beamLength
   self._config.beamRadius = kwargs.beamRadius
+  self._config.secondaryBeamCooldownTime = kwargs.secondaryBeamCooldownTime
+  self._config.secondaryBeamLength = kwargs.secondaryBeamLength
+  self._config.secondaryBeamRadius = kwargs.secondaryBeamRadius
   self._config.aliveStates = set.Set(kwargs.aliveStates)
 
   -- Ground layer is used to make the beam strike the location underneath the
@@ -173,6 +178,13 @@ function ColorZapper:addSprites(tileSet)
   tileSet:addColor(self._config.beamSprite, self._config.color)
 end
 
+function ColorZapper:positionsAreEqual(tableA, tableB)
+  if tableA[1] == tableB[1] and tableA[2] == tableB[2] then
+    return true
+  end
+  return false
+end
+
 function ColorZapper:registerUpdaters(updaterRegistry)
   local transformComponent = self.gameObject:getComponent('Transform')
   local zap = function()
@@ -186,6 +198,7 @@ function ColorZapper:registerUpdaters(updaterRegistry)
           self._coolingTimer = self._coolingTimer - 1
         else
           if actions['fireZap'] == 1 then
+            -- A short-range beam with a wide area of effect.
             self._coolingTimer = self._config.cooldownTime
             self.gameObject:hitBeam(
                 self._config.team,
@@ -199,9 +212,26 @@ function ColorZapper:registerUpdaters(updaterRegistry)
               groundObject:getComponent('Ground'):onHit(self.gameObject,
                                                         self._config.team)
             end
+          elseif actions['fireZap'] == 2 and
+              self:positionsAreEqual(self._previousPosition,
+                                     transformComponent:getPosition()) then
+            -- A longer range beam with a thin area of effect.
+            -- This beam can only be used if the player did not change its
+            -- position on the previous frame (must stand still for one frame
+            -- before it can be used).
+            -- This beam takes twice as long to cool down after use before any
+            -- beam can be used again (all beams share a cooling timer).
+            self._coolingTimer = self._config.secondaryBeamCooldownTime
+            self.gameObject:hitBeam(
+                self._config.team,
+                self._config.secondaryBeamLength,
+                self._config.secondaryBeamRadius
+            )
+            -- Note: long-range zaps do not color the avatar's current location.
           end
         end
       end
+      self._previousPosition = transformComponent:getPosition()
     end
   end
 
@@ -214,6 +244,7 @@ end
 function ColorZapper:reset()
   -- Set the beam cooldown timer to its `ready` state (i.e. coolingTimer = 0).
   self._coolingTimer = 0
+  self._previousPosition = nil
 end
 
 function ColorZapper:readyToShoot()
@@ -239,6 +270,7 @@ function ZappedByColor:__init__(kwargs)
       {'maxHealthOnGround', args.positive},
       {'maxHealthOnOwnColor', args.positive},
       {'maxHealthOnEnemyColor', args.positive},
+      {'groundLayer', args.default('alternateLogic'), args.stringType},
   })
   ZappedByColor.Base.__init__(self, kwargs)
 
@@ -251,11 +283,12 @@ function ZappedByColor:__init__(kwargs)
   self._config.maxHealthOnGround = kwargs.maxHealthOnGround
   self._config.maxHealthOnOwnColor = kwargs.maxHealthOnOwnColor
   self._config.maxHealthOnEnemyColor = kwargs.maxHealthOnEnemyColor
+  self._config.groundLayer = kwargs.groundLayer
 end
 
 function ZappedByColor:_getColorHere()
   local maybeGameObject = self.gameObject:getComponent(
-    'Transform'):queryPosition("lowerPhysical")
+      'Transform'):queryPosition(self._config.groundLayer)
   if maybeGameObject and maybeGameObject:hasComponent('Ground') then
     return maybeGameObject:getState()
   end
@@ -271,6 +304,7 @@ function ZappedByColor:registerUpdaters(updaterRegistry)
     self.gameObject:teleportToGroup(spawnGroup, aliveState)
     self.playerRespawnedThisStep = true
     self._health = self._config.maxHealthOnGround
+    self.gameObject:getComponent('Avatar'):allowMovement()
   end
 
   local function _incrementHealthIfBelowThreshold(threshold)
@@ -295,6 +329,19 @@ function ZappedByColor:registerUpdaters(updaterRegistry)
     end
   end
 
+  local function updateHealthState()
+    local state = self.gameObject:getState()
+    if state ~= self:getWaitState() and
+        self._health ~= self._healthLastFrame then
+      self.gameObject:setState('health' .. tostring(self._health))
+    end
+
+    self._healthLastFrame = self._health
+
+    self.playerRespawnedThisStep = false
+    self.zapperIndex = nil
+  end
+
   updaterRegistry:registerUpdater{
       updateFn = respawn,
       priority = 135,
@@ -307,6 +354,11 @@ function ZappedByColor:registerUpdaters(updaterRegistry)
       priority = 2,
       probability = self._config.healthRegenerationRate
   }
+
+  updaterRegistry:registerUpdater{
+        updateFn = updateHealthState,
+        priority = 1,
+    }
 end
 
 function ZappedByColor:onStateChange()
@@ -357,18 +409,6 @@ function ZappedByColor:start()
     self.playerZapMatrix = scene:getComponent(
         "GlobalMetricHolder").playerZapMatrix
   end
-end
-
-function ZappedByColor:update()
-  local state = self.gameObject:getState()
-  if state ~= self:getWaitState() and self._health ~= self._healthLastFrame then
-    self.gameObject:setState('health' .. tostring(self._health))
-  end
-
-  self._healthLastFrame = self._health
-  -- Metrics must be read from preUpdate since they will get reset in update.
-  self.playerRespawnedThisStep = false
-  self.zapperIndex = nil
 end
 
 function ZappedByColor:getAliveState()

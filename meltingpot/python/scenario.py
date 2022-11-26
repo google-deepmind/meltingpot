@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,26 +14,29 @@
 """Scenario factory."""
 
 import collections
-from collections.abc import Mapping, Set
+from collections.abc import Collection, Mapping
+from typing import Callable, Optional
 
 import immutabledict
-from ml_collections import config_dict
 
-from meltingpot.python import bot as bot_factory
-from meltingpot.python import substrate as substrate_factory
+from meltingpot.python import bot as mp_bot
+from meltingpot.python import substrate as mp_substrate
 from meltingpot.python.configs import scenarios as scenario_configs
-from meltingpot.python.utils.scenarios import scenario as scenario_lib
-from meltingpot.python.utils.scenarios import substrate_transforms
+from meltingpot.python.utils.scenarios import scenario
+from meltingpot.python.utils.scenarios import scenario_factory
+from meltingpot.python.utils.substrates import substrate as substrate_lib
 
 SCENARIOS = frozenset(scenario_configs.SCENARIO_CONFIGS)
-AVAILABLE_SCENARIOS = SCENARIOS
+
+SubstrateTransform = Callable[[substrate_lib.Substrate],
+                              substrate_lib.Substrate]
 
 
-def _scenarios_by_substrate() -> Mapping[str, Set[str]]:
+def _scenarios_by_substrate() -> Mapping[str, Collection[str]]:
   """Returns a mapping from substrates to their scenarios."""
   scenarios_by_substrate = collections.defaultdict(list)
-  for scenario_name, config in scenario_configs.SCENARIO_CONFIGS.items():
-    scenarios_by_substrate[config.substrate].append(scenario_name)
+  for name, config in scenario_configs.SCENARIO_CONFIGS.items():
+    scenarios_by_substrate[config.substrate].append(name)
   return immutabledict.immutabledict({
       substrate: frozenset(scenarios)
       for substrate, scenarios in scenarios_by_substrate.items()
@@ -46,77 +49,84 @@ PERMITTED_OBSERVATIONS = frozenset({
     # The primary visual input.
     'RGB',
     # Extra observations used in some substrates.
+    'HUNGER',
     'INVENTORY',
+    'MY_OFFER',
+    'OFFERS',
     'READY_TO_SHOOT',
+    'STAMINA',
 })
 
 
-def get_config(scenario_name: str) -> config_dict.ConfigDict:
-  """Returns a config for the specified scenario.
+def get_config(name: str) -> scenario_configs.ScenarioConfig:
+  """Returns the config for the specified scenario."""
+  return scenario_configs.SCENARIO_CONFIGS[name]
+
+
+def build(
+    name: str,
+    *,
+    substrate_transform: Optional[SubstrateTransform] = None,
+) -> scenario.Scenario:
+  """Builds an instance of the specified scenario.
 
   Args:
-    scenario_name: Name of the scenario. Must be in AVAILABLE_SCENARIOS.
-  """
-  if scenario_name not in AVAILABLE_SCENARIOS:
-    raise ValueError(f'Unknown scenario {scenario_name!r}')
-  scenario = scenario_configs.SCENARIO_CONFIGS[scenario_name]
-  substrate = substrate_factory.get_config(scenario.substrate)
-  bots = {
-      name: bot_factory.get_config(name)
-      for name in set().union(*scenario.bots_by_role.values())
-  }
-  focal_player_roles = tuple(
-      role for n, role in enumerate(scenario.roles) if scenario.is_focal[n]
-  )
-  focal_timestep_spec = substrate.timestep_spec._replace(
-      observation=immutabledict.immutabledict({
-          key: spec for key, spec in substrate.timestep_spec.observation.items()
-          if key in PERMITTED_OBSERVATIONS
-      }),
-  )
-  config = config_dict.create(
-      substrate=substrate,
-      roles=scenario.roles,
-      is_focal=scenario.is_focal,
-      num_players=sum(scenario.is_focal),
-      bots=bots,
-      bots_by_role=scenario.bots_by_role,
-      substrate_transform=None,
-      permitted_observations=set(PERMITTED_OBSERVATIONS),
-      focal_player_roles=focal_player_roles,
-      timestep_spec=focal_timestep_spec,
-      action_spec=substrate.action_spec,
-  )
-  return config.lock()
-
-
-def build(config: config_dict.ConfigDict) -> scenario_lib.Scenario:
-  """Builds a scenario for the given config.
-
-  Args:
-    config: config resulting from `get_config`.
+    name: the scenario.
+    substrate_transform: optional transform to apply to underlying substrate.
+      This is intended for training purposes and should not be used during
+      evaluation. If applied, the observations will not be restricted to
+      PERMITTED_OBSERVATIONS.
 
   Returns:
     The test scenario.
   """
-  # TODO(b/227143834): pass roles to substrate when building.
-  substrate = substrate_factory.build(config.substrate)
-  if config.substrate_transform:
-    substrate = config.substrate_transform(substrate)
-  permitted_observations = set(substrate.observation_spec()[0])
-  if not config.substrate_transform:
-    permitted_observations &= config.permitted_observations
-  # Add observations needed by some bots. These are removed for focal players.
-  # TODO(b/258239516): remove this wrapper in a future release.
-  substrate = substrate_transforms.with_tf1_bot_required_observations(substrate)
+  config = get_config(name)
+  return build_from_config(config, substrate_transform=substrate_transform)
+
+
+def build_from_config(
+    config: scenario_configs.ScenarioConfig,
+    *,
+    substrate_transform: Optional[SubstrateTransform] = None,
+) -> scenario.Scenario:
+  """Builds a scenario from the provided config.
+
+  Args:
+    config: bot config
+    substrate_transform: optional transform to apply to underlying substrate.
+      This is intended for training purposes and should not be used during
+      evaluation. If applied, the observations will not be restricted to
+      PERMITTED_OBSERVATIONS.
+
+  Returns:
+    The test scenario.
+  """
+  factory = get_factory_from_config(config)
+  if substrate_transform is None:
+    return factory.build()
+  else:
+    return factory.build_transformed(substrate_transform)
+
+
+def get_factory(name: str) -> scenario_factory.ScenarioFactory:
+  """Returns the factory for the specified scenario."""
+  config = scenario_configs.SCENARIO_CONFIGS[name]
+  return get_factory_from_config(config)
+
+
+def get_factory_from_config(
+    config: scenario_configs.ScenarioConfig,
+) -> scenario_factory.ScenarioFactory:
+  """Returns a factory from the provided config."""
+  substrate = mp_substrate.get_factory(config.substrate)
   bots = {
-      bot_name: bot_factory.build(bot_config)
-      for bot_name, bot_config in config.bots.items()
+      name: mp_bot.get_factory(name)
+      for name in set().union(*config.bots_by_role.values())
   }
-  return scenario_lib.build_scenario(
+  return scenario_factory.ScenarioFactory(
       substrate=substrate,
+      roles=config.roles,
       bots=bots,
       bots_by_role=config.bots_by_role,
-      roles=config.roles,
       is_focal=config.is_focal,
-      permitted_observations=permitted_observations)
+      permitted_observations=PERMITTED_OBSERVATIONS)

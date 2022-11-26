@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A simple human player for testing the `clean_up` level.
+"""A simple human player for testing `clean_up`.
 
 Use `WASD` keys to move the character around.
 Use `Q and E` to turn the character.
@@ -21,13 +21,14 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
+from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import clean_up as mp_clean_up
+from meltingpot.python.configs.substrates import clean_up
 from meltingpot.python.human_players import level_playing_utils
 
 
 environment_configs = {
-    'mp_clean_up': mp_clean_up,
+    'clean_up': clean_up,
 }
 
 _ACTION_MAP = {
@@ -38,14 +39,29 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(unused_env, unused_player_index):
-  pass
+def verbose_fn(env_timestep, player_index):
+  """Print using this function once enabling the option --verbose=True."""
+  lua_index = player_index + 1
+  cleaned = env_timestep.observation[f'{lua_index}.PLAYER_CLEANED']
+  ate = env_timestep.observation[f'{lua_index}.PLAYER_ATE_APPLE']
+  num_zapped_this_step = env_timestep.observation[
+      f'{lua_index}.NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP']
+  num_others_cleaned = env_timestep.observation[
+      f'{lua_index}.NUM_OTHERS_WHO_CLEANED_THIS_STEP']
+  num_others_ate = env_timestep.observation[
+      f'{lua_index}.NUM_OTHERS_WHO_ATE_THIS_STEP']
+  # Only print observations from player 0.
+  if player_index == 0:
+    print(f'player: {player_index} --- player_cleaned: {cleaned} --- ' +
+          f'player_ate_apple: {ate} --- num_others_cleaned: ' +
+          f'{num_others_cleaned} --- num_others_ate: {num_others_ate} ' +
+          f'---num_others_player_zapped_this_step: {num_zapped_this_step}')
 
 
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
-      '--level_name', type=str, default='mp_clean_up',
+      '--level_name', type=str, default='clean_up',
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
@@ -59,10 +75,14 @@ def main():
       '--print_events', type=bool, default=False, help='Print events')
 
   args = parser.parse_args()
-  env_config = environment_configs[args.level_name]
+  env_module = environment_configs[args.level_name]
+  env_config = env_module.get_config()
+  with config_dict.ConfigDict(env_config).unlocked() as env_config:
+    roles = env_config.default_player_roles
+    env_config.lab2d_settings = env_module.build(roles, env_config)
   level_playing_utils.run_episode(
       args.observation, args.settings, _ACTION_MAP,
-      env_config.get_config(), level_playing_utils.RenderType.PYGAME,
+      env_config, level_playing_utils.RenderType.PYGAME,
       verbose_fn=verbose_fn if args.verbose else None,
       print_events=args.print_events)
 

@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,135 +11,115 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests of the human_players levels."""
+"""Tests for human_players."""
 
-import collections
 from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
-from dm_env import specs
-import numpy as np
+from ml_collections import config_dict
 import pygame
 
-import dmlab2d
-from meltingpot.python.configs.substrates import allelopathic_harvest as mp_allelopathic_harvest
-from meltingpot.python.configs.substrates import arena_running_with_scissors_in_the_matrix as mp_arena_running_with_scissors_itm
-from meltingpot.python.configs.substrates import bach_or_stravinsky_in_the_matrix as mp_bach_or_stravinsky_itm
-from meltingpot.python.configs.substrates import capture_the_flag as mp_capture_the_flag
-from meltingpot.python.configs.substrates import chemistry_metabolic_cycles as mp_chemistry_metabolic_cycles
-from meltingpot.python.configs.substrates import chicken_in_the_matrix as mp_chicken_itm
-from meltingpot.python.configs.substrates import clean_up as mp_clean_up
-from meltingpot.python.configs.substrates import collaborative_cooking_passable as mp_collaborative_cooking_passable
-from meltingpot.python.configs.substrates import commons_harvest_closed as mp_commons_harvest_closed
-from meltingpot.python.configs.substrates import king_of_the_hill as mp_king_of_the_hill
-from meltingpot.python.configs.substrates import prisoners_dilemma_in_the_matrix as mp_prisoners_dilemma_itm
-from meltingpot.python.configs.substrates import pure_coordination_in_the_matrix as mp_pure_coordination_itm
-from meltingpot.python.configs.substrates import rationalizable_coordination_in_the_matrix as mp_rationalizable_coordination_itm
-from meltingpot.python.configs.substrates import running_with_scissors_in_the_matrix as mp_running_with_scissors_itm
-from meltingpot.python.configs.substrates import stag_hunt_in_the_matrix as mp_stag_hunt_itm
-from meltingpot.python.configs.substrates import territory_rooms as mp_territory_rooms
+from meltingpot.python.configs.substrates import allelopathic_harvest__open
+from meltingpot.python.configs.substrates import boat_race__eight_races
+from meltingpot.python.configs.substrates import chemistry__three_metabolic_cycles
+from meltingpot.python.configs.substrates import chemistry__three_metabolic_cycles_with_plentiful_distractors
+from meltingpot.python.configs.substrates import chemistry__two_metabolic_cycles
+from meltingpot.python.configs.substrates import chemistry__two_metabolic_cycles_with_distractors
+from meltingpot.python.configs.substrates import clean_up
+from meltingpot.python.configs.substrates import coins
+from meltingpot.python.configs.substrates import collaborative_cooking__asymmetric
+from meltingpot.python.configs.substrates import commons_harvest__closed
+from meltingpot.python.configs.substrates import coop_mining
+from meltingpot.python.configs.substrates import daycare
+from meltingpot.python.configs.substrates import externality_mushrooms__dense
+from meltingpot.python.configs.substrates import factory_commons__either_or
+from meltingpot.python.configs.substrates import fruit_market__concentric_rivers
+from meltingpot.python.configs.substrates import gift_refinements
+from meltingpot.python.configs.substrates import paintball__capture_the_flag
+from meltingpot.python.configs.substrates import paintball__king_of_the_hill
+from meltingpot.python.configs.substrates import predator_prey__alley_hunt
+from meltingpot.python.configs.substrates import predator_prey__orchard
+from meltingpot.python.configs.substrates import prisoners_dilemma_in_the_matrix__arena
+from meltingpot.python.configs.substrates import territory__rooms
 from meltingpot.python.human_players import level_playing_utils
 from meltingpot.python.human_players import play_allelopathic_harvest
-from meltingpot.python.human_players import play_any_paintball_game
 from meltingpot.python.human_players import play_anything_in_the_matrix
+from meltingpot.python.human_players import play_boat_race
+from meltingpot.python.human_players import play_chemistry
 from meltingpot.python.human_players import play_clean_up
+from meltingpot.python.human_players import play_coins
 from meltingpot.python.human_players import play_collaborative_cooking
 from meltingpot.python.human_players import play_commons_harvest
-from meltingpot.python.human_players import play_grid_land
+from meltingpot.python.human_players import play_coop_mining
+from meltingpot.python.human_players import play_daycare
+from meltingpot.python.human_players import play_externality_mushrooms
+from meltingpot.python.human_players import play_factory_commons
+from meltingpot.python.human_players import play_fruit_market
+from meltingpot.python.human_players import play_gift_refinements
+from meltingpot.python.human_players import play_paintball
+from meltingpot.python.human_players import play_predator_and_prey
 from meltingpot.python.human_players import play_territory
-
-
-class HumanActionReaderTest(parameterized.TestCase):
-
-  @parameterized.parameters(
-      (
-          {  # Capture the following key events,
-              'move': level_playing_utils.get_direction_pressed,
-          },  # given this action name, key pressed, for this player index; and
-          pygame.K_w, '1',
-          # Expecting this action list out.
-          {'1.move': 1, '2.move': 0, '3.move': 0},
-      ), (
-          {  # Capture the following key events,
-              'move': level_playing_utils.get_direction_pressed,
-          },  # given this action name, key pressed, for this player index; and
-          pygame.K_s, '3',
-          # Expecting this action list out.
-          {'1.move': 0, '2.move': 0, '3.move': 3},
-      ), (
-          {  # Capture the following key events,
-              'move': level_playing_utils.get_direction_pressed,
-          },  # given this action name, key pressed, for this player index; and
-          pygame.K_s, '1',
-          # Expecting this action list out.
-          {'1.move': 3, '2.move': 0, '3.move': 0},
-      ), (
-          {  # Capture the following key events,
-              'move': level_playing_utils.get_direction_pressed,
-          },  # given action name, irrelevant key pressed, for player 0; and
-          pygame.K_x, '1',
-          # Expecting this action list out.
-          {'1.move': 0, '2.move': 0, '3.move': 0},
-      ), (
-          {  # Capture the following key events (don't need to make sense),
-              'move': level_playing_utils.get_space_key_pressed,
-          },  # given action name, irrelevant key pressed, for player 0; and
-          pygame.K_SPACE, '1',
-          # Expecting this action list out.
-          {'1.move': 1, '2.move': 0, '3.move': 0},
-      ),
-  )
-  @mock.patch.object(pygame, 'key')
-  def test_human_action(self, action_map, key_pressed, player_index,
-                        expected_action, mock_key):
-    retval = collections.defaultdict(bool)
-    retval[key_pressed] = True
-    mock_key.get_pressed.return_value = retval
-
-    move_array = specs.BoundedArray(
-        shape=tuple(), dtype=np.intc, minimum=0, maximum=4, name='move')
-    action_spec = {
-        '1.move': move_array,
-        '2.move': move_array,
-        '3.move': move_array,
-    }
-    with mock.patch.object(dmlab2d, 'Lab2d') as env:
-      env.action_spec.return_value = action_spec
-      har = level_playing_utils.ActionReader(env, action_map)
-      np.testing.assert_array_equal(har.step(player_index), expected_action)
 
 
 class PlayLevelTest(parameterized.TestCase):
 
-  @parameterized.parameters(
-      (mp_allelopathic_harvest, play_allelopathic_harvest),
-      (mp_arena_running_with_scissors_itm, play_anything_in_the_matrix),
-      (mp_bach_or_stravinsky_itm, play_anything_in_the_matrix),
-      (mp_capture_the_flag, play_any_paintball_game),
-      (mp_chemistry_metabolic_cycles, play_grid_land),
-      (mp_chicken_itm, play_anything_in_the_matrix),
-      (mp_clean_up, play_clean_up),
-      (mp_collaborative_cooking_passable, play_collaborative_cooking),
-      (mp_commons_harvest_closed, play_commons_harvest),
-      (mp_king_of_the_hill, play_any_paintball_game),
-      (mp_prisoners_dilemma_itm, play_anything_in_the_matrix),
-      (mp_pure_coordination_itm, play_anything_in_the_matrix),
-      (mp_rationalizable_coordination_itm, play_anything_in_the_matrix),
-      (mp_running_with_scissors_itm, play_anything_in_the_matrix),
-      (mp_stag_hunt_itm, play_anything_in_the_matrix),
-      (mp_territory_rooms, play_territory),
-      )
+  @parameterized.named_parameters(
+      ('allelopathic_harvest__open', allelopathic_harvest__open,
+       play_allelopathic_harvest),
+      ('boat_race__eight_races', boat_race__eight_races, play_boat_race),
+      ('chemistry__three_metabolic_cycles', chemistry__three_metabolic_cycles,
+       play_chemistry),
+      ('chemistry__three_metabolic_cycles_with_plentiful_distractors',
+       chemistry__three_metabolic_cycles_with_plentiful_distractors,
+       play_chemistry),
+      ('chemistry__two_metabolic_cycles', chemistry__two_metabolic_cycles,
+       play_chemistry),
+      ('chemistry__two_metabolic_cycles_with_distractors',
+       chemistry__two_metabolic_cycles_with_distractors, play_chemistry),
+      ('clean_up', clean_up, play_clean_up),
+      ('coins', coins, play_coins),
+      ('collaborative_cooking__asymmetric', collaborative_cooking__asymmetric,
+       play_collaborative_cooking),
+      ('commons_harvest__closed', commons_harvest__closed,
+       play_commons_harvest),
+      ('coop_mining', coop_mining, play_coop_mining),
+      ('daycare', daycare, play_daycare),
+      ('externality_mushrooms__dense', externality_mushrooms__dense,
+       play_externality_mushrooms),
+      ('factory_commons__either_or', factory_commons__either_or,
+       play_factory_commons),
+      ('fruit_market__concentric_rivers', fruit_market__concentric_rivers,
+       play_fruit_market),
+      ('gift_refinements', gift_refinements, play_gift_refinements),
+      ('paintball__capture_the_flag', paintball__capture_the_flag,
+       play_paintball),
+      ('paintball__king_of_the_hill', paintball__king_of_the_hill,
+       play_paintball),
+      ('predator_prey__alley_hunt', predator_prey__alley_hunt,
+       play_predator_and_prey),
+      ('predator_prey__orchard', predator_prey__orchard,
+       play_predator_and_prey),
+      ('prisoners_dilemma_in_the_matrix__arena',
+       prisoners_dilemma_in_the_matrix__arena, play_anything_in_the_matrix),
+      ('territory__rooms', territory__rooms, play_territory),
+  )
   @mock.patch.object(pygame, 'key')
   @mock.patch.object(pygame, 'display')
   @mock.patch.object(pygame, 'event')
   @mock.patch.object(pygame, 'time')
   def test_run_level(
       self, config_module, play_module, unused_k, unused_d, unused_e, unused_t):
-    full_config = config_module.get_config()
-    full_config['lab2d_settings']['maxEpisodeLengthFrames'] = 10
+    env_module = config_module
+    env_config = env_module.get_config()
+
+    with config_dict.ConfigDict(env_config).unlocked() as env_config:
+      roles = env_config.default_player_roles
+      env_config.lab2d_settings = env_module.build(roles, env_config)
+
+    env_config['lab2d_settings']['maxEpisodeLengthFrames'] = 10
     level_playing_utils.run_episode(
-        'RGB', {}, play_module._ACTION_MAP, full_config)
+        'RGB', {}, play_module._ACTION_MAP, env_config)
 
 
 if __name__ == '__main__':

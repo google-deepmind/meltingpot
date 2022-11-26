@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -146,6 +146,8 @@ end
 function DensityRegrow:postStart()
   self:_beginLive()
   self._started = true
+  self._underlyingGrass = self.gameObject:getComponent(
+      'Transform'):queryPosition('background')
 end
 
 function DensityRegrow:update()
@@ -180,8 +182,13 @@ function DensityRegrow:_updateWaitState()
   if self.gameObject:getState() ~= self._config.liveState then
     local piece = self.gameObject:getPiece()
     local numClose = self._variables.pieceToNumNeighbors[piece]
-    self.gameObject:setState(
-        self._config.waitState .. '_' .. tostring(numClose))
+    local newState = self._config.waitState .. '_' .. tostring(numClose)
+    self.gameObject:setState(newState)
+    if newState == self._config.waitState .. '_' .. tostring(0) then
+      self._underlyingGrass:setState('dessicated')
+    else
+      self._underlyingGrass:setState('grass')
+    end
   end
 end
 

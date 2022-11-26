@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A simple human player for testing any `commons_harvest` substrate.
+"""A simple human player for testing `commons_harvest`.
 
 Use `WASD` keys to move the character around.
 Use `Q and E` to turn the character.
@@ -21,17 +21,18 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
+from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import commons_harvest_closed as mp_commons_harvest_closed
-from meltingpot.python.configs.substrates import commons_harvest_open as mp_commons_harvest_open
-from meltingpot.python.configs.substrates import commons_harvest_partnership as mp_commons_harvest_partnership
+from meltingpot.python.configs.substrates import commons_harvest__closed
+from meltingpot.python.configs.substrates import commons_harvest__open
+from meltingpot.python.configs.substrates import commons_harvest__partnership
 from meltingpot.python.human_players import level_playing_utils
 
 
 environment_configs = {
-    'mp_commons_harvest_closed': mp_commons_harvest_closed,
-    'mp_commons_harvest_open': mp_commons_harvest_open,
-    'mp_commons_harvest_partnership': mp_commons_harvest_partnership,
+    'commons_harvest__closed': commons_harvest__closed,
+    'commons_harvest__open': commons_harvest__open,
+    'commons_harvest__partnership': commons_harvest__partnership,
 }
 
 _ACTION_MAP = {
@@ -48,7 +49,7 @@ def verbose_fn(unused_env, unused_player_index):
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
-      '--level_name', type=str, default='mp_commons_harvest_closed',
+      '--level_name', type=str, default='commons_harvest__closed',
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
@@ -62,10 +63,14 @@ def main():
       '--print_events', type=bool, default=False, help='Print events')
 
   args = parser.parse_args()
-  env_config = environment_configs[args.level_name]
+  env_module = environment_configs[args.level_name]
+  env_config = env_module.get_config()
+  with config_dict.ConfigDict(env_config).unlocked() as env_config:
+    roles = env_config.default_player_roles
+    env_config.lab2d_settings = env_module.build(roles, env_config)
   level_playing_utils.run_episode(
-      args.observation, args.settings, _ACTION_MAP, env_config.get_config(),
-      level_playing_utils.RenderType.PYGAME,
+      args.observation, args.settings, _ACTION_MAP,
+      env_config, level_playing_utils.RenderType.PYGAME,
       verbose_fn=verbose_fn if args.verbose else None,
       print_events=args.print_events)
 

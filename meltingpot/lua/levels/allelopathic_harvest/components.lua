@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -226,6 +226,7 @@ function Regrowth:__init__(kwargs)
   self._config.baseRate = kwargs.baseRate
   self._config.cubicRate = kwargs.cubicRate
   self._config.linearGrowth = kwargs.linearGrowth
+  self:resetCountdown()
 end
 
 function Regrowth:onStateChange(previousState)
@@ -552,7 +553,7 @@ function ColorZapper:addHits(worldConfig)
         layer = self._config.layerNames[idx],
         sprite = self._config.spriteNames[idx],
     }
-    table.insert(worldConfig.renderOrder, self._config.layerNames[idx])
+    component.insertIfNotPresent(worldConfig.renderOrder, self._config.layerNames[idx])
   end
 end
 

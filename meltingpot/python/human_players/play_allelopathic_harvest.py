@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,8 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-"""A simple human player for testing the `allelopathic_harvest` level.
+"""A simple human player for testing `allelopathic_harvest`.
 
 Use `WASD` keys to move the character around.
 Use `Q and E` to turn the character.
@@ -22,13 +21,14 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
+from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import allelopathic_harvest as mp_allelopathic_harvest
+from meltingpot.python.configs.substrates import allelopathic_harvest__open
 from meltingpot.python.human_players import level_playing_utils
 
 
 environment_configs = {
-    'mp_allelopathic_harvest': mp_allelopathic_harvest,
+    'allelopathic_harvest__open': allelopathic_harvest__open,
 }
 
 _ACTION_MAP = {
@@ -38,8 +38,6 @@ _ACTION_MAP = {
     'fire_1': level_playing_utils.get_key_number_one_pressed,
     'fire_2': level_playing_utils.get_key_number_two_pressed,
     'fire_3': level_playing_utils.get_key_number_three_pressed,
-    'fire_4': level_playing_utils.get_key_number_four_pressed,
-    'fire_5': level_playing_utils.get_key_number_five_pressed,
 }
 
 
@@ -50,7 +48,7 @@ def verbose_fn(unused_env, unused_player_index):
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
-      '--level_name', type=str, default='mp_allelopathic_harvest',
+      '--level_name', type=str, default='allelopathic_harvest__open',
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
@@ -64,10 +62,14 @@ def main():
       '--print_events', type=bool, default=False, help='Print events')
 
   args = parser.parse_args()
-  env_config = environment_configs[args.level_name]
+  env_module = environment_configs[args.level_name]
+  env_config = env_module.get_config()
+  with config_dict.ConfigDict(env_config).unlocked() as env_config:
+    roles = env_config.default_player_roles
+    env_config.lab2d_settings = env_module.build(roles, env_config)
   level_playing_utils.run_episode(
       args.observation, args.settings, _ACTION_MAP,
-      env_config.get_config(), level_playing_utils.RenderType.PYGAME,
+      env_config, level_playing_utils.RenderType.PYGAME,
       verbose_fn=verbose_fn if args.verbose else None,
       print_events=args.print_events)
 

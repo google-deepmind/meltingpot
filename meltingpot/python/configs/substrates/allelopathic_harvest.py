@@ -1,4 +1,4 @@
-# Copyright 2020 DeepMind Technologies Limited.
+# Copyright 2022 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Configuration for Allelopathic Harvest.
-
-Example video: https://youtu.be/ESugMMdKLxI
 
 This substrate contains three different varieties of berry (red, green, & blue)
 and a fixed number of berry patches, which could be replanted to grow any color
@@ -35,9 +33,10 @@ Model-free conventions in multi-agent reinforcement learning with heterogeneous
 preferences. arXiv preprint arXiv:2010.09054.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, Mapping, Sequence
 
 from ml_collections import config_dict
+
 from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
@@ -45,8 +44,6 @@ from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
-# How many simultaneous players in the game.
-NUM_PLAYERS = 16
 # How many different colors of berries.
 NUM_BERRY_TYPES = 3
 
@@ -83,80 +80,114 @@ P3P131P3PPP13P1PPP222PPPP11PP
 21PPPPPPP12P23P1PPPPPP13P3P11
 """
 
-MARKING_LEVEL_1 = """
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-"""
-
-MARKING_LEVEL_2 = """
-xxxxxx****xxxxxx
-xxxxxx****xxxxxx
-xxxxxx****xxxxxx
-xxxxxx****xxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-"""
-
-MARKING_LEVEL_3 = """
-xxxx********xxxx
-xxxx********xxxx
-xxxx********xxxx
-xxxx********xxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxx**xxxx**xxxx
-xxxx**xxxx**xxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxxxxxxxxxxxxxx
-xxxx**xxxx**xxxx
-xxxx**xxxx**xxxx
-"""
-
 # Map a character to the prefab it represents in the ASCII map.
 CHAR_PREFAB_MAP = {
-    "P": "spawn_point",
+    "P": {"type": "all", "list": ["floor", "spawn_point"]},
     "W": "wall",
-    "1": "berry_1",
-    "2": "berry_2",
-    "3": "berry_3",
+    "1": {"type": "all", "list": ["soil", "berry_1"]},
+    "2": {"type": "all", "list": ["soil", "berry_2"]},
+    "3": {"type": "all", "list": ["soil", "berry_3"]},
 }
 
+
+# These need to be orthogonal, same intensity and variance.
 COLORS = [
-    (200, 0, 0, 255),  # 'Red'
-    (0, 200, 0, 255),  # 'Green'
-    (0, 0, 200, 255),  # 'Blue'
+    (200, 10, 10, 255),  # 'Red'
+    (10, 200, 10, 255),  # 'Green'
+    (10, 10, 200, 255),  # 'Blue'
 ]
 
+ROLE_TO_MOST_TASTY_BERRY_IDX = {
+    "player_who_likes_red": 0,
+    "player_who_likes_green": 1,
+    "player_who_likes_blue": 2,
+}
+
+MARKING_SPRITE = """
+oxxxxxxo
+xoxxxxox
+xxoxxoxx
+xxxooxxx
+xxxooxxx
+xxoxxoxx
+xoxxxxox
+oxxxxxxo
+"""
+
+
+def get_marking_palette(alpha: float) -> Dict[str, Sequence[int]]:
+  alpha_uint8 = int(alpha * 255)
+  assert alpha_uint8 >= 0.0 and alpha_uint8 <= 255, "Color value out of range."
+  return {"x": shapes.ALPHA, "o": (0, 0, 0, alpha_uint8)}
 
 _NUM_DIRECTIONS = 4  # NESW
+
+FLOOR = {
+    "name": "floor",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "floor",
+                "stateConfigs": [{
+                    "state": "floor",
+                    "layer": "background",
+                    "sprite": "Floor",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["Floor",],
+                "spriteShapes": [shapes.DIRT_PATTERN],
+                "palettes": [{
+                    "x": (55, 55, 55, 255),
+                    "X": (60, 60, 60, 255),
+                }],
+                "noRotates": [True]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
+
+SOIL = {
+    "name": "soil",
+    "components": [
+        {
+            "component": "StateManager",
+            "kwargs": {
+                "initialState": "soil",
+                "stateConfigs": [{
+                    "state": "soil",
+                    "layer": "background",
+                    "sprite": "Soil",
+                }],
+            }
+        },
+        {
+            "component": "Appearance",
+            "kwargs": {
+                "renderMode": "ascii_shape",
+                "spriteNames": ["Soil",],
+                "spriteShapes": [shapes.SOIL],
+                "palettes": [{
+                    "D": (40, 40, 40, 255),
+                    "d": (50, 50, 50, 255),
+                    "X": (60, 60, 60, 255),
+                    "x": (70, 70, 70, 255)}],
+                "noRotates": [False]
+            }
+        },
+        {
+            "component": "Transform",
+        },
+    ]
+}
 
 WALL = {
     "name": "wall",
@@ -179,8 +210,8 @@ WALL = {
             "component": "Appearance",
             "kwargs": {
                 "spriteNames": ["Wall"],
-                # This color is a dark shade of purple.
-                "spriteRGBColors": [(66, 28, 82)]
+                # This color is a dark shade of grey.
+                "spriteRGBColors": [(40, 40, 40)]
             }
         },
         {
@@ -298,50 +329,47 @@ def create_berry_prefab(lua_index: int):
                       "RipeBerry_3",
                   ],
                   "spriteShapes": [
-                      shapes.UNRIPE_BERRY,
-                      shapes.UNRIPE_BERRY,
-                      shapes.UNRIPE_BERRY,
-                      shapes.BERRY,
-                      shapes.BERRY,
-                      shapes.BERRY,
+                      shapes.BERRY_SEEDS,
+                      shapes.BERRY_SEEDS,
+                      shapes.BERRY_SEEDS,
+                      shapes.BERRY_RIPE,
+                      shapes.BERRY_RIPE,
+                      shapes.BERRY_RIPE,
                   ],
                   "palettes": [
                       # Unripe colors
                       {
-                          "*": COLORS[0],
-                          "@": shapes.scale_color(COLORS[0], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "o": COLORS[0],
+                          "O": shapes.scale_color(COLORS[0], 1.5),
                           "x": (0, 0, 0, 0)
                       },
                       {
-                          "*": COLORS[1],
-                          "@": shapes.scale_color(COLORS[1], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "o": COLORS[1],
+                          "O": shapes.scale_color(COLORS[1], 1.5),
                           "x": (0, 0, 0, 0)
                       },
                       {
-                          "*": COLORS[2],
-                          "@": shapes.scale_color(COLORS[2], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "o": COLORS[2],
+                          "O": shapes.scale_color(COLORS[2], 1.5),
                           "x": (0, 0, 0, 0)
                       },
                       # Ripe colors
                       {
-                          "*": COLORS[0],
-                          "@": shapes.scale_color(COLORS[0], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "d": COLORS[0],
+                          "O": shapes.scale_color(COLORS[0], 1.5),
+                          "o": shapes.scale_color(COLORS[0], 1.25),
                           "x": (0, 0, 0, 0)
                       },
                       {
-                          "*": COLORS[1],
-                          "@": shapes.scale_color(COLORS[1], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "d": COLORS[1],
+                          "O": shapes.scale_color(COLORS[1], 1.5),
+                          "o": shapes.scale_color(COLORS[1], 1.25),
                           "x": (0, 0, 0, 0)
                       },
                       {
-                          "*": COLORS[2],
-                          "@": shapes.scale_color(COLORS[2], 1.5),
-                          "#": (255, 255, 255, 255),
+                          "d": COLORS[2],
+                          "O": shapes.scale_color(COLORS[2], 1.5),
+                          "o": shapes.scale_color(COLORS[2], 1.25),
                           "x": (0, 0, 0, 0)
                       },
                   ],
@@ -384,10 +412,13 @@ def create_berry_prefab(lua_index: int):
   return berry
 
 
-def create_avatar_object(player_idx: int) -> Dict[str, Any]:
+def create_avatar_object(player_idx: int,
+                         most_tasty_berry_idx: int) -> Dict[str, Any]:
   """Return the avatar for the player numbered `player_idx`."""
   # Lua is 1-indexed.
   lua_index = player_idx + 1
+
+  lua_most_tasty_berry_idx = most_tasty_berry_idx + 1
 
   live_state_name = "player{}".format(lua_index)
   avatar_sprite_name = "avatarSprite{}".format(lua_index)
@@ -420,12 +451,12 @@ def create_avatar_object(player_idx: int) -> Dict[str, Any]:
               "kwargs": {
                   "renderMode": "ascii_shape",
                   "spriteNames": [avatar_sprite_name],
-                  "spriteShapes": [shapes.AVATAR_DEFAULT],
+                  "spriteShapes": [shapes.CUTE_AVATAR],
                   # This color is white. It should never appear in gameplay. So
                   # if a white colored avatar does appear then something is
                   # broken.
                   "palettes": [shapes.get_palette((255, 255, 255))],
-                  "noRotates": [False]
+                  "noRotates": [True]
               }
           },
           {
@@ -465,9 +496,11 @@ def create_avatar_object(player_idx: int) -> Dict[str, Any]:
                   "cooldownTime": 4,
                   "beamLength": 3,
                   "beamRadius": 1,
+                  "beamColor": (253, 253, 253),  # the zapper beam is white.
                   "framesTillRespawn": 25,
                   "penaltyForBeingZapped": 0,  # leave this always at 0.
                   "rewardForZapping": 0,  # leave this always at 0.
+                  # GraduatedSanctionsMarking handles removal instead of Zapper.
                   "removeHitPlayer": False,
               }
           },
@@ -477,7 +510,7 @@ def create_avatar_object(player_idx: int) -> Dict[str, Any]:
           {
               "component": "Taste",
               "kwargs": {
-                  "mostTastyBerryId": 1,  # A taste for the red berry.
+                  "mostTastyBerryId": lua_most_tasty_berry_idx,
                   "rewardMostTasty": 2,
               }
           },
@@ -553,6 +586,8 @@ def create_avatar_object(player_idx: int) -> Dict[str, Any]:
 # PREFABS is a dictionary mapping names to template game objects that can
 # be cloned and placed in multiple locations accoring to an ascii map.
 PREFABS = {
+    "floor": FLOOR,
+    "soil": SOIL,
     "wall": WALL,
     "spawn_point": SPAWN_POINT,
     "berry_1": create_berry_prefab(1),
@@ -602,7 +637,7 @@ ACTION_SET = (
 # The Scene objece is a non-physical object, it components implement global
 # logic. In this case, that includes holding the global berry counters to
 # implement the regrowth rate, as well as some of the observations.
-def create_scene():
+def create_scene(num_players: int):
   """Creates the global scene."""
   scene = {
       "name": "scene",
@@ -623,14 +658,14 @@ def create_scene():
               "component": "GlobalBerryTracker",
               "kwargs": {
                   "numBerryTypes": NUM_BERRY_TYPES,
-                  "numPlayers": NUM_PLAYERS,
+                  "numPlayers": num_players,
               }
           },
           {
               "component": "GlobalZapTracker",
               "kwargs": {
                   "numBerryTypes": NUM_BERRY_TYPES,
-                  "numPlayers": NUM_PLAYERS,
+                  "numPlayers": num_players,
               }
           },
           {
@@ -638,7 +673,7 @@ def create_scene():
               "kwargs": {
                   "metrics": [
                       {"type": "tensor.Int32Tensor",
-                       "shape": (NUM_PLAYERS, NUM_PLAYERS),
+                       "shape": (num_players, num_players),
                        "variable": "playerZapMatrix"},
                   ]
               }
@@ -667,13 +702,13 @@ def create_scene():
 
                       {"name": "COLORING_BY_PLAYER",
                        "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_PLAYERS),
+                       "shape": (NUM_BERRY_TYPES, num_players),
                        "component": "GlobalBerryTracker",
                        "variable": "coloringByPlayerMatrix"},
 
                       {"name": "EATING_TYPES_BY_PLAYER",
                        "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_PLAYERS),
+                       "shape": (NUM_BERRY_TYPES, num_players),
                        "component": "GlobalBerryTracker",
                        "variable": "eatingTypesByPlayerMatrix"},
 
@@ -691,7 +726,7 @@ def create_scene():
 
                       {"name": "PLAYER_TIMEOUT_COUNT",
                        "type": "tensor.Int32Tensor",
-                       "shape": (NUM_PLAYERS, NUM_PLAYERS),
+                       "shape": (num_players, num_players),
                        "component": "GlobalZapTracker",
                        "variable": "fullZapCountMatrix"},
 
@@ -721,7 +756,7 @@ def create_scene():
 
                       {"name": "WHO_ZAPPED_WHO",
                        "type": "tensor.Int32Tensor",
-                       "shape": (NUM_PLAYERS, NUM_PLAYERS),
+                       "shape": (num_players, num_players),
                        "component": "GlobalMetricHolder",
                        "variable": "playerZapMatrix"},
                   ]
@@ -772,11 +807,13 @@ def create_marking_overlay(player_idx: int) -> Dict[str, Any]:
                   "spriteNames": ["sprite_for_level_1",
                                   "sprite_for_level_2",
                                   "sprite_for_level_3"],
-                  "spriteShapes": [MARKING_LEVEL_1,
-                                   MARKING_LEVEL_2,
-                                   MARKING_LEVEL_3],
-                  "palettes": [shapes.get_palette((205, 205, 205))] * 3,
-                  "noRotates": [False] * 3
+                  "spriteShapes": [MARKING_SPRITE,
+                                   MARKING_SPRITE,
+                                   MARKING_SPRITE],
+                  "palettes": [get_marking_palette(0.0),
+                               get_marking_palette(0.5),
+                               get_marking_palette(1.0)],
+                  "noRotates": [True] * 3
               }
           },
           {
@@ -864,12 +901,12 @@ def create_colored_avatar_overlay(player_idx: int) -> Dict[str, Any]:
                       "ColoredAvatar_{}".format(i)
                       for i in range(1, NUM_BERRY_TYPES + 1)
                   ],
-                  "spriteShapes": [shapes.AVATAR_DEFAULT] *
+                  "spriteShapes": [shapes.CUTE_AVATAR] *
                                   (NUM_BERRY_TYPES + 1),
                   "palettes":
                       [shapes.get_palette((125, 125, 125))] +
                       [shapes.get_palette(beam_color) for beam_color in COLORS],
-                  "noRotates": [False] * (NUM_BERRY_TYPES + 1)
+                  "noRotates": [True] * (NUM_BERRY_TYPES + 1)
               }
           },
           {
@@ -885,12 +922,19 @@ def create_colored_avatar_overlay(player_idx: int) -> Dict[str, Any]:
   return overlay_object
 
 
-def create_avatar_and_associated_objects(num_players):
+def create_avatar_and_associated_objects(
+    roles: Sequence[str]):
   """Returns list of avatar objects and associated other objects."""
   avatar_objects = []
   additional_objects = []
-  for player_idx in range(num_players):
-    avatar_object = create_avatar_object(player_idx)
+  for player_idx, role in enumerate(roles):
+    if role == "default":
+      most_tasty_berry_idx = player_idx % 2
+    else:
+      most_tasty_berry_idx = ROLE_TO_MOST_TASTY_BERRY_IDX[role]
+
+    avatar_object = create_avatar_object(
+        player_idx=player_idx, most_tasty_berry_idx=most_tasty_berry_idx)
     avatar_objects.append(avatar_object)
 
     overlay_object = create_colored_avatar_overlay(player_idx)
@@ -901,44 +945,12 @@ def create_avatar_and_associated_objects(num_players):
   return avatar_objects + additional_objects
 
 
-def create_lab2d_settings(
-    ascii_map_string: str,
-    num_players: int,
-) -> Dict[str, Any]:
-  """Returns the lab2d settings.
-
-  Args:
-    ascii_map_string: ascii map.
-    num_players: the number of players.
-  """
-  game_objects = create_avatar_and_associated_objects(NUM_PLAYERS)
-  settings = {
-      "levelName": "allelopathic_harvest",
-      "levelDirectory":
-            "meltingpot/lua/levels",
-      "numPlayers": num_players,
-      "maxEpisodeLengthFrames": 2000,
-      "spriteSize": 8,
-      "topology": "TORUS",  # Choose from ["BOUNDED", "TORUS"],
-      "simulation": {
-          "map": ascii_map_string,
-          "gameObjects": game_objects,
-          "scene": create_scene(),
-          "prefabs": PREFABS,
-          "charPrefabMap": CHAR_PREFAB_MAP,
-          "playerPalettes": [PLAYER_COLOR_PALETTES[0]] * NUM_PLAYERS,
-      },
-  }
-  return settings
-
-
-def get_config(factory=create_lab2d_settings):
-  """Default configuration for training on the allelopathic harvest level."""
+def get_config():
+  """Default configuration for the allelopathic harvest level."""
   config = config_dict.ConfigDict()
 
-  # Basic configuration.
-  config.num_players = NUM_PLAYERS
-  config.lab2d_settings = factory(DEFAULT_ASCII_MAP, config.num_players)
+  config.episode_timesteps = 2000
+  config.ascii_map = DEFAULT_ASCII_MAP
 
   # Action set configuration.
   config.action_set = ACTION_SET
@@ -948,27 +960,9 @@ def get_config(factory=create_lab2d_settings):
       "POSITION",
       "ORIENTATION",
       "READY_TO_SHOOT",
-      # Debug observations:
-      "COLOR_ID",
-      "MOST_TASTY_BERRY_ID",
-      "AVATAR_IDS_IN_VIEW",
-      "AVATAR_IDS_IN_RANGE_TO_ZAP",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
-      "WORLD.PLAYER_TIMEOUT_COUNT",
-      "WORLD.RIPE_BERRIES_BY_TYPE",
-      "WORLD.UNRIPE_BERRIES_BY_TYPE",
-      "WORLD.BERRIES_BY_TYPE",
-      "WORLD.COLOR_BY_COLOR_ZAP_COUNTS",
-      "WORLD.COLOR_BY_TASTE_ZAP_COUNTS",
-      "WORLD.TASTE_BY_COLOR_ZAP_COUNTS",
-      "WORLD.TASTE_BY_TASTE_ZAP_COUNTS",
-      "WORLD.COLORING_BY_PLAYER",
-      "WORLD.EATING_TYPES_BY_PLAYER",
-      "WORLD.BERRIES_PER_TYPE_BY_COLOR_OF_COLORER",
-      "WORLD.BERRIES_PER_TYPE_BY_TASTE_OF_COLORER",
-      "WORLD.WHO_ZAPPED_WHO",
   ]
 
   # The specs of the environment (from a single-agent perspective).
@@ -978,30 +972,40 @@ def get_config(factory=create_lab2d_settings):
       "POSITION": specs.OBSERVATION["POSITION"],
       "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
-      "COLOR_ID": specs.float64(),
-      "MOST_TASTY_BERRY_ID": specs.float64(),
-      "AVATAR_IDS_IN_VIEW": specs.int32(NUM_PLAYERS),
-      "AVATAR_IDS_IN_RANGE_TO_ZAP": specs.int32(NUM_PLAYERS),
       "WORLD.RGB": specs.rgb(240, 232),
-      "WORLD.PLAYER_TIMEOUT_COUNT": specs.int32(NUM_PLAYERS, NUM_PLAYERS),
-      "WORLD.RIPE_BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
-      "WORLD.UNRIPE_BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
-      "WORLD.BERRIES_BY_TYPE": specs.int32(NUM_BERRY_TYPES),
-      "WORLD.COLOR_BY_COLOR_ZAP_COUNTS": specs.int32(
-          NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),
-      "WORLD.COLOR_BY_TASTE_ZAP_COUNTS": specs.int32(
-          NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),
-      "WORLD.TASTE_BY_COLOR_ZAP_COUNTS": specs.int32(
-          NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
-      "WORLD.TASTE_BY_TASTE_ZAP_COUNTS": specs.int32(
-          NUM_BERRY_TYPES, NUM_BERRY_TYPES),
-      "WORLD.COLORING_BY_PLAYER": specs.int32(NUM_BERRY_TYPES, NUM_PLAYERS),
-      "WORLD.EATING_TYPES_BY_PLAYER": specs.int32(NUM_BERRY_TYPES, NUM_PLAYERS),
-      "WORLD.BERRIES_PER_TYPE_BY_COLOR_OF_COLORER": specs.int32(
-          NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
-      "WORLD.BERRIES_PER_TYPE_BY_TASTE_OF_COLORER": specs.int32(
-          NUM_BERRY_TYPES, NUM_BERRY_TYPES),
-      "WORLD.WHO_ZAPPED_WHO": specs.int32(NUM_PLAYERS, NUM_PLAYERS),
   })
 
+  # The roles assigned to each player.
+  config.valid_roles = frozenset({"default",
+                                  "player_who_likes_red",
+                                  "player_who_likes_green",
+                                  "player_who_likes_blue",})
+
   return config
+
+
+def build(
+    roles: Sequence[str],
+    config: config_dict.ConfigDict,
+) -> Mapping[str, Any]:
+  """Build the allelopathic_harvest substrate given roles."""
+  num_players = len(roles)
+  game_objects = create_avatar_and_associated_objects(roles=roles)
+  # Build the rest of the substrate definition.
+  substrate_definition = dict(
+      levelName="allelopathic_harvest",
+      levelDirectory="meltingpot/lua/levels",
+      numPlayers=num_players,
+      maxEpisodeLengthFrames=config.episode_timesteps,
+      spriteSize=8,
+      topology="TORUS",  # Choose from ["BOUNDED", "TORUS"],
+      simulation={
+          "map": config.ascii_map,
+          "gameObjects": game_objects,
+          "scene": create_scene(num_players),
+          "prefabs": PREFABS,
+          "charPrefabMap": CHAR_PREFAB_MAP,
+          "playerPalettes": [PLAYER_COLOR_PALETTES[0]] * num_players,
+      },
+  )
+  return substrate_definition

@@ -1,4 +1,4 @@
---[[ Copyright 2020 DeepMind Technologies Limited.
+--[[ Copyright 2022 DeepMind Technologies Limited.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,11 +19,20 @@ local helpers = require 'common.helpers'
 local log = require 'common.log'
 local events = require 'system.events'
 local random = require 'system.random'
+local tensor = require 'system.tensor'
 
 local meltingpot = 'meltingpot.lua.modules.'
 local component = require(meltingpot .. 'component')
 local component_registry = require(meltingpot .. 'component_registry')
 
+local _COMPASS = {'N', 'E', 'S', 'W'}
+
+local _DIRECTION = {
+    N = tensor.Tensor({0, -1}),
+    E = tensor.Tensor({1, 0}),
+    S = tensor.Tensor({0, 1}),
+    W = tensor.Tensor({-1, 0}),
+}
 
 local AllBeamBlocker = class.Class(component.Component)
 
@@ -48,7 +57,9 @@ function Resource:__init__(kwargs)
       {'destroyedState', args.stringType},
       {'reward', args.numberType},
       {'rewardRate', args.numberType},
-      {'rewardDelay', args.numberType}
+      {'rewardDelay', args.numberType},
+      {'delayTillSelfRepair', args.default(15), args.ge(0)},  -- frames
+      {'selfRepairProbability', args.default(0.1), args.ge(0.0), args.le(1.0)},
   })
   Resource.Base.__init__(self, kwargs)
 
@@ -57,6 +68,8 @@ function Resource:__init__(kwargs)
   self._config.reward = kwargs.reward
   self._config.rewardRate = kwargs.rewardRate
   self._config.rewardDelay = kwargs.rewardDelay
+  self._config.delayTillSelfRepair = kwargs.delayTillSelfRepair
+  self._config.selfRepairProbability = kwargs.selfRepairProbability
 end
 
 function Resource:reset()
@@ -65,6 +78,7 @@ function Resource:reset()
   self._claimedByAvatarComponent = nil
   self._neverYetClaimed = true
   self._destroyed = false
+  self._framesSinceZapped = nil
 end
 
 function Resource:registerUpdaters(updaterRegistry)
@@ -122,7 +136,7 @@ function Resource:_claim(hittingGameObject)
 end
 
 function Resource:onHit(hittingGameObject, hitName)
-  if hitName == 'directionHit' then
+  if string.sub(hitName, 1, string.len('directionHit')) == 'directionHit' then
     self:_claim(hittingGameObject)
   end
 
@@ -137,6 +151,7 @@ function Resource:onHit(hittingGameObject, hitName)
 
   if hitName == 'zapHit' then
     self._health = self._health - 1
+    self._framesSinceZapped = 0
     if self._health == 0 then
       -- Reset the health state variable.
       self._health = self._config.initialHealth
@@ -144,6 +159,10 @@ function Resource:onHit(hittingGameObject, hitName)
       self.gameObject:setState(self._config.destroyedState)
       -- Tell the reward indicator the resource was destroyed.
       self._rewardingStatus = 'inactive'
+      -- Destroy the resource's associated texture objects.
+      self._texture_object:setState('destroyed')
+      -- Tell the resource's associated damage indicator.
+      self._associatedDamageIndicator:setState('inactive')
       -- Record the destruction event.
       local playerIndex = hittingGameObject:getComponent('Avatar'):getIndex()
       events:add('destroyed_resource', 'dict',
@@ -162,6 +181,28 @@ end
 
 function Resource:start()
   self._numPlayers = self.gameObject.simulation:getNumPlayers()
+end
+
+function Resource:postStart()
+  self._texture_object = self.gameObject:getComponent(
+      'Transform'):queryPosition('lowerPhysical')
+  self._associatedDamageIndicator = self.gameObject:getComponent(
+      'Transform'):queryPosition('superDirectionIndicatorLayer')
+end
+
+function Resource:update()
+  if self._health < self._config.initialHealth then
+    self._associatedDamageIndicator:setState('damaged')
+    if self._framesSinceZapped >= self._config.delayTillSelfRepair then
+      if random:uniformReal(0, 1) < self._config.selfRepairProbability then
+        self._health = self._health + 1
+        if self._health == self._config.initialHealth then
+          self._associatedDamageIndicator:setState('inactive')
+        end
+      end
+    end
+    self._framesSinceZapped = self._framesSinceZapped + 1
+  end
 end
 
 function Resource:getRewardingStatus()
@@ -263,8 +304,11 @@ end
 function RewardIndicator:update()
   local resourceComponent = self._pairedResource:getComponent('Resource')
   local newStatus = resourceComponent:getRewardingStatus()
-  if newStatus ~= self.gameObject:getState() then
-    self.gameObject:setState(newStatus)
+  local resourceState = resourceComponent.gameObject:getState()
+  if newStatus == "active" then
+    self.gameObject:setState("dry_" .. resourceState)
+  else
+    self.gameObject:setState("inactive")
   end
 end
 
@@ -312,11 +356,85 @@ function Taste:addDefaultReward(defaultReward)
 end
 
 
+-- The `Paintbrush` component endows an avatar with the ability to grasp an
+-- object in the direction they are facing.
+
+local Paintbrush = class.Class(component.Component)
+
+function Paintbrush:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('Paintbrush')},
+      {'shape', args.tableType},
+      {'palette', args.tableType},
+      {'playerIndex', args.numberType},
+  })
+  Paintbrush.Base.__init__(self, kwargs)
+  self._config.shape = kwargs.shape
+  self._config.palette = kwargs.palette
+  self._config.playerIndex = kwargs.playerIndex
+end
+
+function Paintbrush:addSprites(tileSet)
+  for j=1, 4 do
+    local spriteData = {
+      palette = self._config.palette,
+      text = self._config.shape[j],
+      noRotate = true
+    }
+    tileSet:addShape(
+      'brush' .. self._config.playerIndex .. '.' .. _COMPASS[j], spriteData)
+  end
+end
+
+function Paintbrush:addHits(worldConfig)
+  local playerIndex = self._config.playerIndex
+  for j=1, 4 do
+    local hitName = 'directionHit' .. playerIndex
+    worldConfig.hits[hitName] = {
+        layer = 'directionIndicatorLayer',
+        sprite = 'brush' .. self._config.playerIndex,
+  }
+  end
+end
+
+
+function Paintbrush:registerUpdaters(updaterRegistry)
+  local playerIndex = self._config.playerIndex
+  self._avatar = self.gameObject:getComponent('Avatar')
+  local drawBrush = function()
+    local beam = 'directionHit' .. playerIndex
+    self.gameObject:hitBeam(beam, 1, 0)
+  end
+  updaterRegistry:registerUpdater{
+      updateFn = drawBrush,
+      priority = 130,
+  }
+end
+
+
+local Destructable = class.Class(component.Component)
+
+function Destructable:__init__(kwargs)
+  kwargs = args.parse(kwargs, {
+      {'name', args.default('Destructable')},
+  })
+  Destructable.Base.__init__(self, kwargs)
+end
+
+function Destructable:onHit(hittingGameObject, hitName)
+  if hitName == 'zapHit' then
+    self.gameObject:setState('destroyed')
+  end
+  return false
+end
+
 local allComponents = {
     -- Non-avatar components.
     AllBeamBlocker = AllBeamBlocker,
     Resource = Resource,
     RewardIndicator = RewardIndicator,
+    Paintbrush = Paintbrush,
+    Destructable = Destructable,
 
     -- Avatar components.
     ResourceClaimer = ResourceClaimer,

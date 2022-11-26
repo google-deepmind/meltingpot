@@ -20,18 +20,17 @@ from meltingpot.python import substrate
 from meltingpot.python.testing import substrates as test_utils
 
 
-@parameterized.named_parameters(
-    (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
-class SubstrateTestCase(test_utils.SubstrateTestCase):
+@parameterized.named_parameters((name, name) for name in substrate.SUBSTRATES)
+class PerSubstrateTestCase(test_utils.SubstrateTestCase):
 
   def test_substrate(self, name):
-    config = substrate.get_config(name)
-    action_spec = [config.action_spec] * config.num_players
-    discount_spec = config.timestep_spec.discount
-    reward_spec = [config.timestep_spec.reward] * config.num_players
-    observation_spec = [
-        dict(config.timestep_spec.observation)] * config.num_players
-    with substrate.build(config) as env:
+    factory = substrate.get_factory(name)
+    roles = factory.default_player_roles()
+    action_spec = [factory.action_spec()] * len(roles)
+    reward_spec = [factory.timestep_spec().reward] * len(roles)
+    discount_spec = factory.timestep_spec().discount
+    observation_spec = [dict(factory.timestep_spec().observation)] * len(roles)
+    with factory.build(roles) as env:
       with self.subTest('step'):
         self.assert_step_matches_specs(env)
       with self.subTest('discount_spec'):

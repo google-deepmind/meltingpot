@@ -268,9 +268,6 @@ function BaseSimulation:worldConfig()
           'upperPhysical',  -- Avatars are normally on layer `upperPhysical`.
           'overlay',
           'superOverlay',
-           -- Only use directionIndicatorLayer for avatar direction indicators.
-          'directionIndicatorLayer',
-          'superDirectionIndicatorLayer'
       },
       -- `customSprites` holds sprites that can be specified in a spriteMap but
       -- are otherwise not attached to any state. The main use-case for
