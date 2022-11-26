@@ -24,29 +24,22 @@ from meltingpot.python.testing import substrates as test_utils
     (name, name) for name in substrate.AVAILABLE_SUBSTRATES)
 class SubstrateTestCase(test_utils.SubstrateTestCase):
 
-  def test_matches_spec(self, name):
-    config = substrate.get_config(name)
-    env = self.enter_context(substrate.build(config))
-    with self.subTest('discount'):
-      self.assert_discount_matches_spec(env)
-    with self.subTest('reward'):
-      self.assert_reward_matches_spec(env)
-    with self.subTest('observation'):
-      self.assert_observation_matches_spec(env)
-
-  def test_spec_in_config_matches_environment(self, name):
+  def test_substrate(self, name):
     config = substrate.get_config(name)
     action_spec = [config.action_spec] * config.num_players
+    discount_spec = config.timestep_spec.discount
     reward_spec = [config.timestep_spec.reward] * config.num_players
     observation_spec = [
         dict(config.timestep_spec.observation)] * config.num_players
     with substrate.build(config) as env:
+      with self.subTest('step'):
+        self.assert_step_matches_specs(env)
       with self.subTest('discount_spec'):
         self.assertSequenceEqual(env.action_spec(), action_spec)
       with self.subTest('reward_spec'):
         self.assertSequenceEqual(env.reward_spec(), reward_spec)
       with self.subTest('discount_spec'):
-        self.assertEqual(env.discount_spec(), config.timestep_spec.discount)
+        self.assertEqual(env.discount_spec(), discount_spec)
       with self.subTest('observation_spec'):
         self.assertSequenceEqual(env.observation_spec(), observation_spec)
 

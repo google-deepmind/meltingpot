@@ -19,7 +19,7 @@ from absl.testing import parameterized
 class SubstrateTestCase(parameterized.TestCase):
   """Base class for tests of substrates."""
 
-  def assert_accepts_action_matching_spec(self, env):
+  def assert_step_matches_specs(self, env):
     """Asserts that env accepts an action permitted by its spec.
 
     Args:
@@ -28,40 +28,19 @@ class SubstrateTestCase(parameterized.TestCase):
     Raises:
       AssertionError: the env doesn't match its spec.
     """
-    action_spec = env.action_spec()
-    action = [spec.maximum for spec in action_spec]
     env.reset()
+
+    action = [spec.maximum for spec in env.action_spec()]
     try:
-      env.step(action)
+      timestep = env.step(action)
     except Exception:  # pylint: disable=broad-except
       self.fail(f'Failure when passing action {action!r}.')
 
-  def assert_discount_matches_spec(self, env):
-    """Asserts that env returns a discount that matches its spec.
-
-    Args:
-      env: environment to check.
-
-    Raises:
-      AssertionError: the env doesn't match its spec.
-    """
-    timestep = env.reset()
-    discount_spec = env.discount_spec()
     try:
-      discount_spec.validate(timestep.discount)
+      env.discount_spec().validate(timestep.discount)
     except ValueError:
       self.fail('Discount does not match spec.')
 
-  def assert_reward_matches_spec(self, env):
-    """Asserts that env returns a reward that matches its spec.
-
-    Args:
-      env: environment to check.
-
-    Raises:
-      AssertionError: the env doesn't match its spec.
-    """
-    timestep = env.reset()
     reward_spec = env.reward_spec()
     if len(reward_spec) != len(timestep.reward):
       self.fail(f'Spec is length {len(reward_spec)} but reward is length '
@@ -72,29 +51,16 @@ class SubstrateTestCase(parameterized.TestCase):
       except ValueError:
         self.fail(f'Reward {n} does not match spec.')
 
-  def assert_observation_matches_spec(self, env):
-    """Asserts that env returns an observation that matches its spec.
-
-    Args:
-      env: environment to check.
-
-    Raises:
-      AssertionError: the env doesn't match its spec.
-    """
-    observations = env.reset().observation
+    observations = timestep.observation
     observation_specs = env.observation_spec()
-
-    if len(observations) != len(observation_specs):
-      self.fail(f'Observations of length {len(observations)} but observation '
-                f'spec is length {len(observation_specs)}')
-
+    if len(observation_specs) != len(observations):
+      self.fail(f'Spec is length {len(observation_specs)} but observations '
+                f'are length {len(observations)}')
     for n, (observation, spec) in enumerate(
         zip(observations, observation_specs)):
       if set(spec) != set(observation):
         self.fail(f'Observation {n} keys {set(observation)!r} do not match '
-                  f'spec '
-                  f'keys {set(observation)!r}.')
-
+                  f'spec keys {set(observation)!r}.')
       for key in spec:
         try:
           spec[key].validate(observation[key])

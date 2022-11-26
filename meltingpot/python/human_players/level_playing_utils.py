@@ -272,120 +272,121 @@ def run_episode(
   else:
     player_count = len(player_prefixes)
   print(f'Running an episode with {player_count} players: {player_prefixes}.')
-  env = env_builder(**full_config)
+  with env_builder(**full_config) as env:
 
-  if len(player_prefixes) != player_count:
-    raise ValueError('Player prefixes, when specified, must be of the same '
-                     'length as the number of players.')
-  player_index = initial_player_index
-  timestep = env.reset()
+    if len(player_prefixes) != player_count:
+      raise ValueError('Player prefixes, when specified, must be of the same '
+                       'length as the number of players.')
+    player_index = initial_player_index
+    timestep = env.reset()
 
-  score = collections.defaultdict(float)
-  action_reader = ActionReader(env, action_map)
+    score = collections.defaultdict(float)
+    action_reader = ActionReader(env, action_map)
 
-  if interactive == RenderType.PYGAME:
-    pygame.init()
-    pygame.display.set_caption('Melting Pot: {}'.format(
-        full_config.lab2d_settings.levelName))
-    font = pygame.font.SysFont(None, text_font_size)
-
-  scale = 1
-  observation_spec = env.observation_spec()
-  if render_observation in observation_spec:
-    obs_spec = observation_spec[render_observation]
-  elif f'1.{render_observation}' in observation_spec:
-    # This assumes all players have the same observation, which is true for
-    # MeltingPot environments.
-    obs_spec = observation_spec[f'1.{render_observation}']
-  else:
-    # Falls back to 'default_observation.'
-    obs_spec = observation_spec[default_observation]
-
-  observation_shape = obs_spec.shape
-  observation_height = observation_shape[0]
-  observation_width = observation_shape[1]
-  scale = min(screen_height // observation_height,
-              screen_width // observation_width)
-  if interactive == RenderType.PYGAME:
-    game_display = pygame.display.set_mode(
-        (observation_width * scale, observation_height * scale))
-    clock = pygame.time.Clock()
-  stop = False
-
-  # Game loop
-  while True:
-
-    # Check for pygame controls
     if interactive == RenderType.PYGAME:
-      for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-          stop = True
+      pygame.init()
+      pygame.display.set_caption('Melting Pot: {}'.format(
+          full_config.lab2d_settings.levelName))
+      font = pygame.font.SysFont(None, text_font_size)
 
-        if event.type == pygame.KEYDOWN:
-          if event.key == pygame.K_TAB:
-            player_index = (player_index + 1) % player_count
-          break
-    player_prefix = player_prefixes[player_index] if player_prefixes else ''
+    scale = 1
+    observation_spec = env.observation_spec()
+    if render_observation in observation_spec:
+      obs_spec = observation_spec[render_observation]
+    elif f'1.{render_observation}' in observation_spec:
+      # This assumes all players have the same observation, which is true for
+      # MeltingPot environments.
+      obs_spec = observation_spec[f'1.{render_observation}']
+    else:
+      # Falls back to 'default_observation.'
+      obs_spec = observation_spec[default_observation]
 
-    if stop:
-      break
+    observation_shape = obs_spec.shape
+    observation_height = observation_shape[0]
+    observation_width = observation_shape[1]
+    scale = min(screen_height // observation_height,
+                screen_width // observation_width)
+    if interactive == RenderType.PYGAME:
+      game_display = pygame.display.set_mode(
+          (observation_width * scale, observation_height * scale))
+      clock = pygame.time.Clock()
+    stop = False
 
-    # Compute next timestep
-    actions = action_reader.step(player_prefix) if player_count else []
-    timestep = env.step(actions)
-    if timestep.step_type == dm_env.StepType.LAST:
-      if reset_env_when_done:
-        timestep = env.reset()
-      else:
+    # Game loop
+    while True:
+
+      # Check for pygame controls
+      if interactive == RenderType.PYGAME:
+        for event in pygame.event.get():
+          if event.type == pygame.QUIT:
+            stop = True
+
+          if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_TAB:
+              player_index = (player_index + 1) % player_count
+            break
+      player_prefix = player_prefixes[player_index] if player_prefixes else ''
+
+      if stop:
         break
 
-    rewards = _get_rewards(timestep)
-    for i, prefix in enumerate(player_prefixes):
-      if verbose_fn:
-        verbose_fn(timestep, i)
-      score[prefix] += rewards[prefix]
-      if i == player_index and rewards[prefix] != 0:
-        print(f'Player {prefix} Score: {score[prefix]}')
-
-    # Print events if applicable
-    if print_events and hasattr(env, 'events'):
-      events = env.events()
-      # Only print events on timesteps when there are events to print.
-      if events:
-        print(events)
-
-    # pygame display
-    if interactive == RenderType.PYGAME:
-      # show visual observation
-      if render_observation in timestep.observation:
-        obs = timestep.observation[render_observation]
-      elif f'{player_prefix}.{render_observation}' in timestep.observation:
-        obs = timestep.observation[f'{player_prefix}.{render_observation}']
-      else:
-        # Fall back to default_observation.
-        obs = timestep.observation[default_observation]
-      obs = np.transpose(obs, (1, 0, 2))  # PyGame is column major!
-
-      surface = pygame.surfarray.make_surface(obs)
-      rect = surface.get_rect()
-
-      surf = pygame.transform.scale(surface, (rect[2] * scale, rect[3] * scale))
-      game_display.blit(surf, dest=(0, 0))
-
-      # show text
-      if text_display_fn:
-        if player_count == 1:
-          text_str = text_display_fn(timestep, 0)
+      # Compute next timestep
+      actions = action_reader.step(player_prefix) if player_count else []
+      timestep = env.step(actions)
+      if timestep.step_type == dm_env.StepType.LAST:
+        if reset_env_when_done:
+          timestep = env.reset()
         else:
-          text_str = text_display_fn(timestep, player_index)
-        img = font.render(text_str, True, text_color)
-        game_display.blit(img, (text_x_pos, text_y_pos))
+          break
 
-      # tick
-      pygame.display.update()
-      clock.tick(fps)
+      rewards = _get_rewards(timestep)
+      for i, prefix in enumerate(player_prefixes):
+        if verbose_fn:
+          verbose_fn(timestep, i)
+        score[prefix] += rewards[prefix]
+        if i == player_index and rewards[prefix] != 0:
+          print(f'Player {prefix} Score: {score[prefix]}')
 
-  if interactive == RenderType.PYGAME:
-    pygame.quit()
-  for prefix in player_prefixes:
-    print('Player %s: score is %g' % (prefix, score[prefix]))
+      # Print events if applicable
+      if print_events and hasattr(env, 'events'):
+        events = env.events()
+        # Only print events on timesteps when there are events to print.
+        if events:
+          print(events)
+
+      # pygame display
+      if interactive == RenderType.PYGAME:
+        # show visual observation
+        if render_observation in timestep.observation:
+          obs = timestep.observation[render_observation]
+        elif f'{player_prefix}.{render_observation}' in timestep.observation:
+          obs = timestep.observation[f'{player_prefix}.{render_observation}']
+        else:
+          # Fall back to default_observation.
+          obs = timestep.observation[default_observation]
+        obs = np.transpose(obs, (1, 0, 2))  # PyGame is column major!
+
+        surface = pygame.surfarray.make_surface(obs)
+        rect = surface.get_rect()
+
+        surf = pygame.transform.scale(
+            surface, (rect[2] * scale, rect[3] * scale))
+        game_display.blit(surf, dest=(0, 0))
+
+        # show text
+        if text_display_fn:
+          if player_count == 1:
+            text_str = text_display_fn(timestep, 0)
+          else:
+            text_str = text_display_fn(timestep, player_index)
+          img = font.render(text_str, True, text_color)
+          game_display.blit(img, (text_x_pos, text_y_pos))
+
+        # tick
+        pygame.display.update()
+        clock.tick(fps)
+
+    if interactive == RenderType.PYGAME:
+      pygame.quit()
+    for prefix in player_prefixes:
+      print('Player %s: score is %g' % (prefix, score[prefix]))
