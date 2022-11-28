@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [2.0.0] - 2022-11-25
 
 Melting Pot Version 2.0.0 release. See
-[Melting Pot 2.0 Tech Report](https://storage.googleapis.com/dm-meltingpot/meltingpot-tech-report-2.0.0.pdf)
+[Melting Pot 2.0 Tech Report](https://arxiv.org/abs/2211.13746)
 for detailed information on the new substrates, bots, and scenarios.
 
 ### Changed
