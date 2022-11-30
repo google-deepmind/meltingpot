@@ -26,17 +26,22 @@ from meltingpot.python.utils.policies import policy
 
 
 def _numpy_to_placeholder(
-    template: tree.Structure[np.ndarray]) -> tree.Structure[tf.Tensor]:
+    template: tree.Structure[np.ndarray], prefix: str
+) -> tree.Structure[tf.Tensor]:
   """Returns placeholders that matches a given template.
 
   Args:
     template: template numpy arrays.
+    prefix: a prefix to add to the placeholder names.
 
   Returns:
     A tree of placeholders matching the template arrays' specs.
   """
-  fn = lambda x: tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype)
-  return tree.map_structure(fn, template)
+  def fn(path, x):
+    name = '.'.join(str(x) for x in path)
+    return tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype,
+                                    name=f'{prefix}.{name}')
+  return tree.map_structure_with_path(fn, template)
 
 
 def _downcast(x):
@@ -153,21 +158,29 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
       self._build_initial_state_graph()
 
     with self._build_context():
-      step_type_in = tf.compat.v1.placeholder(shape=[], dtype=np.int32)
-      reward_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
-      discount_in = tf.compat.v1.placeholder(shape=[], dtype=np.float32)
-      observation_in = _numpy_to_placeholder(timestep.observation)
+      step_type_in = tf.compat.v1.placeholder(
+          shape=[], dtype=np.int32, name='step_type')
+      reward_in = tf.compat.v1.placeholder(
+          shape=[], dtype=np.float32, name='reward')
+      discount_in = tf.compat.v1.placeholder(
+          shape=[], dtype=np.float32, name='discount')
+      observation_in = _numpy_to_placeholder(
+          timestep.observation, prefix='observation')
       timestep_in = dm_env.TimeStep(
           step_type=step_type_in,
           reward=reward_in,
           discount=discount_in,
           observation=observation_in)
-      prev_key_in, prev_state_in = _numpy_to_placeholder(prev_state)
+      prev_key_in, prev_state_in = _numpy_to_placeholder(
+          prev_state, prefix='prev_state')
       next_key, outputs = self._model.step(prev_key_in, timestep_in,
                                            prev_state_in)
       (action, _), next_state = outputs
-      self._step_inputs = tree.flatten(
-          [timestep_in, (prev_key_in, prev_state_in)])
+      input_values = tree.flatten_with_path({
+          'timestep': timestep_in,
+          'prev_state': (prev_key_in, prev_state_in),
+      })
+      self._step_inputs = dict(input_values)
       self._step_outputs = (action, (next_key, next_state))
 
     self._graph.finalize()
@@ -182,8 +195,14 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
     )
     if not self._step_inputs:
       self._build_step_graph(timestep, prev_state)
-    input_values = tree.flatten([timestep, prev_state])
-    feed_dict = dict(zip(self._step_inputs, input_values))
+    input_values = tree.flatten_with_path({
+        'timestep': timestep,
+        'prev_state': prev_state,
+    })
+    feed_dict = {
+        self._step_inputs[path]: value for path, value in input_values
+        if path in self._step_inputs
+    }
     action, next_state = self._session.run(self._step_outputs, feed_dict)
     return int(action), next_state
 
