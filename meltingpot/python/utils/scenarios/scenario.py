@@ -177,8 +177,8 @@ class Scenario(base.SubstrateWrapper):
 
   def reset(self) -> dm_env.TimeStep:
     """See base class."""
-    self._background_population.reset()
     timestep = super().reset()
+    self._background_population.reset()
     focal_timestep = self._send_full_timestep(timestep)
     for event in self.events():
       self._events_subject.on_next(event)
@@ -188,6 +188,8 @@ class Scenario(base.SubstrateWrapper):
     """See base class."""
     action = self._await_full_action(focal_action=action)
     timestep = super().step(action)
+    if timestep.step_type.first():
+      self._background_population.reset()
     focal_timestep = self._send_full_timestep(timestep)
     for event in self.events():
       self._events_subject.on_next(event)
