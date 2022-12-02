@@ -417,9 +417,11 @@ end
 
 function GameObject:start(grid, optionalLocator)
   self._grid = grid
+  -- Make sure that the Transform is initialised first.
+  self:getComponent('Transform'):start(optionalLocator)
   self:_doOnAllComponents(
     function(component)
-      if component.start then
+      if component.start and component.name ~= 'Transform' then
         component:start(optionalLocator)
       end
     end)

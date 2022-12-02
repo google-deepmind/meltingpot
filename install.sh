@@ -57,8 +57,7 @@ function install_dmlab2d() {
     local -r LUA_VERSION=luajit
   elif [[ "$(uname -s)" == 'Darwin' ]]; then
     # luajit not available on macOS
-    # lua5_2 leads to continuous integration test failures.
-    local -r LUA_VERSION=lua5_1
+    local -r LUA_VERSION=lua5_2
   else
     exit 1
   fi
