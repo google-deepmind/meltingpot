@@ -16,7 +16,6 @@
 import dataclasses
 import functools
 import os
-import re
 from typing import AbstractSet, Callable, Iterable, Literal, Mapping, Optional, Sequence
 
 import immutabledict
@@ -31,8 +30,14 @@ from meltingpot.python.utils.puppeteers import in_the_matrix
 from meltingpot.python.utils.puppeteers import puppeteer
 from meltingpot.python.utils.puppeteers import running_with_scissors_in_the_matrix
 
-MODELS_ROOT = re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                     __file__)
+
+def _find_models_root() -> str:
+  import re  # pylint: disable=g-import-not-at-top
+  return re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
+                __file__)
+
+
+MODELS_ROOT = _find_models_root()
 
 # pylint: disable=line-too-long
 
