@@ -48,10 +48,6 @@ function check_setup() {
 function install_dmlab2d() {
   echo -e "\nCloning dmlab2d..."
   git clone https://github.com/deepmind/lab2d
-  echo -e "\nSetting version to the Nov 22nd one..."
-  cd lab2d
-  git checkout 43a75e7c84de21061a35b3e5279e59fb999afbad
-  cd ..
 
   echo -e "\nInstalling dmlab2d requirements..."
   pip install --upgrade pip packaging
