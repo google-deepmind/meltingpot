@@ -48,6 +48,10 @@ function check_setup() {
 function install_dmlab2d() {
   echo -e "\nCloning dmlab2d..."
   git clone https://github.com/deepmind/lab2d
+  echo -e "\nSetting version to the Nov 22nd one..."
+  cd lab2d
+  git checkout 43a75e7c84de21061a35b3e5279e59fb999afbad
+  cd ..
 
   echo -e "\nInstalling dmlab2d requirements..."
   pip install --upgrade pip packaging
@@ -86,7 +90,7 @@ function test_dmlab2d() {
 
 function install_meltingpot() {
   echo -e "\nDownloading assets..."
-  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.0.0.tar.gz \
+  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.1.0.tar.gz \
       | tar -xz --directory=meltingpot
 
   echo -e "\nInstalling meltingpot..."

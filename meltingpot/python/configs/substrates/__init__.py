@@ -97,6 +97,7 @@ SUBSTRATES: Set[str] = frozenset({
     'factory_commons__either_or',
     'fruit_market__concentric_rivers',
     'gift_refinements',
+    'hidden_agenda',
     'paintball__capture_the_flag',
     'paintball__king_of_the_hill',
     'predator_prey__alley_hunt',

@@ -2068,6 +2068,49 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             default=('gift_refinements__extreme_cooperator_0',),
         ),
     ),
+    hidden_agenda_0=ScenarioConfig(
+        description=(
+            'A focal population is visited by impostor which hunts crewmates'),
+        tags={
+            'resident',
+        },
+        substrate='hidden_agenda',
+        roles=('crewmate',) * 4 + ('impostor',),
+        is_focal=(True,) * 4 + (False,) * 1,
+        bots_by_role=immutabledict.immutabledict(
+            impostor=('hidden_agenda__hunter_impostor_0',),
+        ),
+    ),
+    hidden_agenda_1=ScenarioConfig(
+        description='A focal impostor visits background crew who collect gems',
+        tags={
+            'visitor',
+            'learned_teamwork',
+        },
+        substrate='hidden_agenda',
+        roles=('crewmate',) * 4 + ('impostor',),
+        is_focal=(False,) * 4 + (True,) * 1,
+        bots_by_role=immutabledict.immutabledict(
+            crewmate=('hidden_agenda__collector_crew_0',
+                      'hidden_agenda__collector_crew_1'),
+        ),
+    ),
+    hidden_agenda_2=ScenarioConfig(
+        description=(
+            'Focal crew visits background impostor, and crew who collect gems'),
+        tags={
+            'ad_hoc_teamwork',
+            'half_and_half',
+        },
+        substrate='hidden_agenda',
+        roles=('crewmate',) * 4 + ('impostor',),
+        is_focal=(True,) * 2 + (False,) * 3,
+        bots_by_role=immutabledict.immutabledict(
+            crewmate=('hidden_agenda__collector_crew_0',
+                      'hidden_agenda__collector_crew_1'),
+            impostor=('hidden_agenda__hunter_impostor_0',),
+        ),
+    ),
     paintball__capture_the_flag_0=ScenarioConfig(
         description='focal team versus shaped bot team',
         tags={

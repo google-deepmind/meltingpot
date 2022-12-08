@@ -20,7 +20,7 @@ IS_M1_MAC = platform.system() == 'Darwin' and platform.machine() == 'arm64'
 
 setuptools.setup(
     name='dm-meltingpot',
-    version='2.0.0',
+    version='2.1.0',
     license='Apache 2.0',
     license_files=['LICENSE'],
     url='https://github.com/deepmind/meltingpot',

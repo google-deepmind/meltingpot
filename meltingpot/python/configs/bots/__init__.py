@@ -1518,6 +1518,21 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             gift_goal=_PUPPET_GOALS['gift_refinements']['GIFT'],
         ),
     ),
+    hidden_agenda__collector_crew_0=saved_model(
+        substrate='hidden_agenda',
+        model='collector_crew_0',
+        roles=('crewmate',),
+    ),
+    hidden_agenda__collector_crew_1=saved_model(
+        substrate='hidden_agenda',
+        model='collector_crew_1',
+        roles=('crewmate',),
+    ),
+    hidden_agenda__hunter_impostor_0=saved_model(
+        substrate='hidden_agenda',
+        model='hunter_impostor_0',
+        roles=('impostor',),
+    ),
     paintball__capture_the_flag__shaped_bot_0=saved_model(
         substrate='paintball__capture_the_flag',
         model='shaped_0',

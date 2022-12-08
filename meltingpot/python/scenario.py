@@ -55,6 +55,7 @@ PERMITTED_OBSERVATIONS = frozenset({
     'OFFERS',
     'READY_TO_SHOOT',
     'STAMINA',
+    'VOTING',
 })
 
 
