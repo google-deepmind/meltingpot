@@ -95,10 +95,26 @@ function install_meltingpot() {
 }
 
 
+function install_extras() {
+  echo -e "\nInstalling meltingpot extras..."
+  pip install .[rllib,pettingzoo]
+}
+
+
 function test_meltingpot() {
   echo -e "\nTesting meltingpot..."
   pip install pytest-xdist
   pytest -n auto -rax --durations=10 meltingpot
+}
+
+
+function test_extras() {
+  echo -e "\nTesting meltingpot extras..."
+  # Test RLLib and Petting Zoo training scripts.
+  python <<EOF
+from examples.rllib import self_play_train
+self_play_train.main()
+EOF
 }
 
 
@@ -108,6 +124,8 @@ function main() {
   test_dmlab2d
   install_meltingpot
   test_meltingpot
+  install_extras
+  test_extras
 }
 
 

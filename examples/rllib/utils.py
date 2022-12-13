@@ -20,7 +20,7 @@ import dmlab2d
 from gym import spaces
 from ml_collections import config_dict
 import numpy as np
-from ray.rllib.agents import trainer
+from ray.rllib import algorithms
 from ray.rllib.env import multi_agent_env
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 
@@ -132,7 +132,8 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
 
 def env_creator(env_config):
   """Outputs an environment for registering."""
-  env = substrate.build(config_dict.ConfigDict(env_config))
+  env_config = config_dict.ConfigDict(env_config)
+  env = substrate.build(env_config['substrate'], roles=env_config['roles'])
   env = MeltingPotEnv(env)
   return env
 
@@ -144,7 +145,7 @@ class RayModelPolicy(policy.Policy):
   """
 
   def __init__(self,
-               model: trainer.Trainer,
+               model: algorithms.Algorithm,
                policy_id: str = DEFAULT_POLICY_ID) -> None:
     """Initialize a policy instance.
 
