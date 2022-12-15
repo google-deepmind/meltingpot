@@ -71,7 +71,7 @@ setuptools.setup(
         'rllib': [
             'dm-tree',
             'gym',
-            'ray[rllib,default]==2.0.0',
+            'ray[rllib,default]==2.2.0',
         ],
         # Dependencies required for pettingzoo example.
         'pettingzoo': [
