@@ -29,18 +29,23 @@ function check_version_gt() {
 
 function check_setup() {
   echo -e "\nChecking OS is Linux or macOS..."
+  uname -a
   [[ "$(uname -s)" =~ (Linux|Darwin) ]]
 
   echo -e "\nChecking python version..."
+  python --version
   python --version | check_version_gt '3.9'
 
   echo -e "\nChecking pip version..."
+  pip --version
   pip --version | check_version_gt '20.3'
 
   echo -e "\nChecking gcc version ..."
+  gcc --version
   gcc --version | check_version_gt '8'
 
   echo -e "\nChecking bazel version..."
+  bazel --version
   bazel --version | check_version_gt '5.2'
 }
 
@@ -74,7 +79,7 @@ function install_dmlab2d() {
   popd
 
   echo -e "\nInstalling dmlab2d..."
-  pip install --find-links=lab2d/bazel-bin/dmlab2d dmlab2d
+  pip install -vvv --find-links=lab2d/bazel-bin/dmlab2d dmlab2d
 }
 
 
