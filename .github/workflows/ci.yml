@@ -8,13 +8,11 @@ on:
       - main
     paths-ignore:
       - '**.md'
-      - 'examples/**'
   pull_request:
     branches:
       - main
     paths-ignore:
       - '**.md'
-      - 'examples/**'
   workflow_dispatch:
 
 concurrency:
@@ -50,7 +48,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
       matrix:
