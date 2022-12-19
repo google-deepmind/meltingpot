@@ -66,5 +66,9 @@ jobs:
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Install and test Lab2d
+        run: ./install-dmlab2d.sh
       - name: Install and test Melting Pot
-        run: ./install.sh
+        run: ./install-meltingpot.sh
+      - name: Install and test Extras
+        run: ./install-extras.sh

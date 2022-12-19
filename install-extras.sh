@@ -13,10 +13,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Installs dmlab2d and meltingpot on Linux/macOS.
+# Installs meltingpot extras on Linux/macOS.
 
 set -euxo pipefail
 
-./install-dmlab2d.sh
-./install-meltingpot.sh
-./install-extras.sh
+
+function check_setup() {
+  echo -e "\nChecking meltingpot is installed..."
+  python -c 'import meltingpot'
+}
+
+
+function install_extras() {
+  echo -e "\nInstalling meltingpot extras..."
+  pip install .[rllib,pettingzoo]
+}
+
+
+function test_extras() {
+  echo -e "\nTesting meltingpot extras..."
+  # Test RLLib and Petting Zoo training scripts.
+  python <<EOF
+from examples.rllib import self_play_train
+self_play_train.main()
+EOF
+}
+
+
+function main() {
+  check_setup
+  install_extras
+  test_extras
+}
+
+
+main "$@"

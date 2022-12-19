@@ -64,9 +64,7 @@ automatically.
 
 ### Manual install
 
-The installation steps are
-as follows (see [`install.sh`](https://github.com/deepmind/meltingpot/blob/main/install.sh)
-for an example installation script):
+The installation steps are as follows:
 
 1.  (Optional) Activate a virtual environment, e.g.:
 
@@ -85,7 +83,7 @@ for an example installation script):
     If there is no appropriate wheel (e.g. M1 chipset) you will need to install
     [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel yourself
     (see
-    [`install.sh`](https://github.com/deepmind/meltingpot/blob/main/install.sh)
+    [`install-dmlab2d.sh`](https://github.com/deepmind/meltingpot/blob/main/install-dmlab2d.sh)
     for an example installation script that can be adapted to your setup).
 
 3.  Test the `dmlab2d` installation in `python3`:
@@ -99,7 +97,9 @@ for an example installation script):
     env.step({})
     ```
 
-4.  Install Melting Pot:
+4.  Install Melting Pot (see
+    [`install-meltingpot.sh`](https://github.com/deepmind/meltingpot/blob/main/install-meltingpot.sh)
+    for an example installation script):
 
     ```shell
     git clone -b main https://github.com/deepmind/meltingpot
@@ -114,6 +114,14 @@ for an example installation script):
     ```shell
     pip3 install pytest
     pytest meltingpot
+    ```
+
+6.  (Optional) Install the examples (see
+    [`install-extras.sh`](https://github.com/deepmind/meltingpot/blob/main/install-meltingpot.sh)
+    for an example installation script):
+
+    ```shell
+    pip install .[rllib,pettingzoo]
     ```
 
 ## Example usage
