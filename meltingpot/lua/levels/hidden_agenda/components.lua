@@ -27,6 +27,9 @@ local component = require(meltingpot .. 'component')
 local component_registry = require(meltingpot .. 'component_registry')
 local component_library = require(meltingpot .. 'component_library')
 
+-- For Lua 5.2 compatibility.
+local unpack = unpack or table.unpack
+
 --[[ Progress component for the Scene object, tracks task completion,
   useful methods and metrics for analysis, and interfaces with the
   voting components of each avatar.

@@ -25,6 +25,8 @@ local meltingpot = 'meltingpot.lua.modules.'
 local component = require(meltingpot .. 'component')
 local component_registry = require(meltingpot .. 'component_registry')
 
+-- For Lua 5.2 compatibility.
+local unpack = unpack or table.unpack
 
 local Resource = class.Class(component.Component)
 
