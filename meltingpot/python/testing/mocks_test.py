@@ -16,11 +16,12 @@ import dm_env
 import numpy as np
 
 from meltingpot.python.testing import mocks
+from meltingpot.python.testing import substrates
 from meltingpot.python.utils.substrates import specs as meltingpot_specs
 from meltingpot.python.utils.substrates import substrate
 
 
-class MocksTest(absltest.TestCase):
+class MocksTest(substrates.SubstrateTestCase):
 
   def test_value_from_specs(self):
     specs = (
@@ -81,6 +82,14 @@ class MocksTest(absltest.TestCase):
       self.assertEmpty(mock.events())
     with self.subTest('observation'):
       self.assertEqual(mock.observation(), expected_observation)
+
+  def test_mock_substrate_like(self):
+    mock = mocks.build_mock_substrate_like('clean_up')
+    self.assert_step_matches_specs(mock)
+
+  def test_mock_scenario_like(self):
+    mock = mocks.build_mock_scenario_like('clean_up_0')
+    self.assert_step_matches_specs(mock)
 
 
 if __name__ == '__main__':

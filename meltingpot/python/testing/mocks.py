@@ -14,7 +14,7 @@
 """Mocks of various Melting Pot classes for use in testing."""
 
 from collections.abc import Mapping, Sequence
-from typing import Type, TypeVar
+from typing import Optional, Type, TypeVar
 from unittest import mock
 
 import dm_env
@@ -22,6 +22,7 @@ import immutabledict
 import numpy as np
 import tree
 
+from meltingpot import python as meltingpot
 from meltingpot.python.utils.scenarios import scenario
 from meltingpot.python.utils.substrates import specs as meltingpot_specs
 from meltingpot.python.utils.substrates import substrate
@@ -33,7 +34,7 @@ SUBSTRATE_OBSERVATION_SPEC = immutabledict.immutabledict({
 })
 SCENARIO_OBSERVATION_SPEC = immutabledict.immutabledict({
     # Observations present in all scenarios.
-    'RGB': dm_env.specs.Array(shape=(72, 96, 3), dtype=np.uint8),
+    'RGB': meltingpot_specs.OBSERVATION['RGB'],
 })
 
 
@@ -42,7 +43,7 @@ def _values_from_specs(
 ) -> tree.Structure[np.ndarray]:
   values = tree.map_structure(lambda spec: spec.generate_value(), specs)
   return tuple(
-      tree.map_structure(lambda v, n=n: v + n, value)
+      tree.map_structure(lambda v, n=n: np.full_like(v, n), value)
       for n, value in enumerate(values))
 
 
@@ -53,36 +54,36 @@ def _build_mock_substrate(
     *,
     spec: Type[_AnySubstrate],
     num_players: int,
-    num_actions: int,
-    observation_spec: Mapping[str, dm_env.specs.Array],
+    timestep_spec: dm_env.TimeStep,
+    action_spec: dm_env.specs.DiscreteArray,
 ) -> ...:
   """Returns a mock Substrate for use in testing.
 
   Args:
     spec: the Substrate class to use as a spec.
     num_players: the number of players in the substrate.
-    num_actions: the number of actions supported by the substrate.
-    observation_spec: the observation spec for a single player.
+    timestep_spec: the timestep spec for a single player.
+    action_spec: the action spec for a single player.
   """
   mock_substrate = mock.create_autospec(spec=spec, instance=True, spec_set=True)
   mock_substrate.__enter__.return_value = mock_substrate
   mock_substrate.__exit__.return_value = None
 
   mock_substrate.observation_spec.return_value = (
-      observation_spec,) * num_players
+      timestep_spec.observation,) * num_players
   mock_substrate.reward_spec.return_value = (
-      meltingpot_specs.REWARD,) * num_players
-  mock_substrate.discount_spec.return_value = meltingpot_specs.DISCOUNT
-  mock_substrate.action_spec.return_value = (
-      meltingpot_specs.action(num_actions),) * num_players
+      timestep_spec.reward,) * num_players
+  mock_substrate.discount_spec.return_value = timestep_spec.discount
+  mock_substrate.action_spec.return_value = (action_spec,) * num_players
 
   mock_substrate.events.return_value = ()
 
-  observation = _values_from_specs((observation_spec,) * num_players)
+  observation = _values_from_specs(
+      (timestep_spec.observation,) * num_players)
   mock_substrate.observation.return_value = observation
   mock_substrate.reset.return_value = dm_env.TimeStep(
       step_type=dm_env.StepType.FIRST,
-      reward=(meltingpot_specs.REWARD.generate_value(),) * num_players,
+      reward=(timestep_spec.reward.generate_value(),) * num_players,
       discount=0.,
       observation=observation,
   )
@@ -110,8 +111,28 @@ def build_mock_substrate(
   return _build_mock_substrate(
       spec=substrate.Substrate,
       num_players=num_players,
-      num_actions=num_actions,
-      observation_spec=observation_spec)
+      action_spec=meltingpot_specs.action(num_actions),
+      timestep_spec=meltingpot_specs.timestep(observation_spec),
+  )
+
+
+def build_mock_substrate_like(name: str, *,
+                              num_players: Optional[int] = None) -> ...:
+  """Returns a mock of a specific Substrate for use in testing.
+
+  Args:
+    name: substrate to mock.
+    num_players: number of players to support.
+  """
+  factory = meltingpot.substrate.get_factory(name)
+  if num_players is None:
+    num_players = len(factory.default_player_roles())
+  return _build_mock_substrate(
+      spec=substrate.Substrate,
+      num_players=num_players,
+      action_spec=factory.action_spec(),
+      timestep_spec=factory.timestep_spec(),
+  )
 
 
 def build_mock_scenario(
@@ -131,5 +152,21 @@ def build_mock_scenario(
   return _build_mock_substrate(
       spec=scenario.Scenario,
       num_players=num_players,
-      num_actions=num_actions,
-      observation_spec=observation_spec)
+      action_spec=meltingpot_specs.action(num_actions),
+      timestep_spec=meltingpot_specs.timestep(observation_spec),
+  )
+
+
+def build_mock_scenario_like(name: str) -> ...:
+  """Returns a mock of a specific Scenario for use in testing.
+
+  Args:
+    name: scenario to mock.
+  """
+  factory = meltingpot.scenario.get_factory(name)
+  return _build_mock_substrate(
+      spec=scenario.Scenario,
+      num_players=factory.num_focal_players(),
+      action_spec=factory.action_spec(),
+      timestep_spec=factory.timestep_spec(),
+  )
