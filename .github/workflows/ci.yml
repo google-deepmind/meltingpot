@@ -31,7 +31,7 @@ jobs:
       fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Checkout Melting Pot
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - name: Set up Python 3.9
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984
         with:
@@ -59,7 +59,7 @@ jobs:
           - '3.9'
     steps:
       - name: Checkout Melting Pot
-        uses: actions/checkout@2541b1294d2704b0964813337f33b291d3f8596b
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
       - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@13ae5bb136fac2878aff31522b9efb785519f984
         with:
