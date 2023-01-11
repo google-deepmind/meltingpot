@@ -56,8 +56,8 @@ environment_configs = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
-  if player_index != 0:
+def verbose_fn(env_timestep, player_index, current_player_index):
+  if player_index != current_player_index:
     return
   for obs in ['ADDED_INGREDIENT_TO_COOKING_POT',
               'COLLECTED_SOUP_FROM_COOKING_POT']:

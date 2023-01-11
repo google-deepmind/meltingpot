@@ -44,9 +44,10 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
+def verbose_fn(env_timestep, player_index, current_player_index):
   lua_index = player_index + 1
-  if env_timestep.observation['WORLD.RACE_START'].any() and player_index == 0:
+  if (env_timestep.observation['WORLD.RACE_START'].any() and
+      player_index == current_player_index):
     print('WORLD.RACE_START', env_timestep.observation['WORLD.RACE_START'])
   for obs in [f'{lua_index}.PADDLES', f'{lua_index}.FLAILS']:
     if env_timestep.observation[obs]:

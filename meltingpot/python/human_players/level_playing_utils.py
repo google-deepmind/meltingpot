@@ -196,7 +196,7 @@ def run_episode(
     screen_width: int = 800,
     screen_height: int = 600,
     fps: int = 8,
-    verbose_fn: Optional[Callable[[dm_env.TimeStep, int], None]] = None,
+    verbose_fn: Optional[Callable[[dm_env.TimeStep, int, int], None]] = None,
     text_display_fn: Optional[Callable[[dm_env.TimeStep, int], str]] = None,
     text_font_size: int = 36,
     text_x_pos: int = 20,
@@ -239,8 +239,9 @@ def run_episode(
     screen_height: Height, in pixels, of the window to render the game.
     fps: Frames per second of the game.
     verbose_fn: An optional function that will be executed for every step of
-        the environment.  It receives the environment and the player index. This
-        is typically used to print extra information that would be useful for
+        the environment.  It receives the environment timestep, a player index
+        (will be called for every index), and the current player index. This is
+        typically used to print extra information that would be useful for
         debugging a running episode.
     text_display_fn: An optional function for displaying text on screen. It
         receives the environment and the player index, and returns a string to
@@ -342,7 +343,7 @@ def run_episode(
       rewards = _get_rewards(timestep)
       for i, prefix in enumerate(player_prefixes):
         if verbose_fn:
-          verbose_fn(timestep, i)
+          verbose_fn(timestep, i, player_index)
         score[prefix] += rewards[prefix]
         if i == player_index and rewards[prefix] != 0:
           print(f'Player {prefix} Score: {score[prefix]}')

@@ -68,7 +68,7 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
+def verbose_fn(env_timestep, player_index, current_player_index):
   """Print using this function once enabling the option --verbose=True."""
   lua_index = player_index + 1
   collected_resource_1 = env_timestep.observation[
@@ -85,8 +85,8 @@ def verbose_fn(env_timestep, player_index):
       f'{lua_index}.ARGMAX_INTERACTION_INVENTORY_WAS_1']
   argmax_interact_inventory_2 = env_timestep.observation[
       f'{lua_index}.ARGMAX_INTERACTION_INVENTORY_WAS_2']
-  # Only print observations from player 0.
-  if player_index == 0:
+  # Only print observations from current player.
+  if player_index == current_player_index:
     print(
         f'player: {player_index} --- \n' +
         f'  collected_resource_1: {collected_resource_1} \n' +

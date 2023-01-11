@@ -39,7 +39,7 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
+def verbose_fn(env_timestep, player_index, current_player_index):
   """Print using this function once enabling the option --verbose=True."""
   lua_index = player_index + 1
   cleaned = env_timestep.observation[f'{lua_index}.PLAYER_CLEANED']
@@ -50,8 +50,8 @@ def verbose_fn(env_timestep, player_index):
       f'{lua_index}.NUM_OTHERS_WHO_CLEANED_THIS_STEP']
   num_others_ate = env_timestep.observation[
       f'{lua_index}.NUM_OTHERS_WHO_ATE_THIS_STEP']
-  # Only print observations from player 0.
-  if player_index == 0:
+  # Only print observations from current player.
+  if player_index == current_player_index:
     print(f'player: {player_index} --- player_cleaned: {cleaned} --- ' +
           f'player_ate_apple: {ate} --- num_others_cleaned: ' +
           f'{num_others_cleaned} --- num_others_ate: {num_others_ate} ' +

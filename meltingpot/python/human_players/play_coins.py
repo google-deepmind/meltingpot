@@ -44,8 +44,8 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
-  del env_timestep, player_index
+def verbose_fn(env_timestep, player_index, current_player_index):
+  del env_timestep, player_index, current_player_index
   pass
 
 

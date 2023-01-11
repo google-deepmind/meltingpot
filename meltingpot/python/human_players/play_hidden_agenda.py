@@ -56,13 +56,14 @@ _PREFERENCES = [
 ]
 
 
-def verbose_fn(timestep, player_index: int) -> None:
+def verbose_fn(env_timestep, player_index, current_player_index):
   """Prints out relevant observations and rewards at every timestep."""
+  del current_player_index
   lua_index = player_index + 1
   for obs in ['VOTING']:
     obs_name = f'{lua_index}.{obs}'
-    if timestep.observation[obs_name].any():
-      print(obs_name, timestep.observation[obs_name])
+    if env_timestep.observation[obs_name].any():
+      print(obs_name, env_timestep.observation[obs_name])
 
 
 def main():

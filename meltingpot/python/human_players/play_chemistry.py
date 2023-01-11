@@ -52,7 +52,7 @@ environment_configs = {
 }
 
 
-def verbose_fn(unused_env, unused_player_index):
+def verbose_fn(unused_env, unused_player_index, unused_current_player_index):
   """Activate verbose printing with --verbose=True."""
   pass
 

@@ -81,7 +81,7 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(env_timestep, player_index):
+def verbose_fn(env_timestep, player_index, current_player_index):
   """Print using this function once enabling the option --verbose=True."""
   lua_index = player_index + 1
   inventory = env_timestep.observation[f'{lua_index}.INVENTORY']
@@ -89,7 +89,7 @@ def verbose_fn(env_timestep, player_index):
   my_offer = env_timestep.observation[f'{lua_index}.MY_OFFER']
   offers = env_timestep.observation[f'{lua_index}.OFFERS']
   # Only print offer observations from player 0.
-  if player_index == 0:
+  if player_index == current_player_index:
     print(
         f'player: {player_index} --- inventory: {inventory}, hunger: {hunger}')
     print(f'**player 0 view of offers:\n{offers}')
