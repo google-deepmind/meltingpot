@@ -41,7 +41,7 @@ def get_config(
   # Gets the default training configuration
   config = ppo.PPOConfig()
   # Number of arenas.
-  config.num_rollout_workers = 2
+  config.num_workers = 1  # This is called num_rollout_workers in 2.2.0.
   # This is to match our unroll lengths.
   config.rollout_fragment_length = 100
   # Total (time x batch) timesteps on the learning update.
@@ -138,6 +138,7 @@ def main():
       run_config=air.RunConfig(stop=stop, verbose=1),
   ).fit()
   print(results)
+  assert results.num_errors == 0
 
 
 if __name__ == "__main__":
