@@ -180,6 +180,12 @@ cd <meltingpot_root>/examples/pettingzoo
 python3 sb3_train.py
 ```
 
+### Evaluation
+
+Evaluation results from the [Melting Pot 2.0 Tech Report](https://arxiv.org/abs/2211.13746)
+can be viewed in the [Evaluation Notebook](notebooks/evaluation_results.ipynb).
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deepmind/meltingpot/blob/main/notebooks/evaluation_results.ipynb)
+
 ### Documentation
 
 Full documentation is available [here](docs/index.md).
