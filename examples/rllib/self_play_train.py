@@ -26,7 +26,15 @@ from meltingpot.python import substrate
 
 
 def get_config(
-    substrate_name: str = "bach_or_stravinsky_in_the_matrix__repeated"):
+    substrate_name: str = "bach_or_stravinsky_in_the_matrix__repeated",
+    num_rollout_workers: int = 2,
+    rollout_fragment_length: int = 100,
+    train_batch_size: int = 6400,
+    fcnet_hiddens=(64, 64),
+    post_fcnet_hiddens=(256,),
+    lstm_cell_size: int = 256,
+    sgd_minibatch_size: int = 128,
+):
   """Get the configuration for running an agent on a substrate using RLLib.
 
   We need the following 2 pieces to run the training:
@@ -34,6 +42,13 @@ def get_config(
   Args:
     substrate_name: The name of the MeltingPot substrate, coming from
       `substrate.AVAILABLE_SUBSTRATES`.
+    num_rollout_workers: The number of workers for playing games.
+    rollout_fragment_length: Unroll time for learning.
+    train_batch_size: Batch size (batch * rollout_fragment_length)
+    fcnet_hiddens: Fully connected layers.
+    post_fcnet_hiddens: Layer sizes after the fully connected torso.
+    lstm_cell_size: Size of the LSTM.
+    sgd_minibatch_size: Size of the mini-batch for learning.
 
   Returns:
     The configuration for running the experiment.
@@ -41,11 +56,14 @@ def get_config(
   # Gets the default training configuration
   config = ppo.PPOConfig()
   # Number of arenas.
-  config.num_workers = 1  # This is called num_rollout_workers in 2.2.0.
+  # This is called num_rollout_workers in 2.2.0.
+  config.num_workers = num_rollout_workers
   # This is to match our unroll lengths.
-  config.rollout_fragment_length = 100
+  config.rollout_fragment_length = rollout_fragment_length
   # Total (time x batch) timesteps on the learning update.
-  config.train_batch_size = 6400
+  config.train_batch_size = train_batch_size
+  # Mini-batch size.
+  config.sgd_minibatch_size = sgd_minibatch_size
   # Use the raw observations/actions as defined by the environment.
   config.preprocessor_pref = None
   # Use TensorFlow as the tensor framework.
@@ -71,11 +89,6 @@ def get_config(
     rgb_shape = test_env.observation_space[f"player_{i}"]["RGB"].shape
     sprite_x = rgb_shape[0] // 8
     sprite_y = rgb_shape[1] // 8
-    # Add an override for the ConvNet taking into account role RGB shape
-    overrides = ppo.PPOConfig()
-    overrides.model = {
-        "conv_filters": [[[16, [8, 8], 8]], [128, [sprite_x, sprite_y], 1]],
-    }
 
     policies[f"agent_{i}"] = PolicySpec(
         policy_class=None,  # use default policy
@@ -107,15 +120,15 @@ def get_config(
   # The acb models used as baselines in the meltingpot paper were not run using
   # rllib, so they used a different configuration for the second convolutional
   # layer. It was 32 channels, [4, 4] kernel shape, and stride = 1.
-  config.model["fcnet_hiddens"] = [64, 64]
+  config.model["fcnet_hiddens"] = fcnet_hiddens
   config.model["fcnet_activation"] = "relu"
   config.model["conv_activation"] = "relu"
-  config.model["post_fcnet_hiddens"] = [256]
+  config.model["post_fcnet_hiddens"] = post_fcnet_hiddens
   config.model["post_fcnet_activation"] = "relu"
   config.model["use_lstm"] = True
   config.model["lstm_use_prev_action"] = True
   config.model["lstm_use_prev_reward"] = False
-  config.model["lstm_cell_size"] = 256
+  config.model["lstm_cell_size"] = lstm_cell_size
 
   return config
 
