@@ -79,6 +79,7 @@ P3P131P3PPP13P1PPP222PPPP11PP
 2P3PPPPPPPP2P323PPP2PPP1PPP2P
 21PPPPPPP12P23P1PPPPPP13P3P11
 """
+SPRITE_SIZE = 8
 
 # Map a character to the prefab it represents in the ASCII map.
 CHAR_PREFAB_MAP = {
@@ -972,7 +973,7 @@ def get_config():
       "POSITION": specs.OBSERVATION["POSITION"],
       "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
-      "WORLD.RGB": specs.rgb(240, 232),
+      "WORLD.RGB": specs.world_rgb(DEFAULT_ASCII_MAP, SPRITE_SIZE),
   })
 
   # The roles assigned to each player.
@@ -997,7 +998,7 @@ def build(
       levelDirectory="meltingpot/lua/levels",
       numPlayers=num_players,
       maxEpisodeLengthFrames=config.episode_timesteps,
-      spriteSize=8,
+      spriteSize=SPRITE_SIZE,
       topology="TORUS",  # Choose from ["BOUNDED", "TORUS"],
       simulation={
           "map": config.ascii_map,

@@ -107,6 +107,22 @@ def rgb(height: int,
   return OBSERVATION['RGB'].replace(shape=(height, width, 3), name=name)
 
 
+def world_rgb(ascii_map: str,
+              sprite_size: int,
+              name: Optional[str] = 'WORLD.RGB') -> dm_env.specs.Array:
+  """Returns the spec for a WORLD.RGB observation.
+
+  Args:
+    ascii_map: the height of the observation.
+    sprite_size: the width of the observation.
+    name: optional name for the spec.
+  """
+  lines = ascii_map.strip().split('\n')
+  height = len(lines) * sprite_size
+  width = len(lines[0]) * sprite_size if height else 0
+  return rgb(height, width, name)
+
+
 def inventory(num_resources: int,
               name: Optional[str] = 'INVENTORY') -> dm_env.specs.Array:
   """Returns the spec for an INVENTORY observation.
