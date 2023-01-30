@@ -43,7 +43,8 @@ function install_meltingpot() {
       | tar -xz --directory=meltingpot
 
   echo -e "\nInstalling meltingpot..."
-  pip install --upgrade pip setuptools
+  # TODO(b/267153975): Remove after underlying issue in setuptools is fixed.
+  pip install --upgrade pip setuptools==65.5.0
   pip install .
 }
 
