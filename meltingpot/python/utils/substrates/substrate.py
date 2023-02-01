@@ -25,6 +25,8 @@ from meltingpot.python.utils.substrates import builder
 from meltingpot.python.utils.substrates.wrappers import base
 from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
 from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
+from meltingpot.python.utils.substrates.wrappers import observables
+from meltingpot.python.utils.substrates.wrappers import observables_wrapper
 
 
 @chex.dataclass(frozen=True)
@@ -37,16 +39,18 @@ class SubstrateObservables:
     events: emits environment-specific events resulting from any interactions
       with the Substrate. Each individual event is emitted as a single element:
       (event_name, event_item).
+    dmlab2d: Observables from the underlying dmlab2d environment.
   """
   action: rx.typing.Observable[Sequence[int]]
   timestep: rx.typing.Observable[dm_env.TimeStep]
   events: rx.typing.Observable[tuple[str, Any]]
+  dmlab2d: observables.Lab2dObservables
 
 
 class Substrate(base.Lab2dWrapper):
   """Specific subclass of Wrapper with overridden spec types."""
 
-  def __init__(self, env: ...) -> None:
+  def __init__(self, env: observables.ObservableLab2d) -> None:
     """See base class."""
     super().__init__(env)
     self._action_subject = subject.Subject()
@@ -56,6 +60,7 @@ class Substrate(base.Lab2dWrapper):
         action=self._action_subject,
         events=self._events_subject,
         timestep=self._timestep_subject,
+        dmlab2d=env.observables(),
     )
 
   def reset(self) -> dm_env.TimeStep:
@@ -122,6 +127,7 @@ def build_substrate(
     The constructed substrate.
   """
   env = builder.builder(lab2d_settings)
+  env = observables_wrapper.ObservablesWrapper(env)
   env = multiplayer_wrapper.Wrapper(
       env,
       individual_observation_names=individual_observations,

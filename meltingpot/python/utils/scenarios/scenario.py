@@ -20,12 +20,14 @@ import chex
 import dm_env
 import immutabledict
 import numpy as np
+import rx
 from rx import subject
 
 from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.scenarios import population
 from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.substrates import substrate as substrate_lib
+from meltingpot.python.utils.substrates.wrappers import observables
 
 T = TypeVar('T')
 
@@ -89,6 +91,8 @@ class ScenarioObservables(substrate_lib.SubstrateObservables):
     timestep: emits timesteps sent from the scenario to (focal) players.
     events: will never emit any events since things like player index are hard
       to interpret for a Scenario. Use substrate.events instead.
+    dmlab2d: will never emit any events since things like player index are hard
+      to interpret for a Scenario. Use substrate.dmlab2d instead.
     background: observables from the perspective of the background players.
     substrate: observables for the underlying substrate.
   """
@@ -130,12 +134,19 @@ class Scenario(base.SubstrateWrapper):
     self._background_action_subject = subject.Subject()
     self._background_timestep_subject = subject.Subject()
     self._events_subject = subject.Subject()
+    self._dmlab2d_observables = observables.Lab2dObservables(
+        action=rx.empty(),
+        events=rx.empty(),
+        timestep=rx.empty(),
+    )
+    self._substrate_observables = super().observables()
     self._observables = ScenarioObservables(  # pylint: disable=unexpected-keyword-arg
         action=self._focal_action_subject,
         events=self._events_subject,
         timestep=self._focal_timestep_subject,
         background=self._background_population.observables(),
-        substrate=super().observables(),
+        substrate=self._substrate_observables,
+        dmlab2d=self._dmlab2d_observables,
     )
 
   def close(self) -> None:

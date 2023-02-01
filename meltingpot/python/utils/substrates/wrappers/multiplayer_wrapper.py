@@ -19,7 +19,7 @@ from typing import TypeVar
 import dm_env
 import numpy as np
 
-from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.python.utils.substrates.wrappers import observables
 
 T = TypeVar("T")
 
@@ -44,7 +44,7 @@ def _player_observations(observations: Mapping[str, T], suffix: str,
       yield player_index, value
 
 
-class Wrapper(base.Lab2dWrapper):
+class Wrapper(observables.ObservableLab2dWrapper):
   """Wrapper that converts the environment to multiplayer lists.
 
   Ensures:

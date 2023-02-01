@@ -20,7 +20,7 @@ import dm_env
 import immutabledict
 import numpy as np
 
-from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.python.utils.substrates.wrappers import observables
 
 T = TypeVar('T')
 Numeric = Union[int, float, np.ndarray]
@@ -75,7 +75,7 @@ def _immutable_action_table(
       _immutable_action(action, action_spec) for action in action_table)
 
 
-class Wrapper(base.Lab2dWrapper):
+class Wrapper(observables.ObservableLab2dWrapper):
   """Wrapper that maps a discrete action to an entry in an a table."""
 
   def __init__(self, env, action_table: Sequence[Mapping[str, Numeric]]):

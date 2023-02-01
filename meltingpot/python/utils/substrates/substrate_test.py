@@ -19,15 +19,15 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
-import dmlab2d
 from meltingpot.python.utils.substrates import substrate
+from meltingpot.python.utils.substrates.wrappers import observables as observables_lib
 
 
 class SubstrateTest(parameterized.TestCase):
 
   def test_observables(self):
     base = mock.create_autospec(
-        dmlab2d.Environment, instance=True, spec_set=True)
+        observables_lib.ObservableLab2d, instance=True, spec_set=True)
     with substrate.Substrate(base) as env:
       received = []
       observables = env.observables()
