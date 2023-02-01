@@ -18,7 +18,8 @@ players, if one is not already there. This is useful to match APIs between
 different environments that expose different observations.
 """
 
-from typing import Any, Dict, Optional
+from collections.abc import Mapping
+from typing import Any, Optional
 
 import dm_env
 import numpy as np
@@ -27,8 +28,9 @@ from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.substrates import substrate
 
 
-def _setdefault(dictionary: Dict[str, Any], key: str,
-                value: Any) -> Dict[str, Any]:
+def _setdefault(
+    dictionary: Mapping[str, Any], key: str, value: Any
+) -> Mapping[str, Any]:
   """Sets the default value of `key` to `value` if necessary.
 
   Args:
