@@ -284,7 +284,7 @@ SINGLE_APPLE = {
                 "initialState": "apple",
                 "stateConfigs": [
                     {"state": "apple",
-                     "layer": "superDirectionIndicatorLayer",
+                     "layer": "singleAppleLayer",
                      "sprite": "apple",
                     },
                     {"state": "appleWait",

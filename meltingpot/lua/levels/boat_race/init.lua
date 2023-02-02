@@ -43,10 +43,8 @@ local OverrideSimulation = class.Class(simulation.BaseSimulation)
 
 function OverrideSimulation:worldConfig()
   local config = simulation.BaseSimulation.worldConfig(self)
-  -- Add layer 'directionIndicatorLayer' after all the default layers.
-  table.insert(config.renderOrder, 'directionIndicatorLayer')
-  -- Also add 'superDirectionIndicatorLayer' after 'directionIndicatorLayer'.
-  table.insert(config.renderOrder, 'superDirectionIndicatorLayer')
+  -- Add layer 'singleAppleLayer' after all the default layers.
+  table.insert(config.renderOrder, 'singleAppleLayer')
   -- Add the 'superCrownOverlay' layer at a specific place in the list.
   config = addLayer('superCrownOverlay', 'superOverlay', config)
   return config
