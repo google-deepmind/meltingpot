@@ -9,5 +9,6 @@ build-backend = "setuptools.build_meta"
 profile = "google"
 src_paths = ["meltingpot", "examples"]
 
-[tool.yapf]
-based_on_style = "yapf"
+[tool.black]
+line-length = 80
+target-version = ["py39"]
