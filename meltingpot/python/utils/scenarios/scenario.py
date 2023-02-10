@@ -25,7 +25,6 @@ from rx import subject
 
 from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.scenarios import population
-from meltingpot.python.utils.scenarios.wrappers import base
 from meltingpot.python.utils.substrates import substrate as substrate_lib
 from meltingpot.python.utils.substrates.wrappers import observables
 
@@ -100,7 +99,7 @@ class ScenarioObservables(substrate_lib.SubstrateObservables):
   substrate: substrate_lib.SubstrateObservables
 
 
-class Scenario(base.SubstrateWrapper):
+class Scenario(substrate_lib.Substrate):
   """An substrate where a number of player slots are filled by bots."""
 
   def __init__(
@@ -124,7 +123,7 @@ class Scenario(base.SubstrateWrapper):
       raise ValueError(f'is_focal is length {len(is_focal)} but substrate is '
                        f'{num_players}-player.')
 
-    super().__init__(substrate)
+    self._substrate = substrate
     self._background_population = background_population
     self._is_focal = is_focal
     self._permitted_observations = frozenset(permitted_observations)
@@ -139,7 +138,7 @@ class Scenario(base.SubstrateWrapper):
         events=rx.empty(),
         timestep=rx.empty(),
     )
-    self._substrate_observables = super().observables()
+    self._substrate_observables = self._substrate.observables()
     self._observables = ScenarioObservables(  # pylint: disable=unexpected-keyword-arg
         action=self._focal_action_subject,
         events=self._events_subject,
@@ -152,7 +151,7 @@ class Scenario(base.SubstrateWrapper):
   def close(self) -> None:
     """See base class."""
     self._background_population.close()
-    super().close()
+    self._substrate.close()
     self._focal_action_subject.on_completed()
     self._focal_timestep_subject.on_completed()
     self._events_subject.on_completed()
@@ -188,7 +187,7 @@ class Scenario(base.SubstrateWrapper):
 
   def reset(self) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = self._substrate.reset()
     self._background_population.reset()
     focal_timestep = self._send_full_timestep(timestep)
     for event in self.events():
@@ -198,7 +197,7 @@ class Scenario(base.SubstrateWrapper):
   def step(self, action: Sequence[int]) -> dm_env.TimeStep:
     """See base class."""
     action = self._await_full_action(focal_action=action)
-    timestep = super().step(action)
+    timestep = self._substrate.step(action)
     if timestep.step_type.first():
       self._background_population.reset()
     focal_timestep = self._send_full_timestep(timestep)
@@ -207,7 +206,7 @@ class Scenario(base.SubstrateWrapper):
     return focal_timestep
 
   def observation(self) -> Sequence[Mapping[str, np.ndarray]]:
-    observations = super().observation()
+    observations = self._substrate.observation()
     focal_observations, _ = _partition(observations, self._is_focal)
     focal_observations = _restrict_observations(focal_observations,
                                                 self._permitted_observations)
@@ -221,22 +220,38 @@ class Scenario(base.SubstrateWrapper):
 
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
     """See base class."""
-    action_spec = super().action_spec()
+    action_spec = self._substrate.action_spec()
     focal_action_spec, _ = _partition(action_spec, self._is_focal)
     return focal_action_spec
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    observation_spec = super().observation_spec()
+    observation_spec = self._substrate.observation_spec()
     focal_observation_spec, _ = _partition(observation_spec, self._is_focal)
     return _restrict_observations(focal_observation_spec,
                                   self._permitted_observations)
 
   def reward_spec(self) -> Sequence[dm_env.specs.Array]:
     """See base class."""
-    reward_spec = super().reward_spec()
+    reward_spec = self._substrate.reward_spec()
     focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
     return focal_reward_spec
+
+  def discount_spec(self, *args, **kwargs) -> ...:
+    """See base class."""
+    return self._substrate.discount_spec(*args, **kwargs)
+
+  def list_property(self, *args, **kwargs) -> ...:
+    """See base class."""
+    return self._substrate.list_property(*args, **kwargs)
+
+  def write_property(self, *args, **kwargs) -> ...:
+    """See base class."""
+    return self._substrate.write_property(*args, **kwargs)
+
+  def read_property(self, *args, **kwargs) -> ...:
+    """See base class."""
+    return self._substrate.read_property(*args, **kwargs)
 
   def observables(self) -> ScenarioObservables:
     """Returns the observables for the scenario."""
