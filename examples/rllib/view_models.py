@@ -60,7 +60,7 @@ def main():
   # Create a new environment to visualise
   env = utils.env_creator(config["env_config"]).get_dmlab2d_env()
 
-  num_bots = config["env_config"]["num_players"]
+  num_bots = len(config["env_config"]["roles"])
   bots = [utils.RayModelPolicy(trainer, "av")] * num_bots
 
   timestep = env.reset()
