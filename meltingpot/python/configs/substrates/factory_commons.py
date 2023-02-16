@@ -21,6 +21,9 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 _COMPASS = ["N", "E", "S", "W"]
 INVISIBLE = (0, 0, 0, 0)
 
@@ -2037,7 +2040,14 @@ def _create_stamina_overlay(player_idx: int,
     if i >= 13:
       level = blank_space + xs
     else:
-      level = blank_space + "\nx" + "G" * number_of_gs + "Y" * number_of_ys + "R" * number_of_rs + "x"
+      level = (
+          blank_space
+          + "\nx"
+          + "G" * number_of_gs
+          + "Y" * number_of_ys
+          + "R" * number_of_rs
+          + "x"
+      )
     empty = "\n".join(["x" * 8] * 8)
     # Replace the east/south/west sprites with invisible sprites so the only
     # stamina bar rendered is the one in the direction that the current player
@@ -2287,15 +2297,14 @@ def create_avatar_object(player_idx: int,
                   "staminaComponent": "Stamina",
               }
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
   return avatar_object
 
 
@@ -2368,9 +2377,6 @@ def get_config():
       "RGB",
       "READY_TO_SHOOT",
       "STAMINA",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",

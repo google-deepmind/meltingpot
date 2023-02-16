@@ -109,8 +109,7 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       "STAMINA": specs.float64(),
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.rgb(152, 184),
   })
 

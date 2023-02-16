@@ -46,7 +46,7 @@ Dunning I, Zhu T, McKee KR, Koster R, Roff H, Graepel T. Inequity aversion
 improves cooperation in intertemporal social dilemmas (2018). NeurIPS.
 """
 
-from typing import Any, Dict, Mapping, Sequence, Text
+from typing import Any, Dict, Mapping, Sequence
 
 from ml_collections import config_dict
 
@@ -55,8 +55,10 @@ from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
-
 PrefabConfig = game_object_utils.PrefabConfig
+
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
 
 _COMPASS = ["N", "E", "S", "W"]
 
@@ -509,7 +511,7 @@ SPAWN_POINT = {
 }
 
 
-def create_mushroom(initial_state: Text = "wait"):
+def create_mushroom(initial_state: str = "wait"):
   """Create a mushroom prefab object."""
 
   mushroom_prefab = {
@@ -868,78 +870,77 @@ def create_avatar_object(player_idx: int,
           {
               "component": "Cumulants",
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
-              "component": "AvatarMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {
-                          "name": "ATE_MUSHROOM_FIZE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "ate_mushroom_fize",
-                      },
-                      {
-                          "name": "ATE_MUSHROOM_HIHE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "ate_mushroom_hihe",
-                      },
-                      {
-                          "name": "ATE_MUSHROOM_ZIFE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "ate_mushroom_zife",
-                      },
-                      {
-                          "name": "ATE_MUSHROOM_NINE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "ate_mushroom_nine",
-                      },
-                      {
-                          "name": "DESTROYED_MUSHROOM_FIZE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "destroyed_mushroom_fize",
-                      },
-                      {
-                          "name": "DESTROYED_MUSHROOM_HIHE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "destroyed_mushroom_hihe",
-                      },
-                      {
-                          "name": "DESTROYED_MUSHROOM_ZIFE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "destroyed_mushroom_zife",
-                      },
-                      {
-                          "name": "DESTROYED_MUSHROOM_NINE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cumulants",
-                          "variable": "destroyed_mushroom_nine",
-                      },
-                  ]
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    avatar_object["components"].append({
+        "component": "AvatarMetricReporter",
+        "kwargs": {
+            "metrics": [
+                {
+                    "name": "ATE_MUSHROOM_FIZE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "ate_mushroom_fize",
+                },
+                {
+                    "name": "ATE_MUSHROOM_HIHE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "ate_mushroom_hihe",
+                },
+                {
+                    "name": "ATE_MUSHROOM_ZIFE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "ate_mushroom_zife",
+                },
+                {
+                    "name": "ATE_MUSHROOM_NINE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "ate_mushroom_nine",
+                },
+                {
+                    "name": "DESTROYED_MUSHROOM_FIZE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "destroyed_mushroom_fize",
+                },
+                {
+                    "name": "DESTROYED_MUSHROOM_HIHE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "destroyed_mushroom_hihe",
+                },
+                {
+                    "name": "DESTROYED_MUSHROOM_ZIFE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "destroyed_mushroom_zife",
+                },
+                {
+                    "name": "DESTROYED_MUSHROOM_NINE",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Cumulants",
+                    "variable": "destroyed_mushroom_nine",
+                },
+            ]
+        },
+    })
+
   return avatar_object
 
 
@@ -1034,9 +1035,6 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",

@@ -50,6 +50,8 @@ from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
 
 ASCII_MAP = """
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
@@ -733,59 +735,61 @@ def create_avatar_object(player_idx: int,
               }
           },
           {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
               "component": "AllNonselfCumulants",
-          },
-          {
-              "component": "AvatarMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {
-                          "name": "PLAYER_CLEANED",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Cleaner",
-                          "variable": "player_cleaned",
-                      },
-                      {
-                          "name": "PLAYER_ATE_APPLE",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Taste",
-                          "variable": "player_ate_apple",
-                      },
-                      {
-                          "name": "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Zapper",
-                          "variable": "num_others_player_zapped_this_step",
-                      },
-                      {
-                          "name": "NUM_OTHERS_WHO_CLEANED_THIS_STEP",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "AllNonselfCumulants",
-                          "variable": "num_others_who_cleaned_this_step",
-                      },
-                      {
-                          "name": "NUM_OTHERS_WHO_ATE_THIS_STEP",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "AllNonselfCumulants",
-                          "variable": "num_others_who_ate_this_step",
-                      },
-                  ]
-              }
           },
       ]
   }
+  # Signals needed for puppeteers.
+  metrics = [
+      {
+          "name": "NUM_OTHERS_WHO_CLEANED_THIS_STEP",
+          "type": "Doubles",
+          "shape": [],
+          "component": "AllNonselfCumulants",
+          "variable": "num_others_who_cleaned_this_step",
+      },
+  ]
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    # Debug metrics
+    metrics.append({
+        "name": "PLAYER_CLEANED",
+        "type": "Doubles",
+        "shape": [],
+        "component": "Cleaner",
+        "variable": "player_cleaned",
+    })
+    metrics.append({
+        "name": "PLAYER_ATE_APPLE",
+        "type": "Doubles",
+        "shape": [],
+        "component": "Taste",
+        "variable": "player_ate_apple",
+    })
+    metrics.append({
+        "name": "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP",
+        "type": "Doubles",
+        "shape": [],
+        "component": "Zapper",
+        "variable": "num_others_player_zapped_this_step",
+    })
+    metrics.append({
+        "name": "NUM_OTHERS_WHO_ATE_THIS_STEP",
+        "type": "Doubles",
+        "shape": [],
+        "component": "AllNonselfCumulants",
+        "variable": "num_others_who_ate_this_step",
+    })
+
+  # Add the metrics reporter.
+  avatar_object["components"].append({
+      "component": "AvatarMetricReporter",
+      "kwargs": {"metrics": metrics}
+  })
+
   return avatar_object
 
 
@@ -810,16 +814,8 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
-      # Cumulants.
-      "PLAYER_ATE_APPLE",
-      "PLAYER_CLEANED",
-      "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP",
       # Global switching signals for puppeteers.
       "NUM_OTHERS_WHO_CLEANED_THIS_STEP",
-      "NUM_OTHERS_WHO_ATE_THIS_STEP",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -830,16 +826,9 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
-      # Cumulants.
-      "PLAYER_ATE_APPLE": specs.float64(),
-      "PLAYER_CLEANED": specs.float64(),
-      "NUM_OTHERS_PLAYER_ZAPPED_THIS_STEP": specs.float64(),
       # Global switching signals for puppeteers.
       "NUM_OTHERS_WHO_CLEANED_THIS_STEP": specs.float64(),
-      "NUM_OTHERS_WHO_ATE_THIS_STEP": specs.float64(),
       # Debug only (do not use the following observations in policies).
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(168, 240),
   })
 

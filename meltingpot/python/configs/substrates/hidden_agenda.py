@@ -13,7 +13,7 @@
 # limitations under the License.
 """Configuration for hidden_agenda.
 
-Example video: TBD
+Example video: https://youtu.be/voJWckiOh5k
 
 A social deduction (sometimes also called 'hidden role') game where players can
 have one of two roles: crewmates and impostors. All players with the same role
@@ -62,6 +62,9 @@ from typing import Any, Mapping, Sequence
 from ml_collections import config_dict
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
+
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
 
 # This substrate only makes sense with exactly five players.
 MANDATED_NUM_PLAYERS = 5
@@ -1347,13 +1350,6 @@ def create_player(player_idx: int, role: str, num_players: int,
               }
           },
           {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
               "component": "Tagger",
               "kwargs": {
                   "cooldownTime": 50,
@@ -1381,6 +1377,11 @@ def create_player(player_idx: int, role: str, num_players: int,
           },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    player["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
 
   return player
 
@@ -1456,7 +1457,6 @@ STEP_LEFT  = {"move": 4, "turn": 0,  "tag": 0, "vote": 0}
 TURN_LEFT  = {"move": 0, "turn": -1, "tag": 0, "vote": 0}
 TURN_RIGHT = {"move": 0, "turn": 1,  "tag": 0, "vote": 0}
 TAG        = {"move": 0, "turn": 0,  "tag": 1, "vote": 0}
-
 # pylint: enable=bad-whitespace
 # pyformat: enable
 
@@ -1516,30 +1516,6 @@ def get_config():
               "component": "Transform",
           },
           {
-              "component": "GlobalMetricReporter",
-              "kwargs": {
-                  "metrics": [{
-                      "name": "GLOBAL_PROGRESS",
-                      "type": "tensor.DoubleTensor",
-                      "shape": (1,),
-                      "component": "Progress",
-                      "variable": "progress_bar"
-                  }, {
-                      "name": "IDENTITIES",
-                      "type": "tensor.DoubleTensor",
-                      "shape": (MANDATED_NUM_PLAYERS,),
-                      "component": "Progress",
-                      "variable": "identity_tensor"
-                  }, {
-                      "name": "VOTING",
-                      "type": "tensor.DoubleTensor",
-                      "shape": (MANDATED_NUM_PLAYERS, MANDATED_NUM_PLAYERS + 2),
-                      "component": "Progress",
-                      "variable": "votingMatrix"
-                  }]
-              },
-          },
-          {
               "component":
                   "Progress",
               "kwargs":
@@ -1569,6 +1545,48 @@ def get_config():
           },
       ]
   }
+  # The voting matrix metric is always used.
+  metrics = [{
+      "name": "VOTING",
+      "type": "tensor.DoubleTensor",
+      "shape": (MANDATED_NUM_PLAYERS, MANDATED_NUM_PLAYERS + 2),
+      "component": "Progress",
+      "variable": "votingMatrix",
+  }]
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    config.scene_prefab["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    metrics.append({
+        "name": "GLOBAL_PROGRESS",
+        "type": "tensor.DoubleTensor",
+        "shape": (1,),
+        "component": "Progress",
+        "variable": "progress_bar",
+    })
+    metrics.append({
+        "name": "IDENTITIES",
+        "type": "tensor.DoubleTensor",
+        "shape": (MANDATED_NUM_PLAYERS,),
+        "component": "Progress",
+        "variable": "identity_tensor"
+    })
+    metrics.append({
+        "name": "VOTING",
+        "type": "tensor.DoubleTensor",
+        "shape": (MANDATED_NUM_PLAYERS, MANDATED_NUM_PLAYERS + 2),
+        "component": "Progress",
+        "variable": "votingMatrix"
+    })
+
+  # Add the global metrics reporter
+  config.scene_prefab["components"].append({
+      "component": "GlobalMetricReporter",
+      "kwargs": {
+          "metrics": metrics
+      }
+  })
 
   # Action set configuration.
   config.action_set = create_action_set(MANDATED_NUM_PLAYERS)
@@ -1579,9 +1597,6 @@ def get_config():
       "INVENTORY",
       "READY_TO_SHOOT",
       "VOTING",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -1593,10 +1608,9 @@ def get_config():
       "RGB": specs.OBSERVATION["RGB"],
       "INVENTORY": specs.inventory(1),
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
-      "WORLD.RGB": specs.rgb(176, 264),
       "VOTING": specs.float64(MANDATED_NUM_PLAYERS, MANDATED_NUM_PLAYERS + 2),
+      # Debug only (do not use the following observations in policies).
+      "WORLD.RGB": specs.rgb(176, 264),
   })
 
   # The roles assigned to each player.

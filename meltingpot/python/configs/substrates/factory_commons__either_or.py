@@ -101,8 +101,6 @@ def get_config():
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
       "STAMINA": specs.float64(),
       # Debug only.
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(128, 184),
   })
   return config

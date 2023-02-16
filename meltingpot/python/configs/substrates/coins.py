@@ -29,6 +29,9 @@ from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 MANDATED_NUM_PLAYERS = 2
 
 COIN_PALETTES = {
@@ -110,18 +113,6 @@ SCENE = {
             "component": "Transform",
         },
         {
-            "component": "GlobalMetricReporter",
-            "kwargs": {
-                "metrics": [
-                    {"name": "COINS_COLLECTED",
-                     "type": "tensor.Int32Tensor",
-                     "shape": (MANDATED_NUM_PLAYERS, 2),
-                     "component": "GlobalCoinCollectionTracker",
-                     "variable": "coinsCollected"},
-                ]
-            }
-        },
-        {
             "component": "GlobalCoinCollectionTracker",
             "kwargs": {
                 "numPlayers": MANDATED_NUM_PLAYERS,
@@ -137,6 +128,21 @@ SCENE = {
         }
     ]
 }
+if _ENABLE_DEBUG_OBSERVATIONS:
+  SCENE["components"].append({
+      "component": "GlobalMetricReporter",
+      "kwargs": {
+          "metrics": [
+              {
+                  "name": "COINS_COLLECTED",
+                  "type": "tensor.Int32Tensor",
+                  "shape": (MANDATED_NUM_PLAYERS, 2),
+                  "component": "GlobalCoinCollectionTracker",
+                  "variable": "coinsCollected",
+              },
+          ]
+      },
+  })
 
 
 WALL = {
@@ -269,7 +275,8 @@ def get_coin(
 
 
 def get_avatar(coin_type: str):
-  return {
+  """Create an avatar object."""
+  avatar_object = {
       "name": "avatar",
       "components": [
           {
@@ -341,50 +348,53 @@ def get_avatar(coin_type: str):
               "component": "PartnerTracker",
               "kwargs": {}
           },
-          {
-              "component": "AvatarMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {
-                          "name": "MATCHED_COIN_COLLECTED",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Role",
-                          "variable": "cumulantCollectedMatch",
-                      },
-                      {
-                          "name": "MISMATCHED_COIN_COLLECTED",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "Role",
-                          "variable": "cumulantCollectedMismatch",
-                      },
-                      {
-                          "name": "MATCHED_COIN_COLLECTED_BY_PARTNER",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "PartnerTracker",
-                          "variable": "partnerCollectedMatch",
-                      },
-                      {
-                          "name": "MISMATCHED_COIN_COLLECTED_BY_PARTNER",
-                          "type": "Doubles",
-                          "shape": [],
-                          "component": "PartnerTracker",
-                          "variable": "partnerCollectedMismatch",
-                      },
-                  ]
-              }
-          },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  # Signals needed for puppeteers.
+  metrics = [
+      {
+          "name": "MISMATCHED_COIN_COLLECTED_BY_PARTNER",
+          "type": "Doubles",
+          "shape": [],
+          "component": "PartnerTracker",
+          "variable": "partnerCollectedMismatch",
+      },
+  ]
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    # Debug metrics
+    metrics.append({
+        "name": "MATCHED_COIN_COLLECTED",
+        "type": "Doubles",
+        "shape": [],
+        "component": "Role",
+        "variable": "cumulantCollectedMatch",
+    })
+    metrics.append({
+        "name": "MISMATCHED_COIN_COLLECTED",
+        "type": "Doubles",
+        "shape": [],
+        "component": "Role",
+        "variable": "cumulantCollectedMismatch",
+    })
+    metrics.append({
+        "name": "MATCHED_COIN_COLLECTED_BY_PARTNER",
+        "type": "Doubles",
+        "shape": [],
+        "component": "PartnerTracker",
+        "variable": "partnerCollectedMatch",
+    })
+
+  # Add the metrics reporter.
+  avatar_object["components"].append({
+      "component": "AvatarMetricReporter",
+      "kwargs": {"metrics": metrics}
+  })
+
+  return avatar_object
 
 
 # `prefabs` is a dictionary mapping names to template game objects that can
@@ -459,9 +469,6 @@ def get_config():
       "RGB",
       # Global switching signals for puppeteers.
       "MISMATCHED_COIN_COLLECTED_BY_PARTNER",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB"
@@ -471,9 +478,9 @@ def get_config():
   config.action_spec = specs.action(len(ACTION_SET))
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
+      # Switching signals for puppeteers.
       "MISMATCHED_COIN_COLLECTED_BY_PARTNER": specs.float64(),
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.rgb(136, 136),
   })
 

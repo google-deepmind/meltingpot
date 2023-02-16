@@ -37,6 +37,9 @@ from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 # The number of resources must match the (square) size of the matrix.
 NUM_RESOURCES = 2
 
@@ -454,13 +457,6 @@ def create_avatar_object(player_idx: int,
               }
           },
           {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
               "component": "AvatarMetricReporter",
               "kwargs": {
                   "metrics": [
@@ -480,6 +476,11 @@ def create_avatar_object(player_idx: int,
           },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
 
   return avatar_object
 
@@ -511,8 +512,6 @@ def get_config():
       "INVENTORY",
       "READY_TO_SHOOT",
       # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
       "INTERACTION_INVENTORIES",
   ]
   config.global_observation_names = [
@@ -526,8 +525,6 @@ def get_config():
       "INVENTORY": specs.inventory(2),
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
       # Debug only (do not use the following observations in policies).
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "INTERACTION_INVENTORIES": specs.interaction_inventories(2),
       "WORLD.RGB": specs.rgb(192, 200),
   })

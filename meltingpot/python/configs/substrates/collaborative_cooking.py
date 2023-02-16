@@ -34,6 +34,9 @@ from meltingpot.python.utils.substrates import game_object_utils
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 COOKING_TIME = 20
 items = ["empty", "tomato", "dish", "soup"]
 
@@ -843,32 +846,35 @@ def create_avatar_object(player_idx: int,
               }
           },
           {"component": "AvatarCumulants",},
-          {
-              "component": "AvatarMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {"name": "ADDED_INGREDIENT_TO_COOKING_POT",
-                       "type": "Doubles",
-                       "shape": [],
-                       "component": "AvatarCumulants",
-                       "variable": "addedIngredientToCookingPot"},
-                      {"name": "COLLECTED_SOUP_FROM_COOKING_POT",
-                       "type": "Doubles",
-                       "shape": [],
-                       "component": "AvatarCumulants",
-                       "variable": "collectedSoupFromCookingPot"},
-                  ]
-              }
-          },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    avatar_object["components"].append({
+        "component": "AvatarMetricReporter",
+        "kwargs": {
+            "metrics": [
+                {
+                    "name": "ADDED_INGREDIENT_TO_COOKING_POT",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "AvatarCumulants",
+                    "variable": "addedIngredientToCookingPot",
+                },
+                {
+                    "name": "COLLECTED_SOUP_FROM_COOKING_POT",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "AvatarCumulants",
+                    "variable": "collectedSoupFromCookingPot",
+                },
+            ]
+        }
+    })
+
   return avatar_object
 
 
@@ -906,12 +912,6 @@ def get_config():
   # Observation format configuration.
   config.individual_observation_names = [
       "RGB",
-      # Cumulants (do not use in policies).
-      "ADDED_INGREDIENT_TO_COOKING_POT",
-      "COLLECTED_SOUP_FROM_COOKING_POT",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",

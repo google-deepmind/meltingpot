@@ -41,6 +41,9 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 # Map reaction to rewards.
 DEFAULT_REWARDING_REACTIONS = {"MetabolizeFood1": 1,
                                "MetabolizeFood2": 1,
@@ -411,7 +414,8 @@ def create_avatar_objects(num_players, compounds):
         rewarding_reactions=DEFAULT_REWARDING_REACTIONS,
         player_idx=player_idx,
         target_sprite_self_empty=TARGET_SPRITE_SELF_EMPTY,
-        target_sprite_self_holds_one=TARGET_SPRITE_SELF_HOLDS_ONE)
+        target_sprite_self_holds_one=TARGET_SPRITE_SELF_HOLDS_ONE,
+        add_location_observer=_ENABLE_DEBUG_OBSERVATIONS)
     avatar_objects.append(game_object)
 
     # Add the overlaid avatar vesicle on top of each avatar.
@@ -436,9 +440,6 @@ def get_config():
   # Observation format configuration.
   config.individual_observation_names = [
       "RGB",
-      # For debug only.
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -449,8 +450,6 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       # Debug only (do not use the following observations in policies).
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(112, 200),
   })
 
