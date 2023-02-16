@@ -272,7 +272,7 @@ We have some useful sprites in the
 Let's import it (don't forget to add the dependency):
 
 ```python
-from meltingpot.python import shapes
+from meltingpot.python.utils.substrates import shapes
 ```
 
 and change our avatar's Appearance `Component` to:
