@@ -61,6 +61,9 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 NUM_TOKEN_TYPES = 3
 MAX_TOKENS_PER_TYPE = 15
 
@@ -251,11 +254,12 @@ for human_readable_color in colors.human_readable:
 
 
 def get_avatar_object(num_players: int, player_index: int):
+  """Construct an avatar object."""
   # Lua is 1-indexed.
   lua_index = player_index + 1
   color_palette = PLAYER_COLOR_PALETTES[player_index]
   avatar_sprite_name = "avatarSprite{}".format(lua_index)
-  return {
+  avatar_object = {
       "name": "avatar",
       "components": [
           {
@@ -383,6 +387,13 @@ def get_avatar_object(num_players: int, player_index: int):
           },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
+  return avatar_object
 
 
 # PREFABS is a dictionary mapping names to template game objects that can
@@ -446,9 +457,6 @@ def get_config():
       "RGB",
       "READY_TO_SHOOT",
       "INVENTORY",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",

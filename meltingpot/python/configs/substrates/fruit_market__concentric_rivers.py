@@ -105,8 +105,7 @@ def get_config():
       "MY_OFFER": specs.int64(2),
       "OFFERS": specs.int64(102),
       "HUNGER": specs.float64(),
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.rgb(248, 248,),
   })
 

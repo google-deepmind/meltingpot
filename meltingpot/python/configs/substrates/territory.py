@@ -27,6 +27,10 @@ from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
+
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 _COMPASS = ["N", "E", "S", "W"]
 
 MARKING_SPRITE = """
@@ -735,13 +739,6 @@ def create_avatar_object(player_idx: int) -> Mapping[str, Any]:
               }
           },
           {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
               "component": "Taste",
               "kwargs": {
                   "role": "none",
@@ -750,6 +747,11 @@ def create_avatar_object(player_idx: int) -> Mapping[str, Any]:
           },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
 
   return avatar_object
 
@@ -845,8 +847,6 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -857,8 +857,7 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.rgb(120, 184),
   })
 

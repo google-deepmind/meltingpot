@@ -44,6 +44,9 @@ from meltingpot.python.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 # How many different colors of berries.
 NUM_BERRY_TYPES = 3
 
@@ -532,56 +535,40 @@ def create_avatar_object(player_idx: int,
                   "stochasticallyCryptic": True,
               }
           },
-          {
-              "component": "RewardForColoring",
-              "kwargs": {
-                  "berryIds": [],
-                  "amount": 1,
-                  "rewardCooldown": 50,
-              }
-          },
-          {
-              "component": "RewardForZapping",
-              "kwargs": {
-                  # Color 0 is the "newborn" (free rider) color.
-                  # Color 1 is red, color 2 is green, and color 3 is blue.
-                  "targetColors": [],
-                  "amounts": {},
-              }
-          },
-          {
-              "component": "AvatarMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {"name": "COLOR_ID",
-                       "type": "Doubles",
-                       "shape": [],
-                       "component": "ColorZapper",
-                       "variable": "colorId"},
-
-                      {"name": "MOST_TASTY_BERRY_ID",
-                       "type": "Doubles",
-                       "shape": [],
-                       "component": "Taste",
-                       "variable": "mostTastyBerryId"},
-                  ]
-              }
-          },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          {
-              "component": "AvatarIdsInViewObservation",
-          },
-          {
-              "component": "AvatarIdsInRangeToZapObservation",
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+    avatar_object["components"].append({
+        "component": "AvatarMetricReporter",
+        "kwargs": {
+            "metrics": [
+                {
+                    "name": "COLOR_ID",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "ColorZapper",
+                    "variable": "colorId",
+                },
+                {
+                    "name": "MOST_TASTY_BERRY_ID",
+                    "type": "Doubles",
+                    "shape": [],
+                    "component": "Taste",
+                    "variable": "mostTastyBerryId",
+                },
+            ]
+        },
+    })
+    avatar_object["components"].append({
+        "component": "AvatarIdsInViewObservation",
+    })
+    avatar_object["components"].append({
+        "component": "AvatarIdsInRangeToZapObservation",
+    })
   return avatar_object
 
 # PREFABS is a dictionary mapping names to template game objects that can
@@ -679,92 +666,107 @@ def create_scene(num_players: int):
                   ]
               }
           },
-          {
-              "component": "GlobalMetricReporter",
-              "kwargs": {
-                  "metrics": [
-                      {"name": "RIPE_BERRIES_BY_TYPE",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES,),
-                       "component": "GlobalBerryTracker",
-                       "variable": "ripeBerriesPerType"},
-
-                      {"name": "UNRIPE_BERRIES_BY_TYPE",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES,),
-                       "component": "GlobalBerryTracker",
-                       "variable": "unripeBerriesPerType"},
-
-                      {"name": "BERRIES_BY_TYPE",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES,),
-                       "component": "GlobalBerryTracker",
-                       "variable": "berriesPerType"},
-
-                      {"name": "COLORING_BY_PLAYER",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, num_players),
-                       "component": "GlobalBerryTracker",
-                       "variable": "coloringByPlayerMatrix"},
-
-                      {"name": "EATING_TYPES_BY_PLAYER",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, num_players),
-                       "component": "GlobalBerryTracker",
-                       "variable": "eatingTypesByPlayerMatrix"},
-
-                      {"name": "BERRIES_PER_TYPE_BY_COLOR_OF_COLORER",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
-                       "component": "GlobalBerryTracker",
-                       "variable": "berryTypesByColorOfColorer"},
-
-                      {"name": "BERRIES_PER_TYPE_BY_TASTE_OF_COLORER",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
-                       "component": "GlobalBerryTracker",
-                       "variable": "berryTypesByTasteOfColorer"},
-
-                      {"name": "PLAYER_TIMEOUT_COUNT",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (num_players, num_players),
-                       "component": "GlobalZapTracker",
-                       "variable": "fullZapCountMatrix"},
-
-                      {"name": "COLOR_BY_COLOR_ZAP_COUNTS",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),
-                       "component": "GlobalZapTracker",
-                       "variable": "colorByColorZapCounts"},
-
-                      {"name": "COLOR_BY_TASTE_ZAP_COUNTS",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),
-                       "component": "GlobalZapTracker",
-                       "variable": "colorByTasteZapCounts"},
-
-                      {"name": "TASTE_BY_TASTE_ZAP_COUNTS",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
-                       "component": "GlobalZapTracker",
-                       "variable": "tasteByTasteZapCounts"},
-
-                      {"name": "TASTE_BY_COLOR_ZAP_COUNTS",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
-                       "component": "GlobalZapTracker",
-                       "variable": "tasteByColorZapCounts"},
-
-                      {"name": "WHO_ZAPPED_WHO",
-                       "type": "tensor.Int32Tensor",
-                       "shape": (num_players, num_players),
-                       "component": "GlobalMetricHolder",
-                       "variable": "playerZapMatrix"},
-                  ]
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    scene["components"].append({
+        "component": "GlobalMetricReporter",
+        "kwargs": {
+            "metrics": [
+                {
+                    "name": "RIPE_BERRIES_BY_TYPE",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES,),
+                    "component": "GlobalBerryTracker",
+                    "variable": "ripeBerriesPerType",
+                },
+                {
+                    "name": "UNRIPE_BERRIES_BY_TYPE",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES,),
+                    "component": "GlobalBerryTracker",
+                    "variable": "unripeBerriesPerType",
+                },
+                {
+                    "name": "BERRIES_BY_TYPE",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES,),
+                    "component": "GlobalBerryTracker",
+                    "variable": "berriesPerType",
+                },
+                {
+                    "name": "COLORING_BY_PLAYER",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, num_players),
+                    "component": "GlobalBerryTracker",
+                    "variable": "coloringByPlayerMatrix",
+                },
+                {
+                    "name": "EATING_TYPES_BY_PLAYER",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, num_players),
+                    "component": "GlobalBerryTracker",
+                    "variable": "eatingTypesByPlayerMatrix",
+                },
+                {
+                    "name": "BERRIES_PER_TYPE_BY_COLOR_OF_COLORER",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+                    "component": "GlobalBerryTracker",
+                    "variable": "berryTypesByColorOfColorer",
+                },
+                {
+                    "name": "BERRIES_PER_TYPE_BY_TASTE_OF_COLORER",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+                    "component": "GlobalBerryTracker",
+                    "variable": "berryTypesByTasteOfColorer",
+                },
+                {
+                    "name": "PLAYER_TIMEOUT_COUNT",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (num_players, num_players),
+                    "component": "GlobalZapTracker",
+                    "variable": "fullZapCountMatrix",
+                },
+                {
+                    "name": "COLOR_BY_COLOR_ZAP_COUNTS",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),
+                    "component": "GlobalZapTracker",
+                    "variable": "colorByColorZapCounts",
+                },
+                {
+                    "name": "COLOR_BY_TASTE_ZAP_COUNTS",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),
+                    "component": "GlobalZapTracker",
+                    "variable": "colorByTasteZapCounts",
+                },
+                {
+                    "name": "TASTE_BY_TASTE_ZAP_COUNTS",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+                    "component": "GlobalZapTracker",
+                    "variable": "tasteByTasteZapCounts",
+                },
+                {
+                    "name": "TASTE_BY_COLOR_ZAP_COUNTS",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+                    "component": "GlobalZapTracker",
+                    "variable": "tasteByColorZapCounts",
+                },
+                {
+                    "name": "WHO_ZAPPED_WHO",
+                    "type": "tensor.Int32Tensor",
+                    "shape": (num_players, num_players),
+                    "component": "GlobalMetricHolder",
+                    "variable": "playerZapMatrix",
+                },
+            ]
+        }
+    })
   return scene
 
 
@@ -958,8 +960,6 @@ def get_config():
   # Observation format configuration.
   config.individual_observation_names = [
       "RGB",
-      "POSITION",
-      "ORIENTATION",
       "READY_TO_SHOOT",
   ]
   config.global_observation_names = [
@@ -970,8 +970,7 @@ def get_config():
   config.action_spec = specs.action(len(ACTION_SET))
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
       "WORLD.RGB": specs.world_rgb(DEFAULT_ASCII_MAP, SPRITE_SIZE),
   })

@@ -60,10 +60,7 @@ def get_config():
   # The specs of the environment (from a single-agent perspective).
   config.timestep_spec = specs.timestep({
       "RGB": specs.rgb(40, 40),
-      "ADDED_INGREDIENT_TO_COOKING_POT": specs.float64(),
-      "COLLECTED_SOUP_FROM_COOKING_POT": specs.float64(),
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.rgb(40, 72),
   })
 

@@ -41,6 +41,8 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
 
 NUM_ORE_TYPES = 2
 MAX_TOKENS_PER_TYPE = 6
@@ -305,10 +307,11 @@ for human_readable_color in colors.human_readable:
 
 
 def get_avatar_object(num_players: int, player_index: int):
+  """Construct an avatar object."""
   lua_index = player_index + 1
   color_palette = PLAYER_COLOR_PALETTES[player_index]
   avatar_sprite_name = "avatarSprite{}".format(lua_index)
-  return {
+  avatar_object = {
       "name": "avatar",
       "components": [
           {
@@ -385,13 +388,6 @@ def get_avatar_object(num_players: int, player_index: int):
               }
           },
           {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True,
-              },
-          },
-          {
               "component": "MiningTracker",
               "kwargs": {
                   "numPlayers": num_players,
@@ -400,6 +396,13 @@ def get_avatar_object(num_players: int, player_index: int):
           },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
+  return avatar_object
 
 
 def get_avatar_objects(num_players: int):
@@ -450,9 +453,6 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -464,8 +464,6 @@ def get_config():
       "RGB": specs.OBSERVATION["RGB"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
       # Debug only (do not use the following observations in policies).
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
-      "POSITION": specs.OBSERVATION["POSITION"],
       "WORLD.RGB": specs.rgb(216, 216),
   })
 

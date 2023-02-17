@@ -52,6 +52,9 @@ from meltingpot.python.utils.substrates import shapes
 
 PrefabConfig = game_object_utils.PrefabConfig
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 MAX_OFFER_QUANTITY = 3
 
 _COMPASS = ["N", "E", "S", "W"]
@@ -1137,15 +1140,14 @@ def create_avatar_object(player_idx: int,
                   "needComponent": "PeriodicNeed",
               },
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
   return avatar_object
 
 
@@ -1195,9 +1197,6 @@ def get_config():
       "MY_OFFER",
       "OFFERS",
       "HUNGER",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
