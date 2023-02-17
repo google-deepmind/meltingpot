@@ -111,7 +111,7 @@ function BoatManager:registerUpdaters(updaterRegistry)
       -- Apply agent role pseudo-rewards
       for side, stroke in pairs(self._strokes) do
         local role = self._rowers[side]:getComponent('Rowing'):getRole()
-        log.v(1, "Processing role pseudo-rewards: ", side, stroke, role)
+        log.v(2, "Processing role pseudo-rewards: ", side, stroke, role)
         if role ~= 'none' and role ~= stroke then
           self._rowers[side]:getComponent('Avatar'):addReward(
               self._config.mismatchRolePseudoreward)
@@ -434,8 +434,8 @@ function RaceManager:getRaceDirection()
 end
 
 
--- The `EpisodeManager` will periodically monitor whether all players have
--- been disqualified and terminate the episode early if this is the case.
+-- The `EpisodeManager` will periodically monitor whether all (or any) players
+-- have been disqualified and terminate the episode early if this is the case.
 -- Episode lengths will always be a multiple of the `checkInterval`
 -- parameter.
 local EpisodeManager = class.Class(component.Component)
@@ -444,9 +444,12 @@ function EpisodeManager:__init__(kwargs)
   kwargs = args.parse(kwargs, {
       {'name', args.default('EpisodeManager')},
       {'checkInterval', args.numberType},
+      -- End episode if _any_ player is disqualified.
+      {'earlyExitOnAny', args.default(false), args.booleanType},
   })
   EpisodeManager.Base.__init__(self, kwargs)
   self._config.checkInterval = kwargs.checkInterval
+  self._config.earlyExitOnAny = kwargs.earlyExitOnAny
   self._step = 0
 end
 
@@ -454,15 +457,22 @@ function EpisodeManager:registerUpdaters(updaterRegistry)
   local earlyExit = function()
     if self._step % self._config.checkInterval == 0 then
       local players = self.gameObject.simulation:getGameObjectsByName("avatar")
+      local anyDisqualified = false
       local allDisqualified = true
       for i, player in pairs(players) do
+        if player:getState() == "playerWait" then
+          anyDisqualified = true
+        end
         if player:getState() ~= "playerWait" then
           allDisqualified = false
-          break
         end
       end
-      if allDisqualified then
+      if allDisqualified and not self._config.earlyExitOnAny then
         log.v(1, "All players disqualified, ending episode.")
+        self.gameObject.simulation:endEpisode()
+      end
+      if anyDisqualified and self._config.earlyExitOnAny then
+        log.v(1, "Some players disqualified, ending episode.")
         self.gameObject.simulation:endEpisode()
       end
     end
