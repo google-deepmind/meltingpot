@@ -430,7 +430,8 @@ def create_avatar_constant_self_view(
     player_idx: int,
     target_sprite_self_empty: Dict[str, Any],
     target_sprite_self_holds_one: Dict[str, Any],
-    randomize_initial_orientation: bool = True) -> Dict[str, Any]:
+    randomize_initial_orientation: bool = True,
+    add_location_observer: bool = False) -> Dict[str, Any]:
   """Create an avatar prefab rewarded by reactions in `rewarding_reactions`."""
   # Lua is 1-indexed.
   lua_index = player_idx + 1
@@ -558,15 +559,14 @@ def create_avatar_constant_self_view(
                   "rewardingReactions": rewarding_reactions
               }
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  if add_location_observer:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
   return avatar_object
 
 

@@ -59,6 +59,9 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 _COMPASS = ("N", "E", "S", "W")
 ITEMS = ("empty", "acorn")
 INVISIBLE = (0, 0, 0, 0)
@@ -1221,25 +1224,6 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
                   "staminaComponent": "Stamina",
               }
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
-          # The `ProxemicTaste` component defines a pseudoreward which is useful
-          # for training background populations of prey or predators that stand
-          # near others with their same role. It should be turned off by
-          # default. It is turned off when `distanceToReward` is empty.
-          {
-              "component": "ProxemicTaste",
-              "kwargs": {
-                  "distanceToReward": {},
-                  "layer": "upperPhysical",
-                  "roleToCount": role_name,
-              }
-          },
           # The `RewardForStaminaLevel` component defines a pseudoreward which
           # is useful for training background populations to rapidly learn how
           # to control their stamina. For the default "real" substrate, the
@@ -1492,6 +1476,13 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
             }
         },
     ])
+
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
+
   return avatar_object
 
 
@@ -1570,7 +1561,14 @@ def _create_stamina_overlay(player_idx: int,
     if i >= 13:
       level = blank_space + xs
     else:
-      level = blank_space + "\nx" + "G" * number_of_gs + "Y" * number_of_ys + "R" * number_of_rs + "x"
+      level = (
+          blank_space
+          + "\nx"
+          + "G" * number_of_gs
+          + "Y" * number_of_ys
+          + "R" * number_of_rs
+          + "x"
+      )
     empty = "\n".join(["x" * 8] * 8)
     # Replace the east/south/west sprites with invisible sprites so the only
     # stamina bar rendered is the one in the direction that the current player
@@ -1665,9 +1663,6 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "STAMINA",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",

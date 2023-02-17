@@ -52,6 +52,9 @@ import numpy as np
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 _COMPASS = ["N", "E", "S", "W"]
 
 ASCII_MAP = """
@@ -694,15 +697,13 @@ def create_avatar_object(
               "component": "Taste",
               "kwargs": taste_kwargs
           },
-          {
-              "component": "LocationObserver",
-              "kwargs": {
-                  "objectIsAvatar": True,
-                  "alsoReportOrientation": True
-              }
-          },
       ]
   }
+  if _ENABLE_DEBUG_OBSERVATIONS:
+    avatar_object["components"].append({
+        "component": "LocationObserver",
+        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+    })
 
   return avatar_object
 
@@ -771,9 +772,6 @@ def get_config():
   config.individual_observation_names = [
       "RGB",
       "READY_TO_SHOOT",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -785,8 +783,6 @@ def get_config():
       "RGB": specs.OBSERVATION["RGB"],
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
       # Debug only (do not use the following observations in policies).
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(184, 184),
   })
 

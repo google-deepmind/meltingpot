@@ -38,6 +38,9 @@ from meltingpot.python.utils.substrates import colors
 from meltingpot.python.utils.substrates import shapes
 from meltingpot.python.utils.substrates import specs
 
+# Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
+_ENABLE_DEBUG_OBSERVATIONS = False
+
 # This substrate only makes sense with exactly six players.
 MANDATED_NUM_PLAYERS = 6
 NUM_RACES = 8
@@ -148,24 +151,6 @@ SCENE = {
             },
         },
         {
-            "component": "GlobalMetricReporter",
-            "kwargs": {
-                "metrics": [
-                    {"name": "RACE_START",
-                     "type": "tensor.Int32Tensor",
-                     "shape": (MANDATED_NUM_PLAYERS // 2, 2),
-                     "component": "GlobalRaceTracker",
-                     "variable": "raceStart"},
-
-                    {"name": "STROKES",
-                     "type": "tensor.Int32Tensor",
-                     "shape": (MANDATED_NUM_PLAYERS,),
-                     "component": "GlobalRaceTracker",
-                     "variable": "strokes"},
-                ]
-            }
-        },
-        {
             "component": "GlobalRaceTracker",
             "kwargs": {
                 "numPlayers": MANDATED_NUM_PLAYERS,
@@ -179,6 +164,28 @@ SCENE = {
         },
     ]
 }
+if _ENABLE_DEBUG_OBSERVATIONS:
+  SCENE["components"].append({
+      "component": "GlobalMetricReporter",
+      "kwargs": {
+          "metrics": [
+              {
+                  "name": "RACE_START",
+                  "type": "tensor.Int32Tensor",
+                  "shape": (MANDATED_NUM_PLAYERS // 2, 2),
+                  "component": "GlobalRaceTracker",
+                  "variable": "raceStart",
+              },
+              {
+                  "name": "STROKES",
+                  "type": "tensor.Int32Tensor",
+                  "shape": (MANDATED_NUM_PLAYERS,),
+                  "component": "GlobalRaceTracker",
+                  "variable": "strokes",
+              },
+          ]
+      },
+  })
 
 FLOOR = {
     "name": "floor",
@@ -752,18 +759,16 @@ AVATAR = {
             },
         },
         {
-            "component": "LocationObserver",
-            "kwargs": {
-                "objectIsAvatar": True,
-                "alsoReportOrientation": True
-            }
-        },
-        {
             "component": "StrokesTracker",
             "kwargs": {}
         },
     ]
 }
+if _ENABLE_DEBUG_OBSERVATIONS:
+  AVATAR["components"].append({
+      "component": "LocationObserver",
+      "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
+  })
 
 
 # PREFABS is a dictionary mapping names to template game objects that can
@@ -846,9 +851,6 @@ def get_config():
   # Observation format configuration.
   config.individual_observation_names = [
       "RGB",
-      # Debug only (do not use the following observations in policies).
-      "POSITION",
-      "ORIENTATION",
   ]
   config.global_observation_names = [
       "WORLD.RGB",
@@ -859,8 +861,6 @@ def get_config():
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
       # Debug only (do not use the following observations in policies).
-      "POSITION": specs.OBSERVATION["POSITION"],
-      "ORIENTATION": specs.OBSERVATION["ORIENTATION"],
       "WORLD.RGB": specs.rgb(304, 208),
   })
 
