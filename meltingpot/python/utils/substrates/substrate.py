@@ -23,6 +23,7 @@ from rx import subject
 
 from meltingpot.python.utils.substrates import builder
 from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.python.utils.substrates.wrappers import collective_reward_wrapper
 from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
 from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
 from meltingpot.python.utils.substrates.wrappers import observables
@@ -133,4 +134,7 @@ def build_substrate(
       individual_observation_names=individual_observations,
       global_observation_names=global_observations)
   env = discrete_action_wrapper.Wrapper(env, action_table=action_table)
+  # Add a wrapper that augments adds an observation of the collective
+  # reward (sum of all players' rewards).
+  env = collective_reward_wrapper.CollectiveRewardWrapper(env)
   return Substrate(env)
