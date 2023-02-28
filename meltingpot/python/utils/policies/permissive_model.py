@@ -159,22 +159,9 @@ class PermissiveModel:
           (bound_args.args, bound_args.kwargs))
       flat_canonical_args = tree.flatten_with_path(canonical_args)
 
-      # Specs for error reporting.
-      bound_specs = tree.map_structure(
-          lambda x: None if x is None else object(),
-          (bound_args.args, bound_args.kwargs))
-      canonical_specs = tree.map_structure(
-          lambda x: None if x is None else object(), canonical_args)
-
       # Check for missing arguments.
       flat_bound_args_dict = dict(flat_bound_args)
       for arg_path, arg_spec in flat_canonical_args:
-        if arg_path not in flat_bound_args_dict and arg_spec is not None:
-          raise ValueError(
-              f"Missing argument with path {arg_path}, expected canonical args "
-              f"with structure {canonical_specs}, received {bound_specs}. (All "
-              "required values have been replaced by object() for brevity.")
-
         if arg_path in flat_bound_args_dict and arg_spec is None:
           arg_value = flat_bound_args_dict[arg_path]
           if arg_value is not None:
