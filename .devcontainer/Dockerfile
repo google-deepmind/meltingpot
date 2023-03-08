@@ -1,6 +1,6 @@
 # Use Nvidia Ubuntu 20 base (includes CUDA if a supported GPU is present)
 # https://hub.docker.com/r/nvidia/cuda
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu20.04@sha256:cd96e25cb4136632f28f5c330514380b19777bd030aeb603c75303ec2291442e
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu20.04@sha256:b754c43fe9d62e88862d168c4ab9282618a376dbc54871467870366cacfa456e
 
 # Install dependencies
 RUN apt-get update && \

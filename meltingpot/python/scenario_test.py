@@ -16,6 +16,9 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
+import dm_env
+import numpy as np
+
 from meltingpot.python import scenario
 from meltingpot.python.testing import substrates as test_utils
 
@@ -29,7 +32,10 @@ class ScenarioTest(test_utils.SubstrateTestCase):
     action_spec = [factory.action_spec()] * num_players
     reward_spec = [factory.timestep_spec().reward] * num_players
     discount_spec = factory.timestep_spec().discount
-    observation_spec = [factory.timestep_spec().observation] * num_players
+    observation_spec = dict(factory.timestep_spec().observation)
+    observation_spec['COLLECTIVE_REWARD'] = dm_env.specs.Array(
+        shape=(), dtype=np.float64, name='COLLECTIVE_REWARD')
+    observation_spec = [observation_spec] * num_players
     with factory.build() as env:
       with self.subTest('step'):
         self.assert_step_matches_specs(env)

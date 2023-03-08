@@ -970,8 +970,8 @@ def get_config():
   config.action_spec = specs.action(len(ACTION_SET))
   config.timestep_spec = specs.timestep({
       "RGB": specs.OBSERVATION["RGB"],
-      # Debug only (do not use the following observations in policies).
       "READY_TO_SHOOT": specs.OBSERVATION["READY_TO_SHOOT"],
+      # Debug only (do not use the following observations in policies).
       "WORLD.RGB": specs.world_rgb(DEFAULT_ASCII_MAP, SPRITE_SIZE),
   })
 
