@@ -20,14 +20,15 @@ IS_M1_MAC = platform.system() == 'Darwin' and platform.machine() == 'arm64'
 
 setuptools.setup(
     name='dm-meltingpot',
-    version='2.1.0',
+    version='2.1.1',
     license='Apache 2.0',
     license_files=['LICENSE'],
     url='https://github.com/deepmind/meltingpot',
     download_url='https://github.com/deepmind/meltingpot',
     author='DeepMind',
     author_email='noreply@google.com',
-    description='A suite of test scenarios for multi-agent reinforcement learning.',
+    description=(
+        'A suite of test scenarios for multi-agent reinforcement learning.'),
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     keywords='multi-agent reinforcement-learning python machine-learning',
