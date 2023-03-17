@@ -28,7 +28,7 @@ from meltingpot.python import substrate
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
     "cpu")
-
+print(f"Using device {device}")
 
 # Use this with lambda wrapper returning observations only
 class CustomCNN(torch_layers.BaseFeaturesExtractor):
@@ -44,7 +44,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
     """Construct a custom CNN feature extractor.
 
     Args:
-      observation_space: the observation space as a gym.Space
+      observation_space: the observation space as a gym.Space (Box in this case, the other option being Discrete)
       features_dim: Number of features extracted. This corresponds to the number
         of unit for the last layer.
       num_frames: The number of (consecutive) frames to feed into the network.
@@ -57,13 +57,13 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
     self.conv = nn.Sequential(
         nn.Conv2d(
             num_frames * 3, num_frames * 3, kernel_size=8, stride=4, padding=0),
-        nn.ReLU(),  # 18 * 21 * 21
+        nn.ReLU(),  # 18 * 21 * 21  (size of the output tensor from this layer)
         nn.Conv2d(
             num_frames * 3, num_frames * 6, kernel_size=5, stride=2, padding=0),
-        nn.ReLU(),  # 36 * 9 * 9
+        nn.ReLU(),  # 36 * 9 * 9    (size of the output tensor from this layer)
         nn.Conv2d(
             num_frames * 6, num_frames * 6, kernel_size=3, stride=1, padding=0),
-        nn.ReLU(),  # 36 * 7 * 7
+        nn.ReLU(),  # 36 * 7 * 7    (size of the output tensor from this layer)
         nn.Flatten(),
     )
     flat_out = num_frames * 6 * 7 * 7
@@ -74,7 +74,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
   def forward(self, observations) -> torch.Tensor:
     # Convert to tensor, rescale to [0, 1], and convert from
     #   B x H x W x C to B x C x H x W
-    observations = observations.permute(0, 3, 1, 2)
+    observations = observations.permute(0, 3, 1, 2) # Output of the form B x C x H x W
     features = self.conv(observations)
     features = F.relu(self.fc1(features))
     features = F.relu(self.fc2(features))
@@ -83,16 +83,16 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
 
 def main():
   # Config
-  env_name = "commons_harvest_open"
+  env_name = "commons_harvest__open"
   env_config = substrate.get_config(env_name)
   env = utils.parallel_env(env_config)
-  rollout_len = 1000
+  rollout_len = 100
   total_timesteps = 2000000
   num_agents = env.max_num_agents
 
   # Training
   num_cpus = 1  # number of cpus
-  num_envs = 1  # number of parallel multi-agent environments
+  num_envs = 5  # number of parallel multi-agent environments
   # number of frames to stack together; use >4 to avoid automatic
   # VecTransposeImage
   num_frames = 4
@@ -125,6 +125,8 @@ def main():
       num_cpus=num_cpus,
       base_class="stable_baselines3")
   env = vec_env.VecMonitor(env)
+#   print("The type of env is:",type(env))
+  print("Observation space:", env.observation_space)
   env = vec_env.VecTransposeImage(env, True)
 
   eval_env = utils.parallel_env(
@@ -153,6 +155,9 @@ def main():
 
   tensorboard_log = "./results/sb3/harvest_open_ppo_paramsharing"
 
+  print("Before PPO",type(env.observation_space))
+  print("Before PPO",type(env.action_space))
+  print("Env type:",type(env))
   model = stable_baselines3.PPO(
       "CnnPolicy",
       env=env,

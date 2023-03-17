@@ -5,31 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.1.1] - 2023-02-16
-
-### Changed
-
-- Added COLLECTIVE_RETURN to PERMITTED_OBSERVATIONS.
-- Split install.sh into three scripts.
-- Move from yapf to black.
-- Remove debug observations to speed up environment stepping.
-
-### Fixed
-
-- Add Lua 5.2 compatibility for `unpack`.
-
-### Removed
-
-- SubstrateWrappers previously needed for the v1 bots.
-
-### Added
-
-- Colab for visualizing evaluation results.
-- Tests for the examples.
-- Mocks of specific substrates and scenarios, for use in testing.
-- Helper for setting world.rgb spec.
-
-
 ## [2.1.0] - 2022-12-06
 
 ### Changed
@@ -57,7 +32,7 @@ for detailed information on the new substrates, bots, and scenarios.
 ### Changed
 
 - Removed all v1 scenarios, bots, and substrates and replaced with new versions.
-- Scenarios now support heterogeneous roles, which must be specified at build
+- Scenarios now support heterogenous roles, which must be specified at build
   time.
 - Various improvements to `examples` and their documentation.
 

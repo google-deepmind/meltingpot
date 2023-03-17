@@ -17,6 +17,7 @@ from typing import Any, Mapping
 
 import dm_env
 from gym import spaces
+from gymnasium.spaces import Dict, Space, Tuple, Box, Discrete
 import numpy as np
 import tree
 
@@ -36,13 +37,13 @@ def timestep_to_observations(timestep: dm_env.TimeStep) -> Mapping[str, Any]:
 
 
 def remove_world_observations_from_space(
-    observation: spaces.Dict) -> spaces.Dict:
-  return spaces.Dict({
+    observation: Dict) -> Dict:
+  return Dict({
       key: observation[key] for key in observation if _WORLD_PREFIX not in key
   })
 
 
-def spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
+def spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> Space:
   """Converts a dm_env nested structure of specs to a Gym Space.
 
   BoundedArray is converted to Box Gym spaces. DiscreteArray is converted to
@@ -55,20 +56,20 @@ def spec_to_space(spec: tree.Structure[dm_env.specs.Array]) -> spaces.Space:
     The Gym space corresponding to the given spec.
   """
   if isinstance(spec, dm_env.specs.DiscreteArray):
-    return spaces.Discrete(spec.num_values)
+    return Discrete(spec.num_values)
   elif isinstance(spec, dm_env.specs.BoundedArray):
-    return spaces.Box(spec.minimum, spec.maximum, spec.shape, spec.dtype)
+    return Box(spec.minimum, spec.maximum, spec.shape, spec.dtype)
   elif isinstance(spec, dm_env.specs.Array):
     if np.issubdtype(spec.dtype, np.floating):
-      return spaces.Box(-np.inf, np.inf, spec.shape, spec.dtype)
+      return Box(-np.inf, np.inf, spec.shape, spec.dtype)
     elif np.issubdtype(spec.dtype, np.integer):
       info = np.iinfo(spec.dtype)
-      return spaces.Box(info.min, info.max, spec.shape, spec.dtype)
+      return Box(info.min, info.max, spec.shape, spec.dtype)
     else:
       raise NotImplementedError(f'Unsupported dtype {spec.dtype}')
   elif isinstance(spec, (list, tuple)):
-    return spaces.Tuple([spec_to_space(s) for s in spec])
+    return Tuple([spec_to_space(s) for s in spec])
   elif isinstance(spec, dict):
-    return spaces.Dict({key: spec_to_space(s) for key, s in spec.items()})
+    return Dict({key: spec_to_space(s) for key, s in spec.items()})
   else:
     raise ValueError('Unexpected spec of type {}: {}'.format(type(spec), spec))

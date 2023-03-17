@@ -59,12 +59,12 @@ def get_config(substrate: str) -> config_dict.ConfigDict:
   """
   if substrate not in SUBSTRATES:
     raise ValueError(f'{substrate} not in {SUBSTRATES}.')
-  path = f'{__name__}.{substrate}'
-  module = importlib.import_module(path)
-  config = module.get_config()
-  with config.unlocked():
-    config.lab2d_settings_builder = _validated(module.build)
-  return config.lock()
+  path = f'{__name__}.{substrate}'                        # Sets path to the python file of the substrate(env); check the same directory to find all python files
+  module = importlib.import_module(path)                  # Imports the python file of the substrate(env)
+  config = module.get_config()                            # Gets the config of the substrate(env)
+  with config.unlocked():                            # Unlocks the config         
+    config.lab2d_settings_builder = _validated(module.build)  # Adds validation checks to build function
+  return config.lock()                    # Locks the config  
 
 
 SUBSTRATES: Set[str] = frozenset({

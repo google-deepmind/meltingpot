@@ -15,6 +15,8 @@
 
 import functools
 
+import gymnasium as gym
+from gym import spaces
 from gym import utils as gym_utils
 import matplotlib.pyplot as plt
 from ml_collections import config_dict
@@ -50,7 +52,7 @@ class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
   def __init__(self, env_config, max_cycles):
     self.env_config = config_dict.ConfigDict(env_config)
     self.max_cycles = max_cycles
-    self._env = substrate.build(self.env_config)
+    self._env = substrate.build_from_config(self.env_config,roles=self.env_config.default_player_roles)
     self._num_players = len(self._env.observation_spec())
     self.possible_agents = [
         PLAYER_STR_FORMAT.format(index=index)
@@ -60,9 +62,11 @@ class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
         utils.spec_to_space(self._env.observation_spec()[0]))
     self.observation_space = functools.lru_cache(
         maxsize=None)(lambda agent_id: observation_space)
+    # print(type(self.observation_space))
     action_space = utils.spec_to_space(self._env.action_spec()[0])
     self.action_space = functools.lru_cache(maxsize=None)(
         lambda agent_id: action_space)
+    print("Action Space: ", type(self.action_space))
     self.state_space = utils.spec_to_space(
         self._env.observation_spec()[0]['WORLD.RGB'])
 
