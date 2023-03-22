@@ -17,7 +17,7 @@ from typing import Tuple
 
 import dm_env
 import dmlab2d
-from gym import spaces
+from gymnasium import spaces
 from ml_collections import config_dict
 import numpy as np
 from ray.rllib import algorithms
@@ -85,7 +85,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     """Returns the underlying DM Lab2D environment."""
     return self._env
 
-  # Metadata is required by the gym `Env` class that we are extending, to show
+  # Metadata is required by the gymnasium `Env` class that we are extending, to show
   # which modes the `render` method supports.
   metadata = {'render.modes': ['rgb_array']}
 

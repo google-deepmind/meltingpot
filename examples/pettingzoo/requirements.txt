@@ -1,0 +1,1 @@
+git+https://github.com/DLR-RM/stable-baselines3@feat/gymnasium-support

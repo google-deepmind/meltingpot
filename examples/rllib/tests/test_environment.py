@@ -14,7 +14,7 @@
 """MeltingPotEnv as a MultiAgentEnv wrapper to interface with RLLib."""
 
 from absl.testing import absltest
-from gym.spaces import discrete
+from gymnasium.spaces import discrete
 
 from examples.rllib import utils
 from meltingpot.python import substrate
