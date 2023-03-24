@@ -42,7 +42,7 @@ RUN if [ "$(uname -m)" != 'x86_64' ]; then \
 
 # Download assets
 RUN mkdir -p /workspaces/meltingpot/meltingpot && \
-  curl -SL https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-1.0.0.tar.gz \
+  curl -SL https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.1.0.tar.gz \
   | tar -xz --directory=/workspaces/meltingpot/meltingpot
 
 # Set Python path
