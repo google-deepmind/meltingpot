@@ -66,7 +66,7 @@ def puppet_timestep(timestep: dm_env.TimeStep,
 
 
 def puppet_goals(names: Sequence[str],
-                 dtype: np.dtype = _GOAL_DTYPE) -> Mapping[str, PuppetGoal]:
+                 dtype: ... = _GOAL_DTYPE) -> Mapping[str, PuppetGoal]:
   """Returns a mapping from goal name to a one-hot goal vector for a puppet.
 
   Args:
