@@ -63,7 +63,8 @@ def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
       '--level_name', type=str,
-      default='magi_suite_predator_prey__alley_hunt',
+      default='predator_prey__alley_hunt',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
