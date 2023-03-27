@@ -47,6 +47,7 @@ def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
       '--level_name', type=str, default='coop_mining',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')

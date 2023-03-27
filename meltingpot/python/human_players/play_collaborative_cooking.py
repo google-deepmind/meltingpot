@@ -72,6 +72,7 @@ def main():
       '--level_name',
       type=str,
       default='collaborative_cooking__cramped',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
