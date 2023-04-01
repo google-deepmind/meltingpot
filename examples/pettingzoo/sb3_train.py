@@ -40,6 +40,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
       features_dim=128,
       num_frames=6,
       fcnet_hiddens=(1024, 128),
+      flat_out = 36 * 7 * 7
   ):
     """Construct a custom CNN feature extractor.
 
@@ -57,16 +58,19 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
     self.conv = nn.Sequential(
         nn.Conv2d(
             num_frames * 3, num_frames * 3, kernel_size=8, stride=4, padding=0),
-        nn.ReLU(),  # 18 * 21 * 21
+        nn.ReLU(),  # 18 * 21 * 21 for arena; 18 * 9 * 9 for matrix
         nn.Conv2d(
             num_frames * 3, num_frames * 6, kernel_size=5, stride=2, padding=0),
-        nn.ReLU(),  # 36 * 9 * 9
+        nn.ReLU(),  # 36 * 9 * 9 for arena; 36 * 3 * 3 for matrix
         nn.Conv2d(
             num_frames * 6, num_frames * 6, kernel_size=3, stride=1, padding=0),
-        nn.ReLU(),  # 36 * 7 * 7
+        nn.ReLU(),  # 36 * 7 * 7 for arena; 36 * 1 * 1 for matrix
         nn.Flatten(),
     )
-    flat_out = num_frames * 6 * 7 * 7
+    if (self._observation_space.shape[0] == 84 and self._observation_space.shape[1] == 84):     # arena
+        flat_out = num_frames * 6 * 7 * 7
+    elif (self._observation_space.shape[0] == 40 and self._observation_space.shape[1] == 40):   # repeated
+        flat_out = num_frames * 6 * 1 * 1
     self.fc1 = nn.Linear(in_features=flat_out, out_features=fcnet_hiddens[0])
     self.fc2 = nn.Linear(
         in_features=fcnet_hiddens[0], out_features=fcnet_hiddens[1])
@@ -83,11 +87,12 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
 
 def main():
   # Config
-  substrate_name = "commons_harvest__open"
+  substrate_name = "bach_or_stravinsky_in_the_matrix__arena"
   player_roles = substrate.get_config(substrate_name).default_player_roles
   env_config = {"substrate": substrate_name, "roles": player_roles}
 
   env = utils.parallel_env(render_mode="rgb_array", env_config=env_config)
+
   rollout_len = 1000
   total_timesteps = 2000000
   num_agents = env.max_num_agents
@@ -97,7 +102,7 @@ def main():
   num_envs = 1  # number of parallel multi-agent environments
   # number of frames to stack together; use >4 to avoid automatic
   # VecTransposeImage
-  num_frames = 4
+  num_frames = 6
   # output layer of cnn extractor AND shared layer for policy and value
   # functions
   features_dim = 128

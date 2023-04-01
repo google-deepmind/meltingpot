@@ -65,6 +65,7 @@ class ParallelMeltingPotEnv(ParallelEnv, EzPickle):
     self.agents = [agent for agent in self.possible_agents]
     observation_space = utils.remove_world_observations_from_space(
         utils.spec_to_space(self._env.observation_spec()[0]))
+    print("Observation space is:", observation_space)
     self.observation_space = functools.lru_cache(
         maxsize=None)(lambda agent_id: observation_space)
     action_space = utils.spec_to_space(self._env.action_spec()[0])
