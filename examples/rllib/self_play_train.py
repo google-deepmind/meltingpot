@@ -84,7 +84,7 @@ def get_config(
 
   # Setup PPO with policies, one per entry in default player roles.
   policies = {}
-  player_to_agent = {}
+  player_to_agent = {}     
   for i in range(len(player_roles)):
     rgb_shape = test_env.observation_space[f"player_{i}"]["RGB"].shape
     sprite_x = rgb_shape[0] // 8

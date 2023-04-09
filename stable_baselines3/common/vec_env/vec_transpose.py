@@ -23,7 +23,7 @@ class VecTransposeImage(VecEnvWrapper):
         print(type(venv.observation_space))
         print(venv.observation_space)
         assert is_image_space(venv.observation_space) or isinstance(
-            venv.observation_space, spaces.box.Box
+            venv.observation_space, spaces.dict.Dict
         ), "The observation space must be an image or dictionary observation space"
 
         self.skip = skip

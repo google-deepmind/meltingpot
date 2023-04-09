@@ -38,9 +38,9 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
       self,
       observation_space: gymnasium.spaces.Box,
       features_dim=128,
-      num_frames=6,
+      num_frames=1,
       fcnet_hiddens=(1024, 128),
-      flat_out = 36 * 7 * 7
+      flat_out = 6
   ):
     """Construct a custom CNN feature extractor.
 
@@ -78,8 +78,10 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
   def forward(self, observations) -> torch.Tensor:
     # Convert to tensor, rescale to [0, 1], and convert from
     #   B x H x W x C to B x C x H x W
-    observations = observations.permute(0, 3, 1, 2)
+    # observations = observations.permute(0, 3, 1, 2)
+    print("This is CNNBANS", observations.shape)
     features = self.conv(observations)
+    print("This is post cnn", features.shape)
     features = F.relu(self.fc1(features))
     features = F.relu(self.fc2(features))
     return features
@@ -87,7 +89,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
 
 def main():
   # Config
-  substrate_name = "bach_or_stravinsky_in_the_matrix__arena"
+  substrate_name = "bach_or_stravinsky_in_the_matrix__repeated"
   player_roles = substrate.get_config(substrate_name).default_player_roles
   env_config = {"substrate": substrate_name, "roles": player_roles}
 
@@ -96,13 +98,13 @@ def main():
   rollout_len = 1000
   total_timesteps = 2000000
   num_agents = env.max_num_agents
-
+  
   # Training
   num_cpus = 1  # number of cpus
-  num_envs = 1  # number of parallel multi-agent environments
+  num_envs = 2  # number of parallel multi-agent environments
   # number of frames to stack together; use >4 to avoid automatic
   # VecTransposeImage
-  num_frames = 6
+  num_frames = 1
   # output layer of cnn extractor AND shared layer for policy and value
   # functions
   features_dim = 128
@@ -117,28 +119,28 @@ def main():
   target_kl = 0.01
   grad_clip = 40
   verbose = 3
-  model_path = None  # Replace this with a saved model
+  ego_model_path = None  # Replace this with a saved model
+  opp_model_path = None  # Replace this with a saved model
 
   env = utils.parallel_env(render_mode="rgb_array", env_config=env_config, max_cycles=rollout_len)
   env = ss.observation_lambda_v0(env, lambda x, _: x["RGB"], lambda s: s["RGB"])
   env = ss.pettingzoo_env_to_vec_env_v1(env)
-  env = ss.concat_vec_envs_v1(
-      env,
-      num_vec_envs=num_envs,
-      num_cpus=num_cpus,
-      base_class="stable_baselines3")
-  env = vec_env.VecMonitor(env)
-  env = vec_env.VecTransposeImage(env, True)
-  env = vec_env.VecFrameStack(env, num_frames)
+  # env = ss.frame_stack_v1(env, num_frames)
+  print("Type of blah",env.observation_space)
 
 
-  eval_env = utils.parallel_env(
-      max_cycles=rollout_len,
-      env_config=env_config,
-      render_mode="rgb_array"
-  )
-  eval_env = ss.observation_lambda_v0(eval_env, lambda x, _: x["RGB"],
-                                      lambda s: s["RGB"])
+  # env = ss.concat_vec_envs_v1(
+  #     env,
+  #     num_vec_envs=num_envs,
+  #     num_cpus=num_cpus,
+  #     base_class="stable_baselines3")
+  # env = vec_env.VecMonitor(env)
+  # env = vec_env.VecTransposeImage(env, True)
+  # env = vec_env.VecFrameStack(env, num_frames)
+
+
+  eval_env = utils.parallel_env(max_cycles=rollout_len,env_config=env_config,render_mode="rgb_array")
+  eval_env = ss.observation_lambda_v0(eval_env, lambda x, _: x["RGB"],lambda s: s["RGB"])
   eval_env = ss.pettingzoo_env_to_vec_env_v1(eval_env)
   eval_env = ss.concat_vec_envs_v1(
       eval_env,
@@ -150,6 +152,7 @@ def main():
   eval_env = vec_env.VecFrameStack(eval_env, num_frames)
   eval_freq = 100000 // (num_envs * num_agents)
 
+
   policy_kwargs = dict(
       features_extractor_class=CustomCNN,
       features_extractor_kwargs=dict(
@@ -160,13 +163,14 @@ def main():
       net_arch=[features_dim],
   )
 
-  tensorboard_log = "./results/sb3/harvest_open_ppo_paramsharing"
+  tensorboard_log_ego = "./results/sb3/harvest_open_ppo_ego_agent"
+  tensorboard_log_opp = "./results/sb3/harvest_open_ppo_opp_agent"
 
-  print("Type of env: ", type(env))
 
-  model = stable_baselines3.PPO(
+
+  model_ego = stable_baselines3.PPO(
       "CnnPolicy",
-      env=env,
+      env = env,
       learning_rate=lr,
       n_steps=rollout_len,
       batch_size=batch_size,
@@ -177,19 +181,68 @@ def main():
       max_grad_norm=grad_clip,
       target_kl=target_kl,
       policy_kwargs=policy_kwargs,
-      tensorboard_log=tensorboard_log,
+      tensorboard_log=tensorboard_log_ego,
       verbose=verbose,
   )
-  if model_path is not None:
-    model = stable_baselines3.PPO.load(model_path, env=env)
-  eval_callback = callbacks.EvalCallback(
-      eval_env, eval_freq=eval_freq, best_model_save_path=tensorboard_log)
-  model.learn(total_timesteps=total_timesteps, callback=eval_callback)
+  
+  model_opp = stable_baselines3.PPO(
+      "CnnPolicy",
+      env = env,
+      learning_rate=lr,
+      n_steps=rollout_len,
+      batch_size=batch_size,
+      n_epochs=n_epochs,
+      gamma=gamma,
+      gae_lambda=gae_lambda,
+      ent_coef=ent_coef,
+      max_grad_norm=grad_clip,
+      target_kl=target_kl,
+      policy_kwargs=policy_kwargs,
+      tensorboard_log=tensorboard_log_opp,
+      verbose=verbose,
+  )
 
-  logdir = model.logger.dir
-  model.save(logdir + "/model")
+  policy_dict = {"player_1": model_ego.policy, "player_2": model_opp.policy}
+
+  def get_actions(obs):
+    actions = {}
+    actions[0] = model_ego.policy(obs[0]).sample()
+    actions[1] = model_opp.policy(obs[1]).sample()
+    return actions
+
+  if ego_model_path is not None:
+    model_ego = stable_baselines3.PPO.load(ego_model_path, env=env)
+  if opp_model_path is not None:
+    model_opp = stable_baselines3.PPO.load(opp_model_path, env=env)
+  eval_callback = callbacks.EvalCallback(
+      eval_env, eval_freq=eval_freq, best_model_save_path=tensorboard_log_ego)
+  eval_callback_opp = callbacks.EvalCallback(
+      eval_env, eval_freq=eval_freq, best_model_save_path=tensorboard_log_opp)
+
+
+
+  for i in range(total_timesteps):
+     obs, infs = env.reset(return_info=True)
+     print("MainLoop",obs.shape)
+     for t in range(rollout_len):
+        action_1 = model_ego.predict(obs, deterministic=False)[0][0]
+        action_2 = model_opp.predict(obs, deterministic=False)[0][1]
+        actions = [action_1, action_2]
+        print(actions)
+        obs, reward, terms, truncs, info = env.step(actions)
+        dones = terms | truncs
+        print("Obs[0] after policy", obs[0].shape)
+        print("Obs[1] after policy", obs[1].shape)
+
+        model_ego.learn(total_timesteps=100000, callback=eval_callback)
+
+        # env.render()  
+  
+
+  logdir = model_ego.logger.dir
+  model_ego.save(logdir + "/model_ego")
   del model
-  model = stable_baselines3.PPO.load(logdir + "/model")  # noqa: F841
+  model_ego = stable_baselines3.PPO.load(logdir + "/model_ego")  # noqa: F841m
 
 
 if __name__ == "__main__":
