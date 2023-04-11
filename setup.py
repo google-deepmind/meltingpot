@@ -80,7 +80,7 @@ setuptools.setup(
             'dm-tree',
             'gym',
             'matplotlib',
-            'pettingzoo>=1.22.4',
+            'pettingzoo>=1.22.3',
             'stable-baselines3',
             'supersuit>=3.7.2',
             'torch',
