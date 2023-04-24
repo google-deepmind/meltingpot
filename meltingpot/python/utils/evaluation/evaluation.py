@@ -16,9 +16,12 @@
 import collections
 from collections.abc import Collection, Iterator, Mapping
 import contextlib
-from typing import TypeVar
+import os
+from typing import Optional, TypeVar
+import uuid
 
 from absl import logging
+import cv2
 import dm_env
 import numpy as np
 import pandas as pd
@@ -50,6 +53,68 @@ def run_episode(
     actions = population.await_action()
 
 
+class VideoSubject(subject.Subject):
+  """Subject that emits a video at the end of each episode."""
+
+  def __init__(
+      self,
+      root: str,
+      *,
+      extension: str = 'webm',
+      codec: str = 'vp90',
+      fps: int = 30,
+  ) -> None:
+    """Initializes the instance.
+
+    Args:
+      root: directory to write videos in.
+      extension: file extention of file.
+      codec: codex to write with.
+      fps: frames-per-second for videos.
+    """
+    super().__init__()
+    self._root = root
+    self._extension = extension
+    self._codec = codec
+    self._fps = fps
+    self._path = None
+    self._writer = None
+
+  def on_next(self, timestep: dm_env.TimeStep) -> None:
+    """Called on each timestep.
+
+    Args:
+      timestep: the most recent timestep.
+    """
+    rgb_frame = timestep.observation[0]['WORLD.RGB']
+    if timestep.step_type.first():
+      self._path = os.path.join(
+          self._root, f'{uuid.uuid4().hex}.{self._extension}')
+      height, width, _ = rgb_frame.shape
+      self._writer = cv2.VideoWriter(
+          filename=self._path,
+          fourcc=cv2.VideoWriter_fourcc(*self._codec),
+          fps=self._fps,
+          frameSize=(width, height),
+          isColor=True)
+    elif self._writer is None:
+      raise ValueError('First timestep must be StepType.FIRST.')
+    bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+    assert self._writer.isOpened()  # Catches any cv2 usage errors.
+    self._writer.write(bgr_frame)
+    if timestep.step_type.last():
+      self._writer.release()
+      super().on_next(self._path)
+      self._path = None
+      self._writer = None
+
+  def dispose(self):
+    """See base class."""
+    if self._writer is not None:
+      self._writer.release()
+    super().dispose()
+
+
 class ReturnSubject(subject.Subject):
   """Subject that emits the player returns at the end of each episode."""
 
@@ -71,6 +136,7 @@ def run_and_observe_episodes(
     population: population_lib.Population,
     substrate: substrate_lib.Substrate,
     num_episodes: int,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Runs a population on a substrate and returns results.
 
@@ -78,6 +144,7 @@ def run_and_observe_episodes(
     population: the population to run.
     substrate: the substrate to run on.
     num_episodes: the number of episodes to gather data for.
+    video_root: path to directory to save videos in.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -85,11 +152,14 @@ def run_and_observe_episodes(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   focal_observables = population.observables()
   if isinstance(substrate, scenario_lib.Scenario):
+    substrate_observables = substrate.observables().substrate
     background_observables = substrate.observables().background
   else:
+    substrate_observables = substrate.observables()
     background_observables = population_lib.PopulationObservables(
         names=focal_observables.names.pipe(ops.map(lambda x: ())),
         action=focal_observables.action.pipe(ops.map(lambda x: ())),
@@ -102,6 +172,11 @@ def run_and_observe_episodes(
     def subscribe(observable, *args, **kwargs):
       disposable = observable.subscribe(*args, **kwargs)  # pytype: disable=wrong-keyword-args
       stack.callback(disposable.dispose)
+
+    if video_root:
+      video_subject = VideoSubject(video_root)
+      subscribe(substrate_observables.timestep, video_subject)
+      subscribe(video_subject, on_next=data['video_path'].append)
 
     focal_return_subject = ReturnSubject()
     subscribe(focal_observables.timestep, focal_return_subject)
@@ -132,6 +207,7 @@ def evaluate_population_on_scenario(
     names_by_role: Mapping[str, Collection[str]],
     scenario: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates a population on a scenario.
 
@@ -140,6 +216,7 @@ def evaluate_population_on_scenario(
     names_by_role: the names of the policies that support specific roles.
     scenario: the scenario to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos in.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -147,6 +224,7 @@ def evaluate_population_on_scenario(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   factory = meltingpot.scenario.get_factory(scenario)
   focal_population = population_lib.Population(
@@ -157,7 +235,8 @@ def evaluate_population_on_scenario(
     return run_and_observe_episodes(
         population=focal_population,
         substrate=env,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
 
 
 def evaluate_population_on_substrate(
@@ -165,6 +244,7 @@ def evaluate_population_on_substrate(
     names_by_role: Mapping[str, Collection[str]],
     substrate: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates a population on a substrate.
 
@@ -173,6 +253,7 @@ def evaluate_population_on_substrate(
     names_by_role: the names of the policies that support specific roles.
     substrate: the substrate to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos in.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -180,6 +261,7 @@ def evaluate_population_on_substrate(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   factory = meltingpot.substrate.get_factory(substrate)
   roles = factory.default_player_roles()
@@ -191,7 +273,8 @@ def evaluate_population_on_substrate(
     return run_and_observe_episodes(
         population=focal_population,
         substrate=env,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
 
 
 def evaluate_population(
@@ -199,6 +282,7 @@ def evaluate_population(
     names_by_role: Mapping[str, Collection[str]],
     scenario: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates a population on a scenario (or a substrate).
 
@@ -207,6 +291,7 @@ def evaluate_population(
     names_by_role: the names of the policies that support specific roles.
     scenario: the scenario (or substrate) to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos under.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -214,19 +299,22 @@ def evaluate_population(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   if scenario in meltingpot.scenario.SCENARIOS:
     return evaluate_population_on_scenario(
         population=population,
         names_by_role=names_by_role,
         scenario=scenario,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
   elif scenario in meltingpot.substrate.SUBSTRATES:
     return evaluate_population_on_substrate(
         population=population,
         names_by_role=names_by_role,
         substrate=scenario,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
   else:
     raise ValueError(f'Unknown substrate or scenario: {scenario!r}')
 
@@ -255,6 +343,7 @@ def evaluate_saved_models_on_scenario(
     names_by_role: Mapping[str, Collection[str]],
     scenario: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates saved models on a scenario.
 
@@ -263,6 +352,7 @@ def evaluate_saved_models_on_scenario(
     names_by_role: the names of the policies that support specific roles.
     scenario: the scenario to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos in.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -270,13 +360,15 @@ def evaluate_saved_models_on_scenario(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   with build_saved_model_population(saved_models) as population:
     return evaluate_population_on_scenario(
         population=population,
         names_by_role=names_by_role,
         scenario=scenario,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
 
 
 def evaluate_saved_models_on_substrate(
@@ -284,6 +376,7 @@ def evaluate_saved_models_on_substrate(
     names_by_role: Mapping[str, Collection[str]],
     substrate: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates saved models on a substrate.
 
@@ -292,6 +385,7 @@ def evaluate_saved_models_on_substrate(
     names_by_role: the names of the policies that support specific roles.
     substrate: the substrate to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos in.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -299,13 +393,15 @@ def evaluate_saved_models_on_substrate(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   with build_saved_model_population(saved_models) as population:
     return evaluate_population_on_substrate(
         population=population,
         names_by_role=names_by_role,
         substrate=substrate,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)
 
 
 def evaluate_saved_models(
@@ -313,6 +409,7 @@ def evaluate_saved_models(
     names_by_role: Mapping[str, Collection[str]],
     scenario: str,
     num_episodes: int = 100,
+    video_root: Optional[str] = None,
 ) -> pd.DataFrame:
   """Evaluates saved models on a substrate and it's scenarios.
 
@@ -321,6 +418,7 @@ def evaluate_saved_models(
     names_by_role: the names of the policies that support specific roles.
     scenario: the scenario (or substrate) to evaluate on.
     num_episodes: the number of episodes to run.
+    video_root: path to directory to save videos under.
 
   Returns:
     A dataframe of results. One row for each episode with columns:
@@ -328,10 +426,12 @@ def evaluate_saved_models(
       background_player_returns: the episode returns for each background player.
       focal_player_names: the names of each focal player.
       focal_player_returns: the episode returns for each focal player.
+      video_path: a path to a video of the episode.
   """
   with build_saved_model_population(saved_models) as population:
     return evaluate_population(
         population=population,
         names_by_role=names_by_role,
         scenario=scenario,
-        num_episodes=num_episodes)
+        num_episodes=num_episodes,
+        video_root=video_root)

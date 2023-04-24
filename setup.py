@@ -63,6 +63,8 @@ setuptools.setup(
         'ml-collections',
         'networkx',
         'numpy',
+        'opencv-python',
+        'pandas',
         'pygame',
         'rx',
         'tensorflow-macos' if IS_M1_MAC else 'tensorflow',
