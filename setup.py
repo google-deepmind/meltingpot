@@ -74,7 +74,7 @@ setuptools.setup(
         'rllib': [
             'dm-tree',
             'gym',
-            'ray[rllib,default]==2.0.0',
+            'ray[rllib,default]==2.4.0',
             'numpy<1.23',  # Needed by Ray because it uses `np.bool`.
         ],
         # Dependencies required for pettingzoo example.
