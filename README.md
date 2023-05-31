@@ -168,7 +168,7 @@ python3 self_play_train.py
 This example uses a PettingZoo wrapper with a fully parameter shared PPO agent from SB3.
 
 The PettingZoo wrapper can be used separately from SB3 and
-can be found at [meltingpot_env.py](examples/pettingzoo/meltingpot_env.py)
+can be found [here](examples/pettingzoo/utils.py).
 
 ```shell
 cd <meltingpot_root>
