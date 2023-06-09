@@ -66,7 +66,7 @@ setuptools.setup(
         'opencv-python',
         'pandas',
         'pygame',
-        'rx',
+        'reactivex',
         'tensorflow-macos' if IS_M1_MAC else 'tensorflow',
     ],
     extras_require={

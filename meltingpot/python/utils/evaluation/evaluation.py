@@ -25,8 +25,8 @@ import cv2
 import dm_env
 import numpy as np
 import pandas as pd
-from rx import operators as ops
-from rx import subject
+from reactivex import operators as ops
+from reactivex import subject
 
 from meltingpot import python as meltingpot
 from meltingpot.python.utils.policies import policy as policy_lib

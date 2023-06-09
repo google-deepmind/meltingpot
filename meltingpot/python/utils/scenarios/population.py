@@ -20,8 +20,8 @@ from typing import Callable, Collection, List, Mapping, Sequence
 
 import chex
 import dm_env
-import rx
-from rx import subject
+import reactivex
+from reactivex import subject
 
 from meltingpot.python.utils.policies import policy as policy_lib
 
@@ -58,9 +58,9 @@ class PopulationObservables:
     action: emits actions sent to the substrate by the poulation.
     timestep: emits timesteps sent from the substrate to the population.
   """
-  names: rx.typing.Observable[Sequence[str]]
-  action: rx.typing.Observable[Sequence[int]]
-  timestep: rx.typing.Observable[dm_env.TimeStep]
+  names: reactivex.Observable[Sequence[str]]
+  action: reactivex.Observable[Sequence[int]]
+  timestep: reactivex.Observable[dm_env.TimeStep]
 
 
 class Population:

@@ -25,7 +25,7 @@ from typing import Any, Sequence
 
 import chex
 import dm_env
-import rx
+import reactivex
 
 import dmlab2d
 from meltingpot.python.utils.substrates.wrappers import base
@@ -42,9 +42,9 @@ class Lab2dObservables:
       with the Substrate. Each individual event is emitted as a single element:
       (event_name, event_item).
   """
-  action: rx.typing.Observable[Sequence[int]]
-  timestep: rx.typing.Observable[dm_env.TimeStep]
-  events: rx.typing.Observable[tuple[str, Any]]
+  action: reactivex.Observable[Sequence[int]]
+  timestep: reactivex.Observable[dm_env.TimeStep]
+  events: reactivex.Observable[tuple[str, Any]]
 
 
 class ObservableLab2d(dmlab2d.Environment):

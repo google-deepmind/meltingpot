@@ -18,8 +18,8 @@ from typing import Any
 
 import chex
 import dm_env
-import rx
-from rx import subject
+import reactivex
+from reactivex import subject
 
 from meltingpot.python.utils.substrates import builder
 from meltingpot.python.utils.substrates.wrappers import base
@@ -42,9 +42,9 @@ class SubstrateObservables:
       (event_name, event_item).
     dmlab2d: Observables from the underlying dmlab2d environment.
   """
-  action: rx.typing.Observable[Sequence[int]]
-  timestep: rx.typing.Observable[dm_env.TimeStep]
-  events: rx.typing.Observable[tuple[str, Any]]
+  action: reactivex.Observable[Sequence[int]]
+  timestep: reactivex.Observable[dm_env.TimeStep]
+  events: reactivex.Observable[tuple[str, Any]]
   dmlab2d: observables.Lab2dObservables
 
 
