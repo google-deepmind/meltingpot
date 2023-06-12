@@ -1,12 +1,11 @@
 import os
 import random
-import shutil
+
 import ray
+from ray import air
 from ray import tune
-from ray.rllib.agents.ppo import PPOTrainer
-from ray.rllib.models import ModelCatalog
+from ray.rllib.algorithms import ppo
 from ray.rllib.policy.policy import PolicySpec
-# from ray.tune.schedulers import PopulationBasedTraining
 
 from examples.rllib import utils
 from meltingpot.python import substrate
@@ -14,130 +13,106 @@ from meltingpot.python import substrate
 
 def get_config(
     substrate_name: str = "stag_hunt_in_the_matrix__repeated",
+    num_rollout_workers: int = 2,
+    rollout_fragment_length: int = 100,
+    train_batch_size: int = 1600,
     fcnet_hiddens=(64, 64),
     post_fcnet_hiddens=(256,),
     lstm_cell_size: int = 256,
     sgd_minibatch_size: int = 128,
-    seed: int = 0,
 ):
-    """Get the configuration for running an agent on a substrate using RLLib."""
-    # Set random seed
-    random.seed(seed)
+    config = ppo.PPOConfig()
+    config.num_workers = num_rollout_workers
+    config.rollout_fragment_length = rollout_fragment_length
+    config.train_batch_size = train_batch_size
+    config.sgd_minibatch_size = sgd_minibatch_size
+    config.preprocessor_pref = None
+    config = config.framework("tf")
+    config.num_gpus = int(os.environ.get("RLLIB_NUM_GPUS", "0"))
+    config.log_level = "DEBUG"
 
-    # Create a default configuration dictionary
-    config = {
-        "framework": "tf",
-        "num_gpus": int(os.environ.get("RLLIB_NUM_GPUS", "0")),
-        "log_level": "DEBUG",
-    }
-
-    # Set environment config
     player_roles = substrate.get_config(substrate_name).default_player_roles
-    config["env_config"] = {"substrate": substrate_name, "roles": player_roles}
-    config["env"] = "meltingpot"
+    config.env_config = {"substrate": substrate_name, "roles": player_roles}
 
-    # Extract space dimensions
-    test_env = utils.env_creator(config["env_config"])
+    config.env = "meltingpot"
 
-    # Setup PPO with policies, one per entry in default player roles.
+    test_env = utils.env_creator(config.env_config)
+
     policies = {}
     player_to_agent = {}
+    agent2_weights = {}  # Store weights for each seed's Agent 2
+
     for i in range(len(player_roles)):
         rgb_shape = test_env.observation_space[f"player_{i}"]["RGB"].shape
         sprite_x = rgb_shape[0] // 8
         sprite_y = rgb_shape[1] // 8
 
+        if i == 0:
+            agent_index = i  # Agent 1 (ego agent)
+        else:
+            seed = i  # Seed for Agent 2
+            if seed in agent2_weights:
+                agent_index = agent2_weights[seed]
+            else:
+                available_seeds = [s for s in agent2_weights if s != seed]
+                if available_seeds:
+                    swap_seed = random.choice(available_seeds)
+                    agent_index = agent2_weights[swap_seed]
+                else:
+                    agent_index = len(agent2_weights) + 1
+                    agent2_weights[seed] = agent_index
+
         policies[f"agent_{i}"] = PolicySpec(
-            policy_class=None,  # use default policy
+            policy_class=None,
             observation_space=test_env.observation_space[f"player_{i}"],
             action_space=test_env.action_space[f"player_{i}"],
             config={
                 "model": {
-                    "conv_filters": [[16, [8, 8], 8], [128, [sprite_x, sprite_y], 1]],
+                    "conv_filters": [
+                        [16, [8, 8], 8],
+                        [128, [sprite_x, sprite_y], 1]
+                    ],
                 },
-            },
+            }
         )
-        player_to_agent[f"player_{i}"] = f"agent_{i}"
+        player_to_agent[f"player_{i}"] = f"agent_{agent_index}"
 
     def policy_mapping_fn(agent_id, **kwargs):
         del kwargs
         return player_to_agent[agent_id]
 
-    # Configuration for multi-agent setup with one policy per role
-    config["multiagent"] = {
-        "policies": policies,
-        "policy_mapping_fn": policy_mapping_fn,
-    }
+    config.multi_agent(policies=policies, policy_mapping_fn=policy_mapping_fn)
 
-    # Set the agent architecture
-    config["model"] = {
-        "fcnet_hiddens": fcnet_hiddens,
-        "fcnet_activation": "relu",
-        "conv_activation": "relu",
-        "post_fcnet_hiddens": post_fcnet_hiddens,
-        "post_fcnet_activation": "relu",
-        "use_lstm": True,
-        "lstm_use_prev_action": True,
-        "lstm_use_prev_reward": False,
-        "lstm_cell_size": lstm_cell_size,
-    }
+    config.model["fcnet_hiddens"] = fcnet_hiddens
+    config.model["fcnet_activation"] = "relu"
+    config.model["conv_activation"] = "relu"
+    config.model["post_fcnet_hiddens"] = post_fcnet_hiddens
+    config.model["post_fcnet_activation"] = "relu"
+    config.model["use_lstm"] = True
+    config.model["lstm_use_prev_action"] = True
+    config.model["lstm_use_prev_reward"] = False
+    config.model["lstm_cell_size"] = lstm_cell_size
 
     return config
 
 
-def main(num_seeds: int = 3):
-    seeds = [random.randint(1, 1000) for _ in range(num_seeds)]
-    checkpoint_dirs = []
-
-    for seed in seeds:
-        config = get_config(seed=seed)
-        tune.register_env("meltingpot", utils.env_creator)
-
-        # Initialize ray, train, and save
-        ray.init()
-
-        checkpoint_dir = f"checkpoints/seed_{seed}"
-        checkpoint_dirs.append(checkpoint_dir)
-        os.makedirs(checkpoint_dir, exist_ok=True)
-
-        stop = {"training_iteration": 5000000}
-
-        results = tune.run(
-            PPOTrainer,
-            config=config,
-            stop=stop,
-            checkpoint_at_end=True,
-            verbose=1,
-        )
-
-        checkpoint_path = results.get_last_checkpoint()
-        print(checkpoint_path)
-        if checkpoint_path:
-            shutil.copy(checkpoint_path, os.path.join(checkpoint_dir, "checkpoint"))
-
-        ray.shutdown()
-
-    # Randomly pick the latest checkpoint from any seed for population play
-    population_checkpoint_dir = random.choice(checkpoint_dirs)
-
-    # Load the best policy from the latest checkpoint
-    best_policy_weights = get_best_policy_weights(population_checkpoint_dir)
-
-    # Print the best policy weights
-    print("Best Policy Weights:")
-    print(best_policy_weights)
-
-
-def get_best_policy_weights(checkpoint_dir: str):
-    """Load the best policy weights from a checkpoint directory."""
-    checkpoint_path = os.path.join(checkpoint_dir, "checkpoint")
+def main():
     config = get_config()
-    trainer = PPOTrainer(config=config)
-    trainer.restore(checkpoint_path)
-    best_policy = trainer.get_policy()
-    best_policy_weights = best_policy.get_weights()
-    return best_policy_weights
+    tune.register_env("meltingpot", utils.env_creator)
+
+    ray.init()
+
+    stop = {
+        "training_iteration": 1,
+    }
+
+    results = tune.Tuner(
+        "PPO",
+        param_space=config.to_dict(),
+        run_config=air.RunConfig(stop=stop, checkpoint_config=air.CheckpointConfig(checkpoint_frequency=20), verbose=1),
+    )
+    results.fit()
 
 
 if __name__ == "__main__":
-    main(num_seeds=3)
+    main()
