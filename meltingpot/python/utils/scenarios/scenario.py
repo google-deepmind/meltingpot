@@ -20,8 +20,8 @@ import chex
 import dm_env
 import immutabledict
 import numpy as np
-import rx
-from rx import subject
+import reactivex
+from reactivex import subject
 
 from meltingpot.python.utils.policies import policy
 from meltingpot.python.utils.scenarios import population
@@ -134,9 +134,9 @@ class Scenario(substrate_lib.Substrate):
     self._background_timestep_subject = subject.Subject()
     self._events_subject = subject.Subject()
     self._dmlab2d_observables = observables.Lab2dObservables(
-        action=rx.empty(),
-        events=rx.empty(),
-        timestep=rx.empty(),
+        action=reactivex.empty(),
+        events=reactivex.empty(),
+        timestep=reactivex.empty(),
     )
     self._substrate_observables = self._substrate.observables()
     self._observables = ScenarioObservables(  # pylint: disable=unexpected-keyword-arg

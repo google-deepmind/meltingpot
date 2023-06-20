@@ -52,6 +52,7 @@ def main():
   parser.add_argument(
       '--level_name', type=str,
       default='daycare',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')

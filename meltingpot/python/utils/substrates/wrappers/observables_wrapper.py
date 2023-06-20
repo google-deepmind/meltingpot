@@ -17,7 +17,7 @@ from typing import Mapping, Union
 
 import dm_env
 import numpy as np
-from rx import subject
+from reactivex import subject
 
 import dmlab2d
 from meltingpot.python.utils.substrates.wrappers import observables

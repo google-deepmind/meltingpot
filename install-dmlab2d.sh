@@ -83,16 +83,9 @@ function install_dmlab2d() {
 }
 
 
-function test_dmlab2d() {
-  echo -e "\nTesting dmlab2d..."
-  python lab2d/dmlab2d/dmlab2d_test.py
-}
-
-
 function main() {
   check_setup
   install_dmlab2d
-  test_dmlab2d
 }
 
 

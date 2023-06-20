@@ -104,6 +104,7 @@ def main():
   parser.add_argument(
       '--level_name', type=str,
       default='prisoners_dilemma_in_the_matrix__repeated',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')

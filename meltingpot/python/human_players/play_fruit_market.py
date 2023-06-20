@@ -102,6 +102,7 @@ def main():
       '--level_name',
       type=str,
       default='fruit_market__concentric_rivers',
+      choices=environment_configs.keys(),
       help='Level name to load')
   parser.add_argument(
       '--observation', type=str, default='RGB', help='Observation to render')
