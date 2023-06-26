@@ -46,7 +46,7 @@ function check_setup() {
 
   echo -e "\nChecking bazel version..."
   bazel --version
-  bazel --version | check_version_gt '5.2'
+  bazel --version | check_version_gt '6.2'
 }
 
 
