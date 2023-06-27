@@ -13,10 +13,51 @@
 # limitations under the License.
 """Install script for setuptools."""
 
+import os
 import platform
+import shutil
+import tarfile
+import urllib.request
+
 import setuptools
+from setuptools.command import build_py
+
+VERSION = '2.1.1'
+ASSETS_VERSION = '2.1.0'
+
+ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
 
 IS_M1_MAC = platform.system() == 'Darwin' and platform.machine() == 'arm64'
+
+
+class BuildPy(build_py.build_py):
+  """Command that downloads Melting Pot assets as part of build_py."""
+
+  def run(self):
+    self.editable_mode = False
+    super().run()
+    self.download_and_extract_assets()
+
+  def download_and_extract_assets(self):
+    """Downloads and extracts assets to meltingpot/assets."""
+    tar_file_path = os.path.join(
+        self.get_package_dir('assets'), os.path.basename(ASSETS_URL))
+    if os.path.exists(tar_file_path):
+      print(f'found cached assets {tar_file_path}', flush=True)
+    else:
+      os.makedirs(os.path.dirname(tar_file_path), exist_ok=True)
+      print('downloading assets...', flush=True)
+      urllib.request.urlretrieve(ASSETS_URL, filename=tar_file_path)
+      print(f'downloaded {tar_file_path}', flush=True)
+
+    root = self.get_package_dir('meltingpot')
+    if os.path.exists(f'{root}/assets'):
+      shutil.rmtree(f'{root}/assets')
+      print('deleted existing assets', flush=True)
+    with tarfile.open(tar_file_path, mode='r|*') as tarball:
+      tarball.extractall(root)
+    print(f'extracted assets from {tar_file_path} to {root}/assets', flush=True)
+
 
 setuptools.setup(
     name='dm-meltingpot',
@@ -43,6 +84,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
+    cmdclass={'build_py': BuildPy},
     packages=['meltingpot'],
     package_data={
         'meltingpot': [

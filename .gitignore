@@ -4,9 +4,12 @@
 # Ignore common venv names.
 /*venv/
 
-# Ignore setup files created by install.sh.
+# Ignore setup files created during pip install.
 *.egg-info
+/assets/
 /build/
+
+# Ignore lab2d repo created by ./install-dmlab2d.sh.
 /lab2d/
 
 # Ignore saved models.

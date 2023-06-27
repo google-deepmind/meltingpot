@@ -37,24 +37,15 @@ function check_setup() {
 }
 
 
-function download_assets() {
-  echo -e "\nDownloading assets..."
-  curl -L https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.1.0.tar.gz \
-      | tar -xz --directory=meltingpot
-}
-
-
 function install_meltingpot() {
   echo -e "\nInstalling meltingpot..."
-  # TODO(b/267153975): Remove after underlying issue in setuptools is fixed.
-  pip install --upgrade pip setuptools==65.5.0
+  pip install --upgrade pip setuptools
   pip install .
 }
 
 
 function main() {
   check_setup
-  download_assets
   install_meltingpot
 }
 
