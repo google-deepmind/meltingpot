@@ -95,7 +95,7 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     cmdclass={'build_py': BuildPy},
-    packages=['meltingpot'],
+    package_dir={'meltingpot': 'meltingpot'},
     package_data={
         'meltingpot': [
             'lua/modules/*',
