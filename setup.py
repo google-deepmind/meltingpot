@@ -34,9 +34,10 @@ class BuildPy(build_py.build_py):
   """Command that downloads Melting Pot assets as part of build_py."""
 
   def run(self):
-    self.editable_mode = False
-    super().run()
     self.download_and_extract_assets()
+    if not self.editable_mode:
+      super().run()
+      self.build_assets()
 
   def download_and_extract_assets(self):
     """Downloads and extracts assets to meltingpot/assets."""
@@ -58,20 +59,29 @@ class BuildPy(build_py.build_py):
       tarball.extractall(root)
     print(f'extracted assets from {tar_file_path} to {root}/assets', flush=True)
 
+  def build_assets(self):
+    """Copies assets from package to build lib."""
+    package_root = self.get_package_dir('meltingpot')
+    build_root = os.path.join(self.build_lib, 'meltingpot')
+    if os.path.exists(f'{build_root}/assets'):
+      shutil.rmtree(f'{build_root}/assets')
+      print('deleted existing assets', flush=True)
+    shutil.copytree(f'{package_root}/assets', f'{build_root}/assets')
+    print(f'copied assets from {package_root}/assets to {build_root}/assets',
+          flush=True)
+
 
 setuptools.setup(
     name='dm-meltingpot',
-    version='2.1.1',
+    version=VERSION,
     license='Apache 2.0',
     license_files=['LICENSE'],
     url='https://github.com/deepmind/meltingpot',
-    download_url='https://github.com/deepmind/meltingpot',
+    download_url='https://github.com/deepmind/meltingpot/releases',
     author='DeepMind',
     author_email='noreply@google.com',
     description=(
         'A suite of test scenarios for multi-agent reinforcement learning.'),
-    long_description=open('README.md').read(),
-    long_description_content_type='text/markdown',
     keywords='multi-agent reinforcement-learning python machine-learning',
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -88,9 +98,6 @@ setuptools.setup(
     packages=['meltingpot'],
     package_data={
         'meltingpot': [
-            'assets/saved_models/**/**/saved_model.pb',
-            'assets/saved_models/**/**/variables/variables.data-00000-of-00001',
-            'assets/saved_models/**/**/variables/variables.index',
             'lua/modules/*',
             'lua/levels/**/*',
         ],

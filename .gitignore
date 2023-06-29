@@ -1,15 +1,17 @@
+# Ignore MacOS metadata.
+.DS_Store
+
 # Ignore byte-compiled Python code.
 *.py[cod]
 
 # Ignore common venv names.
 /*venv/
 
-# Ignore setup files created during pip install.
+# Ignore files created during installation and building.
 *.egg-info
 /assets/
 /build/
-
-# Ignore lab2d repo created by ./install-dmlab2d.sh.
+/dist/
 /lab2d/
 
 # Ignore saved models.
