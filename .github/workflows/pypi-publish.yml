@@ -1,0 +1,58 @@
+# A workflow to publish releases to PyPi and TestPyPi.
+
+name: pypi-publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      upload_to_test_pypi:
+        description: 'Upload to Test PyPi'
+        type: boolean
+        default: true
+      upload_to_pypi:
+        description: 'Upload to PyPi'
+        type: boolean
+        default: false
+
+permissions: read-all
+
+jobs:
+  pypi-publish:
+    name: Upload to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dm-meltingpot
+    permissions:
+      id-token: write
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+
+      - name: Set up Python
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435
+        with:
+          python-version: '3.9'
+
+      - name: Install Python dependencies
+        run: pip install --upgrade pip build
+
+      - name: Build Melting Pot source distribution
+        run: python -m build --sdist --outdir dist/
+
+      - name: Publish to TestPyPI
+        if: github.event_name == 'release' || inputs.upload_to_test_pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+
+      - name: Publish to PyPI
+        if: github.event_name == 'release' || inputs.upload_to_pypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
