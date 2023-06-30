@@ -20,7 +20,6 @@ Use 'Tab' to switch between players.
 """
 
 import argparse
-import dataclasses
 import json
 
 from ml_collections import config_dict
@@ -44,16 +43,6 @@ _ACTION_MAP = {
 environment_configs = {
     'hidden_agenda': hidden_agenda,
 }
-
-# The impostor is always the 5th player when running in human mode. Otherwise
-# you should randomize the impostor's player ID.
-_PREFERENCES = [
-    {'role': 'crewmate'},
-    {'role': 'crewmate'},
-    {'role': 'crewmate'},
-    {'role': 'crewmate'},
-    {'role': 'impostor'},
-]
 
 
 def verbose_fn(env_timestep, player_index, current_player_index):
@@ -87,9 +76,8 @@ def main():
   env_module = environment_configs[args.level_name]
   env_config = env_module.get_config()
   with config_dict.ConfigDict(env_config).unlocked() as env_config:
-    # Apply player preferences specified above (e.g. roles).
-    env_config.lab2d_settings = dataclasses.asdict(
-        env_module.build(_PREFERENCES, env_config))
+    roles = env_config.default_player_roles
+    env_config.lab2d_settings = env_module.build(roles, env_config)
   level_playing_utils.run_episode(
       args.observation, args.settings, _ACTION_MAP, env_config,
       level_playing_utils.RenderType.PYGAME, MAX_SCREEN_WIDTH,
