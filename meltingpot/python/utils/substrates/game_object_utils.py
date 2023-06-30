@@ -173,9 +173,9 @@ def build_avatar_badges(
 def get_game_object_positions_from_map(
     ascii_map: str, char: str, orientation_mode: str = "always_north"
     ) -> Sequence[Transform]:
-  """Extract the ocurrences of a character in the ascii map into transforms.
+  """Extract the occurrences of a character in the ascii map into transforms.
 
-  For all ocurrences of the given `char`, retrieves a Transform containing the
+  For all occurrences of the given `char`, retrieves a Transform containing the
   position and orientation of the instance.
 
   Args:
@@ -185,7 +185,7 @@ def get_game_object_positions_from_map(
 
   Returns:
     A list of Transforms containing all the positions and orientations of all
-    ocurrences of the character in the map.
+    occurrences of the character in the map.
   """
   transforms = []
   rows = ascii_map.split("\n")
@@ -194,7 +194,6 @@ def get_game_object_positions_from_map(
   for i, row in enumerate(rows[1:]):
     indices = [i for i, c in enumerate(row) if char == c]
     for j in indices:
-      orientation = None
       if orientation_mode == "always_north":
         orientation = Orientation.NORTH
       else:
