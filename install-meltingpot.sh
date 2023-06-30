@@ -39,8 +39,9 @@ function check_setup() {
 
 function install_meltingpot() {
   echo -e "\nInstalling meltingpot..."
-  pip install --upgrade pip setuptools
-  pip install .
+  pip install --upgrade pip build setuptools
+  python -m build --sdist --outdir dist/
+  pip install dist/*.tar.gz
 }
 
 
