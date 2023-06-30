@@ -7,6 +7,10 @@ on:
     types: [published]
   workflow_dispatch:
     inputs:
+      test_sdist:
+        description: 'Test the sdist before uploading'
+        type: boolean
+        default: true
       upload_to_test_pypi:
         description: 'Upload to Test PyPi'
         type: boolean
@@ -39,10 +43,24 @@ jobs:
           python-version: '3.9'
 
       - name: Install Python dependencies
-        run: pip install --upgrade pip build
+        run: |
+          pip install --upgrade pip
+          pip install build
 
-      - name: Build Melting Pot source distribution
+      - name: Build source distribution
         run: python -m build --sdist --outdir dist/
+
+      - name: Install from source distribution
+        if: github.event_name == 'release' || inputs.test_sdist
+        run: |
+          pip install setuptools
+          pip -vvv install dist/*.tar.gz
+
+      - name: Test installation
+        if: github.event_name == 'release' || inputs.test_sdist
+        run: |
+          pip install pytest-xdist
+          pytest -n auto -rax --pyargs meltingpot
 
       - name: Publish to TestPyPI
         if: github.event_name == 'release' || inputs.upload_to_test_pypi
