@@ -30,20 +30,8 @@ RUN pip install \
   toml \
   yapf
 
-# Install lab2d (appropriate version for architecture)
-RUN if [ "$(uname -m)" != 'x86_64' ]; then \
-    echo "No Lab2d wheel available for $(uname -m) machines." >&2 \
-    exit 1; \
-  elif [ "$(uname -s)" = 'Linux' ]; then \
-    pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-manylinux_2_31_x86_64.whl ;\
-  else \
-    pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2022-03-24/dmlab2d-1.0-cp39-cp39-macosx_10_15_x86_64.whl ;\
-  fi
-
-# Download assets
-RUN mkdir -p /workspaces/meltingpot/meltingpot && \
-  curl -SL https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-2.1.0.tar.gz \
-  | tar -xz --directory=/workspaces/meltingpot/meltingpot
+# Install lab2d from wheel.
+RUN pip install https://github.com/deepmind/lab2d/releases/download/release_candidate_2023-06_01/dmlab2d-1.0-cp39-cp39-manylinux_2_35_x86_64.whl
 
 # Set Python path
 ENV PYTHONPATH="/workspaces/meltingpot"
