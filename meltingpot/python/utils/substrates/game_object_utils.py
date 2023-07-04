@@ -210,7 +210,9 @@ def _create_game_object(
   go_transform = get_first_named_component(game_object, "Transform")
   go_transform["kwargs"] = {
       "position": (transform.position.x, transform.position.y),
-      "orientation": transform.orientation.value,
+      "orientation": (transform.orientation.value
+                      if transform.orientation is not None
+                      else Orientation.NORTH.value),
     }
   return game_object
 
