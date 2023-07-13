@@ -94,6 +94,9 @@ setuptools.setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     cmdclass={'build_py': BuildPy},
@@ -109,7 +112,8 @@ setuptools.setup(
         'absl-py',
         'chex',
         'dm_env',
-        # 'dmlab2d',  # Not yet available for PIP install.
+        'dmlab2d',
+        'dm-tree',
         'immutabledict',
         'ml-collections',
         'networkx',
@@ -123,14 +127,12 @@ setuptools.setup(
     extras_require={
         # Dependencies required for rllib example.
         'rllib': [
-            'dm-tree',
             'gym',
             'ray[rllib,default]==2.0.0',
             'numpy<1.23',  # Needed by Ray because it uses `np.bool`.
         ],
         # Dependencies required for pettingzoo example.
         'pettingzoo': [
-            'dm-tree',
             'gym',
             'matplotlib',
             'pettingzoo>=1.22.3',
