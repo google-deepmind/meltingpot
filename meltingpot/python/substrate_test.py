@@ -19,8 +19,8 @@ from absl.testing import parameterized
 import dm_env
 import numpy as np
 
-from meltingpot.python import substrate
-from meltingpot.python.testing import substrates as test_utils
+from meltingpot import substrate
+from meltingpot.testing import substrates as test_utils
 
 
 @parameterized.named_parameters((name, name) for name in substrate.SUBSTRATES)

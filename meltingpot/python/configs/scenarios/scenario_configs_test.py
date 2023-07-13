@@ -18,10 +18,10 @@ import collections
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python import bot as bot_factory
-from meltingpot.python.configs import bots
-from meltingpot.python.configs import scenarios
-from meltingpot.python.configs import substrates
+from meltingpot import bot as bot_factory
+from meltingpot.configs import bots
+from meltingpot.configs import scenarios
+from meltingpot.configs import substrates
 
 SCENARIO_CONFIGS = scenarios.SCENARIO_CONFIGS
 AVAILABLE_BOTS = bot_factory.BOTS

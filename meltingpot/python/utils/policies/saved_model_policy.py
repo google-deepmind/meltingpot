@@ -21,8 +21,8 @@ import numpy as np
 import tensorflow as tf
 import tree
 
-from meltingpot.python.utils.policies import permissive_model
-from meltingpot.python.utils.policies import policy
+from meltingpot.utils.policies import permissive_model
+from meltingpot.utils.policies import policy
 
 
 def _numpy_to_placeholder(

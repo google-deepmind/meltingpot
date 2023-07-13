@@ -15,10 +15,10 @@
 
 from absl.testing import absltest
 from gym.spaces import discrete
+from meltingpot import substrate
+from meltingpot.configs.substrates import commons_harvest_open
 
-from examples.rllib import utils
-from meltingpot.python import substrate
-from meltingpot.python.configs.substrates import commons_harvest_open
+from .. import utils
 
 
 class MeltingPotEnvTests(absltest.TestCase):

@@ -23,10 +23,10 @@ import numpy as np
 import reactivex
 from reactivex import subject
 
-from meltingpot.python.utils.policies import policy
-from meltingpot.python.utils.scenarios import population
-from meltingpot.python.utils.substrates import substrate as substrate_lib
-from meltingpot.python.utils.substrates.wrappers import observables
+from meltingpot.utils.policies import policy
+from meltingpot.utils.scenarios import population
+from meltingpot.utils.substrates import substrate as substrate_lib
+from meltingpot.utils.substrates.wrappers import observables
 
 T = TypeVar('T')
 

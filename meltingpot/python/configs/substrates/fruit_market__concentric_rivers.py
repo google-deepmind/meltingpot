@@ -21,8 +21,8 @@ cost to players who step on them.
 
 from ml_collections import config_dict as configdict
 
-from meltingpot.python.configs.substrates import fruit_market as base_config
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import fruit_market as base_config
+from meltingpot.utils.substrates import specs
 
 build = base_config.build
 

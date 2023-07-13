@@ -22,7 +22,7 @@ import dm_env
 import numpy as np
 import tree
 
-from meltingpot.python.utils.puppeteers import puppeteer
+from meltingpot.utils.puppeteers import puppeteer
 
 State = TypeVar("State")
 Observation = Mapping[str, tree.Structure[np.ndarray]]

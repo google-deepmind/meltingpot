@@ -35,7 +35,7 @@ Model-free conventions in multi-agent reinforcement learning with heterogeneous
 preferences. arXiv preprint arXiv:2010.09054.
 """
 
-from meltingpot.python.configs.substrates import allelopathic_harvest as base_config
+from meltingpot.configs.substrates import allelopathic_harvest as base_config
 
 OPEN_ASCII_MAP = """
 333PPPP12PPP322P32PPP1P13P3P3

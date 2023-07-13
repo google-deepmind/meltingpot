@@ -10,7 +10,7 @@ By the end, your game will look like this:
 
 ## Getting started
 
-The code for this tutorial is in `meltingpot/docs/substrate_tutorial`, and you
+The code for this tutorial is in `meltingpot/examples/tutorial/harvest`, and you
 can try it out like this:
 
 <code class="lang-shell"><pre>
@@ -30,7 +30,7 @@ UnboundLocalError: local variable 'game_display' referenced before assignment
 ```
 
 make sure you are including the `-- --observation WORLD.RGB` parameter in your
-command. The reson for this is that the empty substrate only has two
+command. The reason for this is that the empty substrate only has two
 observations: `WORLD.RGB` and `WORLD.TEXT`. We will add more later on, including
 the default per-player `RGB` one.
 
@@ -38,17 +38,17 @@ the default per-player `RGB` one.
 
 If you just want to skip ahead and look at the finished game, simply change the
 import in
-[`play_harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/substrate_tutorial/harvest/play_harvest.py)
+[`play_harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/examples/tutorial/harvest/play_harvest.py)
 from
 
 ```python
-from meltingpot.tutorial.harvest.configs.environment import harvest as game
+from .configs.environment import harvest as game
 ```
 
 to
 
 ```python
-from meltingpot.tutorial.harvest.configs.environment import harvest_finished as game
+from .configs.environment import harvest_finished as game
 ```
 
 and launch as desired:
@@ -72,7 +72,7 @@ us, at least, have an avatar that we can move around.
 
 The first thing to do is to set our number of players to 1 and add the
 individual observation to the config in
-[`harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/substrate_tutorial/harvest/configs/environment/harvest.py):
+[`harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/examples/tutorial/harvest/configs/environment/harvest.py):
 
 ```python
   config.num_players = 1
@@ -209,7 +209,7 @@ the `lab2d_settings` part of the config. In the end, they should look like this:
   config.substrate.lab2d_settings = {
       "levelName": "harvest",
       "levelDirectory":
-          "meltingpot/substrate_tutorial/harvest/levels",
+          "meltingpot/examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 100,
       "numPlayers": 1,
       "spriteSize": 8,
@@ -272,7 +272,7 @@ We have some useful sprites in the
 Let's import it (don't forget to add the dependency):
 
 ```python
-from meltingpot.python.utils.substrates import shapes
+from meltingpot.utils.substrates import shapes
 ```
 
 and change our avatar's Appearance `Component` to:
@@ -501,7 +501,7 @@ character in the ASCII map, and call the prefab `"apple"`.
   config.lab2d_settings = {
       "levelName": "harvest",
       "levelDirectory":
-          "meltingpot/tutorial/harvest/levels",
+          "meltingpot/examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 100,
       "numPlayers": 5,
       "spriteSize": 8,
@@ -720,7 +720,7 @@ First set `config.num_players = 5`. The rest of the changes go in
   config.lab2d_settings = {
       "levelName": "harvest_finished",
       "levelDirectory":
-          "meltingpot/tutorial/harvest/levels",
+          "meltingpot/examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 1000,
       "numPlayers": 5,
       "spriteSize": 8,

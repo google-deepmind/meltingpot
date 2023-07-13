@@ -20,21 +20,20 @@ from typing import AbstractSet, Callable, Iterable, Literal, Mapping, Optional, 
 
 import immutabledict
 
-from meltingpot.python.utils.puppeteers import alternator
-from meltingpot.python.utils.puppeteers import clean_up
-from meltingpot.python.utils.puppeteers import coins
-from meltingpot.python.utils.puppeteers import coordination_in_the_matrix
-from meltingpot.python.utils.puppeteers import fixed_goal
-from meltingpot.python.utils.puppeteers import gift_refinements
-from meltingpot.python.utils.puppeteers import in_the_matrix
-from meltingpot.python.utils.puppeteers import puppeteer
-from meltingpot.python.utils.puppeteers import running_with_scissors_in_the_matrix
+from meltingpot.utils.puppeteers import alternator
+from meltingpot.utils.puppeteers import clean_up
+from meltingpot.utils.puppeteers import coins
+from meltingpot.utils.puppeteers import coordination_in_the_matrix
+from meltingpot.utils.puppeteers import fixed_goal
+from meltingpot.utils.puppeteers import gift_refinements
+from meltingpot.utils.puppeteers import in_the_matrix
+from meltingpot.utils.puppeteers import puppeteer
+from meltingpot.utils.puppeteers import running_with_scissors_in_the_matrix
 
 
 def _find_models_root() -> str:
   import re  # pylint: disable=g-import-not-at-top
-  return re.sub('meltingpot/python/.*', 'meltingpot/assets/saved_models',
-                __file__)
+  return re.sub('meltingpot/.*?$', 'meltingpot/assets/saved_models/', __file__)
 
 
 MODELS_ROOT = _find_models_root()

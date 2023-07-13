@@ -18,7 +18,7 @@ from typing import Callable
 
 import dm_env
 
-from meltingpot.python.utils.policies import policy
+from meltingpot.utils.policies import policy
 
 
 class PolicyFactory(metaclass=abc.ABCMeta):

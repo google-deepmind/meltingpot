@@ -51,7 +51,8 @@ class BuildPy(build_py.build_py):
       urllib.request.urlretrieve(ASSETS_URL, filename=tar_file_path)
       print(f'downloaded {tar_file_path}', flush=True)
 
-    root = self.get_package_dir('meltingpot')
+    root = os.path.join(self.get_package_dir(''), 'meltingpot')
+    os.makedirs(root, exist_ok=True)
     if os.path.exists(f'{root}/assets'):
       shutil.rmtree(f'{root}/assets')
       print('deleted existing assets', flush=True)
@@ -61,7 +62,8 @@ class BuildPy(build_py.build_py):
 
   def build_assets(self):
     """Copies assets from package to build lib."""
-    package_root = self.get_package_dir('meltingpot')
+    package_root = os.path.join(self.get_package_dir(''), 'meltingpot')
+    os.makedirs(package_root, exist_ok=True)
     build_root = os.path.join(self.build_lib, 'meltingpot')
     if os.path.exists(f'{build_root}/assets'):
       shutil.rmtree(f'{build_root}/assets')
@@ -95,12 +97,12 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     cmdclass={'build_py': BuildPy},
-    package_dir={'meltingpot': 'meltingpot'},
+    package_dir={
+        'meltingpot': 'meltingpot/python',
+        'meltingpot.lua': 'meltingpot/lua',
+    },
     package_data={
-        'meltingpot': [
-            'lua/modules/*',
-            'lua/levels/**/*',
-        ],
+        'meltingpot.lua': ['**'],
     },
     python_requires='>=3.9',
     install_requires=[

@@ -22,8 +22,8 @@ import dm_env
 import immutabledict
 import numpy as np
 
-from meltingpot.python.utils.puppeteers import in_the_matrix
-from meltingpot.python.utils.puppeteers import testutils
+from meltingpot.utils.puppeteers import in_the_matrix
+from meltingpot.utils.puppeteers import testutils
 
 _RESOURCE_0 = in_the_matrix.Resource(
     index=0,

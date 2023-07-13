@@ -17,7 +17,7 @@ from typing import Tuple
 
 import dm_env
 
-from meltingpot.python.utils.policies import policy
+from meltingpot.utils.policies import policy
 
 
 class FixedActionPolicy(policy.Policy[Tuple[()]]):

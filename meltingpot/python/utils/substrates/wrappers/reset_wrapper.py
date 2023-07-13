@@ -18,7 +18,7 @@ from typing import Callable
 import dm_env
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.utils.substrates.wrappers import base
 
 
 class ResetWrapper(base.Lab2dWrapper):

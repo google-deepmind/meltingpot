@@ -21,7 +21,7 @@ import dm_env
 import numpy as np
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import collective_reward_wrapper
+from meltingpot.utils.substrates.wrappers import collective_reward_wrapper
 
 RGB_SPEC = dm_env.specs.Array(shape=(2, 1), dtype=np.int8)
 COLLECTIVE_REWARD_SPEC = dm_env.specs.Array(shape=(), dtype=np.float64)

@@ -19,8 +19,8 @@ from absl import logging  # pylint: disable=unused-import
 import networkx as nx  # pylint: disable=unused-import
 import numpy as np
 
-from meltingpot.python.utils.substrates import colors
-from meltingpot.python.utils.substrates import shapes
+from meltingpot.utils.substrates import colors
+from meltingpot.utils.substrates import shapes
 
 EARTH_COLOR = (225, 169, 95, 255)  # An earth color.
 WHITE_COLOR = (255, 255, 255, 255)  # A white color.

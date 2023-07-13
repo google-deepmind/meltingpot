@@ -18,7 +18,7 @@ from absl.testing import parameterized
 import dm_env
 import tree
 
-from meltingpot.python.utils.policies import policy as policy_lib
+from meltingpot.utils.policies import policy as policy_lib
 
 
 class BotTestCase(parameterized.TestCase):

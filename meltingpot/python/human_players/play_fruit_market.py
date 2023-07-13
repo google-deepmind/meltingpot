@@ -29,8 +29,8 @@ import json
 from ml_collections import config_dict
 import pygame
 
-from meltingpot.python.configs.substrates import fruit_market__concentric_rivers
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import fruit_market__concentric_rivers
+from meltingpot.human_players import level_playing_utils
 
 
 def get_offer_apple_pressed() -> int:

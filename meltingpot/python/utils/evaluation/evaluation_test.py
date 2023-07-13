@@ -20,7 +20,7 @@ import cv2
 import dm_env
 import numpy as np
 
-from meltingpot.python.utils.evaluation import evaluation
+from meltingpot.utils.evaluation import evaluation
 
 
 def _as_timesteps(frames):

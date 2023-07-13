@@ -20,7 +20,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.utils.substrates.wrappers import base
 
 _WRAPPED_METHODS = tuple([
     name for name, _ in inspect.getmembers(dmlab2d.Environment)

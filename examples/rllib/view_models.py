@@ -26,7 +26,7 @@ from ray.rllib.algorithms.registry import get_trainer_class
 from ray.tune.analysis.experiment_analysis import ExperimentAnalysis
 from ray.tune.registry import register_env
 
-from examples.rllib import utils
+from . import utils
 
 
 def main():

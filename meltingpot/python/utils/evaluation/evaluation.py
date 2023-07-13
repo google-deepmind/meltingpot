@@ -28,12 +28,12 @@ import pandas as pd
 from reactivex import operators as ops
 from reactivex import subject
 
-from meltingpot import python as meltingpot
-from meltingpot.python.utils.policies import policy as policy_lib
-from meltingpot.python.utils.policies import saved_model_policy
-from meltingpot.python.utils.scenarios import population as population_lib
-from meltingpot.python.utils.scenarios import scenario as scenario_lib
-from meltingpot.python.utils.substrates import substrate as substrate_lib
+import meltingpot
+from meltingpot.utils.policies import policy as policy_lib
+from meltingpot.utils.policies import saved_model_policy
+from meltingpot.utils.scenarios import population as population_lib
+from meltingpot.utils.scenarios import scenario as scenario_lib
+from meltingpot.utils.substrates import substrate as substrate_lib
 
 T = TypeVar('T')
 

@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.utils.puppeteers import clean_up
-from meltingpot.python.utils.puppeteers import testutils
+from meltingpot.utils.puppeteers import clean_up
+from meltingpot.utils.puppeteers import testutils
 
 _NUM_COOPERATORS_KEY = 'num_cooperators'
 _COOPERATE = mock.sentinel.cooperate

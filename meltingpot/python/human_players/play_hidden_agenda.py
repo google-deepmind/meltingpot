@@ -24,8 +24,8 @@ import json
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import hidden_agenda
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import hidden_agenda
+from meltingpot.human_players import level_playing_utils
 
 
 MAX_SCREEN_WIDTH = 800

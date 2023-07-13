@@ -24,14 +24,14 @@ import json
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import collaborative_cooking__asymmetric
-from meltingpot.python.configs.substrates import collaborative_cooking__circuit
-from meltingpot.python.configs.substrates import collaborative_cooking__cramped
-from meltingpot.python.configs.substrates import collaborative_cooking__crowded
-from meltingpot.python.configs.substrates import collaborative_cooking__figure_eight
-from meltingpot.python.configs.substrates import collaborative_cooking__forced
-from meltingpot.python.configs.substrates import collaborative_cooking__ring
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import collaborative_cooking__asymmetric
+from meltingpot.configs.substrates import collaborative_cooking__circuit
+from meltingpot.configs.substrates import collaborative_cooking__cramped
+from meltingpot.configs.substrates import collaborative_cooking__crowded
+from meltingpot.configs.substrates import collaborative_cooking__figure_eight
+from meltingpot.configs.substrates import collaborative_cooking__forced
+from meltingpot.configs.substrates import collaborative_cooking__ring
+from meltingpot.human_players import level_playing_utils
 
 
 MAX_SCREEN_WIDTH = 800

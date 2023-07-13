@@ -17,7 +17,7 @@ from typing import Any, Iterator, Iterable, Mapping, Optional, Sequence, TypeVar
 
 import dm_env
 
-from meltingpot.python.utils.puppeteers import puppeteer as puppeteer_lib
+from meltingpot.utils.puppeteers import puppeteer as puppeteer_lib
 
 GOAL_KEY = puppeteer_lib._GOAL_OBSERVATION_KEY  # pylint: disable=protected-access
 State = TypeVar('State')

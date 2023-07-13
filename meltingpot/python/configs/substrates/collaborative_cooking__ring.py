@@ -33,8 +33,8 @@ If players do not coordinate, they will block each other’s movement.
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import collaborative_cooking as base_config
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import collaborative_cooking as base_config
+from meltingpot.utils.substrates import specs
 
 build = base_config.build
 

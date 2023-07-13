@@ -23,10 +23,10 @@ import argparse
 import json
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import commons_harvest__closed
-from meltingpot.python.configs.substrates import commons_harvest__open
-from meltingpot.python.configs.substrates import commons_harvest__partnership
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import commons_harvest__closed
+from meltingpot.configs.substrates import commons_harvest__open
+from meltingpot.configs.substrates import commons_harvest__partnership
+from meltingpot.human_players import level_playing_utils
 
 
 environment_configs = {

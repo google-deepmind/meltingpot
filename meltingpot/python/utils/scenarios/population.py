@@ -23,7 +23,7 @@ import dm_env
 import reactivex
 from reactivex import subject
 
-from meltingpot.python.utils.policies import policy as policy_lib
+from meltingpot.utils.policies import policy as policy_lib
 
 
 def _step_fn(policy: policy_lib.Policy,

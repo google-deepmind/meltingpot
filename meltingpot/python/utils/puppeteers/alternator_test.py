@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.utils.puppeteers import alternator
-from meltingpot.python.utils.puppeteers import testutils
+from meltingpot.utils.puppeteers import alternator
+from meltingpot.utils.puppeteers import testutils
 
 _GOAL_A = mock.sentinel.goal_a
 _GOAL_B = mock.sentinel.goal_b

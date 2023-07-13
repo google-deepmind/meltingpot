@@ -15,10 +15,10 @@ from absl.testing import absltest
 import dm_env
 import numpy as np
 
-from meltingpot.python.testing import mocks
-from meltingpot.python.testing import substrates
-from meltingpot.python.utils.substrates import specs as meltingpot_specs
-from meltingpot.python.utils.substrates import substrate
+from meltingpot.testing import mocks
+from meltingpot.testing import substrates
+from meltingpot.utils.substrates import specs as meltingpot_specs
+from meltingpot.utils.substrates import substrate
 
 
 class MocksTest(substrates.SubstrateTestCase):

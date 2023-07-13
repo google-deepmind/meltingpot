@@ -20,7 +20,7 @@ import dm_env
 import immutabledict
 import numpy as np
 
-from meltingpot.python.utils.substrates.wrappers import observables
+from meltingpot.utils.substrates.wrappers import observables
 
 T = TypeVar('T')
 Numeric = Union[int, float, np.ndarray]

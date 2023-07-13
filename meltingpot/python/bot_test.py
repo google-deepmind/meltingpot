@@ -16,8 +16,8 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python import bot
-from meltingpot.python.testing import bots as test_utils
+from meltingpot import bot
+from meltingpot.testing import bots as test_utils
 
 
 @parameterized.named_parameters((name, name) for name in bot.BOTS)

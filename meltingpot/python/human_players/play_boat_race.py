@@ -24,9 +24,9 @@ import argparse
 import json
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import boat_race__eight_races
-from meltingpot.python.human_players import level_playing_utils
-from meltingpot.python.utils.substrates import game_object_utils
+from meltingpot.configs.substrates import boat_race__eight_races
+from meltingpot.human_players import level_playing_utils
+from meltingpot.utils.substrates import game_object_utils
 
 MAX_SCREEN_WIDTH = 600
 MAX_SCREEN_HEIGHT = 800

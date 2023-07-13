@@ -27,8 +27,8 @@ import tree
 import dmlab2d
 from dmlab2d import runfiles_helper
 from dmlab2d import settings_helper
-from meltingpot.python.utils.substrates import game_object_utils
-from meltingpot.python.utils.substrates.wrappers import reset_wrapper
+from meltingpot.utils.substrates import game_object_utils
+from meltingpot.utils.substrates.wrappers import reset_wrapper
 
 
 Settings = Union[config_dict.ConfigDict, Mapping[str, Any]]
@@ -39,7 +39,7 @@ _DMLAB2D_ROOT = runfiles_helper.find()
 
 def _find_root() -> str:
   import re  # pylint: disable=g-import-not-at-top
-  return re.sub('meltingpot/python/.*', '', __file__)
+  return re.sub('meltingpot/.*?$', '', __file__)
 
 
 _MELTINGPOT_ROOT = _find_root()

@@ -15,7 +15,7 @@
 
 from ml_collections import config_dict as configdict
 
-from meltingpot.python.configs.substrates import boat_race as base_config
+from meltingpot.configs.substrates import boat_race as base_config
 
 
 def get_config() -> configdict.ConfigDict:

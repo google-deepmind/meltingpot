@@ -20,10 +20,10 @@ from absl.testing import parameterized
 import dm_env
 import immutabledict
 
-from meltingpot.python.utils.policies import policy
-from meltingpot.python.utils.scenarios import population
-from meltingpot.python.utils.scenarios import scenario as scenario_utils
-from meltingpot.python.utils.substrates import substrate as substrate_lib
+from meltingpot.utils.policies import policy
+from meltingpot.utils.scenarios import population
+from meltingpot.utils.scenarios import scenario as scenario_utils
+from meltingpot.utils.substrates import substrate as substrate_lib
 
 
 def _track(source, fields):

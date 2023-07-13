@@ -20,7 +20,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import observables_wrapper
+from meltingpot.utils.substrates.wrappers import observables_wrapper
 
 
 class ObservablesWrapperTest(parameterized.TestCase):

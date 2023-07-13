@@ -24,11 +24,11 @@ import json
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import predator_prey__alley_hunt
-from meltingpot.python.configs.substrates import predator_prey__open
-from meltingpot.python.configs.substrates import predator_prey__orchard
-from meltingpot.python.configs.substrates import predator_prey__random_forest
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import predator_prey__alley_hunt
+from meltingpot.configs.substrates import predator_prey__open
+from meltingpot.configs.substrates import predator_prey__orchard
+from meltingpot.configs.substrates import predator_prey__random_forest
+from meltingpot.human_players import level_playing_utils
 
 
 MAX_SCREEN_WIDTH = 800

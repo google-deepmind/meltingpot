@@ -24,8 +24,8 @@ import argparse
 import json
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import gift_refinements
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import gift_refinements
+from meltingpot.human_players import level_playing_utils
 
 
 environment_configs = {

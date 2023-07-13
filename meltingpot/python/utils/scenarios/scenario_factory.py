@@ -19,10 +19,10 @@ from typing import Callable, Optional
 import dm_env
 import immutabledict
 
-from meltingpot.python.utils.policies import policy_factory
-from meltingpot.python.utils.scenarios import scenario as scenario_lib
-from meltingpot.python.utils.substrates import substrate as substrate_lib
-from meltingpot.python.utils.substrates import substrate_factory
+from meltingpot.utils.policies import policy_factory
+from meltingpot.utils.scenarios import scenario as scenario_lib
+from meltingpot.utils.substrates import substrate as substrate_lib
+from meltingpot.utils.substrates import substrate_factory
 
 SubstrateTransform = Callable[[substrate_lib.Substrate],
                               substrate_lib.Substrate]

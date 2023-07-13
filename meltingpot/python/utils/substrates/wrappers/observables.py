@@ -28,7 +28,7 @@ import dm_env
 import reactivex
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import base
+from meltingpot.utils.substrates.wrappers import base
 
 
 @chex.dataclass(frozen=True)

@@ -19,7 +19,7 @@ from absl import logging  # pylint: disable=unused-import
 import networkx as nx  # pylint: disable=unused-import
 import numpy as np
 
-from meltingpot.python.utils.substrates import shapes
+from meltingpot.utils.substrates import shapes
 
 EMPTY_COLOR = shapes.PETRI_DISH_PALETTE["@"]
 WHITE_COLOR = (255, 255, 255, 255)  # A white color.

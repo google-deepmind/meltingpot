@@ -15,14 +15,14 @@
 
 import os
 
+from meltingpot import substrate
 import ray
 from ray import air
 from ray import tune
 from ray.rllib.algorithms import ppo
 from ray.rllib.policy.policy import PolicySpec
 
-from examples.rllib import utils
-from meltingpot.python import substrate
+from . import utils
 
 
 def get_config(

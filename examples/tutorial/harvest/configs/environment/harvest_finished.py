@@ -14,7 +14,7 @@
 """Configuration for finished tutorial level: Harvest."""
 
 from ml_collections import config_dict
-from meltingpot.python.utils.substrates import shapes
+from meltingpot.utils.substrates import shapes
 
 
 SPAWN_POINT = {

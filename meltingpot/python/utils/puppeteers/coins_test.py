@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.utils.puppeteers import coins
-from meltingpot.python.utils.puppeteers import testutils
+from meltingpot.utils.puppeteers import coins
+from meltingpot.utils.puppeteers import testutils
 
 _COOPERATE = mock.sentinel.cooperate
 _DEFECT = mock.sentinel.defect

@@ -30,7 +30,7 @@ import numpy as np
 import pygame
 
 import dmlab2d
-from meltingpot.python.utils.substrates import builder
+from meltingpot.utils.substrates import builder
 
 WHITE = (255, 255, 255)
 

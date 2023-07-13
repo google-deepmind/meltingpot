@@ -16,7 +16,7 @@
 import copy
 from typing import Any, Dict, Mapping, Sequence
 
-from meltingpot.python.utils.substrates import shapes
+from meltingpot.utils.substrates import shapes
 
 
 def get_cumulant_metric_configs(

@@ -31,9 +31,9 @@ problem to be solved.
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import territory as base_config
-from meltingpot.python.utils.substrates import map_helpers
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import territory as base_config
+from meltingpot.utils.substrates import map_helpers
+from meltingpot.utils.substrates import specs
 
 build = base_config.build
 

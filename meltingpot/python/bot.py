@@ -15,14 +15,14 @@
 
 import functools
 
-from meltingpot.python import substrate
-from meltingpot.python.configs import bots as bot_configs
-from meltingpot.python.utils.policies import fixed_action_policy
-from meltingpot.python.utils.policies import policy
-from meltingpot.python.utils.policies import policy_factory
-from meltingpot.python.utils.policies import puppet_policy
-from meltingpot.python.utils.policies import saved_model_policy
-from meltingpot.python.utils.substrates import specs
+from meltingpot import substrate
+from meltingpot.configs import bots as bot_configs
+from meltingpot.utils.policies import fixed_action_policy
+from meltingpot.utils.policies import policy
+from meltingpot.utils.policies import policy_factory
+from meltingpot.utils.policies import puppet_policy
+from meltingpot.utils.policies import saved_model_policy
+from meltingpot.utils.substrates import specs
 
 NOOP_BOT_NAME = 'noop_bot'
 NOOP_ACTION = 0

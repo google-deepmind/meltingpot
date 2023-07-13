@@ -60,8 +60,8 @@ import copy
 from typing import Any, Mapping, Sequence
 
 from ml_collections import config_dict
-from meltingpot.python.utils.substrates import shapes
-from meltingpot.python.utils.substrates import specs
+from meltingpot.utils.substrates import shapes
+from meltingpot.utils.substrates import specs
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

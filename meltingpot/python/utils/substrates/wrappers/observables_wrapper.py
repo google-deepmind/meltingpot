@@ -20,7 +20,7 @@ import numpy as np
 from reactivex import subject
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import observables
+from meltingpot.utils.substrates.wrappers import observables
 
 
 Action = Union[int, float, np.ndarray]

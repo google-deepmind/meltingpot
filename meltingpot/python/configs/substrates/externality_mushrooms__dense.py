@@ -23,8 +23,8 @@ mushrooms.
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import externality_mushrooms as base_config
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import externality_mushrooms as base_config
+from meltingpot.utils.substrates import specs
 
 build = base_config.build
 

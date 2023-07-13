@@ -19,8 +19,8 @@ import os
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.configs import bots
-from meltingpot.python.configs import substrates
+from meltingpot.configs import bots
+from meltingpot.configs import substrates
 
 
 def _subdirs(root):

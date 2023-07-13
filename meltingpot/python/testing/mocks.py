@@ -22,10 +22,10 @@ import immutabledict
 import numpy as np
 import tree
 
-from meltingpot import python as meltingpot
-from meltingpot.python.utils.scenarios import scenario
-from meltingpot.python.utils.substrates import specs as meltingpot_specs
-from meltingpot.python.utils.substrates import substrate
+import meltingpot
+from meltingpot.utils.scenarios import scenario
+from meltingpot.utils.substrates import specs as meltingpot_specs
+from meltingpot.utils.substrates import substrate
 
 SUBSTRATE_OBSERVATION_SPEC = immutabledict.immutabledict({
     # Observations present in all substrates. Sizes may vary.

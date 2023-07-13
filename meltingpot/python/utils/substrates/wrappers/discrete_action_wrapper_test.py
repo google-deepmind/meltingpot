@@ -22,7 +22,7 @@ import dm_env
 import numpy as np
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
+from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
 
 MOVE_SPEC = dm_env.specs.BoundedArray(
     shape=(), minimum=0, maximum=3, dtype=np.int8, name='MOVE')

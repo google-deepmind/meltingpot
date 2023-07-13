@@ -17,9 +17,9 @@ from collections.abc import Sequence
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs import substrates as substrate_configs
-from meltingpot.python.utils.substrates import substrate
-from meltingpot.python.utils.substrates import substrate_factory
+from meltingpot.configs import substrates as substrate_configs
+from meltingpot.utils.substrates import substrate
+from meltingpot.utils.substrates import substrate_factory
 
 SUBSTRATES = substrate_configs.SUBSTRATES
 

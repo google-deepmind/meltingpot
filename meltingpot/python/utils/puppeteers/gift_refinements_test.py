@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.utils.puppeteers import gift_refinements
-from meltingpot.python.utils.puppeteers import testutils
+from meltingpot.utils.puppeteers import gift_refinements
+from meltingpot.utils.puppeteers import testutils
 
 _COLLECT = mock.sentinel.collect
 _CONSUME = mock.sentinel.consume

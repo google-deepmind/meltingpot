@@ -16,7 +16,7 @@
 from absl.testing import absltest
 from absl.testing import parameterized
 
-from meltingpot.python.utils.substrates import game_object_utils
+from meltingpot.utils.substrates import game_object_utils
 
 
 def get_transform(x, y, orientation):

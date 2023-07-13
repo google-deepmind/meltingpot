@@ -24,10 +24,10 @@ import json
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import territory__inside_out
-from meltingpot.python.configs.substrates import territory__open
-from meltingpot.python.configs.substrates import territory__rooms
-from meltingpot.python.human_players import level_playing_utils
+from meltingpot.configs.substrates import territory__inside_out
+from meltingpot.configs.substrates import territory__open
+from meltingpot.configs.substrates import territory__rooms
+from meltingpot.human_players import level_playing_utils
 
 
 environment_configs = {

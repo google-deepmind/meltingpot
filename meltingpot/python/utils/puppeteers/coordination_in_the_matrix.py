@@ -15,7 +15,7 @@
 
 from typing import Iterable
 
-from meltingpot.python.utils.puppeteers import in_the_matrix
+from meltingpot.utils.puppeteers import in_the_matrix
 
 
 class CoordinateWithPrevious(in_the_matrix.RespondToPrevious):

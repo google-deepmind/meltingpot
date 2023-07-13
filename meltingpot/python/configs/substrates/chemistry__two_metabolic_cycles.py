@@ -35,10 +35,10 @@ from typing import Any
 from ml_collections import config_dict
 import networkx as nx
 
-from meltingpot.python.configs.substrates import reaction_graph_utils as graph_utils
-from meltingpot.python.utils.substrates import colors
-from meltingpot.python.utils.substrates import shapes
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import reaction_graph_utils as graph_utils
+from meltingpot.utils.substrates import colors
+from meltingpot.utils.substrates import shapes
+from meltingpot.utils.substrates import specs
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

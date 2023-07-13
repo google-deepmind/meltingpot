@@ -21,7 +21,7 @@ import dm_env
 import numpy as np
 
 import dmlab2d
-from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
+from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
 
 ACT_SPEC = dm_env.specs.BoundedArray(
     shape=(), minimum=0, maximum=4, dtype=np.int8)

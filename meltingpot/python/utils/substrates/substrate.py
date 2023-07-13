@@ -21,13 +21,13 @@ import dm_env
 import reactivex
 from reactivex import subject
 
-from meltingpot.python.utils.substrates import builder
-from meltingpot.python.utils.substrates.wrappers import base
-from meltingpot.python.utils.substrates.wrappers import collective_reward_wrapper
-from meltingpot.python.utils.substrates.wrappers import discrete_action_wrapper
-from meltingpot.python.utils.substrates.wrappers import multiplayer_wrapper
-from meltingpot.python.utils.substrates.wrappers import observables
-from meltingpot.python.utils.substrates.wrappers import observables_wrapper
+from meltingpot.utils.substrates import builder
+from meltingpot.utils.substrates.wrappers import base
+from meltingpot.utils.substrates.wrappers import collective_reward_wrapper
+from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
+from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
+from meltingpot.utils.substrates.wrappers import observables
+from meltingpot.utils.substrates.wrappers import observables_wrapper
 
 
 @chex.dataclass(frozen=True)

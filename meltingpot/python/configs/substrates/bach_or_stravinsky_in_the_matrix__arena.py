@@ -33,11 +33,11 @@ from typing import Any, Dict, Mapping, Sequence, Tuple
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import the_matrix
-from meltingpot.python.utils.substrates import colors
-from meltingpot.python.utils.substrates import game_object_utils
-from meltingpot.python.utils.substrates import shapes
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import the_matrix
+from meltingpot.utils.substrates import colors
+from meltingpot.utils.substrates import game_object_utils
+from meltingpot.utils.substrates import shapes
+from meltingpot.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 

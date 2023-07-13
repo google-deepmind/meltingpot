@@ -43,10 +43,10 @@ from typing import Any, Dict, Mapping, Sequence
 
 from ml_collections import config_dict
 
-from meltingpot.python.utils.substrates import colors
-from meltingpot.python.utils.substrates import game_object_utils
-from meltingpot.python.utils.substrates import shapes
-from meltingpot.python.utils.substrates import specs
+from meltingpot.utils.substrates import colors
+from meltingpot.utils.substrates import game_object_utils
+from meltingpot.utils.substrates import shapes
+from meltingpot.utils.substrates import specs
 
 PrefabConfig = game_object_utils.PrefabConfig
 

@@ -17,9 +17,9 @@ from typing import Any, Dict, Generator, Mapping, Sequence
 
 from ml_collections import config_dict
 
-from meltingpot.python.utils.substrates import colors
-from meltingpot.python.utils.substrates import shapes
-from meltingpot.python.utils.substrates import specs
+from meltingpot.utils.substrates import colors
+from meltingpot.utils.substrates import shapes
+from meltingpot.utils.substrates import specs
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

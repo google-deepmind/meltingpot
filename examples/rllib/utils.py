@@ -18,15 +18,16 @@ from typing import Tuple
 import dm_env
 import dmlab2d
 from gym import spaces
+from meltingpot import substrate
+from meltingpot.utils.policies import policy
 from ml_collections import config_dict
 import numpy as np
 from ray.rllib import algorithms
 from ray.rllib.env import multi_agent_env
 from ray.rllib.policy.sample_batch import DEFAULT_POLICY_ID
 
-from examples import utils
-from meltingpot.python import substrate
-from meltingpot.python.utils.policies import policy
+from .. import utils
+
 
 PLAYER_STR_FORMAT = 'player_{index}'
 

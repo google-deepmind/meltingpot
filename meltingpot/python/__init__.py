@@ -13,6 +13,6 @@
 # limitations under the License.
 """Melting Pot."""
 
-from meltingpot.python import bot
-from meltingpot.python import scenario
-from meltingpot.python import substrate
+from meltingpot import bot
+from meltingpot import scenario
+from meltingpot import substrate

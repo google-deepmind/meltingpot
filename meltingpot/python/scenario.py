@@ -19,12 +19,12 @@ from typing import Callable, Optional
 
 import immutabledict
 
-from meltingpot.python import bot as mp_bot
-from meltingpot.python import substrate as mp_substrate
-from meltingpot.python.configs import scenarios as scenario_configs
-from meltingpot.python.utils.scenarios import scenario
-from meltingpot.python.utils.scenarios import scenario_factory
-from meltingpot.python.utils.substrates import substrate as substrate_lib
+from meltingpot import bot as mp_bot
+from meltingpot import substrate as mp_substrate
+from meltingpot.configs import scenarios as scenario_configs
+from meltingpot.utils.scenarios import scenario
+from meltingpot.utils.scenarios import scenario_factory
+from meltingpot.utils.substrates import substrate as substrate_lib
 
 SCENARIOS = frozenset(scenario_configs.SCENARIO_CONFIGS)
 

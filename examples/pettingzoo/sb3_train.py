@@ -14,6 +14,7 @@
 """Binary to run Stable Baselines 3 agents on meltingpot substrates."""
 
 import gym
+from meltingpot import substrate
 import stable_baselines3
 from stable_baselines3.common import callbacks
 from stable_baselines3.common import torch_layers
@@ -23,8 +24,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from examples.pettingzoo import utils
-from meltingpot.python import substrate
+from . import utils
 
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
     "cpu")

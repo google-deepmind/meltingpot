@@ -32,8 +32,8 @@ the players in order to avoid being blocked by each other.
 
 from ml_collections import config_dict
 
-from meltingpot.python.configs.substrates import collaborative_cooking as base_config
-from meltingpot.python.utils.substrates import specs
+from meltingpot.configs.substrates import collaborative_cooking as base_config
+from meltingpot.utils.substrates import specs
 
 build = base_config.build
 

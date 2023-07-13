@@ -17,7 +17,7 @@ from collections.abc import Sequence
 
 import dm_env
 
-from meltingpot.python.utils.puppeteers import puppeteer
+from meltingpot.utils.puppeteers import puppeteer
 
 
 class Alternator(puppeteer.Puppeteer[int]):
