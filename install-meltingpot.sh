@@ -31,9 +31,6 @@ function check_setup() {
   echo -e "\nChecking python version..."
   python --version
   python --version | check_version_gt '3.9'
-
-  echo -e "\nChecking dmlab2d is installed..."
-  python -c 'import dmlab2d'
 }
 
 
