@@ -33,7 +33,7 @@ from meltingpot.utils.puppeteers import running_with_scissors_in_the_matrix
 
 def _find_models_root() -> str:
   import re  # pylint: disable=g-import-not-at-top
-  return re.sub('meltingpot/.*?$', 'meltingpot/assets/saved_models/', __file__)
+  return re.sub('^(.*)/meltingpot/.*?$', r'\1/meltingpot/assets/saved_models/', __file__)
 
 
 MODELS_ROOT = _find_models_root()

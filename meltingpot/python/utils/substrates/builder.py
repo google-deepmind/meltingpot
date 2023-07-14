@@ -39,7 +39,7 @@ _DMLAB2D_ROOT = runfiles_helper.find()
 
 def _find_root() -> str:
   import re  # pylint: disable=g-import-not-at-top
-  return re.sub('meltingpot/.*?$', '', __file__)
+  return re.sub('^(.*)/meltingpot/.*?$', r'\1', __file__)
 
 
 _MELTINGPOT_ROOT = _find_root()
