@@ -1,19 +1,28 @@
-# Ignore MacOS metadata.
+# MacOS metadata.
 .DS_Store
 
-# Ignore byte-compiled Python code.
+# Byte-compiled Python code.
 *.py[cod]
+__pycache__/
+.cache
 
-# Ignore common venv names.
+# Common venv names.
 /*venv/
 
 # Ignore files created during installation and building.
 *.egg-info
+.eggs/
 /assets/
 /build/
 /dist/
 /lab2d/
 
-# Ignore saved models.
+# Test cache
+.pytest_cache
+
+# Type checking
+.pytype
+
+# Saved models.
 /examples/results/
 /meltingpot/assets/
