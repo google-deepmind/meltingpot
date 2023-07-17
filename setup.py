@@ -125,13 +125,24 @@ setuptools.setup(
         'tensorflow-macos' if IS_M1_MAC else 'tensorflow',
     ],
     extras_require={
-        # Dependencies required for rllib example.
+        # Used in development.
+        'dev': [
+            'build',
+            'isort',
+            'pipreqs',
+            'pyink',
+            'pylint',
+            'pytest-xdist',
+            'pytype',
+            'venv',
+        ],
+        # Required for rllib example.
         'rllib': [
             'gym',
             'ray[rllib,default]==2.0.0',
             'numpy<1.23',  # Needed by Ray because it uses `np.bool`.
         ],
-        # Dependencies required for pettingzoo example.
+        # Required for pettingzoo example.
         'pettingzoo': [
             'gym',
             'matplotlib',

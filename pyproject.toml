@@ -4,8 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "google"
+# TODO remove once https://github.com/PyCQA/isort/pull/2149 submitted.
+line_length = 1000
+single_line_exclusions = ["collections.abc", "typing"]
+known_local_folder = ["dmlab2d", "meltingpot", "examples"]
 src_paths = ["meltingpot", "examples"]
 
-[tool.black]
+[tool.pyink]
 line-length = 80
-target-version = ["py39"]
+preview = true
+pyink-indentation = 2
+pyink-use-majority-quotes = true
+
+[tool.pytest.ini_options]
+addopts = "-n auto"
+testpaths = ["meltingpot", "examples"]
+
+[tool.pytype]
+python_version = "3.9"
+inputs = ["meltingpot", "examples"]
+# Keep going past errors to analyze as many files as possible.
+keep_going = true
+# Run N jobs in parallel. When 'auto' is used, this will be equivalent to the
+# number of CPUs on the host system.
+jobs = 'auto'
+# Use the enum overlay for more precise enum checking. This flag is temporary
+# and will be removed once this behavior is enabled by default.
+use_enum_overlay = true
