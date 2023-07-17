@@ -30,14 +30,6 @@ function install_extras() {
 }
 
 
-function test_extras() {
-  echo -e "\nTesting meltingpot extras..."
-  # Test RLLib and Petting Zoo training scripts.
-  # TODO(b/265139141): Add PettingZoo test.
-  test_rllib
-}
-
-
 function main() {
   check_setup
   install_extras

@@ -1,0 +1,48 @@
+# Continuous integration tests.
+
+name: test-examples
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'pyproject.toml'
+      - 'examples/**'
+      - 'meltingpot/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'pyproject.toml'
+      - 'examples/**'
+      - 'meltingpot/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  test-examples:
+    name: Test examples
+    runs-on: ubuntu-latest
+    env:
+      SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
+    timeout-minutes: 90
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+      - name: Set up Python 3.9
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435
+        with:
+          python-version: '3.9'
+      - name: Install Melting Pot
+        run: ./install-meltingpot.sh
+      - name: Install examples
+        run: ./install-extras.sh
+      - name: Test examples
+        run: ./test-extras.sh
