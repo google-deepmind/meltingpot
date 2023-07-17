@@ -50,7 +50,13 @@ function check_setup() {
 }
 
 
-function install_dmlab2d() {
+function install_dmlab2d_from_pypi() {
+  pip install --upgrade pip
+  pip install dmlab2d
+}
+
+
+function install_dmlab2d_from_source() {
   echo -e "\nCloning dmlab2d..."
   git clone https://github.com/deepmind/lab2d
 
@@ -84,8 +90,7 @@ function install_dmlab2d() {
 
 
 function main() {
-  check_setup
-  install_dmlab2d
+  install_dmlab2d_from_pypi || check_setup && install_dmlab2d_from_source
 }
 
 

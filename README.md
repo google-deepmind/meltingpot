@@ -40,67 +40,50 @@ If you are interested in extending Melting Pot, please refer to the
 
 ## Installation
 
-Melting Pot is built on top of
-[DeepMind Lab2D](https://github.com/deepmind/lab2d).
+### `pip` install
+
+Melting Pot can be installed using:
+
+```shell
+pip install https://github.com/deepmind/meltingpot/archive/main.tar.gz
+```
+
+NOTE: Melting Pot is built on top of [DeepMind Lab2D](https://github.com/deepmind/lab2d)
+which is distributed as prebuilt wheels. If there is no appropriate wheel for
+`dmlab2d`, you will need to build it from source (see
+[`install-dmlab2d.sh`](https://github.com/deepmind/meltingpot/blob/main/install-dmlab2d.sh)
+for an example installation script that can be adapted to your setup).
 
 ### Manual install
 
-The installation steps are as follows:
+If you want to work on the Melting Pot source code, you can perform an editable
+installation as follows:
 
-1.  (Optional) Activate a virtual environment, e.g.:
-
-    ```shell
-    python3 -m venv "${HOME}/meltingpot_venv"
-    source "${HOME}/meltingpot_venv/bin/activate"
-    ```
-
-2.  Install `dmlab2d` from the
-    [dmlab2d wheel files](https://github.com/deepmind/lab2d/releases/tag/release_candidate_2023-06_01), e.g.:
-
-    ```shell
-    pip3 install https://github.com/deepmind/lab2d/releases/download/release_candidate_2023-06_01/dmlab2d-1.0-cp39-cp39-manylinux_2_35_x86_64.whl
-    ```
-
-    If there is no appropriate wheel you will need to install
-    [`dmlab2d`](https://github.com/deepmind/lab2d) and build the wheel
-    yourself (see
-    [`install-dmlab2d.sh`](https://github.com/deepmind/meltingpot/blob/main/install-dmlab2d.sh)
-    for an example installation script that can be adapted to your setup).
-
-3.  Test the `dmlab2d` installation in `python3`:
-
-    ```python
-    import dmlab2d
-    import dmlab2d.runfiles_helper
-
-    lab = dmlab2d.Lab2d(dmlab2d.runfiles_helper.find(), {"levelName": "chase_eat"})
-    env = dmlab2d.Environment(lab, ["WORLD.RGB"])
-    env.step({})
-    ```
-
-4.  Install Melting Pot (see
-    [`install-meltingpot.sh`](https://github.com/deepmind/meltingpot/blob/main/install-meltingpot.sh)
-    for an example installation script):
+1.  Clone Melting Pot:
 
     ```shell
     git clone -b main https://github.com/deepmind/meltingpot
     cd meltingpot
-    pip3 install .
     ```
 
-5.  Test the Melting Pot installation:
+2.  (Optional) Activate a virtual environment, e.g.:
 
     ```shell
-    pip3 install pytest
-    pytest meltingpot
+    python -m venv venv
+    source venv/bin/activate
     ```
 
-6.  (Optional) Install the examples (see
-    [`install-extras.sh`](https://github.com/deepmind/meltingpot/blob/main/install-meltingpot.sh)
-    for an example installation script):
+3.  Install Melting Pot:
 
     ```shell
-    pip install .[rllib,pettingzoo]
+    pip install --editable .
+    ```
+
+4.  (Optional) Test the installation:
+
+    ```shell
+    pip install pytest-xdist
+    pytest -n auto --pyargs meltingpot
     ```
 
 ### Devcontainer (x86 only)
