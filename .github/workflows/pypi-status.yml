@@ -23,7 +23,7 @@ jobs:
           - ubuntu-20.04
           - ubuntu-22.04
         python-version:
-          - '3.9'
+          - '3.10'
 
     steps:
       - name: Set up Python ${{ matrix.python_version }}

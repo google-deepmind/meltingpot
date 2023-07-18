@@ -94,7 +94,6 @@ setuptools.setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
@@ -107,7 +106,7 @@ setuptools.setup(
     package_data={
         'meltingpot.lua': ['**'],
     },
-    python_requires='>=3.9',
+    python_requires='>=3.10',
     install_requires=[
         'absl-py',
         'chex',
