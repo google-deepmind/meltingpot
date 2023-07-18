@@ -134,7 +134,6 @@ setuptools.setup(
             'pylint',
             'pytest-xdist',
             'pytype',
-            'venv',
         ],
         # Required for rllib example.
         'rllib': [

@@ -1,32 +1,32 @@
 // For format details, see https://aka.ms/devcontainer.json
 {
-    "name": "Meltingpot (Python 3)",
+    "name": "Melting Pot",
     "build": {
         "dockerfile": "Dockerfile",
-        "context": ".."
+        "context": "..",
+        "args": {
+            "PYTHON_VERSION": "3.10"
+        }
     },
-    // Configure tool-specific properties.
+    "runArgs": [
+        // Increase SHM sufficiently for RLlib. Note you can increase this
+        // further for performance gains (recommended to be at least 30% of RAM
+        // on large machines).
+        "--shm-size=6gb"
+    ],
+    "postCreateCommand": "pip install --editable .[dev]",
+    "containerEnv": {
+        "PYTHONPATH": "/workspaces/meltingpot"
+    },
     "customizations": {
-        // Configure properties specific to VS Code.
         "vscode": {
-            "settings": {
-                "python.linting.enabled": true,
-                "python.formatting.provider": "yapf",
-                "python.formatting.yapfPath": "yapf"
-            },
             "extensions": [
                 "ms-python.python",
+                "ms-python.python.pylint",
                 "ms-python.vscode-pylance",
                 "ms-azuretools.vscode-docker",
                 "donjayamanne.githistory"
             ]
         }
-    },
-    // Run the install script on create
-    "postCreateCommand": "pip install .[rllib] .[pettingzoo]",
-    "runArgs": [
-        // Increase SHM sufficiently for RlLib. Note you can increase this further for 
-        // performance gains (recommended to be at least 30% of RAM on large machines).
-        "--shm-size=6gb"
-    ]
+    }
 }
