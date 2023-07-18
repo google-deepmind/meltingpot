@@ -135,20 +135,5 @@ setuptools.setup(
             'pytest-xdist',
             'pytype',
         ],
-        # Required for rllib example.
-        'rllib': [
-            'gym',
-            'ray[rllib,default]==2.0.0',
-            'numpy<1.23',  # Needed by Ray because it uses `np.bool`.
-        ],
-        # Required for pettingzoo example.
-        'pettingzoo': [
-            'gym',
-            'matplotlib',
-            'pettingzoo>=1.22.3',
-            'stable-baselines3',
-            'supersuit>=3.7.2',
-            'torch',
-        ],
     },
 )

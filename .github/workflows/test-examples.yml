@@ -43,6 +43,6 @@ jobs:
       - name: Install Melting Pot
         run: ./install-meltingpot.sh
       - name: Install examples
-        run: ./install-extras.sh
+        run: ./examples/install.sh
       - name: Test examples
-        run: ./test-extras.sh
+        run: ./examples/test.sh

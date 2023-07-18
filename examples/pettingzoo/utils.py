@@ -22,7 +22,7 @@ from ml_collections import config_dict
 from pettingzoo import utils as pettingzoo_utils
 from pettingzoo.utils import wrappers
 
-from .. import utils
+from ..gym import utils
 
 PLAYER_STR_FORMAT = 'player_{index}'
 MAX_CYCLES = 1000

@@ -76,13 +76,12 @@ installation as follows:
 3.  Install Melting Pot:
 
     ```shell
-    pip install --editable .
+    pip install --editable .[dev]
     ```
 
 4.  (Optional) Test the installation:
 
     ```shell
-    pip install pytest-xdist
     pytest -n auto --pyargs meltingpot
     ```
 
@@ -127,7 +126,7 @@ You can try out the substrates interactively with the
 the `clean_up` substrate, you can run:
 
 ```shell
-python3 meltingpot/python/human_players/play_clean_up.py
+python meltingpot/python/human_players/play_clean_up.py
 ```
 
 You can move around with the `W`, `A`, `S`, `D` keys, Turn with `Q`, and `E`,
@@ -155,18 +154,18 @@ task suite.
 This example uses RLlib to train agents in
 self-play on a Melting Pot substrate.
 
-First you will need to install the dependencies needed by the RLlib example:
+First you will need to install the dependencies needed by the examples:
 
 ```shell
 cd <meltingpot_root>
-pip3 install -e .[rllib]
+pip install -r examples/requirements.txt
 ```
 
 Then you can run the training experiment using:
 
 ```shell
-cd <meltingpot_root>/examples/rllib
-python3 self_play_train.py
+cd examples/rllib
+python self_play_train.py
 ```
 
 #### PettingZoo and Stable-Baselines3
@@ -179,12 +178,9 @@ can be found [here](examples/pettingzoo/utils.py).
 
 ```shell
 cd <meltingpot_root>
-pip3 install -e .[pettingzoo]
-```
-
-```shell
-cd <meltingpot_root>/examples/pettingzoo
-python3 sb3_train.py
+pip install -r examples/requirements.txt
+cd examples/pettingzoo
+python sb3_train.py
 ```
 
 ## Documentation

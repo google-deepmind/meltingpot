@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""MeltingPotEnv as a MultiAgentEnv wrapper to interface with RLLib."""
+"""Tests for utils.py."""
 
 from absl.testing import absltest
 from gym.spaces import discrete
 from meltingpot import substrate
 from meltingpot.configs.substrates import commons_harvest_open
 
-from .. import utils
+from . import utils
 
 
 class MeltingPotEnvTests(absltest.TestCase):

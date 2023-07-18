@@ -133,23 +133,31 @@ def get_config(
   return config
 
 
-def main():
+def train(config, num_iterations=1):
+  """Trains a model.
 
-  config = get_config()
+  Args:
+    config: model config
+    num_iterations: number of iterations ot train for.
+
+  Returns:
+    Training results.
+  """
   tune.register_env("meltingpot", utils.env_creator)
-
-  # 6. Initialize ray, train and save
   ray.init()
-
   stop = {
-      "training_iteration": 1,
+      "training_iteration": num_iterations,
   }
-
-  results = tune.Tuner(
+  return tune.Tuner(
       "PPO",
       param_space=config.to_dict(),
       run_config=air.RunConfig(stop=stop, verbose=1),
   ).fit()
+
+
+def main():
+  config = get_config()
+  results = train(config, num_iterations=1)
   print(results)
   assert results.num_errors == 0
 
