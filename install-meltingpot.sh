@@ -17,35 +17,8 @@
 
 set -euxo pipefail
 
+pip install --upgrade pip
+pip install build setuptools
 
-function check_version_gt() {
-  local required="$1"
-  local input lowest
-  input="$(grep -Eo '[0-9]+\.[0-9]+' /dev/stdin | head -n 1)"
-  lowest="$(printf "${required}\n${input}" | sort -V | head -n 1)"
-  [[ "${lowest}" == "${required}" ]]
-}
-
-
-function check_setup() {
-  echo -e "\nChecking python version..."
-  python --version
-  python --version | check_version_gt '3.9'
-}
-
-
-function install_meltingpot() {
-  echo -e "\nInstalling meltingpot..."
-  pip install --upgrade pip build setuptools
-  python -m build --sdist --outdir dist/
-  pip install dist/*.tar.gz
-}
-
-
-function main() {
-  check_setup
-  install_meltingpot
-}
-
-
-main "$@"
+python -m build --sdist --outdir dist/
+pip install dist/*.tar.gz

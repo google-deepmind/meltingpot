@@ -17,8 +17,6 @@
 
 set -euxo pipefail
 
-cd "$(dirname "$0")"
-
 pip install --upgrade pip
 pip install setuptools
 

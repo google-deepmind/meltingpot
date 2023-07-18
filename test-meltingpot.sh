@@ -17,17 +17,7 @@
 
 set -euxo pipefail
 
+pip install --upgrade pip
+pip install pytest-xdist
 
-function test_meltingpot() {
-  echo -e "\nTesting meltingpot..."
-  pip install pytest-xdist
-  pytest -n auto -rax --durations=10 --pyargs meltingpot
-}
-
-
-function main() {
-  test_meltingpot
-}
-
-
-main "$@"
+pytest --pyargs meltingpot
