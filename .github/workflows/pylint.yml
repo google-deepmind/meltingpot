@@ -1,0 +1,48 @@
+# Continuous integration tests.
+
+name: pylint
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pylint.yml'
+      - '.pylintrc'
+      - 'examples/**'
+      - 'meltingpot/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pylint.yml'
+      - '.pylintrc'
+      - 'examples/**'
+      - 'meltingpot/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+# Declare default permissions as read only.
+permissions: read-all
+
+jobs:
+  pylint:
+    name: Lint Melting Pot
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+      - name: Set up Python
+        uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435
+        with:
+          python-version: '3.10'
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install pylint
+      - name: Run PyLint
+        run: pylint --disable=C,W,R --recursive=y meltingpot examples
