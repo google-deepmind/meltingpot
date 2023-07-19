@@ -8,7 +8,7 @@ matplotlib
 ml_collections
 numpy<1.23  # Needed by Ray because it uses `np.bool`.
 pettingzoo>=1.22.3
-ray[rllib,default]==2.0.0
+ray[rllib,default]==2.5.1
 stable_baselines3
 supersuit>=3.7.2
 torch
