@@ -45,6 +45,8 @@ jobs:
       - name: Install Melting Pot
         run: ./install-meltingpot.sh
       - name: Install examples
-        run: ./examples/install.sh
+        working-directory: examples
+        run: ./install.sh
       - name: Test examples
-        run: ./examples/test.sh
+        working-directory: examples
+        run: ./test.sh
