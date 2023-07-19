@@ -16,7 +16,7 @@
 from absl.testing import absltest
 from gym.spaces import discrete
 from meltingpot import substrate
-from meltingpot.configs.substrates import commons_harvest_open
+from meltingpot.configs.substrates import commons_harvest__open
 
 from . import utils
 
@@ -27,12 +27,12 @@ class MeltingPotEnvTests(absltest.TestCase):
   def setUp(self):
     super().setUp()
     # Create a new MeltingPotEnv for each test case
-    self._env_config = substrate.get_config('commons_harvest_open')
+    self._env_config = substrate.get_config('commons_harvest__open')
     self._env = utils.env_creator(self._env_config)
 
   def test_action_space_size(self):
     """Test the action space is the correct size."""
-    actions_count = len(commons_harvest_open.ACTION_SET)
+    actions_count = len(commons_harvest__open.ACTION_SET)
     env_action_space = self._env.action_space['player_1']
     self.assertEqual(env_action_space, discrete.Discrete(actions_count))
 
