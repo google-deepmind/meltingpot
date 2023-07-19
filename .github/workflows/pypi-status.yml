@@ -5,6 +5,16 @@ name: pypi-test
 on:
   schedule:
     - cron: "0 2 * * 1"  # Every Monday at 2am.
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pypi-status.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pypi-status.yml'
   workflow_dispatch:
 
 permissions: read-all
@@ -40,4 +50,4 @@ jobs:
         run: pip -vvv install dm-meltingpot
 
       - name: Test installation
-        run: pytest -n auto -rax --pyargs meltingpot
+        run: pytest --pyargs meltingpot

@@ -7,16 +7,18 @@ on:
     branches:
       - main
     paths:
-      - 'pyproject.toml'
+      - '.github/workflows/test-examples.yml'
       - 'examples/**'
       - 'meltingpot/**'
+      - 'setup.py'
   pull_request:
     branches:
       - main
     paths:
-      - 'pyproject.toml'
+      - '.github/workflows/test-examples.yml'
       - 'examples/**'
       - 'meltingpot/**'
+      - 'setup.py'
   workflow_dispatch:
 
 concurrency:

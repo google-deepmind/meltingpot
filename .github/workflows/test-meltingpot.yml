@@ -7,14 +7,16 @@ on:
     branches:
       - main
     paths:
-      - 'pyproject.toml'
+      - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
+      - 'setup.py'
   pull_request:
     branches:
       - main
     paths:
-      - 'pyproject.toml'
+      - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
+      - 'setup.py'
   workflow_dispatch:
 
 concurrency:
@@ -49,6 +51,6 @@ jobs:
           pip install --upgrade pip
           pip install setuptools pytest-xdist
       - name: Install Melting Pot
-        run: pip install https://github.com/deepmind/meltingpot/archive/${{ github.sha }}.tar.gz
+        run: pip -vvv install https://github.com/deepmind/meltingpot/archive/${{ github.sha }}.tar.gz
       - name: Test Melting Pot
-        run: pytest -n auto --pyargs meltingpot
+        run: pytest --pyargs meltingpot
