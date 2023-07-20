@@ -1,6 +1,6 @@
 # Continuous integration tests.
 
-name: pylint
+name: pytype
 
 on:
   push:
