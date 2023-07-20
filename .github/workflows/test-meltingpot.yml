@@ -51,6 +51,8 @@ jobs:
           pip install --upgrade pip
           pip install setuptools pytest-xdist
       - name: Install Melting Pot
-        run: pip -vvv install https://github.com/deepmind/meltingpot/archive/${{ github.sha }}.tar.gz
+        run: |
+          pip -vvv install https://github.com/deepmind/meltingpot/archive/${{ github.sha }}.tar.gz
+          pip list
       - name: Test Melting Pot
         run: pytest --pyargs meltingpot

@@ -43,10 +43,14 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install Melting Pot
-        run: ./install-meltingpot.sh
+        run: |
+          ./install-meltingpot.sh
+          pip list
       - name: Install examples
         working-directory: examples
-        run: ./install.sh
+        run: |
+          ./install.sh
+          pip list
       - name: Test examples
         working-directory: examples
         run: ./test.sh

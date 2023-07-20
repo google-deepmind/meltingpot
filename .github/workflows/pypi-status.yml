@@ -47,7 +47,9 @@ jobs:
           pip install pytest-xdist setuptools
 
       - name: Install from PyPI
-        run: pip -vvv install dm-meltingpot
+        run: |
+          pip -vvv install dm-meltingpot
+          pip list
 
       - name: Test installation
         run: pytest --pyargs meltingpot
