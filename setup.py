@@ -100,8 +100,7 @@ setuptools.setup(
     ],
     cmdclass={'build_py': BuildPy},
     package_dir={
-        'meltingpot': 'meltingpot/python',
-        'meltingpot.lua': 'meltingpot/lua',
+        'meltingpot': 'meltingpot',
     },
     package_data={
         'meltingpot.lua': ['**'],

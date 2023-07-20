@@ -89,7 +89,7 @@ colors = {
     {0, 255, 198, 255},
     {255, 110, 65, 255},
 }
--- LINT.ThenChange(//meltingpot/python/utils/substrates/colors.py)
+-- LINT.ThenChange(//meltingpot//utils/substrates/colors.py)
 
 -- LINT.IfChange
 --[[ Convert provided color to a palette suitable for the player text shape.
@@ -140,7 +140,7 @@ function getPalette(colorRGB)
       ["x"] = alpha,
   }
 end
--- LINT.ThenChange(//meltingpot/python/utils/substrates/shapes.py)
+-- LINT.ThenChange(//meltingpot//utils/substrates/shapes.py)
 
 return {
     colors = colors,
