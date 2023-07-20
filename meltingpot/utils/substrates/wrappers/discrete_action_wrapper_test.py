@@ -17,11 +17,10 @@ from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 import dm_env
+import dmlab2d
 import numpy as np
 
-import dmlab2d
 from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
 
 MOVE_SPEC = dm_env.specs.BoundedArray(

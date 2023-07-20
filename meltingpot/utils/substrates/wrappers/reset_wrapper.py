@@ -16,8 +16,8 @@
 from typing import Callable
 
 import dm_env
-
 import dmlab2d
+
 from meltingpot.utils.substrates.wrappers import base
 
 

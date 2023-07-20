@@ -25,9 +25,9 @@ from typing import Any, Sequence
 
 import chex
 import dm_env
+import dmlab2d
 import reactivex
 
-import dmlab2d
 from meltingpot.utils.substrates.wrappers import base
 
 

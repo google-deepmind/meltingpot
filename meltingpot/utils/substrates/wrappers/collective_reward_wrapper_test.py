@@ -16,11 +16,10 @@
 from unittest import mock
 
 from absl.testing import absltest
-
 import dm_env
+import dmlab2d
 import numpy as np
 
-import dmlab2d
 from meltingpot.utils.substrates.wrappers import collective_reward_wrapper
 
 RGB_SPEC = dm_env.specs.Array(shape=(2, 1), dtype=np.int8)

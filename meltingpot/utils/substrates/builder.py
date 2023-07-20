@@ -21,15 +21,14 @@ import random
 from typing import Any, Optional, Union
 
 from absl import logging
-from ml_collections import config_dict
-import tree
-
 import dmlab2d
 from dmlab2d import runfiles_helper
 from dmlab2d import settings_helper
+from ml_collections import config_dict
+import tree
+
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates.wrappers import reset_wrapper
-
 
 Settings = Union[config_dict.ConfigDict, Mapping[str, Any]]
 

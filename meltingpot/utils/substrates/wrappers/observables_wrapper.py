@@ -16,12 +16,11 @@
 from typing import Mapping, Union
 
 import dm_env
+import dmlab2d
 import numpy as np
 from reactivex import subject
 
-import dmlab2d
 from meltingpot.utils.substrates.wrappers import observables
-
 
 Action = Union[int, float, np.ndarray]
 

@@ -21,15 +21,14 @@ Use `TAB` to switch between players.
 
 import collections
 import enum
-
 from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
-import dm_env
 
+import dm_env
+import dmlab2d
 from ml_collections import config_dict
 import numpy as np
 import pygame
 
-import dmlab2d
 from meltingpot.utils.substrates import builder
 
 WHITE = (255, 255, 255)
