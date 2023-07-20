@@ -120,7 +120,7 @@ setuptools.setup(
         'pandas',
         'pygame',
         'reactivex',
-        'tensorflow-macos' if IS_M1_MAC else 'tensorflow',
+        'tensorflow-macos==2.11.0' if IS_M1_MAC else 'tensorflow',
     ],
     extras_require={
         # Used in development.
