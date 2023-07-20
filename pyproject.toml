@@ -16,14 +16,12 @@ pyink-indentation = 2
 pyink-use-majority-quotes = true
 
 [tool.pytest.ini_options]
-addopts = "-n auto"
+addopts = "-n auto --import-mode=importlib"
 testpaths = ["meltingpot", "examples"]
 
 [tool.pytype]
 python_version = "3.10"
 inputs = ["meltingpot", "examples"]
-# Set pythonpath to the root to effectively disable it.
-pythonpath = "/"
 # Keep going past errors to analyze as many files as possible.
 keep_going = true
 # Run N jobs in parallel. When 'auto' is used, this will be equivalent to the
