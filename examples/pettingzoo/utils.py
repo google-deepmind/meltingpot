@@ -50,7 +50,8 @@ class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
   def __init__(self, env_config, max_cycles):
     self.env_config = config_dict.ConfigDict(env_config)
     self.max_cycles = max_cycles
-    self._env = substrate.build(self.env_config)
+    self._env = substrate.build(
+        self.env_config, roles=self.env_config.default_player_roles)
     self._num_players = len(self._env.observation_spec())
     self.possible_agents = [
         PLAYER_STR_FORMAT.format(index=index)

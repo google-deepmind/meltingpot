@@ -106,7 +106,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
         into a video.
     """
     observation = self._env.observation()
-    world_rgb = observation['WORLD.RGB']
+    world_rgb = observation[0]['WORLD.RGB']
 
     # RGB mode is used for recording videos
     if mode == 'rgb_array':
@@ -139,7 +139,7 @@ def env_creator(env_config):
   return env
 
 
-class RayModelPolicy(policy.Policy):
+class RayModelPolicy(policy.Policy[policy.State]):
   """Policy wrapping an RLLib model for inference.
 
   Note: Currently only supports a single input, batching is not enabled
