@@ -13,6 +13,15 @@
 # limitations under the License.
 """Melting Pot."""
 
+import sys
+
 from meltingpot import bot
 from meltingpot import scenario
 from meltingpot import substrate
+
+try:
+  # Keep `import meltingpot.python` working for external meltingpot.
+  # TODO: b/292470900 - Remove in v3.0
+  sys.modules['meltingpot.python'] = sys.modules['meltingpot']
+except KeyError:
+  pass  # Internal version of meltingpot.
