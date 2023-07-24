@@ -25,7 +25,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 
-# Declare default permissions as read only.
 permissions: read-all
 
 jobs:
@@ -42,15 +41,18 @@ jobs:
         uses: actions/setup-python@d27e3f3d7c64b4bbf8e4abfb9b63b83e846e0435
         with:
           python-version: '3.10'
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install setuptools pytest-xdist
       - name: Install Melting Pot
         run: |
-          ./install-meltingpot.sh
+          pip -vvv install .
           pip list
       - name: Install examples
         working-directory: examples
         run: |
-          ./install.sh
+          pip install -r examples/requirements.txt
           pip list
       - name: Test examples
-        working-directory: examples
-        run: ./test.sh
+        run: pytest examples
