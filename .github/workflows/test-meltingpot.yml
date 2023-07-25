@@ -4,11 +4,15 @@ name: test-meltingpot
 
 on:
   push:
+    branches:
+      - main
     paths:
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
       - 'setup.py'
   pull_request:
+    branches:
+      - main
     paths:
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
@@ -27,7 +31,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
       matrix:
