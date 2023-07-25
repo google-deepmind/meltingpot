@@ -6,7 +6,7 @@ dmlab2d
 gym
 matplotlib
 ml_collections
-numpy<1.23  # Needed by Ray because it uses `np.bool`.
+numpy<1.26  # Needed by Ray because it uses `np.bool`.
 pettingzoo>=1.22.3
 ray[rllib,default]==2.0.0
 stable_baselines3
