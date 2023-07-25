@@ -50,7 +50,6 @@ jobs:
           pip -vvv install .
           pip list
       - name: Install examples
-        working-directory: examples
         run: |
           pip install -r examples/requirements.txt
           pip list
