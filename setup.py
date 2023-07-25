@@ -14,7 +14,6 @@
 """Install script for setuptools."""
 
 import os
-import platform
 import shutil
 import tarfile
 import urllib.request
@@ -26,8 +25,6 @@ VERSION = '2.1.1'
 ASSETS_VERSION = '2.1.0'
 
 ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
-
-IS_M1_MAC = platform.system() == 'Darwin' and platform.machine() == 'arm64'
 
 
 class BuildPy(build_py.build_py):
@@ -108,8 +105,8 @@ setuptools.setup(
     python_requires='>=3.10',
     install_requires=[
         'absl-py',
-        'chex',
-        'dm_env',
+        'chex<0.1.81',  # Incompatible with tensorflow 2.13 (due to numpy req).
+        'dm-env',
         'dmlab2d',
         'dm-tree',
         'immutabledict',
@@ -120,7 +117,7 @@ setuptools.setup(
         'pandas',
         'pygame',
         'reactivex',
-        'tensorflow-macos==2.11.0' if IS_M1_MAC else 'tensorflow',
+        'tensorflow',
     ],
     extras_require={
         # Used in development.
