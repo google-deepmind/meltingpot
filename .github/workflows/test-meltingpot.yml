@@ -4,15 +4,11 @@ name: test-meltingpot
 
 on:
   push:
-    branches:
-      - main
     paths:
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
       - 'setup.py'
   pull_request:
-    branches:
-      - main
     paths:
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
