@@ -2,6 +2,9 @@
 
 *A suite of test scenarios for multi-agent reinforcement learning.*
 
+[![Python](https://img.shields.io/pypi/pyversions/dm-meltingpot.svg)](https://pypi.python.org/pypi/dm-meltingpot)
+[![PyPI version](https://img.shields.io/pypi/v/dm-meltingpot.svg)](https://pypi.python.org/pypi/dm-meltingpot)
+[![PyPI tests](../../actions/workflows/pypi-status.yml/badge.svg)](../../actions/workflows/pypi-status.yml)
 [![Tests](../../actions/workflows/test-meltingpot.yml/badge.svg)](../../actions/workflows/test-meltingpot.yml)
 [![Examples](../../actions/workflows/test-examples.yml/badge.svg)](../../actions/workflows/test-examples.yml)
 
@@ -42,14 +45,15 @@ If you are interested in extending Melting Pot, please refer to the
 
 ### `pip` install
 
-Melting Pot can be installed using:
+[Melting Pot is available on PyPI](https://pypi.python.org/pypi/dm-meltingpot)
+and can be installed using:
 
 ```shell
-pip install https://github.com/deepmind/meltingpot/archive/main.tar.gz
+pip install dm-meltingpot
 ```
 
 NOTE: Melting Pot is built on top of [DeepMind Lab2D](https://github.com/deepmind/lab2d)
-which is distributed as prebuilt wheels. If there is no appropriate wheel for
+which is distributed as pre-built wheels. If there is no appropriate wheel for
 `dmlab2d`, you will need to build it from source (see
 [`install-dmlab2d.sh`](https://github.com/deepmind/meltingpot/blob/main/install-dmlab2d.sh)
 for an example installation script that can be adapted to your setup).
@@ -82,7 +86,7 @@ installation as follows:
 4.  (Optional) Test the installation:
 
     ```shell
-    pytest -n auto --pyargs meltingpot
+    pytest --pyargs meltingpot
     ```
 
 ### Devcontainer (x86 only)
@@ -122,22 +126,18 @@ can be viewed in the [Evaluation Notebook](notebooks/evaluation_results.ipynb).
 ### Interacting with the substrates
 
 You can try out the substrates interactively with the
-[human_players](meltingpot/python/human_players) scripts. For example, to play
+[human_players](meltingpot/human_players) scripts. For example, to play
 the `clean_up` substrate, you can run:
 
 ```shell
-python meltingpot/python/human_players/play_clean_up.py
+python meltingpot/human_players/play_clean_up.py
 ```
 
 You can move around with the `W`, `A`, `S`, `D` keys, Turn with `Q`, and `E`,
 fire the zapper with `1`, and fire the cleaning beam with `2`. You can switch
 between players with `TAB`. There are other substrates available in the
-[human_players](meltingpot/python/human_players) directory. Some have multiple
+[human_players](meltingpot/human_players) directory. Some have multiple
 variants, which you select with the `--level_name` flag.
-
-NOTE: If you get a `ModuleNotFoundError: No module named 'meltingpot.python'`
-      error, you can solve it by exporting the meltingpot home directory as
-      `PYTHONPATH` (e.g. by calling `export PYTHONPATH=$(pwd)`).
 
 ### Training agents
 
