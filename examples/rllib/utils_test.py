@@ -27,8 +27,13 @@ class MeltingPotEnvTests(absltest.TestCase):
   def setUp(self):
     super().setUp()
     # Create a new MeltingPotEnv for each test case
-    self._env_config = substrate.get_config('commons_harvest__open')
-    self._env = utils.env_creator(self._env_config)
+    env_config = substrate.get_config('commons_harvest__open')
+    roles = env_config.default_player_roles
+    self._num_players = len(roles)
+    self._env = utils.env_creator({
+        'substrate': 'commons_harvest__open',
+        'roles': roles,
+    })
 
   def test_action_space_size(self):
     """Test the action space is the correct size."""
@@ -39,7 +44,7 @@ class MeltingPotEnvTests(absltest.TestCase):
   def test_reset_number_agents(self):
     """Test that reset() returns observations for all agents."""
     obs = self._env.reset()
-    self.assertLen(obs, self._env_config.num_players)
+    self.assertLen(obs, self._num_players)
 
   def test_step(self):
     """Test step() returns rewards for all agents."""
@@ -47,14 +52,14 @@ class MeltingPotEnvTests(absltest.TestCase):
 
     # Create dummy actions
     actions = {}
-    for player_idx in range(0, self._env_config.num_players):
+    for player_idx in range(0, self._num_players):
       actions['player_' + str(player_idx)] = 1
 
     # Step
     _, rewards, _, _ = self._env.step(actions)
 
     # Check we have one reward per agent
-    self.assertLen(rewards, self._env_config.num_players)
+    self.assertLen(rewards, self._num_players)
 
   def test_render_modes_metadata(self):
     """Test that render modes are given in the metadata."""
@@ -64,7 +69,7 @@ class MeltingPotEnvTests(absltest.TestCase):
     """Test that render('rgb_array') returns the full world."""
     self._env.reset()
     render = self._env.render('rgb_array')
-    self.assertEqual(render.shape, (248, 456, 3))
+    self.assertEqual(render.shape, (144, 192, 3))
 
 
 if __name__ == '__main__':
