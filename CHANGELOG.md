@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.0] - 2023-07-25
+
+### Changed
+
+- Make meltingpot `pip` installable.
+- Support `import meltingpot` as an alias of `import meltingpot.python`.
+- Raise minimum Python version to Python 3.10.
+- Install assets as part of `pip install .`
+- Update Dockerfile and dev tooling (pytest, pyink, pytype, pylint, isort).
+- Update examples to work with v2.
+- Update README.md with new installation details.
+- Migrate from rx to reactivex.
+
+### Fixed
+
+- Remove type annotation for dtype.
+- Use correct roles in play_hidden_agenda.
+- Fix noop that was causing a typing error.
+- Add missing `__init__.py` files.
+- Set the default orientation to NORTH for objects that have no orientation
+  defined.
+
+### Added
+
+- Evaluation utilities.
+
+
 ## [2.1.1] - 2023-02-16
 
 ### Changed
