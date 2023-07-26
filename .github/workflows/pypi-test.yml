@@ -27,6 +27,7 @@ permissions: read-all
 jobs:
   pypi-test:
     name: Test PyPI Distribution
+    if: ${{ github.event.workflow_run.conclusion != 'failure' }}
     runs-on: ${{ matrix.os }}
     env:
       SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.

@@ -31,7 +31,7 @@ jobs:
       url: https://pypi.org/p/dm-meltingpot
     permissions:
       id-token: write
-    timeout-minutes: 10
+    timeout-minutes: 90
 
     steps:
       - name: Checkout Melting Pot
