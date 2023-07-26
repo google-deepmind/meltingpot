@@ -101,8 +101,8 @@ def get_config(
         })
     player_to_agent[f"player_{i}"] = f"agent_{i}"
 
-  def policy_mapping_fn(agent_id, **kwargs):
-    del kwargs
+  def policy_mapping_fn(agent_id, episode, **kwargs):
+    del episode, kwargs
     return player_to_agent[agent_id]
 
   # 5. Configuration for multi-agent setup with one policy per role:

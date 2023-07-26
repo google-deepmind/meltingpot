@@ -1,0 +1,3 @@
+absl_py==1.4.0
+dm_meltingpot==2.2.0
+ml_collections==0.1.1

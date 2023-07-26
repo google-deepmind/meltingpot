@@ -1,0 +1,10 @@
+absl-py
+dm-env
+dm-meltingpot
+dm-tree
+dmlab2d
+gymnasium
+ml-collections
+numpy
+ray[rllib,default]>=2.5.0
+tensorflow-probability

@@ -1,0 +1,12 @@
+#absl-py
+dm-env
+dm-meltingpot
+dm-tree
+gymnasium
+matplotlib
+ml-collections
+numpy
+pettingzoo>=1.22.3
+stable-baselines3
+SuperSuit
+torch
