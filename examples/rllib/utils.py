@@ -17,7 +17,7 @@ from typing import Tuple
 
 import dm_env
 import dmlab2d
-from gym import spaces
+from gymnasium import spaces
 from meltingpot import substrate
 from meltingpot.utils.policies import policy
 from ml_collections import config_dict
@@ -59,10 +59,10 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
         utils.spec_to_space(self._env.action_spec()))
     super().__init__()
 
-  def reset(self):
+  def reset(self, *args, **kwargs):
     """See base class."""
     timestep = self._env.reset()
-    return utils.timestep_to_observations(timestep)
+    return utils.timestep_to_observations(timestep), {}
 
   def step(self, action_dict):
     """See base class."""
@@ -76,7 +76,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     info = {}
 
     observations = utils.timestep_to_observations(timestep)
-    return observations, rewards, done, info
+    return observations, rewards, done, done, info
 
   def close(self):
     """See base class."""
@@ -90,15 +90,11 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
   # which modes the `render` method supports.
   metadata = {'render.modes': ['rgb_array']}
 
-  def render(self, mode: str) -> np.ndarray:
+  def render(self) -> np.ndarray:
     """Render the environment.
 
     This allows you to set `record_env` in your training config, to record
     videos of gameplay.
-
-    Args:
-        mode (str): The mode to render with (see
-        `MeltingPotEnv.metadata["render.modes"]` for supported modes).
 
     Returns:
         np.ndarray: This returns a numpy.ndarray with shape (x, y, 3),
@@ -109,10 +105,7 @@ class MeltingPotEnv(multi_agent_env.MultiAgentEnv):
     world_rgb = observation[0]['WORLD.RGB']
 
     # RGB mode is used for recording videos
-    if mode == 'rgb_array':
-      return world_rgb
-    else:
-      return super().render(mode=mode)
+    return world_rgb
 
   def _convert_spaces_tuple_to_dict(
       self,

@@ -13,7 +13,7 @@
 # limitations under the License.
 """Binary to run Stable Baselines 3 agents on meltingpot substrates."""
 
-import gym
+import gymnasium as gym
 from meltingpot import substrate
 import stable_baselines3
 from stable_baselines3.common import callbacks
@@ -50,7 +50,7 @@ class CustomCNN(torch_layers.BaseFeaturesExtractor):
       num_frames: The number of (consecutive) frames to feed into the network.
       fcnet_hiddens: Sizes of hidden layers.
     """
-    super(CustomCNN, self).__init__(observation_space, features_dim)
+    super().__init__(observation_space, features_dim)
     # We assume CxHxW images (channels first)
     # Re-ordering will be done by pre-preprocessing or wrapper
 
@@ -178,7 +178,7 @@ def main():
   logdir = model.logger.dir
   model.save(logdir + "/model")
   del model
-  model = stable_baselines3.PPO.load(logdir + "/model")  # noqa: F841
+  stable_baselines3.PPO.load(logdir + "/model")
 
 
 if __name__ == "__main__":

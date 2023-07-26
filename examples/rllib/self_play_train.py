@@ -20,7 +20,7 @@ import ray
 from ray import air
 from ray import tune
 from ray.rllib.algorithms import ppo
-from ray.rllib.policy.policy import PolicySpec
+from ray.rllib.policy import policy
 
 from . import utils
 
@@ -56,8 +56,7 @@ def get_config(
   # Gets the default training configuration
   config = ppo.PPOConfig()
   # Number of arenas.
-  # This is called num_rollout_workers in 2.2.0.
-  config.num_workers = num_rollout_workers
+  config.num_rollout_workers = num_rollout_workers
   # This is to match our unroll lengths.
   config.rollout_fragment_length = rollout_fragment_length
   # Total (time x batch) timesteps on the learning update.
@@ -90,7 +89,7 @@ def get_config(
     sprite_x = rgb_shape[0] // 8
     sprite_y = rgb_shape[1] // 8
 
-    policies[f"agent_{i}"] = PolicySpec(
+    policies[f"agent_{i}"] = policy.PolicySpec(
         policy_class=None,  # use default policy
         observation_space=test_env.observation_space[f"player_{i}"],
         action_space=test_env.action_space[f"player_{i}"],
