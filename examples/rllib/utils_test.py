@@ -14,7 +14,7 @@
 """Tests for utils.py."""
 
 from absl.testing import absltest
-from gym.spaces import discrete
+from gymnasium.spaces import discrete
 from meltingpot import substrate
 from meltingpot.configs.substrates import commons_harvest__open
 
@@ -43,7 +43,7 @@ class MeltingPotEnvTests(absltest.TestCase):
 
   def test_reset_number_agents(self):
     """Test that reset() returns observations for all agents."""
-    obs = self._env.reset()
+    obs, _ = self._env.reset()
     self.assertLen(obs, self._num_players)
 
   def test_step(self):
@@ -56,7 +56,7 @@ class MeltingPotEnvTests(absltest.TestCase):
       actions['player_' + str(player_idx)] = 1
 
     # Step
-    _, rewards, _, _ = self._env.step(actions)
+    _, rewards, _, _, _ = self._env.step(actions)
 
     # Check we have one reward per agent
     self.assertLen(rewards, self._num_players)
@@ -68,7 +68,7 @@ class MeltingPotEnvTests(absltest.TestCase):
   def test_render_rgb_array(self):
     """Test that render('rgb_array') returns the full world."""
     self._env.reset()
-    render = self._env.render('rgb_array')
+    render = self._env.render()
     self.assertEqual(render.shape, (144, 192, 3))
 
 

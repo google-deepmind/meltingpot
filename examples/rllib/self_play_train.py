@@ -56,8 +56,7 @@ def get_config(
   # Gets the default training configuration
   config = ppo.PPOConfig()
   # Number of arenas.
-  # This is called num_rollout_workers in 2.2.0.
-  config.num_workers = num_rollout_workers
+  config.num_rollout_workers = num_rollout_workers
   # This is to match our unroll lengths.
   config.rollout_fragment_length = rollout_fragment_length
   # Total (time x batch) timesteps on the learning update.

@@ -15,7 +15,7 @@
 
 import functools
 
-from gym import utils as gym_utils
+from gymnasium import utils as gym_utils
 import matplotlib.pyplot as plt
 from meltingpot import substrate
 from ml_collections import config_dict
@@ -75,7 +75,7 @@ class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
     timestep = self._env.reset()
     self.agents = self.possible_agents[:]
     self.num_cycles = 0
-    return utils.timestep_to_observations(timestep)
+    return utils.timestep_to_observations(timestep), {}
 
   def step(self, action):
     """See base class."""
@@ -92,7 +92,7 @@ class _MeltingPotPettingZooEnv(pettingzoo_utils.ParallelEnv):
       self.agents = []
 
     observations = utils.timestep_to_observations(timestep)
-    return observations, rewards, dones, infos
+    return observations, rewards, dones, dones, infos
 
   def close(self):
     """See base class."""

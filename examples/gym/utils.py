@@ -16,7 +16,7 @@
 from typing import Any, Mapping
 
 import dm_env
-from gym import spaces
+from gymnasium import spaces
 import numpy as np
 import tree
 
