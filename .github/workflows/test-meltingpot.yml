@@ -8,8 +8,8 @@ on:
       - '.github/actions/install-meltingpot/action.yml'
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
-      - 'setup.py'
       - 'pyproject.toml'
+      - 'setup.py'
   pull_request:
     branches:
       - main
@@ -17,8 +17,8 @@ on:
       - '.github/actions/install-meltingpot/action.yml'
       - '.github/workflows/test-meltingpot.yml'
       - 'meltingpot/**'
-      - 'setup.py'
       - 'pyproject.toml'
+      - 'setup.py'
   workflow_dispatch:
 
 concurrency:

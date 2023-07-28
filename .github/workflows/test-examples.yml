@@ -10,8 +10,8 @@ on:
       - '.github/workflows/test-examples.yml'
       - 'examples/**'
       - 'meltingpot/**'
-      - 'setup.py'
       - 'pyproject.toml'
+      - 'setup.py'
   pull_request:
     branches:
       - main
@@ -21,8 +21,8 @@ on:
       - '.github/workflows/test-examples.yml'
       - 'examples/**'
       - 'meltingpot/**'
-      - 'setup.py'
       - 'pyproject.toml'
+      - 'setup.py'
   workflow_dispatch:
 
 concurrency:
