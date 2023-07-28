@@ -30,8 +30,8 @@ class MocksTest(substrates.SubstrateTestCase):
     )
     actual = mocks._values_from_specs(specs)
     expected = (
-        {'a': np.zeros([1, 2, 3], dtype=np.uint8) + 0},
-        {'b': np.zeros([1, 2, 3], dtype=np.uint8) + 1},
+        {'a': np.zeros([1, 2, 3], dtype=np.uint8)},
+        {'b': np.ones([1, 2, 3], dtype=np.uint8)},
     )
     np.testing.assert_equal(actual, expected)
 
@@ -44,7 +44,10 @@ class MocksTest(substrates.SubstrateTestCase):
         num_actions=num_actions,
         observation_spec=observation_spec)
 
-    expected_observation = ({'a': np.uint8()}, {'a': np.uint8() + 1})
+    expected_observation = (
+        {'a': np.zeros([], dtype=np.uint8)},
+        {'a': np.ones([], dtype=np.uint8)},
+    )
     expected_reward = tuple(float(n) for n in range(num_players))
 
     with self.subTest('is_substrate'):

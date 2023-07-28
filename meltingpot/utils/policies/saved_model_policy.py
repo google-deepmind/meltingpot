@@ -136,7 +136,7 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
 
   @contextlib.contextmanager
   def _build_context(self):
-    with self._graph.as_default():
+    with self._graph.as_default():  # pylint: disable=not-context-manager
       with tf.compat.v1.device(self._device_name):
         yield
 
