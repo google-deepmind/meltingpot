@@ -1,28 +1,24 @@
-name: test-examples
+name: pylint-meltingpot
 
 on:
   push:
     branches:
       - main
     paths:
-      - '.github/actions/install-examples/action.yml'
       - '.github/actions/install-meltingpot/action.yml'
-      - '.github/workflows/test-examples.yml'
+      - '.github/workflows/pylint-meltingpot.yml'
+      - '.pylintrc'
       - 'examples/**'
       - 'meltingpot/**'
-      - 'setup.py'
-      - 'pyproject.toml'
   pull_request:
     branches:
       - main
     paths:
-      - '.github/actions/install-examples.yml'
-      - '.github/actions/install-meltingpot.yml'
-      - '.github/workflows/test-examples.yml'
+      - '.github/actions/install-meltingpot/action.yml'
+      - '.github/workflows/pylint-meltingpot.yml'
+      - '.pylintrc'
       - 'examples/**'
       - 'meltingpot/**'
-      - 'setup.py'
-      - 'pyproject.toml'
   workflow_dispatch:
 
 concurrency:
@@ -32,16 +28,16 @@ concurrency:
 permissions: read-all
 
 jobs:
-  pytest:
-    name: Test examples
+  pylint:
+    name: Lint Melting Pot
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 30
     steps:
       - name: Checkout Melting Pot
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 
-      - name: Install examples
-        uses: ./.github/actions/install-examples
+      - name: Install Melting Pot
+        uses: ./.github/actions/install-meltingpot
 
-      - name: Test examples
-        run: pytest examples
+      - name: Run PyLint on Melting Pot
+        run: pylint --errors-only meltingpot

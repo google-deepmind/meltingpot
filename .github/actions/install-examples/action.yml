@@ -1,0 +1,15 @@
+name: install-examples
+
+runs:
+  using: composite
+  steps:
+    - name: Install Melting Pot
+      uses: ./.github/actions/install-meltingpot
+
+    - name: Install requirements for examples
+      shell: bash
+      run: pip -r examples/requirements.txt
+
+    - name: Show installed dependencies
+      shell: bash
+      run: pip list
