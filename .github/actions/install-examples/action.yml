@@ -8,7 +8,7 @@ runs:
 
     - name: Install requirements for examples
       shell: bash
-      run: pip -r examples/requirements.txt
+      run: pip install -r examples/requirements.txt
 
     - name: Show installed dependencies
       shell: bash
