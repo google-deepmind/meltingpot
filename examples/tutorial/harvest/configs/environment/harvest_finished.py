@@ -13,8 +13,8 @@
 # limitations under the License.
 """Configuration for finished tutorial level: Harvest."""
 
-from ml_collections import config_dict
 from meltingpot.utils.substrates import shapes
+from ml_collections import config_dict
 
 
 SPAWN_POINT = {
