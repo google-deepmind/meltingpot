@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import fixed_goal
-from meltingpot.utils.puppeteers import testutils
 
 
 class FixedGoalTest(parameterized.TestCase):
@@ -28,7 +28,7 @@ class FixedGoalTest(parameterized.TestCase):
     puppeteer = fixed_goal.FixedGoal(mock.sentinel.goal)
     observations = [{}] * 3
     expected = [mock.sentinel.goal] * 3
-    actual, _ = testutils.goals_from_observations(puppeteer, observations)
+    actual, _ = puppeteers.goals_from_observations(puppeteer, observations)
     self.assertSequenceEqual(actual, expected)
 
 

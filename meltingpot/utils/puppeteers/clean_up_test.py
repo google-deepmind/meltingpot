@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import clean_up
-from meltingpot.utils.puppeteers import testutils
 
 _NUM_COOPERATORS_KEY = 'num_cooperators'
 _COOPERATE = mock.sentinel.cooperate
@@ -28,8 +28,9 @@ _DEFECT = mock.sentinel.defect
 
 def _goals(puppeteer, num_cooperators, state=None):
   observations = [{_NUM_COOPERATORS_KEY: n} for n in num_cooperators]
-  goals, state = testutils.goals_from_observations(puppeteer, observations,
-                                                   state)
+  goals, state = puppeteers.goals_from_observations(
+      puppeteer, observations, state
+  )
   return goals, state
 
 

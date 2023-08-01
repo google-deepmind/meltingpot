@@ -22,8 +22,8 @@ import dm_env
 import immutabledict
 import numpy as np
 
+from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import in_the_matrix
-from meltingpot.utils.puppeteers import testutils
 
 _RESOURCE_0 = in_the_matrix.Resource(
     index=0,
@@ -136,7 +136,7 @@ def _goals_from_observations(puppeteer,
   for inventory, interaction in itertools.zip_longest(inventories,
                                                       interactions):
     observations.append(_observation(inventory, interaction))
-  return testutils.goals_from_observations(puppeteer, observations, state)
+  return puppeteers.goals_from_observations(puppeteer, observations, state)
 
 
 class SpecialistTest(parameterized.TestCase):

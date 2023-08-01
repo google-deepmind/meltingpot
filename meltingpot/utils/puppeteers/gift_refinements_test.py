@@ -18,8 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 
+from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import gift_refinements
-from meltingpot.utils.puppeteers import testutils
 
 _COLLECT = mock.sentinel.collect
 _CONSUME = mock.sentinel.consume
@@ -45,8 +45,9 @@ class GiftRefinementsCooperatorTest(parameterized.TestCase):
         consume_goal=_CONSUME,
         gift_goal=_GIFT,
     )
-    (actual,), _ = testutils.goals_from_observations(
-        puppeteer, [{'INVENTORY': inventory}])
+    (actual,), _ = puppeteers.goals_from_observations(
+        puppeteer, [{'INVENTORY': inventory}]
+    )
     self.assertEqual(actual, expected)
 
 
@@ -68,8 +69,9 @@ class GiftRefinementsExtremeCooperatorTest(parameterized.TestCase):
         consume_goal=_CONSUME,
         gift_goal=_GIFT,
     )
-    (actual,), _ = testutils.goals_from_observations(
-        puppeteer, [{'INVENTORY': inventory}])
+    (actual,), _ = puppeteers.goals_from_observations(
+        puppeteer, [{'INVENTORY': inventory}]
+    )
     self.assertEqual(actual, expected)
 
 

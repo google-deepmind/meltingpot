@@ -20,9 +20,9 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import numpy as np
 
+from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import coordination_in_the_matrix
 from meltingpot.utils.puppeteers import in_the_matrix
-from meltingpot.utils.puppeteers import testutils
 
 _RESOURCE_A = in_the_matrix.Resource(
     index=0,
@@ -53,7 +53,7 @@ def _goals_from_observations(puppeteer, inventories, interactions, state=None):
   for inventory, interaction in itertools.zip_longest(inventories,
                                                       interactions):
     observations.append(_observation(inventory, interaction))
-  return testutils.goals_from_observations(puppeteer, observations, state)
+  return puppeteers.goals_from_observations(puppeteer, observations, state)
 
 
 class CounterPrevious(parameterized.TestCase):
