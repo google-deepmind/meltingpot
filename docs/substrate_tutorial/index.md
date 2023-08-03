@@ -15,7 +15,7 @@ can try it out like this:
 
 <code class="lang-shell"><pre>
 $ # Run the empty game
-$ <kbd>python3 meltingpot/examples/tutorial/harvest/play_harvest.py --observation WORLD.RGB --display_text</kbd>
+$ <kbd>python examples/tutorial/harvest/play_harvest.py --observation WORLD.RGB --display_text</kbd>
 </pre></code>
 
 ![Empty game](images/empty.png)
@@ -38,7 +38,7 @@ the default per-player `RGB` one.
 
 If you just want to skip ahead and look at the finished game, simply change the
 import in
-[`play_harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/examples/tutorial/harvest/play_harvest.py)
+[`play_harvest.py`](https://github.com/deepmind/meltingpot/tree/main/examples/tutorial/harvest/play_harvest.py)
 from
 
 ```python
@@ -54,13 +54,13 @@ from .configs.environment import harvest_finished as game
 and launch as desired:
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py
+python examples/tutorial/harvest/play_harvest.py
 ```
 
 for _first person_ view; or
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py --observation WORLD.RGB
+python examples/tutorial/harvest/play_harvest.py --observation WORLD.RGB
 ```
 
 for _third person_ view.
@@ -72,7 +72,7 @@ us, at least, have an avatar that we can move around.
 
 The first thing to do is to set our number of players to 1 and add the
 individual observation to the config in
-[`harvest.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/examples/tutorial/harvest/configs/environment/harvest.py):
+[`harvest.py`](https://github.com/deepmind/meltingpot/tree/main/examples/tutorial/harvest/configs/environment/harvest.py):
 
 ```python
   config.num_players = 1
@@ -267,7 +267,7 @@ By now you should be able to guess that all that is needed to change the
 appearance of an object is to... well, change its Appearance `Component`.
 
 We have some useful sprites in the
-[`shapes.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/utils/substrates/shapes.py) library.
+[`shapes.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/shapes.py) library.
 
 Let's import it (don't forget to add the dependency):
 
@@ -536,7 +536,7 @@ If a component you've added doesn't function in the way you anticipate, an easy
 way to debug the substrate is to launch it with the `--verbose` flag.
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py --verbose True
+python examples/tutorial/harvest/play_harvest.py --verbose True
 ```
 
 This flag will activate the `verbose_fn` function in `play_harvest.py`, where
@@ -735,7 +735,7 @@ You can also launch the interactive substrate using the player view instead of
 the third person one. Simply by remove the `--observation WORLD.RGB` flag:
 
 ```shell
-python3 meltingpot/tutorial/harvest/play_harvest.py
+python examples/tutorial/harvest/play_harvest.py
 ```
 
 You should see something like this:
@@ -751,7 +751,7 @@ You should see something like this:
 
 ## Making a substrate
 
-We provide a [builder](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/utils/substrates/builder.py)
+We provide a [builder](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/builder.py)
 that adapts the raw `Lab2d` substrate into an interface compatible with
 `dm_env`. This adaptor exposes a multi-agent API, where the action and
 observation specs are lists of the single-agent specs. The observation produced

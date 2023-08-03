@@ -46,8 +46,8 @@ For more information refer to
 [DMLab2D's documentation](https://github.com/deepmind/lab2d/blob/main/docs/lua_levels_api.md).
 
 We recommend also adding a human player for ease of debugging / demoing in, e.g.
-`meltingpot/python/human_players/`, as well as a substrate configuration (in
-Python) in, e.g. `meltingpot/python/configs/environments/`. The Python
+`meltingpot/human_players/`, as well as a substrate configuration (in
+Python) in, e.g. `meltingpot/configs/environments/`. The Python
 environment config is where most of the actual data for the substrate resides,
 whereas the code resides in the Lua files.
 
@@ -324,7 +324,7 @@ In addition to creating prefabs, possibly with overrides, to create
 configurations to the substrate constructor.
 
 Within the
-[game_object_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/utils/substrates/game_object_utils.py)
+[game_object_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/game_object_utils.py)
 library we have functions to parse ASCII maps to aid in the creation of game
 object configs. `GameObject`s created from prefabs using these utilities will
 have their `Transform` adapted to their position in the map. However, you can
@@ -498,17 +498,17 @@ substrate Python configuration and create an interactive game where a person can
 take control of an avatar and test functionality.
 
 These _human players_ typically live in
-[meltingpot/python/human_players](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/human_players/).
+[meltingpot/python/human_players](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/).
 In here you can use our
-[level_playing_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/human_players/level_playing_utils.py)
+[level_playing_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/level_playing_utils.py)
 library to hook up your substrate's actions to particular keys. For an example
 of this, see
-[play_substrate](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/human_players/play_clean_up.py).
+[play_substrate](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/play_clean_up.py).
 
 To launch them, run
 
 ```sh
-bash python3 meltingpot/python/human_players/play_substrate.py --substrate_name=clean_up`
+bash python meltingpot/human_players/play_substrate.py --substrate_name=clean_up`
 ```
 
 Since the human players launch a window to render the substrate and capture

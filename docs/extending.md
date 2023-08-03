@@ -13,7 +13,7 @@ in [SavedModel](https://www.tensorflow.org/guide/saved_model) format.
 
 Add the saved models for your bots in a subdirectory under `meltingpot/assets/saved_models/<name_of_substrate>`.
 
-Add your bots to the library by adding an entry for each one in [`bots`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/configs/bots/__init__.py).
+Add your bots to the library by adding an entry for each one in [`bots`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/configs/bots/__init__.py).
 If your bot is purely a saved model then structure its entry like this:
 
 ```python
@@ -24,7 +24,7 @@ my_bot_0=_saved_model(
 ```
 
 If instead your bot is a puppet, then select a `Puppeteer` from those
-defined in [`puppeteers`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/utils/bots/puppeteers).
+defined in [`puppeteers`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/bots/puppeteers).
 Then structure its bot entry like this:
 
 ```python
@@ -36,7 +36,7 @@ my_puppet_bot_0=_puppet(
 
 
 Add the bots to your scenario by adding an entry in
-[`scenarios`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/python/configs/scenarios/__init__.py).
+[`scenarios`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/configs/scenarios/__init__.py).
 Structure your scenario entry like this:
 
 ```python
