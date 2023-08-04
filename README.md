@@ -114,7 +114,7 @@ automatically.
 
 ### Evaluation
 
-The [evaluation](meltingpot/python/evaluation/evaluation.py) library can be used
+The [evaluation](meltingpot/evaluation/evaluation.py) library can be used
 to evaluate [SavedModel](https://www.tensorflow.org/guide/saved_model)s
 trained on Melting Pot substrates.
 
