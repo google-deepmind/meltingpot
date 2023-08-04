@@ -498,7 +498,7 @@ substrate Python configuration and create an interactive game where a person can
 take control of an avatar and test functionality.
 
 These _human players_ typically live in
-[meltingpot/python/human_players](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/).
+[meltingpot/human_players](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/).
 In here you can use our
 [level_playing_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/level_playing_utils.py)
 library to hook up your substrate's actions to particular keys. For an example
