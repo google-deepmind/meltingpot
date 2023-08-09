@@ -22,14 +22,12 @@ Use `space bar` to select the 'eat' (i.e. the `interact` action).
 import argparse
 import json
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import predator_prey__alley_hunt
 from meltingpot.configs.substrates import predator_prey__open
 from meltingpot.configs.substrates import predator_prey__orchard
 from meltingpot.configs.substrates import predator_prey__random_forest
 from meltingpot.human_players import level_playing_utils
-
+from ml_collections import config_dict
 
 MAX_SCREEN_WIDTH = 800
 MAX_SCREEN_HEIGHT = 600

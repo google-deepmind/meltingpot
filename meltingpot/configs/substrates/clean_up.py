@@ -41,12 +41,11 @@ Processing Systems (pp. 3330-3340).
 
 from typing import Any, Dict, Mapping, Sequence
 
-from ml_collections import config_dict
-
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 PrefabConfig = game_object_utils.PrefabConfig
 

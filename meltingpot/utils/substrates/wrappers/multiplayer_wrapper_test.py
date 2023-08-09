@@ -18,9 +18,8 @@ from unittest import mock
 from absl.testing import absltest
 import dm_env
 import dmlab2d
-import numpy as np
-
 from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
+import numpy as np
 
 ACT_SPEC = dm_env.specs.BoundedArray(
     shape=(), minimum=0, maximum=4, dtype=np.int8)

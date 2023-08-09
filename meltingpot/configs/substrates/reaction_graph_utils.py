@@ -14,12 +14,10 @@
 """Library of functions for defining chemical motifs."""
 
 from typing import Any, Dict
-from absl import logging  # pylint: disable=unused-import
-
-import networkx as nx  # pylint: disable=unused-import
-import numpy as np
 
 from meltingpot.utils.substrates import shapes
+import networkx as nx
+import numpy as np
 
 EMPTY_COLOR = shapes.PETRI_DISH_PALETTE["@"]
 WHITE_COLOR = (255, 255, 255, 255)  # A white color.
@@ -111,7 +109,7 @@ def create_compound(attributes):
   return data
 
 
-def add_system_nodes(g):
+def add_system_nodes(g: nx.DiGraph):
   """Add several nodes that must always be present for the system to function.
 
   Args:

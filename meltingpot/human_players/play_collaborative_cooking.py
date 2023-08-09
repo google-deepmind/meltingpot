@@ -22,8 +22,6 @@ Use `TAB` to switch between players.
 import argparse
 import json
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking__asymmetric
 from meltingpot.configs.substrates import collaborative_cooking__circuit
 from meltingpot.configs.substrates import collaborative_cooking__cramped
@@ -32,7 +30,7 @@ from meltingpot.configs.substrates import collaborative_cooking__figure_eight
 from meltingpot.configs.substrates import collaborative_cooking__forced
 from meltingpot.configs.substrates import collaborative_cooking__ring
 from meltingpot.human_players import level_playing_utils
-
+from ml_collections import config_dict
 
 MAX_SCREEN_WIDTH = 800
 MAX_SCREEN_HEIGHT = 600

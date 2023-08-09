@@ -18,7 +18,6 @@ from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 from meltingpot.utils.substrates import substrate
 from meltingpot.utils.substrates.wrappers import observables as observables_lib
 

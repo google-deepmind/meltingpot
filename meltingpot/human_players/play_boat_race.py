@@ -22,11 +22,11 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
-from ml_collections import config_dict
 
 from meltingpot.configs.substrates import boat_race__eight_races
 from meltingpot.human_players import level_playing_utils
 from meltingpot.utils.substrates import game_object_utils
+from ml_collections import config_dict
 
 MAX_SCREEN_WIDTH = 600
 MAX_SCREEN_HEIGHT = 800

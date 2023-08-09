@@ -14,7 +14,6 @@
 """Puppeteer the emits a fixed goal."""
 
 import dm_env
-
 from meltingpot.utils.puppeteers import puppeteer
 
 

@@ -31,10 +31,9 @@ Coordination Ring: A layout with two equally successful movement strategies –
 If players do not coordinate, they will block each other’s movement.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

@@ -19,9 +19,8 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
 import dmlab2d
-import numpy as np
-
 from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
+import numpy as np
 
 MOVE_SPEC = dm_env.specs.BoundedArray(
     shape=(), minimum=0, maximum=3, dtype=np.int8, name='MOVE')

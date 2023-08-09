@@ -7,7 +7,7 @@ profile = "google"
 # TODO remove once https://github.com/PyCQA/isort/pull/2149 submitted.
 line_length = 1000
 single_line_exclusions = ["collections.abc", "typing"]
-known_local_folder = ["meltingpot"]
+known_thirdparty = ["meltingpot"]
 
 [tool.pyink]
 line-length = 80

@@ -19,10 +19,9 @@ This substrate has three concentric rings of water that confer a small stamina
 cost to players who step on them.
 """
 
-from ml_collections import config_dict as configdict
-
 from meltingpot.configs.substrates import fruit_market as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict as configdict
 
 build = base_config.build
 

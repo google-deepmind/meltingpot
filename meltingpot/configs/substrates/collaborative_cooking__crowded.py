@@ -33,10 +33,9 @@ There is a choke point where it is likely that players who do not work as a
 team will get in one another's way.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

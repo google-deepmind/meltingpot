@@ -16,7 +16,6 @@
 from meltingpot.utils.substrates import shapes
 from ml_collections import config_dict
 
-
 SPAWN_POINT = {
     "name": "spawn_point",
     "components": [

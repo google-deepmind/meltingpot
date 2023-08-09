@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Common functions to be used across multiple *_in_the_matrix substrates.
-"""
+"""Common functions to be used across multiple *_in_the_matrix substrates."""
+
 import copy
 from typing import Any, Dict, Mapping, Sequence
 

@@ -19,7 +19,6 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
 import immutabledict
-
 from meltingpot.utils.policies import policy
 from meltingpot.utils.scenarios import population
 from meltingpot.utils.scenarios import scenario as scenario_utils

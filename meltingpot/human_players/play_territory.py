@@ -22,13 +22,11 @@ Use `TAB` to switch between players.
 import argparse
 import json
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import territory__inside_out
 from meltingpot.configs.substrates import territory__open
 from meltingpot.configs.substrates import territory__rooms
 from meltingpot.human_players import level_playing_utils
-
+from ml_collections import config_dict
 
 environment_configs = {
     'territory__open': territory__open,

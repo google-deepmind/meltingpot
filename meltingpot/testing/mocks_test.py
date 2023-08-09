@@ -13,12 +13,11 @@
 # limitations under the License.
 from absl.testing import absltest
 import dm_env
-import numpy as np
-
 from meltingpot.testing import mocks
 from meltingpot.testing import substrates
 from meltingpot.utils.substrates import specs as meltingpot_specs
 from meltingpot.utils.substrates import substrate
+import numpy as np
 
 
 class MocksTest(substrates.SubstrateTestCase):

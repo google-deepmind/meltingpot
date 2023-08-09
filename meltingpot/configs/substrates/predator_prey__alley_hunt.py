@@ -22,10 +22,9 @@ In this variant prey must forage for apples in a maze with many dangerous
 dead-end corridors where they could easily be trapped by predators.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import predator_prey as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

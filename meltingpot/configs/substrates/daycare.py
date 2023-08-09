@@ -16,11 +16,10 @@
 import copy
 from typing import Any, Dict, Mapping, Sequence
 
-from ml_collections import config_dict as configdict
-
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict as configdict
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

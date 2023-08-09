@@ -59,12 +59,11 @@ learning. In International Conference on Machine Learning (pp. 9733-9742). PMLR.
 
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import the_matrix
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

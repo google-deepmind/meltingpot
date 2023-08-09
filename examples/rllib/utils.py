@@ -28,7 +28,6 @@ from ray.rllib.policy import sample_batch
 
 from ..gym import utils
 
-
 PLAYER_STR_FORMAT = 'player_{index}'
 
 

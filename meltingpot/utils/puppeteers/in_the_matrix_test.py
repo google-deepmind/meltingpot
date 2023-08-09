@@ -20,10 +20,9 @@ from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
 import immutabledict
-import numpy as np
-
 from meltingpot.testing import puppeteers
 from meltingpot.utils.puppeteers import in_the_matrix
+import numpy as np
 
 _RESOURCE_0 = in_the_matrix.Resource(
     index=0,

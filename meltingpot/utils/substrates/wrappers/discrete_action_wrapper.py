@@ -18,9 +18,8 @@ from typing import Mapping, Sequence, TypeVar, Union
 
 import dm_env
 import immutabledict
-import numpy as np
-
 from meltingpot.utils.substrates.wrappers import observables
+import numpy as np
 
 T = TypeVar('T')
 Numeric = Union[int, float, np.ndarray]

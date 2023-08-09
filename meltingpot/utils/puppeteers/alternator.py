@@ -16,7 +16,6 @@
 from collections.abc import Sequence
 
 import dm_env
-
 from meltingpot.utils.puppeteers import puppeteer
 
 

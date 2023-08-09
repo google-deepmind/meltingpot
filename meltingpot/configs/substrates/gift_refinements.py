@@ -55,11 +55,10 @@ can split five and four with 10 roughly alternating gifting actions.
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from ml_collections import config_dict
-
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

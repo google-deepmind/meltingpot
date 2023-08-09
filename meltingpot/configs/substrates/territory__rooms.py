@@ -31,10 +31,9 @@ it becomes rational to invade the space, leaving one's own territory undefended,
 creating more opportunity for mischief by others.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import territory as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

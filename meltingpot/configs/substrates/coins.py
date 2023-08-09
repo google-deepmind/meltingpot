@@ -20,12 +20,11 @@ from collections.abc import Mapping, Sequence
 import random
 from typing import Any
 
-from ml_collections import config_dict as configdict
-
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict as configdict
 
 PrefabConfig = game_object_utils.PrefabConfig
 

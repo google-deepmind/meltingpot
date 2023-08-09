@@ -17,12 +17,11 @@ import contextlib
 import random
 
 import dm_env
+from meltingpot.utils.policies import permissive_model
+from meltingpot.utils.policies import policy
 import numpy as np
 import tensorflow as tf
 import tree
-
-from meltingpot.utils.policies import permissive_model
-from meltingpot.utils.policies import policy
 
 
 def _numpy_to_placeholder(

@@ -18,7 +18,6 @@ from typing import Callable, Optional
 
 import dm_env
 import immutabledict
-
 from meltingpot.utils.policies import policy_factory
 from meltingpot.utils.scenarios import scenario as scenario_lib
 from meltingpot.utils.substrates import substrate as substrate_lib

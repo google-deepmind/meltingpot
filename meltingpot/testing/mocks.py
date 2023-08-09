@@ -19,13 +19,12 @@ from unittest import mock
 
 import dm_env
 import immutabledict
-import numpy as np
-import tree
-
 import meltingpot
 from meltingpot.utils.scenarios import scenario
 from meltingpot.utils.substrates import specs as meltingpot_specs
 from meltingpot.utils.substrates import substrate
+import numpy as np
+import tree
 
 SUBSTRATE_OBSERVATION_SPEC = immutabledict.immutabledict({
     # Observations present in all substrates. Sizes may vary.

@@ -19,7 +19,6 @@ import os
 from typing import AbstractSet, Callable, Iterable, Literal, Mapping, Optional, Sequence
 
 import immutabledict
-
 from meltingpot.utils.puppeteers import alternator
 from meltingpot.utils.puppeteers import clean_up
 from meltingpot.utils.puppeteers import coins

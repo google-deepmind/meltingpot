@@ -19,10 +19,10 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
-from ml_collections import config_dict
 
 from meltingpot.configs.substrates import coins
 from meltingpot.human_players import level_playing_utils
+from ml_collections import config_dict
 
 MAX_SCREEN_WIDTH = 600
 MAX_SCREEN_HEIGHT = 450

@@ -33,10 +33,9 @@ their own it is very unlikely that poor performing partners would get out of its
 way, so in practice, collaboration is essential.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

@@ -26,10 +26,9 @@ strategy since they are relatively close to the safe tall grass. They can easily
 be collected and brought back to safety for consumption.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import predator_prey as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

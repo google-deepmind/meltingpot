@@ -16,7 +16,6 @@
 from typing import Tuple
 
 import dm_env
-
 from meltingpot.utils.policies import policy
 
 

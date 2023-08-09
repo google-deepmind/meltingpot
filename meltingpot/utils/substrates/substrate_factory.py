@@ -17,7 +17,6 @@ from collections.abc import Collection, Mapping, Sequence, Set
 from typing import Callable
 
 import dm_env
-
 from meltingpot.utils.substrates import builder
 from meltingpot.utils.substrates import substrate
 

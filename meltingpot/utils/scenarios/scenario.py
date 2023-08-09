@@ -19,14 +19,13 @@ from typing import Any, TypeVar
 import chex
 import dm_env
 import immutabledict
-import numpy as np
-import reactivex
-from reactivex import subject
-
 from meltingpot.utils.policies import policy
 from meltingpot.utils.scenarios import population
 from meltingpot.utils.substrates import substrate as substrate_lib
 from meltingpot.utils.substrates.wrappers import observables
+import numpy as np
+import reactivex
+from reactivex import subject
 
 T = TypeVar('T')
 

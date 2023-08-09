@@ -25,11 +25,10 @@ from typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple
 
 import dm_env
 import dmlab2d
+from meltingpot.utils.substrates import builder
 from ml_collections import config_dict
 import numpy as np
 import pygame
-
-from meltingpot.utils.substrates import builder
 
 WHITE = (255, 255, 255)
 

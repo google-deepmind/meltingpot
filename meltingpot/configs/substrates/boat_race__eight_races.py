@@ -13,9 +13,8 @@
 # limitations under the License.
 """Configuration for boat_race__eight_races."""
 
-from ml_collections import config_dict as configdict
-
 from meltingpot.configs.substrates import boat_race as base_config
+from ml_collections import config_dict as configdict
 
 
 def get_config() -> configdict.ConfigDict:

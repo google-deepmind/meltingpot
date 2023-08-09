@@ -24,11 +24,10 @@ prey to be fully safe from predation. The grass merely provides an obstacle that
 predators must navigate around while chasing prey.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import predator_prey as base_config
 from meltingpot.utils.substrates import map_helpers
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

@@ -17,7 +17,6 @@ import collections
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 from meltingpot import bot as bot_factory
 from meltingpot.configs import bots
 from meltingpot.configs import scenarios

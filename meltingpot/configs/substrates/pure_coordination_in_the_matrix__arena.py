@@ -26,13 +26,12 @@ Both players are removed and their inventories are reset after each interaction.
 
 from typing import Any, Dict, Mapping, Sequence
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import the_matrix
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 PrefabConfig = game_object_utils.PrefabConfig
 

@@ -45,10 +45,9 @@ inventories.
 import copy
 from typing import Any, Dict, Generator, Mapping, Sequence
 
-from ml_collections import config_dict as configdict
-
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates import shapes
+from ml_collections import config_dict as configdict
 
 PrefabConfig = game_object_utils.PrefabConfig
 

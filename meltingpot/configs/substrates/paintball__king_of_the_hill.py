@@ -28,11 +28,10 @@ is in control. Purple indicator tiles mean no team is in control.
 
 from typing import Any, Dict, Mapping, Optional, Sequence
 
-from ml_collections import config_dict
-import numpy as np
-
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
+import numpy as np
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
 _ENABLE_DEBUG_OBSERVATIONS = False

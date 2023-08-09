@@ -34,13 +34,12 @@ after step 1000. This usually allows time for 8 or more interactions.
 
 from typing import Any, Dict, Mapping, Sequence, Tuple
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import the_matrix
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
 from meltingpot.utils.substrates import shapes
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 PrefabConfig = game_object_utils.PrefabConfig
 

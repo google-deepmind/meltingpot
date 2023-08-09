@@ -17,10 +17,9 @@ import copy
 
 from absl.testing import absltest
 from absl.testing import parameterized
-import numpy as np
-
 from meltingpot.configs.substrates import running_with_scissors_in_the_matrix__repeated as test_substrate
 from meltingpot.utils.substrates import builder
+import numpy as np
 
 
 def _get_test_settings():

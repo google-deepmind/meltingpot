@@ -16,12 +16,9 @@
 import copy
 import enum
 from typing import List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union
-
-import numpy as np
-
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import shapes
-
+import numpy as np
 
 # Type of a GameObject prefab configuration: A recursive string mapping.
 # pytype: disable=not-supported-yet

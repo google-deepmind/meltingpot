@@ -33,10 +33,9 @@ dishes, while the player on the right can only cook the soup and deliver it
 (using the items provided by the first player).
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

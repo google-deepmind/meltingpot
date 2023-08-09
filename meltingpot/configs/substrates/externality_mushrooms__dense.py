@@ -21,10 +21,9 @@ This may sometimes make it necessary to actively avoid or destroy undesirable
 mushrooms.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import externality_mushrooms as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

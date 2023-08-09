@@ -26,9 +26,8 @@ from typing import Any, Sequence
 import chex
 import dm_env
 import dmlab2d
-import reactivex
-
 from meltingpot.utils.substrates.wrappers import base
+import reactivex
 
 
 @chex.dataclass(frozen=True)

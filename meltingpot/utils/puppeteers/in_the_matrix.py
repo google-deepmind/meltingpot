@@ -19,10 +19,9 @@ import random
 from typing import Optional, TypeVar
 
 import dm_env
+from meltingpot.utils.puppeteers import puppeteer
 import numpy as np
 import tree
-
-from meltingpot.utils.puppeteers import puppeteer
 
 State = TypeVar("State")
 Observation = Mapping[str, tree.Structure[np.ndarray]]

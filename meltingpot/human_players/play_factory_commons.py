@@ -22,10 +22,9 @@ Use `TAB` to switch between players.
 import argparse
 import json
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import factory_commons__either_or
 from meltingpot.human_players import level_playing_utils
+from ml_collections import config_dict
 
 
 def get_push_pull() -> int:

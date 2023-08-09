@@ -26,10 +26,9 @@ this case prey collect acorns and bring them back to safe tall grass to consume
 them.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import predator_prey as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

@@ -21,11 +21,10 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
-from ml_collections import config_dict
 
 from meltingpot.configs.substrates import clean_up
 from meltingpot.human_players import level_playing_utils
-
+from ml_collections import config_dict
 
 environment_configs = {
     'clean_up': clean_up,

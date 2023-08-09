@@ -21,11 +21,11 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
-from ml_collections import config_dict
 
 from meltingpot.configs.substrates import paintball__capture_the_flag
 from meltingpot.configs.substrates import paintball__king_of_the_hill
 from meltingpot.human_players import level_playing_utils
+from ml_collections import config_dict
 
 
 def get_zap() -> int:

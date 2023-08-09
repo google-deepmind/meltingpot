@@ -18,9 +18,6 @@ from typing import Any
 
 import chex
 import dm_env
-import reactivex
-from reactivex import subject
-
 from meltingpot.utils.substrates import builder
 from meltingpot.utils.substrates.wrappers import base
 from meltingpot.utils.substrates.wrappers import collective_reward_wrapper
@@ -28,6 +25,8 @@ from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
 from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
 from meltingpot.utils.substrates.wrappers import observables
 from meltingpot.utils.substrates.wrappers import observables_wrapper
+import reactivex
+from reactivex import subject
 
 
 @chex.dataclass(frozen=True)

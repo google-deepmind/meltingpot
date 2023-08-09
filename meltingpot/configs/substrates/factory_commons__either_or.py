@@ -13,11 +13,10 @@
 # limitations under the License.
 """Configuration for Factory of the Commons: Either Or."""
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import factory_commons as base_config
 from meltingpot.utils.substrates import map_helpers
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

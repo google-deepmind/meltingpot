@@ -19,7 +19,6 @@ from unittest import mock
 from absl.testing import absltest
 from absl.testing import parameterized
 import dmlab2d
-
 from meltingpot.utils.substrates.wrappers import base
 
 _WRAPPED_METHODS = tuple([

@@ -17,7 +17,6 @@ import abc
 from typing import Callable
 
 import dm_env
-
 from meltingpot.utils.policies import policy
 
 

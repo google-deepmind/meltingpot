@@ -21,7 +21,6 @@ Use `TAB` to switch between players.
 
 import argparse
 import json
-from ml_collections import config_dict
 
 from meltingpot.configs.substrates import bach_or_stravinsky_in_the_matrix__arena as bach_or_stravinsky_itm
 from meltingpot.configs.substrates import bach_or_stravinsky_in_the_matrix__repeated as bach_or_stravinsky_itm__repeated
@@ -39,6 +38,7 @@ from meltingpot.configs.substrates import running_with_scissors_in_the_matrix__r
 from meltingpot.configs.substrates import stag_hunt_in_the_matrix__arena as stag_hunt_itm
 from meltingpot.configs.substrates import stag_hunt_in_the_matrix__repeated as stag_hunt_itm__repeated
 from meltingpot.human_players import level_playing_utils
+from ml_collections import config_dict
 
 environment_configs = {
     'bach_or_stravinsky_in_the_matrix__arena': bach_or_stravinsky_itm,

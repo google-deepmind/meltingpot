@@ -17,9 +17,6 @@ from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
-from ml_collections import config_dict
-import pygame
-
 from meltingpot.configs.substrates import allelopathic_harvest__open
 from meltingpot.configs.substrates import boat_race__eight_races
 from meltingpot.configs.substrates import chemistry__three_metabolic_cycles
@@ -60,6 +57,8 @@ from meltingpot.human_players import play_gift_refinements
 from meltingpot.human_players import play_paintball
 from meltingpot.human_players import play_predator_and_prey
 from meltingpot.human_players import play_territory
+from ml_collections import config_dict
+import pygame
 
 
 class PlayLevelTest(parameterized.TestCase):

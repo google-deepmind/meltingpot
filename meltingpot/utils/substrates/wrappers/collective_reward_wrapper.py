@@ -17,10 +17,8 @@ import copy
 from typing import Mapping, Sequence, TypeVar
 
 import dm_env
-import numpy as np
-
 from meltingpot.utils.substrates.wrappers import observables
-
+import numpy as np
 
 T = TypeVar("T")
 

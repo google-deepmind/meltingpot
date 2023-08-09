@@ -16,7 +16,6 @@
 from typing import Generic, Tuple, TypeVar
 
 import dm_env
-
 from meltingpot.utils.policies import policy
 from meltingpot.utils.puppeteers import puppeteer as puppeteer_lib
 

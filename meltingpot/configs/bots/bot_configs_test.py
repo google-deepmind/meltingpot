@@ -18,7 +18,6 @@ import os
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 from meltingpot.configs import bots
 from meltingpot.configs import substrates
 

@@ -13,10 +13,9 @@
 # limitations under the License.
 """Puppeteer test utilities."""
 
-from typing import Any, Iterator, Iterable, Mapping, Optional, Sequence, TypeVar
+from typing import Any, Iterable, Iterator, Mapping, Optional, Sequence, TypeVar
 
 import dm_env
-
 from meltingpot.utils.puppeteers import puppeteer as puppeteer_lib
 
 GOAL_KEY = puppeteer_lib._GOAL_OBSERVATION_KEY  # pylint: disable=protected-access

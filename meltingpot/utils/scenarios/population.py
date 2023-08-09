@@ -20,10 +20,9 @@ from typing import Callable, Collection, List, Mapping, Sequence
 
 import chex
 import dm_env
+from meltingpot.utils.policies import policy as policy_lib
 import reactivex
 from reactivex import subject
-
-from meltingpot.utils.policies import policy as policy_lib
 
 
 def _step_fn(policy: policy_lib.Policy,

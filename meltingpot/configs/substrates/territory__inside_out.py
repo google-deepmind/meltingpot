@@ -29,11 +29,10 @@ the resources differs from episode to episode, so too does the negotiation
 problem to be solved.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import territory as base_config
 from meltingpot.utils.substrates import map_helpers
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

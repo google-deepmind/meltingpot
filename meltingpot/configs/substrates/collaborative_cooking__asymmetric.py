@@ -33,10 +33,9 @@ pots while the delivery station is far. This presents an asymmetric advantage of
 responsibilities for optimally creating and delivering soups.
 """
 
-from ml_collections import config_dict
-
 from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.utils.substrates import specs
+from ml_collections import config_dict
 
 build = base_config.build
 

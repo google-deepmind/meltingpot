@@ -18,9 +18,8 @@ import tempfile
 from absl.testing import absltest
 import cv2
 import dm_env
-import numpy as np
-
 from meltingpot.utils.evaluation import evaluation
+import numpy as np
 
 
 def _as_timesteps(frames):

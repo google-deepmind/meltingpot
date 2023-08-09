@@ -15,7 +15,6 @@
 
 from absl.testing import absltest
 from absl.testing import parameterized
-
 from meltingpot import bot
 from meltingpot.testing import bots as test_utils
 
