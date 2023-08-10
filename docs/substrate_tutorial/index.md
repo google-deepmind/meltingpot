@@ -209,7 +209,7 @@ the `lab2d_settings` part of the config. In the end, they should look like this:
   config.substrate.lab2d_settings = {
       "levelName": "harvest",
       "levelDirectory":
-          "meltingpot/examples/tutorial/harvest/levels",
+          "examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 100,
       "numPlayers": 1,
       "spriteSize": 8,
@@ -501,7 +501,7 @@ character in the ASCII map, and call the prefab `"apple"`.
   config.lab2d_settings = {
       "levelName": "harvest",
       "levelDirectory":
-          "meltingpot/examples/tutorial/harvest/levels",
+          "examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 100,
       "numPlayers": 5,
       "spriteSize": 8,
@@ -720,7 +720,7 @@ First set `config.num_players = 5`. The rest of the changes go in
   config.lab2d_settings = {
       "levelName": "harvest_finished",
       "levelDirectory":
-          "meltingpot/examples/tutorial/harvest/levels",
+          "examples/tutorial/harvest/levels",
       "maxEpisodeLengthFrames": 1000,
       "numPlayers": 5,
       "spriteSize": 8,
