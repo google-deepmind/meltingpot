@@ -44,7 +44,7 @@ jobs:
           - '3.10'
     steps:
       - name: Checkout Melting Pot
-        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744
       - name: Install Melting Pot
         uses: ./.github/actions/install-meltingpot
         with:
