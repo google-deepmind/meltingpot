@@ -14,6 +14,8 @@
        height="250" width="250" />
 </div>
 
+NEWS! [Melting Pot Contest at NeurIPS 2023](https://www.aicrowd.com/challenges/meltingpot-challenge-2023)
+
 [Melting Pot 2.0 Tech Report](https://arxiv.org/abs/2211.13746)
 
 ## About
