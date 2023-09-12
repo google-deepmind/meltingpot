@@ -67,8 +67,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - Initialize `Transform` before any other component.
-  [#84](https://github.com/deepmind/meltingpot/issues/84)
-  [#24](https://github.com/deepmind/meltingpot/issues/24)
+  [#84](https://github.com/google-deepmind/meltingpot/issues/84)
+  [#24](https://github.com/google-deepmind/meltingpot/issues/24)
 
 ### Added
 
@@ -108,7 +108,7 @@ for detailed information on the new substrates, bots, and scenarios.
 ### Fixed
 
 - Puppets were sharing state in Scenarios.
-  [#70](https://github.com/deepmind/meltingpot/issues/70)
+  [#70](https://github.com/google-deepmind/meltingpot/issues/70)
 - Various issues with RLlib examples.
 
 ### Added
@@ -122,13 +122,13 @@ for detailed information on the new substrates, bots, and scenarios.
 ### Changed
 
 - Define `is_focal` is in scenario configs.
-- Use `chex.dataclass` for [dm-tree](https://github.com/deepmind/tree)
+- Use `chex.dataclass` for [dm-tree](https://github.com/google-deepmind/tree)
   compatibility.
 
 ### Fixed
 
 - Use correct `is_focal` settings for team-vs-team games
-  [#16](https://github.com/deepmind/meltingpot/issues/16).
+  [#16](https://github.com/google-deepmind/meltingpot/issues/16).
 
 ## [1.0.2] - 2022-02-23
 
@@ -144,10 +144,10 @@ for detailed information on the new substrates, bots, and scenarios.
 
 ### Fixed
 
-- Simulation Speed [#7](https://github.com/deepmind/meltingpot/issues/7)
-- Horizon setting in examples [#9](https://github.com/deepmind/meltingpot/issues/9)
-- Error running example "self_play_train.py" [#10](https://github.com/deepmind/meltingpot/issues/10)
-- build lab2d on m1 chip [#13](https://github.com/deepmind/meltingpot/issues/13)
+- Simulation Speed [#7](https://github.com/google-deepmind/meltingpot/issues/7)
+- Horizon setting in examples [#9](https://github.com/google-deepmind/meltingpot/issues/9)
+- Error running example "self_play_train.py" [#10](https://github.com/google-deepmind/meltingpot/issues/10)
+- build lab2d on m1 chip [#13](https://github.com/google-deepmind/meltingpot/issues/13)
 
 ## [1.0.1] - 2021-10-01
 
@@ -156,9 +156,9 @@ intended. Other changes not expected to have any impact.
 
 ### Fixed
 
-- Bots receive incorrect timesteps in Scenario [#3](https://github.com/deepmind/meltingpot/issues/3)
-- Python seed is not forwarded to Lua [#4](https://github.com/deepmind/meltingpot/issues/4)
-- Second episode using same seed as the first [#5](https://github.com/deepmind/meltingpot/issues/5)
+- Bots receive incorrect timesteps in Scenario [#3](https://github.com/google-deepmind/meltingpot/issues/3)
+- Python seed is not forwarded to Lua [#4](https://github.com/google-deepmind/meltingpot/issues/4)
+- Second episode using same seed as the first [#5](https://github.com/google-deepmind/meltingpot/issues/5)
 
 ## [1.0.0] - 2021-07-16
 

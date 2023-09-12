@@ -43,7 +43,7 @@ the module file in the following places, in order:
 *   `<path_to_dmlab2d>/dmlab2d/game_scripts/<module_name>/init.lua`
 
 For more information refer to
-[DMLab2D's documentation](https://github.com/deepmind/lab2d/blob/main/docs/lua_levels_api.md).
+[DMLab2D's documentation](https://github.com/google-deepmind/lab2d/blob/main/docs/lua_levels_api.md).
 
 We recommend also adding a human player for ease of debugging / demoing in, e.g.
 `meltingpot/human_players/`, as well as a substrate configuration (in
@@ -57,7 +57,7 @@ A Melting Pot substrate consists of the following required elements:
 
 *   An API Factory object containing:
     *   `Simulation`: Typically using directly, or inheriting from,
-        [`base_simulation.lua`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua)
+        [`base_simulation.lua`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua)
     *   settings:
         -   `spriteSize`: Sprites will be squares of `spriteSize` X
             `spriteSize`.
@@ -95,7 +95,7 @@ return api_factory.apiFactory{
 ```
 
 where `topology` can be either `'BOUNDED'` or `'TORUS'`. See
-[the engine docs](https://github.com/deepmind/lab2d/blob/main/docs/system/grid_world.md#topology)
+[the engine docs](https://github.com/google-deepmind/lab2d/blob/main/docs/system/grid_world.md#topology)
 for more info. This is optional, and the default is `BOUNDED`.
 
 The `simulation` field will be explained in more detail below.
@@ -103,7 +103,7 @@ The `simulation` field will be explained in more detail below.
 While the user doesn't need to directly interact with the API Factory object, it
 can be useful to understand how the methods in `Simulation` are used. To learn
 more, check
-[api_factory.lua](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/api_factory.lua).
+[api_factory.lua](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/api_factory.lua).
 
 Another critical part of the `init.lua` file is registering the components that
 you want to use in your substrate. You achieve this by importing the component
@@ -129,7 +129,7 @@ components from the `<your_substrate_name>/components.lua` file.
 The simulation is in charge of creating and managing `GameObject`s and is the
 main entry point for registering event callbacks, sprites and substrate maps.
 You usually can just use
-[`BaseSimulation`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua),
+[`BaseSimulation`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua),
 but you can provide your own. In particular, if you need to add new layers,
 require custom world observations, or have other high-substrate requirements,
 you will have to provide your own. Simply derive from `BaseSimulation` and
@@ -261,7 +261,7 @@ These mappings are specified in `lab2d_settings.simulation` as:
     palettes, one per player in the substrate. Avatars will be created with
     these palettes. If not provided and the avatars will be automatically built,
     then we will simply use the first `N` values from
-    [`colors.lua`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/colors.lua).
+    [`colors.lua`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/colors.lua).
 
 ##### Prefab Specification
 
@@ -324,7 +324,7 @@ In addition to creating prefabs, possibly with overrides, to create
 configurations to the substrate constructor.
 
 Within the
-[game_object_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/game_object_utils.py)
+[game_object_utils](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/utils/substrates/game_object_utils.py)
 library we have functions to parse ASCII maps to aid in the creation of game
 object configs. `GameObject`s created from prefabs using these utilities will
 have their `Transform` adapted to their position in the map. However, you can
@@ -354,7 +354,7 @@ config.lab2d_settings = {
 
 You can also pass you avatars manually just like any other `GameObject`. Avatar
 `GameObject`s are simply ones with the
-[`Avatar`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
+[`Avatar`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
 component.
 
 The `Avatar` component configuration has the following structure:
@@ -425,9 +425,9 @@ substrate as apples, one can use:
 ### Custom components
 
 While there are some useful components provided in the
-[component_library](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
+[component_library](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
 and
-[avatar_library](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua),
+[avatar_library](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua),
 most likely your substrate will require custom components. We suggest putting
 your components in
 `path/to/your/levelDirectory/your_substrate_name/components.lua`. Then you can
@@ -440,7 +440,7 @@ get called when events happen, like `onEnter` being called when a game object
 enters the same `(x, y)` location as your game object containing your component.
 
 Components typically derive from the
-[`Component`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component.lua)
+[`Component`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component.lua)
 class. For example, your `components.lua` file, might contain the following
 
 ```lua
@@ -452,7 +452,7 @@ local MyComponent = class.Class(component.Component)
 
 For examples of how to write components, refer to the `component_library`, or
 the
-[`components.lua`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/substrates/clean_up/components.lua)
+[`components.lua`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/substrates/clean_up/components.lua)
 file of `clean_up`.
 
 #### Component registry
@@ -498,12 +498,12 @@ substrate Python configuration and create an interactive game where a person can
 take control of an avatar and test functionality.
 
 These _human players_ typically live in
-[meltingpot/human_players](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/).
+[meltingpot/human_players](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/human_players/).
 In here you can use our
-[level_playing_utils](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/level_playing_utils.py)
+[level_playing_utils](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/human_players/level_playing_utils.py)
 library to hook up your substrate's actions to particular keys. For an example
 of this, see
-[play_substrate](https://github.com/deepmind/meltingpot/tree/main/meltingpot/human_players/play_clean_up.py).
+[play_substrate](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/human_players/play_clean_up.py).
 
 To launch them, run
 

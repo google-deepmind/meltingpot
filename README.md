@@ -54,11 +54,11 @@ and can be installed using:
 pip install dm-meltingpot
 ```
 
-NOTE: Melting Pot is built on top of [DeepMind Lab2D](https://github.com/deepmind/lab2d)
+NOTE: Melting Pot is built on top of [DeepMind Lab2D](https://github.com/google-deepmind/lab2d)
 which is distributed as pre-built wheels. If there is no appropriate wheel for
 `dmlab2d`, you will need to build it from source (see
-[the `dmlab2d` `README.md`](https://github.com/deepmind/lab2d/README.md) for
-details).
+[the `dmlab2d` `README.md`](https://github.com/google-deepmind/lab2d/blob/main/README.md)
+for details).
 
 ### Manual install
 
@@ -68,7 +68,7 @@ installation as follows:
 1.  Clone Melting Pot:
 
     ```shell
-    git clone -b main https://github.com/deepmind/meltingpot
+    git clone -b main https://github.com/google-deepmind/meltingpot
     cd meltingpot
     ```
 

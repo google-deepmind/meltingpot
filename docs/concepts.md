@@ -12,14 +12,14 @@ to Melting Pot substrates is our [tutorial](substrate_tutorial/index.md).
 ------
 
 Throughout this document, we distinguish between
-[DMLab2D](https://github.com/deepmind/lab2d) (the engine) and Melting Pot (our
+[DMLab2D](https://github.com/google-deepmind/lab2d) (the engine) and Melting Pot (our
 framework for creating DMLab2D levels with abstractions for `GameObject`s and
 `Component`s). Whenever we refer to the engine, we are talking about DMLab2D.
 
 ## DMLab2D main concepts
 
 For more complete information, please refer the
-[documentation](https://github.com/deepmind/lab2d/blob/main/docs/lua_levels_api.md)
+[documentation](https://github.com/google-deepmind/lab2d/blob/main/docs/lua_levels_api.md)
 for DMLab2D.
 
 ### The grid
@@ -58,9 +58,9 @@ Most of what Melting Pot does is encapsulate the functionality offered by the
 grid and the callbacks of pieces into an Object-Oriented paradigm.
 
 The central concepts of this framework are
-[`GameObject`s](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/game_object.lua)
+[`GameObject`s](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/game_object.lua)
 and
-[`Component`s](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component.lua).
+[`Component`s](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component.lua).
 See below for more information.
 
 ## GameObjects
@@ -99,18 +99,18 @@ In addition to the above methods, there is an important property that is
 available after creation, but before any callbacks are performed:
 
 *   `simulation`: A reference to the game `Simulation` (see
-    [base_simulation.lua](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua)
+    [base_simulation.lua](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/base_simulation.lua)
     and below).
 
 A `GameObject` *always* has a
-[`StateManager`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
+[`StateManager`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
 component and a
-[`Transform`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
+[`Transform`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
 component. All other components are optional.
 
 Other utility methods specific to required components are detaild below. Refer
 to the
-[source code](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/game_object.lua)
+[source code](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/game_object.lua)
 for more detailed information.
 
 NOTE: `GameObject`s cannot currently be added dynamically. A particular
@@ -122,7 +122,7 @@ substrate).
 ### StateManager
 
 The
-[`StateManager`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
+[`StateManager`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
 component keeps track of the states of the `GameObject` and provides an API for
 switching between them.
 
@@ -270,7 +270,7 @@ the `Appearance`. For completeness, these are:
 *   `addPlayerCallbacks(callbacks)`: Deprecated.
 
 You can find these and other useful components in the
-[component_library](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua).
+[component_library](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua).
 
 ## Updaters or `update`
 
@@ -286,7 +286,7 @@ and if there is a delay on the onset of the updating after a state change. This
 is the approach we use in our substrates.
 
 For full documentation, see the implementation in
-[updater_registry](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/updater_registry.lua).
+[updater_registry](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/updater_registry.lua).
 Intuitively, instead of defining a function that gets called at every step, you
 register an updater function (named or anonymous) along with some parameters
 describing when the function will be called. They key parameters are:
@@ -354,7 +354,7 @@ The `Simulation` also has functions to find objects from the internal engine
 pieces, but this functionality should be largely irrelevant to users.
 
 Avatars are `GameObject`s with the
-[`Avatar`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
+[`Avatar`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
 component. They are special in that they require special initialisation to
 handle spawn points and deferred initialisation of their internal engine piece.
 However, from the perspective of the user, avatars should be considered just
@@ -362,7 +362,7 @@ another type of `GameObject`.
 
 ### RayCast and Queries
 
-[Raycasts and queries](https://github.com/deepmind/lab2d/blob/main/docs/system/grid_world.md#querying)
+[Raycasts and queries](https://github.com/google-deepmind/lab2d/blob/main/docs/system/grid_world.md#querying)
 are ways to get information about objects in specific locations in the grid.
 
 Queries are exposed in Melting Pot through the `Transform` component via:
@@ -375,13 +375,13 @@ Queries are exposed in Melting Pot through the `Transform` component via:
 
 Rays are exposed through beams. When a beam touches an object, its `onHit`
 callback is executed with the specific hit name as parameter. See the
-[`Zapper`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
+[`Zapper`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua)
 component for more details.
 
 ### API Factory
 
 The
-[API Factory](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/api_factory.lua)
+[API Factory](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/api_factory.lua)
 is a native concept of DMLab2D. It is the main entry point of the Lua bindings
 of the internal C++ engine. The API Factory defines the order of calls on the
 API object. All substrates are initialised from an subclass of the API Factory

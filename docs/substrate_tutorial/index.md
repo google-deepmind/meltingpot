@@ -38,7 +38,7 @@ the default per-player `RGB` one.
 
 If you just want to skip ahead and look at the finished game, simply change the
 import in
-[`play_harvest.py`](https://github.com/deepmind/meltingpot/tree/main/examples/tutorial/harvest/play_harvest.py)
+[`play_harvest.py`](https://github.com/google-deepmind/meltingpot/tree/main/examples/tutorial/harvest/play_harvest.py)
 from
 
 ```python
@@ -72,7 +72,7 @@ us, at least, have an avatar that we can move around.
 
 The first thing to do is to set our number of players to 1 and add the
 individual observation to the config in
-[`harvest.py`](https://github.com/deepmind/meltingpot/tree/main/examples/tutorial/harvest/configs/environment/harvest.py):
+[`harvest.py`](https://github.com/google-deepmind/meltingpot/tree/main/examples/tutorial/harvest/configs/environment/harvest.py):
 
 ```python
   config.num_players = 1
@@ -90,7 +90,7 @@ game logic you add to them.
 
 To instantiate the player in the game, we need a `GameObject` with the avatar
 component. This is contained in
-[`avatar_library.lua`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua).
+[`avatar_library.lua`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua).
 
 Defining a game object is done in the python substrate configuration, just like
 we set the `config.num_players` above. Let's define our avatar `GameObject` by
@@ -246,7 +246,7 @@ these are optional, and will have a default value in the constructor itself.
 Whatever value is specified in Python will override the default.
 
 For instance, you can see the arguments for the Avatar `Component`
-[here](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua).
+[here](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/avatar_library.lua).
 
 #### How does it look now?
 
@@ -267,7 +267,7 @@ By now you should be able to guess that all that is needed to change the
 appearance of an object is to... well, change its Appearance `Component`.
 
 We have some useful sprites in the
-[`shapes.py`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/shapes.py) library.
+[`shapes.py`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/utils/substrates/shapes.py) library.
 
 Let's import it (don't forget to add the dependency):
 
@@ -433,7 +433,7 @@ can enter it. The usual layers are `background`, `lowerPhysical`,
 #### `Edible` component
 
 The
-[`Edible`](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
+[`Edible`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/component_library.lua)
 component takes 3 `kwargs`:
 
 1.  `liveState`: The name of the state that is touchable and provides reward
@@ -632,7 +632,7 @@ end
 ```
 
 Notice the use of the
-[`args.lua`](https://github.com/deepmind/lab2d/blob/main/dmlab2d/game_scripts/common/args.lua)
+[`args.lua`](https://github.com/google-deepmind/lab2d/blob/main/dmlab2d/game_scripts/common/args.lua)
 module to specify the arguments, their type, range, and default values.
 Arguments with default values can be omitted in the prefab specification.
 
@@ -751,7 +751,7 @@ You should see something like this:
 
 ## Making a substrate
 
-We provide a [builder](https://github.com/deepmind/meltingpot/tree/main/meltingpot/utils/substrates/builder.py)
+We provide a [builder](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/utils/substrates/builder.py)
 that adapts the raw `Lab2d` substrate into an interface compatible with
 `dm_env`. This adaptor exposes a multi-agent API, where the action and
 observation specs are lists of the single-agent specs. The observation produced
