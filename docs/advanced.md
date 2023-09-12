@@ -19,7 +19,7 @@ by the engine. These include:
 * Connection / disconnection
 
 These are defined in the engine's
-[grid](https://github.com/deepmind/lab2d/blob/main/dmlab2d/system/grid_world/grid.h).
+[grid](https://github.com/google-deepmind/lab2d/blob/main/dmlab2d/system/grid_world/grid.h).
 
 WARNING: Changing these attributes do not take effect immediately. Instead, they
          are queued for later processing by the engine.
@@ -38,7 +38,7 @@ engine. The specific order is as follows:
 1.  Rendering of all the objects in the substrate. This finalises the
     observation for all the players
 2.  Components' `update` functions are called in arbitrary order
-3.  [Registered updaters](https://github.com/deepmind/meltingpot/tree/main/meltingpot/lua/modules/updater_registry.lua)
+3.  [Registered updaters](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/lua/modules/updater_registry.lua)
     are run, in priority order
 4.  Process all events that were queued from (2) and (3).
 
@@ -52,5 +52,5 @@ engine. The specific order is as follows:
         and are not processed in this step
 
 For more details, see the
-[`DoUpdate`](https://github.com/deepmind/lab2d/blob/main/dmlab2d/system/grid_world/grid.cc)
+[`DoUpdate`](https://github.com/google-deepmind/lab2d/blob/main/dmlab2d/system/grid_world/grid.cc)
 method of the engine's grid.

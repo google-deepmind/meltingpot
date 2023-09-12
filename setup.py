@@ -75,8 +75,8 @@ setuptools.setup(
     version=VERSION,
     license='Apache 2.0',
     license_files=['LICENSE'],
-    url='https://github.com/deepmind/meltingpot',
-    download_url='https://github.com/deepmind/meltingpot/releases',
+    url='https://github.com/google-deepmind/meltingpot',
+    download_url='https://github.com/google-deepmind/meltingpot/releases',
     author='DeepMind',
     author_email='noreply@google.com',
     description=(
