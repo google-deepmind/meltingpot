@@ -64,7 +64,7 @@ from meltingpot.utils.substrates import specs
 from ml_collections import config_dict
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
-_ENABLE_DEBUG_OBSERVATIONS = False
+_ENABLE_DEBUG_OBSERVATIONS = True
 
 # This substrate only makes sense with exactly five players.
 MANDATED_NUM_PLAYERS = 5
@@ -1554,10 +1554,6 @@ def get_config():
       "variable": "votingMatrix",
   }]
   if _ENABLE_DEBUG_OBSERVATIONS:
-    config.scene_prefab["components"].append({
-        "component": "LocationObserver",
-        "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
-    })
     metrics.append({
         "name": "GLOBAL_PROGRESS",
         "type": "tensor.DoubleTensor",
