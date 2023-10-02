@@ -64,7 +64,7 @@ from meltingpot.utils.substrates import specs
 from ml_collections import config_dict
 
 # Warning: setting `_ENABLE_DEBUG_OBSERVATIONS = True` may cause slowdown.
-_ENABLE_DEBUG_OBSERVATIONS = True
+_ENABLE_DEBUG_OBSERVATIONS = False
 
 # This substrate only makes sense with exactly five players.
 MANDATED_NUM_PLAYERS = 5
