@@ -519,7 +519,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'resident',
         },
-        substrate='chemistry__three_metabolic_cycles_with_plentiful_distractors',
+        substrate=(
+            'chemistry__three_metabolic_cycles_with_plentiful_distractors'),
         roles=('default',) * 8,
         is_focal=(True,) * 5 + (False,) * 3,
         bots_by_role={
@@ -535,7 +536,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'half_and_half',
         },
-        substrate='chemistry__three_metabolic_cycles_with_plentiful_distractors',
+        substrate=(
+            'chemistry__three_metabolic_cycles_with_plentiful_distractors'),
         roles=('default',) * 8,
         is_focal=(True,) * 4 + (False,) * 4,
         bots_by_role={
@@ -549,7 +551,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'half_and_half',
         },
-        substrate='chemistry__three_metabolic_cycles_with_plentiful_distractors',
+        substrate=(
+            'chemistry__three_metabolic_cycles_with_plentiful_distractors'),
         roles=('default',) * 8,
         is_focal=(True,) * 4 + (False,) * 4,
         bots_by_role={
@@ -565,7 +568,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'visitor',
         },
-        substrate='chemistry__three_metabolic_cycles_with_plentiful_distractors',
+        substrate=(
+            'chemistry__three_metabolic_cycles_with_plentiful_distractors'),
         roles=('default',) * 8,
         is_focal=(True,) * 2 + (False,) * 6,
         bots_by_role={
