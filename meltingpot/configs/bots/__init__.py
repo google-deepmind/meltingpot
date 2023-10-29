@@ -1885,7 +1885,7 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             defect_resource=_RESOURCES['prisoners_dilemma_in_the_matrix__repeated']['DEFECT'],
             threshold=3,
             margin=5,
-                        tremble_probability=0,
+            tremble_probability=0,
         ),
     ),
     prisoners_dilemma_in_the_matrix__repeated__puppet_corrigible_tremble_0=puppet(

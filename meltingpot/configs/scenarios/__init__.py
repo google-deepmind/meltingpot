@@ -715,6 +715,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'dove players'),
         tags={
             'resident',
+            'prosocial_newcomers',
         },
         substrate='chicken_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -732,6 +733,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'resident',
             'partner_choice',
+            'antisocial_newcomers',
         },
         substrate='chicken_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -844,6 +846,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='partner typically plays dove',
         tags={
             'exploitation',
+            'partner_cooperates_unconditionally',
         },
         substrate='chicken_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -859,6 +862,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='partner typically plays hawk',
         tags={
             'acceptance',
+            'partner_defects_unconditionally',
         },
         substrate='chicken_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -958,7 +962,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforcement',
+            'sanctioning',
         },
         substrate='chicken_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -977,7 +981,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforcement',
+            'sanctioning',
         },
         substrate='chicken_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -991,7 +995,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     clean_up_0=ScenarioConfig(
         description='visiting an altruistic population',
         tags={
-            'exploitation',
+            'chance_to_benefit_oneself_without_imposing_social_cost',
             'visitor',
         },
         substrate='clean_up',
@@ -1177,6 +1181,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='partner is a cooperator',
         tags={
             'exploitation',
+            'partner_cooperates_unconditionally',
         },
         substrate='coins',
         roles=('default',) * 2,
@@ -1189,6 +1194,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='partner is a defector',
         tags={
             'acceptance',
+            'partner_defects_unconditionally',
         },
         substrate='coins',
         roles=('default',) * 2,
@@ -1495,6 +1501,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ownership',
             'restraint',
             'defense',
+            'antisocial_newcomers',
         },
         substrate='commons_harvest__closed',
         roles=('default',) * 7,
@@ -1532,6 +1539,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ownership',
             'restraint',
             'defense',
+            'prosocial_newcomers',
         },
         substrate='commons_harvest__closed',
         roles=('default',) * 7,
@@ -1550,7 +1558,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'resident',
             'restraint',
             'defense',
-            'enforcement',
+            'sanctioning',
+            'antisocial_newcomers',
         },
         substrate='commons_harvest__open',
         roles=('default',) * 7,
@@ -1566,7 +1575,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'resident',
             'restraint',
-            'enforcement',
+            'sanctioning',
+            'antisocial_newcomers',
         },
         substrate='commons_harvest__open',
         roles=('default',) * 7,
@@ -1602,6 +1612,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'ownership',
             'restraint',
             'defense',
+            'prosocial_newcomers',
         },
         substrate='commons_harvest__partnership',
         roles=('default',) * 7,
@@ -1655,7 +1666,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'dyadic_trust',
             'ownership',
             'restraint',
-            'enforcement',
+            'sanctioning',
         },
         substrate='commons_harvest__partnership',
         roles=('default',) * 7,
@@ -1842,6 +1853,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'hihe (cooperator) players'),
         tags={
             'resident',
+            'prosocial_newcomers',
         },
         substrate='externality_mushrooms__dense',
         roles=('default',) * 5,
@@ -1855,6 +1867,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'fize (defector) players'),
         tags={
             'resident',
+            'antisocial_newcomers',
         },
         substrate='externality_mushrooms__dense',
         roles=('default',) * 5,
@@ -1895,6 +1908,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='resident focal agents are joined by a sustainable visitor',
         tags={
             'resident',
+            'prosocial_newcomers',
         },
         substrate='factory_commons__either_or',
         roles=('default',) * 3,
@@ -1910,6 +1924,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'visitor'),
         tags={
             'resident',
+            'antisocial_newcomers',
         },
         substrate='factory_commons__either_or',
         roles=('default',) * 3,
@@ -2131,6 +2146,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focal team versus shaped bot team',
         tags={
             'learned_teamwork',
+            'defense',
         },
         substrate='paintball__capture_the_flag',
         roles=('default',) * 8,
@@ -2147,6 +2163,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'ad_hoc_teamwork',
             'visitor',
+            'defense',
         },
         substrate='paintball__capture_the_flag',
         roles=('default',) * 8,
@@ -2162,6 +2179,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focal team versus default bot team',
         tags={
             'learned_teamwork',
+            'defense',
         },
         substrate='paintball__king_of_the_hill',
         roles=('default',) * 8,
@@ -2176,6 +2194,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focal team versus shaped bot team',
         tags={
             'learned_teamwork',
+            'defense',
         },
         substrate='paintball__king_of_the_hill',
         roles=('default',) * 8,
@@ -2192,6 +2211,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'ad_hoc_teamwork',
             'visitor',
+            'defense',
         },
         substrate='paintball__king_of_the_hill',
         roles=('default',) * 8,
@@ -2207,6 +2227,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'ad_hoc_teamwork',
             'visitor',
+            'defense',
         },
         substrate='paintball__king_of_the_hill',
         roles=('default',) * 8,
@@ -2623,6 +2644,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'resident',
             'partner_choice',
+            'prosocial_newcomers',
         },
         substrate='prisoners_dilemma_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -2639,6 +2661,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         tags={
             'resident',
             'partner_choice',
+            'antisocial_newcomers',
         },
         substrate='prisoners_dilemma_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -2733,6 +2756,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='partner typically plays cooperate',
         tags={
             'exploitation',
+            'partner_cooperates_unconditionally',
         },
         substrate='prisoners_dilemma_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -2747,7 +2771,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     prisoners_dilemma_in_the_matrix__repeated_2=ScenarioConfig(
         description='partner typically plays defect',
         tags={
-            'versus_pure_defector',
+            'acceptance',
+            'partner_defects_unconditionally',
         },
         substrate='prisoners_dilemma_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -2841,14 +2866,14 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         },
     ),
     prisoners_dilemma_in_the_matrix__repeated_8=ScenarioConfig(
-        description=('partner tries to take advantage of the focal player ' +
-                     'by playing defect, but if punished, partner then ' +
+        description=('visitor tries to take advantage of the focal player ' +
+                     'by playing defect, but if punished, visitor then ' +
                      'switches to tit-for-tat conditional cooperation'),
         tags={
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforcement',
+            'sanctioning',
         },
         substrate='prisoners_dilemma_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -2860,14 +2885,14 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         },
     ),
     prisoners_dilemma_in_the_matrix__repeated_9=ScenarioConfig(
-        description=('partner tries to take advantage of the focal player ' +
-                     'by playing defect, but if punished, partner then ' +
+        description=('visitor tries to take advantage of the focal player ' +
+                     'by playing defect, but if punished, visitor then ' +
                      'switches to noisy tit-for-tat conditional cooperation'),
         tags={
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforcement',
+            'sanctioning',
         },
         substrate='prisoners_dilemma_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -3753,7 +3778,6 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='visiting unconditional stag players',
         tags={
             'visitor',
-            'versus_pure_stag_players',
             'convention_following',
         },
         substrate='stag_hunt_in_the_matrix__arena',
@@ -3770,7 +3794,6 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='visiting unconditional hare players',
         tags={
             'visitor',
-            'versus_pure_hare_players',
             'convention_following',
         },
         substrate='stag_hunt_in_the_matrix__arena',
@@ -3788,7 +3811,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'stag players'),
         tags={
             'resident',
-            'versus_pure_stag_players',
+            'prosocial_newcomers',
         },
         substrate='stag_hunt_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -3805,7 +3828,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'hare players'),
         tags={
             'resident',
-            'versus_pure_hare_players',
+            'antisocial_newcomers',
         },
         substrate='stag_hunt_in_the_matrix__arena',
         roles=('default',) * 8,
@@ -3918,7 +3941,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     stag_hunt_in_the_matrix__repeated_1=ScenarioConfig(
         description='partner typically plays stag',
         tags={
-            'versus_pure_stag',
+            'partner_cooperates_unconditionally',
         },
         substrate='stag_hunt_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -3933,7 +3956,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
     stag_hunt_in_the_matrix__repeated_2=ScenarioConfig(
         description='partner typically plays hare',
         tags={
-            'versus_pure_hare',
+            'acceptance',
+            'partner_defects_unconditionally',
         },
         substrate='stag_hunt_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -4032,7 +4056,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforcement',
+            'sanctioning',
         },
         substrate='stag_hunt_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -4051,7 +4075,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'teaching',
             'reciprocity',
             'forgiveness',
-            'enforement',
+            'sanctioning',
         },
         substrate='stag_hunt_in_the_matrix__repeated',
         roles=('default',) * 2,
@@ -4066,6 +4090,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals are resident and visited by an aggressor',
         tags={
             'resident',
+            'antisocial_newcomers',
+            'defense',
         },
         substrate='territory__inside_out',
         roles=('default',) * 5,
@@ -4084,6 +4110,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='visiting a population of aggressors',
         tags={
             'visitor',
+            'defense',
         },
         substrate='territory__inside_out',
         roles=('default',) * 5,
@@ -4113,7 +4140,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals visit a resident population that does nothing.',
         tags={
             'visitor',
-            'restraint',
+            'chance_to_benefit_oneself_without_imposing_social_cost',
         },
         substrate='territory__inside_out',
         roles=('default',) * 5,
@@ -4126,6 +4153,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'neighbors'),
         tags={
             'resident',
+            'defense',
         },
         substrate='territory__inside_out',
         roles=('default',) * 5,
@@ -4142,6 +4170,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
                      'neighbors'),
         tags={
             'visitor',
+            'defense',
         },
         substrate='territory__inside_out',
         roles=('default',) * 5,
@@ -4156,6 +4185,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals are resident and visited by an aggressor',
         tags={
             'resident',
+            'antisocial_newcomers',
+            'defense',
         },
         substrate='territory__open',
         roles=('default',) * 9,
@@ -4174,6 +4205,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='visiting a population of aggressors',
         tags={
             'visitor',
+            'defense',
         },
         substrate='territory__open',
         roles=('default',) * 9,
@@ -4203,7 +4235,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals visit a resident population that does nothing',
         tags={
             'visitor',
-            'restraint',
+            'chance_to_benefit_oneself_without_imposing_social_cost',
         },
         substrate='territory__open',
         roles=('default',) * 9,
@@ -4214,6 +4246,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals are resident and visited by an aggressor',
         tags={
             'resident',
+            'antisocial_newcomers',
+            'defense',
         },
         substrate='territory__rooms',
         roles=('default',) * 9,
@@ -4232,6 +4266,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='visiting a population of aggressors',
         tags={
             'visitor',
+            'defense',
         },
         substrate='territory__rooms',
         roles=('default',) * 9,
@@ -4261,7 +4296,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         description='focals visit a resident population that does nothing',
         tags={
             'visitor',
-            'restraint',
+            'chance_to_benefit_oneself_without_imposing_social_cost',
         },
         substrate='territory__rooms',
         roles=('default',) * 9,
