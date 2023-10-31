@@ -19,13 +19,13 @@ See _Territory: Open_ for the general description of the mechanics at play in
 this substrate.
 
 In this substrate, _Territory: Inside Out_,  players start on the outside of
-a randomly generated maze of resources. They must move from their starting
+a randomly generated maze of resource walls. They must move from their starting
 locations inward toward the center of the map to claim territory. In so doing
 they will quickly encounter their coplayers who will be doing the same thing
 from their own starting locations. In order to get high scores, agents must be
 able to rapidly negotiate tacit agreements with one another concerning the
 borders between their respective territories. Since the spatial arrangement of
-the resources differs from episode to episode, so too does the negotiation
+the resource walls differs from episode to episode, so too does the negotiation
 problem to be solved.
 """
 

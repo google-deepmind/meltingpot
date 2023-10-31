@@ -15,32 +15,45 @@
 
 Example video: https://youtu.be/F1OO6LFIZHI
 
-Players can claim a resource in two ways: (1) by touching it, and (2) by using a
-"claiming beam", different from the zapping beam, which they also have.
-Claimed resources are colored in the unique color of the player that claimed
-them. Unclaimed resources are gray. Players cannot walk through resources, they
-are like walls.
+Each player has their own unique color. Players aim to claim territory by
+painting walls in their color. Wet paint (dull version of each player's color)
+provides no reward. 25 steps after painting a wall, if no other paint was
+applied since, the paint dries and changes to the brighter version of the
+claiming player's color. All dry paint on a wall yields reward stochastically
+to the claiming player with a fixed rate. The more walls a player has claimed
+the more reward they may expect to achieve per timestep.
 
-Once a resource has been claimed a countdown begins. After 100 timesteps, the
-claimed resource becomes active. This is visualized by a white and gray plus
-sign appearing on top. Active resources provide reward stochastically to the
+Players can claim a wall in two ways: (1) by touching it with the paintbrush
+they carry, and (2) by flinging paint forward. Claimed walls are colored in
+the unique color of the player that claimed them. Unclaimed walls are gray.
+
+Once a wall has been claimed a countdown begins. After 25 timesteps the paint
+on the wall dries and the wall is said to be `active'. This is visualized by
+the paint color brightening. Active walls provide reward stochastically to the
 player that claimed them at a rate of 0.01 per timestep. Thus the more resources
-a player claims and can hold until they become active, the more reward they
-obtain.
+a player claims and can hold until the paint dries and they become active, the
+more reward they obtain.
 
-The claiming beam is of length 2. It can color through a resource to
-simultaneously color a second resource on the other side. If two players stand
-on opposite sides of a wall of resources of width 2 and one player claims all
-the way across to the other side (closer to the other player than themselves)
-then the player on the other side might reasonably perceive that as a somewhat
-aggressive action. Less aggressive of course than the other option both players
-have: using their zapping beam. If any resource is zapped twice then it gets
-permanently destroyed. It no longer functions as a wall or a resource, allowing
-players to pass through.
+Players may fling paint a distance of 2. This allows then to paint over a wall
+to simultaneously paint both a near wall and a second wall on the other side of
+it. If two players stand on opposite sides of a wall of width 2 and one player
+claims all the way across to the other side (closer to the other player than
+themselves) then the player on the other side might reasonably perceive that as
+a somewhat aggressive action. It is still less aggressive of course than the
+other option both players have: using their zapping beam to attack one another
+or their claimed walls. If any wall is zapped twice then it is permanently
+destroyed. It no longer functions as a wall and it is no longer claimable. Once
+a wall has been destroyed then players may freely walk over it.
 
-Like resources, when players are hit by a zapping beam they also get removed
-from the game and never regenerate. Once a player has been zapped out it is
-gone. All resources it claimed are immediately returned to the unclaimed state.
+Players, like walls, are also removed from the game once they are hit twice by a
+zapping game. Like walls, players also never regenerate. This is different from
+other substrates where being hit by a zapping beam does not cause permanent
+removal. In territory, once a player has been zapped out they are gone for good.
+All walls they claimed immediately return to the unclaimed state.
+
+In territory__open, all nine players spawn in an open space near one another and
+at some distance away from all the resource walls. Some parts of the map are
+more rich in resource walls than others.
 """
 
 from meltingpot.configs.substrates import territory as base_config

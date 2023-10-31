@@ -18,12 +18,12 @@ Example video: https://youtu.be/4URkGR9iv9k
 See _Territory: Open_ for the general description of the mechanics at play in
 this substrate.
 
-In this substrate, _Territory: Rooms_,  individuals start in segregated rooms
-that strongly suggest a partition individuals could adhere to. They can break
-down the walls of these regions and invade each other's "natural territory", but
-the destroyed resources are lost forever. A peaceful partition is possible at
-the start of the episode, and the policy to achieve it is easy to implement. But
-if any agent gets too greedy and invades, it buys itself a chance of large
+In this substrate, _Territory: Rooms_, players start in segregated rooms which
+strongly suggest a partition they could adhere to. They can break down the walls
+of their regions and invade each other's ``natural territory'', but the
+destroyed resource walls are then lost forever. A peaceful partition is possible
+at the start of the episode, and the policy to achieve it is easy to implement.
+But if any agent gets too greedy and invades, it buys itself a chance of large
 rewards, but also chances inflicting significant chaos and deadweight loss on
 everyone if its actions spark wider conflict. The reason it can spiral out of
 control is that once an agent's neighbor has left their natural territory then
