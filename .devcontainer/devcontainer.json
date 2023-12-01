@@ -5,7 +5,7 @@
     "dockerfile": "Dockerfile",
     "context": "..",
     "args": {
-      "PYTHON_VERSION": "3.10"
+      "PYTHON_VERSION": "3.11"
     }
   },
   "runArgs": [

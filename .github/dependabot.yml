@@ -16,4 +16,4 @@ updates:
       interval: monthly
     ignore:
       - dependency-name: "vscode/devcontainers/python"
-        versions: [">= 3.10"]
+        versions: [">= 3.11"]
