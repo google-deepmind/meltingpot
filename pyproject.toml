@@ -21,7 +21,7 @@ addopts = "-n auto"
 testpaths = ["meltingpot", "examples"]
 
 [tool.pytype]
-python_version = "3.10"
+python_version = "3.11"
 inputs = ["meltingpot", "examples"]
 # Keep going past errors to analyze as many files as possible.
 keep_going = true

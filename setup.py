@@ -91,8 +91,8 @@ setuptools.setup(
         'Operating System :: POSIX :: Linux',
         'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     cmdclass={'build_py': BuildPy},
@@ -102,7 +102,7 @@ setuptools.setup(
     package_data={
         'meltingpot.lua': ['**'],
     },
-    python_requires='>=3.10',
+    python_requires='>=3.11',
     install_requires=[
         'absl-py',
         'chex<0.1.81',  # Incompatible with tensorflow 2.13 (due to numpy req).
