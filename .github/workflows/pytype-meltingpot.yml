@@ -7,7 +7,6 @@ on:
     paths:
       - '.github/actions/install-meltingpot/action.yml'
       - '.github/workflows/pytype-meltingpot.yml'
-      - 'examples/**'
       - 'meltingpot/**'
       - 'pyproject.toml'
       - 'setup.py'
@@ -17,7 +16,6 @@ on:
     paths:
       - '.github/actions/install-meltingpot/action.yml'
       - '.github/workflows/pytype-meltingpot.yml'
-      - 'examples/**'
       - 'meltingpot/**'
       - 'pyproject.toml'
       - 'setup.py'
