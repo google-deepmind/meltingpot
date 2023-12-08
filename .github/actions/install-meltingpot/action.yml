@@ -39,9 +39,9 @@ runs:
         path: |
           meltingpot/assets
           venv
-        key: install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.version }}-${{ hashFiles('setup.py') }}
+        key: install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('setup.py') }}
         restore-keys: |
-          install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.version }}-
+          install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.python-version }}-
 
     - name: Install Melting Pot
       if: steps.restore.outputs.cache-hit != 'true'
