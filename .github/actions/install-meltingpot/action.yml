@@ -25,6 +25,7 @@ runs:
         fi
 
     - name: Set up Python ${{ inputs.python-version }}
+      id: setup-python
       uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1
       with:
         python-version: ${{ inputs.python-version }}
@@ -38,16 +39,16 @@ runs:
         path: |
           meltingpot/assets
           venv
-        key: install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ inputs.python-version}}-${{ hashFiles('setup.py') }}
+        key: install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.version }}-${{ hashFiles('setup.py') }}
         restore-keys: |
-          install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ inputs.python-version }}-
+          install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.version }}-
 
     - name: Install Melting Pot
       if: steps.restore.outputs.cache-hit != 'true'
       shell: bash
       run: |
         pip install --upgrade pip
-        pip install virtualenv
+        pip install --upgrade virtualenv
         virtualenv venv
         source venv/bin/activate
         pip install --editable .[dev]
