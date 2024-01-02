@@ -10,6 +10,16 @@ updates:
     schedule:
       interval: monthly
 
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/install-meltingpot"
+    schedule:
+      interval: monthly
+
+  - package-ecosystem: "github-actions"
+    directory: "/.github/actions/install-examples"
+    schedule:
+      interval: monthly
+
   - package-ecosystem: docker
     directory: /.devcontainer
     schedule:
