@@ -42,23 +42,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
-        run: |
-          pip install pip==23.3.1
-          pip install build==1.0.3
-          pip install pytest-xdist==3.5.0
-          pip install setuptools==68.0.0
-
       - name: Build source distribution
-        run: python -m build --sdist --outdir dist/
+        run: |
+          pip install build==1.0.3
+          python -m build --sdist --outdir dist/
 
-      - name: Install from source distribution
+      - name: Test source distribution
         if: github.event_name == 'release' || inputs.test_sdist
-        run: pip -vvv install dist/*.tar.gz
-
-      - name: Test installation
-        if: github.event_name == 'release' || inputs.test_sdist
-        run: pytest -n auto -rax --pyargs meltingpot
+        run: |
+          VENV="$(mktemp --dry-run)"
+          python -m venv "${VENV}"
+          source "${VENV}/bin/activate"
+          pip install dist/*.tar.gz
+          pip install pytest-xdist
+          pytest -n auto -rax --pyargs meltingpot
+          deactivate
+          rm -rf "${VENV}"
 
       - name: Publish to TestPyPI
         if: github.event_name == 'release' || inputs.upload_to_test_pypi
