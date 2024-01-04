@@ -125,10 +125,12 @@ setuptools.setup(
             'build',
             'isort',
             'pipreqs',
+            'pip-tools',
             'pyink',
             'pylint',
             'pytest-xdist',
             'pytype',
+            'twine',
         ],
     },
 )
