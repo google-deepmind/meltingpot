@@ -32,7 +32,7 @@ runs:
 
     - name: Restore Melting Pot installation
       id: restore
-      uses: actions/cache/restore@v3
+      uses: actions/cache/restore@13aacd865c20de90d75de3b17ebe84f7a17d57d2
       with:
         path: |
           meltingpot/assets
@@ -51,7 +51,7 @@ runs:
 
     - name: Save Melting Pot installation
       if: steps.restore.outputs.cache-hit != 'true'
-      uses: actions/cache/save@v3
+      uses: actions/cache/save@13aacd865c20de90d75de3b17ebe84f7a17d57d2
       with:
         path:  |
           meltingpot/assets
