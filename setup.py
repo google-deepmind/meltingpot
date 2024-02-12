@@ -103,7 +103,7 @@ setuptools.setup(
     python_requires='>=3.11',
     install_requires=[
         'absl-py',
-        'chex<0.1.81',  # Incompatible with tensorflow 2.13 (due to numpy req).
+        'chex',
         'dm-env',
         'dmlab2d',
         'dm-tree',
