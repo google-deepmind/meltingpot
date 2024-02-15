@@ -349,6 +349,14 @@ function BaseSimulation:addObservations(tileSet, world, observations)
       layout = self:textMap().layout,
       spriteMap = self._settings.worldSpriteMap,
   }
+  local worldLayerViewSpec = worldLayerView:observationSpec('WORLD.LAYER')
+  -- worldLayerViewSpec.type = 'tensor.ByteTensor'
+  worldLayerViewSpec.func = function(grid)
+    return worldLayerView:observation{
+      grid = grid,
+    }
+  end
+  observations[#observations + 1] = worldLayerViewSpec
 
   local worldView = tile.Scene{shape = worldLayerView:gridSize(), set = tileSet}
   local spec = {
