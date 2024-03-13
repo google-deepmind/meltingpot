@@ -274,6 +274,31 @@ function Avatar:addObservations(tileSet, world, observations)
       end
   }
   observations[#observations + 1] = spec
+
+  observations[#observations + 1] = {
+    name = stringId .. '.NEARBY',
+    type = 'tensor.Int32Tensor',
+    shape = {},
+    func = function(grid)
+        -- List of avatar ids
+        local resultsList = {}
+        local objectsOnLayer = self:queryPartialObservationWindow("upperPhysical")
+        for _, object in ipairs(objectsOnLayer) do
+        if object:hasComponent('Avatar') then
+            local index = object:getComponent('Avatar'):getIndex()
+            table.insert(resultsList, index)
+        end
+        end
+        -- Then reformat list as int32 tensor to output
+        local numPlayers = self.gameObject.simulation:getNumPlayers()
+        local resultTensor = tensor.Int32Tensor(numPlayers):fill(0)
+        for _, avatarId in ipairs(resultsList) do
+            resultTensor(avatarId):add(1)
+        end
+        return resultTensor
+    end
+}
+
 end
 
 function Avatar:reset()

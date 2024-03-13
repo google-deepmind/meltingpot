@@ -20,6 +20,9 @@ import dm_env
 from meltingpot.utils.substrates import builder
 from meltingpot.utils.substrates import substrate
 
+from SocialEnvDesign import principal_substrate
+from SocialEnvDesign.principal import Principal
+
 
 class SubstrateFactory:
   """Factory for building specific substrates."""
@@ -93,3 +96,20 @@ class SubstrateFactory:
         individual_observations=self._individual_observations,
         global_observations=self._global_observations,
         action_table=self._action_table)
+
+  def build_principal(self, roles: Sequence[str], principal: Principal) -> principal_substrate.PrincipalSubstrate:
+    """Builds the substrate.
+
+    Args:
+      roles: the role each player will take.
+
+    Returns:
+      The constructed substrate.
+    """
+    return principal_substrate.build_substrate(
+        lab2d_settings=self._lab2d_settings_builder(roles),
+        individual_observations=self._individual_observations,
+        global_observations=self._global_observations,
+        action_table=self._action_table,
+        principal=principal
+        )
