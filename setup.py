@@ -98,7 +98,7 @@ setuptools.setup(
     cmdclass={'build_py': BuildPy},
     packages=setuptools.find_packages(include=['meltingpot', 'meltingpot.*']),
     package_data={
-        'meltingpot.lua': ['**'],
+        'meltingpot': ['lua/**'],
     },
     python_requires='>=3.11',
     install_requires=[
