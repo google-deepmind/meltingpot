@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.2.1] - 2023-07-25
+
+### Changed
+
+- Do not allow `orientation = None` in Transform objects
+- Improve documentation for territory__*.
+- Improve scenario tags.
+- Move puppeteers testutils to testing dir.
+- remove restriction on chex
+- Update setup.py to work with older versions of setuptools
+- Add dev tools to setup.py
+- Add pytest-xdist as a required plugin.
+- Update pylintrc
+
+### Fixed
+
+- Debug observations break hidden agenda [#168](https://github.com/google-deepmind/meltingpot/issues/168)
+- Various lint errors
+
+### Removed
+
+- Residual v1 file: reaction_graph_utils.py
+- Remove stale documentation left over from 1.0.
+
+
 ## [2.2.0] - 2023-07-25
 
 ### Changed
