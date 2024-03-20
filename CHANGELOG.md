@@ -5,7 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [2.2.1] - 2023-07-25
+## [2.2.2] - 2024-03-20
+
+### Fixed
+
+- Update setup.py to work with earlier setuptools (fixes broken 2.2.1 release).
+
+
+## [2.2.1] - 2024-03-19 [YANKED]
 
 ### Changed
 
