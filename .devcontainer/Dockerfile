@@ -1,6 +1,6 @@
 # Use Nvidia Ubuntu 22 base (includes CUDA if a supported GPU is present)
 # https://hub.docker.com/r/nvidia/cuda
-FROM nvidia/cuda:12.3.2-devel-ubuntu22.04@sha256:6655d5fc2fb48580255a5021a81c379c325a457b74b77ac823ed67e4faa32aeb
+FROM nvidia/cuda:12.4.1-devel-ubuntu22.04@sha256:da6791294b0b04d7e65d87b7451d6f2390b4d36225ab0701ee7dfec5769829f5
 
 ARG PYTHON_VERSION
 
