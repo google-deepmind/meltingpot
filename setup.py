@@ -27,6 +27,19 @@ ASSETS_VERSION = '2.1.0'
 ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
 
 
+def _remove_excluded(description: str) -> str:
+  description, *sections = description.split('<!-- GITHUB -->')
+  for section in sections:
+    excluded, included = section.split('<!-- /GITHUB -->')
+    del excluded
+    description += included
+  return description
+
+
+with open('README.md') as f:
+  LONG_DESCRIPTION = _remove_excluded(f.read())
+
+
 class BuildPy(build_py.build_py):
   """Command that downloads Melting Pot assets as part of build_py."""
 
@@ -80,7 +93,11 @@ setuptools.setup(
     author='DeepMind',
     author_email='noreply@google.com',
     description=(
-        'A suite of test scenarios for multi-agent reinforcement learning.'),
+        'A suite of test scenarios for multi-agent reinforcement learning.'
+    ),
+    description_content_type='text/plain',
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     keywords='multi-agent reinforcement-learning python machine-learning',
     classifiers=[
         'Development Status :: 4 - Beta',

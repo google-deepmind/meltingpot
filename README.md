@@ -2,21 +2,22 @@
 
 *A suite of test scenarios for multi-agent reinforcement learning.*
 
+<!-- GITHUB -->
 [![Python](https://img.shields.io/pypi/pyversions/dm-meltingpot.svg)](https://pypi.python.org/pypi/dm-meltingpot)
 [![PyPI version](https://img.shields.io/pypi/v/dm-meltingpot.svg)](https://pypi.python.org/pypi/dm-meltingpot)
 [![PyPI tests](../../actions/workflows/pypi-test.yml/badge.svg)](../../actions/workflows/pypi-test.yml)
 [![Tests](../../actions/workflows/test-meltingpot.yml/badge.svg)](../../actions/workflows/test-meltingpot.yml)
 [![Examples](../../actions/workflows/test-examples.yml/badge.svg)](../../actions/workflows/test-examples.yml)
+<!-- /GITHUB -->
 
 <div align="center">
-  <img src="docs/images/meltingpot_montage.gif"
+  <img src="https://github.com/google-deepmind/meltingpot/blob/main/docs/images/meltingpot_montage.gif?raw=true"
        alt="Melting Pot substrates"
        height="250" width="250" />
 </div>
 
-NEWS! [Melting Pot Contest at NeurIPS 2023](https://www.aicrowd.com/challenges/meltingpot-challenge-2023)
-
 [Melting Pot 2.0 Tech Report](https://arxiv.org/abs/2211.13746)
+[Melting Pot Contest at NeurIPS 2023](https://www.aicrowd.com/challenges/meltingpot-challenge-2023)
 
 ## About
 
@@ -41,7 +42,7 @@ reinforcement learning. We plan to maintain it, and will be extending it in the
 coming years to cover more social interactions and generalization scenarios.
 
 If you are interested in extending Melting Pot, please refer to the
-[Extending Melting Pot](docs/extending.md) documentation.
+[Extending Melting Pot](https://github.com/google-deepmind/meltingpot/blob/main/docs/extending.md) documentation.
 
 ## Installation
 
@@ -115,19 +116,19 @@ automatically.
 ## Example usage
 
 ### Evaluation
-The [evaluation](meltingpot/utils/evaluation/evaluation.py) library can be used
+The [evaluation](https://github.com/google-deepmind/meltingpot/blob/main/meltingpot/utils/evaluation/evaluation.py) library can be used
 to evaluate [SavedModel](https://www.tensorflow.org/guide/saved_model)s
 trained on Melting Pot substrates.
 
 Evaluation results from the [Melting Pot 2.0 Tech Report](https://arxiv.org/abs/2211.13746)
-can be viewed in the [Evaluation Notebook](notebooks/evaluation_results.ipynb).
+can be viewed in the [Evaluation Notebook](https://github.com/google-deepmind/meltingpot/blob/main/notebooks/evaluation_results.ipynb).
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deepmind/meltingpot/blob/main/notebooks/evaluation_results.ipynb)
 
 ### Interacting with the substrates
 
 You can try out the substrates interactively with the
-[human_players](meltingpot/human_players) scripts. For example, to play
+[human_players](https://github.com/google-deepmind/meltingpot/blob/main/meltingpot/human_players) scripts. For example, to play
 the `clean_up` substrate, you can run:
 
 ```shell
@@ -137,7 +138,7 @@ python meltingpot/human_players/play_clean_up.py
 You can move around with the `W`, `A`, `S`, `D` keys, Turn with `Q`, and `E`,
 fire the zapper with `1`, and fire the cleaning beam with `2`. You can switch
 between players with `TAB`. There are other substrates available in the
-[human_players](meltingpot/human_players) directory. Some have multiple
+[human_players](https://github.com/google-deepmind/meltingpot/blob/main/meltingpot/human_players) directory. Some have multiple
 variants, which you select with the `--level_name` flag.
 
 ### Training agents
@@ -175,7 +176,7 @@ This example uses a PettingZoo wrapper with a fully parameter shared PPO agent
 from SB3.
 
 The PettingZoo wrapper can be used separately from SB3 and
-can be found [here](examples/pettingzoo/utils.py).
+can be found [here](https://github.com/google-deepmind/meltingpot/blob/main/examples/pettingzoo/utils.py).
 
 ```shell
 cd <meltingpot_root>
@@ -186,7 +187,7 @@ python sb3_train.py
 
 ## Documentation
 
-Full documentation is available [here](docs/index.md).
+Full documentation is available [here](https://github.com/google-deepmind/meltingpot/blob/main/docs/index.md).
 
 ## Citing Melting Pot
 
