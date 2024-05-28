@@ -224,15 +224,9 @@ def create_cell_prefab(compound_name, compounds, reactivity_levels,
 
   if sprites:
     def get_palette(sprite_color):
-      if len(sprite_color) == 3:
-        x_color = EMPTY_COLOR[0:3]
-        a_color = (252, 252, 252)
-      elif len(sprite_color) == 4:
-        x_color = EMPTY_COLOR
-        a_color = (252, 252, 252, 255)
       return {
-          "x": x_color,
-          "a": a_color,
+          "x": EMPTY_COLOR[0:len(sprite_color)],
+          "a": (252,) * len(sprite_color),
           "b": sprite_color,
           "c": multiply_tuple(sprite_color, 0.2),
           "d": sprite_color

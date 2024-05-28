@@ -694,7 +694,7 @@ def _even_vs_odd_team_assignment(num_players,
   for player_idx in range(0, num_players):
     if player_idx % 2 == 0:
       team = "red"
-    elif player_idx % 2 == 1:
+    else:
       team = "blue"
     game_object = create_avatar_object(player_idx, team,
                                        override_taste_kwargs=taste_kwargs)
@@ -713,6 +713,8 @@ def _low_vs_high_team_assignment(num_players,
       team = "blue"
     elif player_idx > median:
       team = "red"
+    else:
+      raise ValueError("num_players must be even")
     game_object = create_avatar_object(player_idx, team,
                                        override_taste_kwargs=taste_kwargs)
     avatar_objects.append(game_object)

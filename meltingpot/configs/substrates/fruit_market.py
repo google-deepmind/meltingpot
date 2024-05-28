@@ -1160,13 +1160,14 @@ def create_avatar_objects(roles: Sequence[str],
       # farmers and odd numbered players to be apple farmers.
       if player_idx % 2 == 1:
         specialty = "apple"
-      elif player_idx % 2 == 0:
+      else:
         specialty = "banana"
+    elif role == "apple_farmer":
+      specialty = "apple"
+    elif role == "banana_farmer":
+      specialty = "banana"
     else:
-      if role == "apple_farmer":
-        specialty = "apple"
-      elif role == "banana_farmer":
-        specialty = "banana"
+      raise ValueError(f"Unsupported role: {role}")
     game_object = create_avatar_object(player_idx,
                                        specialty,
                                        max_stamina_bar_states - 1)

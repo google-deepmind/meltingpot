@@ -480,16 +480,17 @@ def create_avatar_objects(
       if player_idx % 2 == 0:
         row_player = True
         color = (50, 100, 200)
-      elif player_idx % 2 == 1:
+      else:
         row_player = False
         color = (200, 100, 50)
+    elif role == "bach_fan":
+      row_player = True
+      color = (50, 100, 200)
+    elif role == "stravinsky_fan":
+      row_player = False
+      color = (200, 100, 50)
     else:
-      if role == "bach_fan":
-        row_player = True
-        color = (50, 100, 200)
-      elif role == "stravinsky_fan":
-        row_player = False
-        color = (200, 100, 50)
+      raise ValueError(f"Unsupported role: {role}")
 
     avatar = create_avatar_object(player_idx, color, row_player)
     avatar_objects.append(avatar)
