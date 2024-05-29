@@ -10,12 +10,12 @@ updates:
     schedule:
       interval: monthly
 
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: github-actions
     directory: "/.github/actions/install-meltingpot"
     schedule:
       interval: monthly
 
-  - package-ecosystem: "github-actions"
+  - package-ecosystem: github-actions
     directory: "/.github/actions/install-examples"
     schedule:
       interval: monthly
@@ -24,6 +24,8 @@ updates:
     directory: /.devcontainer
     schedule:
       interval: monthly
-    ignore:
-      - dependency-name: "vscode/devcontainers/python"
-        versions: [">= 3.11"]
+
+  - package-ecosystem: devcontainers
+    directory: /.devcontainer
+    schedule:
+      interval: monthly
