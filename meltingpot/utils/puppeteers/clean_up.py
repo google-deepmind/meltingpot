@@ -17,6 +17,7 @@ import dataclasses
 
 import dm_env
 from meltingpot.utils.puppeteers import puppeteer
+import numpy as np
 
 
 @dataclasses.dataclass(frozen=True)
@@ -138,3 +139,221 @@ class ConditionalCleaner(puppeteer.Puppeteer[ConditionalCleanerState]):
         clean_until=clean_until,
         recent_cleaning=recent_cleaning)
     return timestep, next_state
+
+
+@dataclasses.dataclass(frozen=True)
+class CorrigibleReciprocatorState:
+  """Current state of the CorrigibleReciprocator.
+
+  Attributes:
+    clean_until: step_count after which to stop cleaning.
+    nice: whether the puppeteer will cooperate.
+    step_count: number of timesteps previously seen in this episode.
+    recent_cleaning: number of others cleaning on previous timesteps (ordered
+      from oldest to most recent).
+    sanctioned_steps: how long has the player been in time-out (after zap).
+  """
+  clean_until: int
+  nice: bool
+  step_count: int
+  recent_cleaning: tuple[int, ...]
+  sanctioned_steps: int
+
+
+@dataclasses.dataclass(frozen=True)
+class SanctionerAlternatorState:
+  """Current state of the SanctionerAlternator.
+
+  Attributes:
+    step_count: number of timesteps previously seen in this episode.
+    recent_cleaning: number of others cleaning on previous timesteps (ordered
+      from oldest to most recent).
+    sanction_until: the number of steps to sanction others.
+  """
+  step_count: int
+  recent_cleaning: tuple[int, ...]
+  sanction_until: int
+
+
+class CorrigibleReciprocator(puppeteer.Puppeteer[CorrigibleReciprocatorState]):
+  """Cleanup puppeteer for a corrigible reciprocator."""
+
+  def __init__(
+      self,
+      cooperate_goal: puppeteer.PuppetGoal,
+      defect_goal: puppeteer.PuppetGoal,
+      num_others_cooperating_cumulant: str,
+      threshold: int,
+      recency_window: int = 5,
+      steps_to_cooperate_when_motivated: int = 75,
+      timeout_steps: int = 50,
+      corrigible_threshold: int = 2) -> None:
+    """Initializes the puppeteer."""
+    self._cooperate_goal = cooperate_goal
+    self._defect_goal = defect_goal
+    self._num_others_cooperating_cumulant = num_others_cooperating_cumulant
+
+    self._steps_to_cooperate_when_motivated = steps_to_cooperate_when_motivated
+
+    self._timeout_steps = timeout_steps
+    self._corrigible_threshold = corrigible_threshold
+
+    self._threshold = threshold
+    self._recency_window = recency_window
+
+  def initial_state(self):
+    return CorrigibleReciprocatorState(
+        clean_until=0, nice=False, step_count=0, recent_cleaning=(),
+        sanctioned_steps=0)
+
+  def step(
+      self, timestep: dm_env.TimeStep, prev_state: CorrigibleReciprocatorState,
+  ) -> tuple[dm_env.TimeStep, CorrigibleReciprocatorState]:
+    """Puppeteer step.
+
+    Args:
+      timestep: The current timestep from the environment.
+      prev_state: The previous state of the puppeteer.
+
+    Returns:
+      The transformed timestep (with a goal), and the new state.
+    """
+    if timestep.first():
+      prev_state = self.initial_state()
+
+    sanctioned_steps = prev_state.sanctioned_steps
+    clean_until = prev_state.clean_until
+    nice = prev_state.nice
+    step_count = prev_state.step_count
+    recent_cleaning = prev_state.recent_cleaning
+    if np.all(timestep.observation['RGB'] == 0):
+      sanctioned_steps += 1
+      if (sanctioned_steps >=
+          self._timeout_steps * self._corrigible_threshold):
+        nice = True
+        clean_until = step_count + self._steps_to_cooperate_when_motivated
+        return (puppeteer.puppet_timestep(timestep, self._cooperate_goal),
+                CorrigibleReciprocatorState(clean_until, nice, step_count + 1,
+                                            recent_cleaning, sanctioned_steps))
+      return (puppeteer.puppet_timestep(timestep, self._defect_goal),
+              CorrigibleReciprocatorState(clean_until, nice, step_count + 1,
+                                          recent_cleaning, sanctioned_steps))
+
+    if not nice:
+      return (puppeteer.puppet_timestep(timestep, self._defect_goal),
+              CorrigibleReciprocatorState(clean_until, nice, step_count + 1,
+                                          recent_cleaning, sanctioned_steps))
+
+    num_others_cooperating = float(
+        timestep.observation[self._num_others_cooperating_cumulant])
+    if len(recent_cleaning) < self._recency_window:
+      recent_cleaning = tuple([num_others_cooperating, *recent_cleaning])
+    else:
+      recent_cleaning = tuple([num_others_cooperating, *recent_cleaning[:-1]])
+
+    smooth_cleaning = np.sum(recent_cleaning)
+    if smooth_cleaning >= self._threshold:
+      clean_until = step_count + self._steps_to_cooperate_when_motivated
+
+    if step_count < clean_until:
+      goal = self._cooperate_goal
+    else:
+      goal = self._defect_goal
+
+    return (puppeteer.puppet_timestep(timestep, goal),
+            CorrigibleReciprocatorState(clean_until, nice, step_count + 1,
+                                        recent_cleaning, sanctioned_steps))
+
+
+class SanctionerAlternator(puppeteer.Puppeteer[SanctionerAlternatorState]):
+  """Cleanup puppeteer for a thresholded sanctioner alternator."""
+
+  def __init__(
+      self,
+      cooperate_goal: puppeteer.PuppetGoal,
+      defect_goal: puppeteer.PuppetGoal,
+      sanction_goal: puppeteer.PuppetGoal,
+      num_others_cooperating_cumulant: str,
+      threshold: int,
+      recency_window: int = 50,
+      steps_to_sanction_when_motivated: int = 100,
+      alternating_steps: int = 200,
+      nice: bool = True) -> None:
+    """Initializes the puppeteer.
+    
+    Args:
+      cooperate_goal: the goal to emit when cooperating.
+      defect_goal: the goal to emit when defecting.
+      sanction_goal: the goal to emit when sanctioning.
+      num_others_cooperating_cumulant: name of the observation for others
+        cooperating.
+      threshold: threshold of others cooperating over time under which it
+        triggers a sanctioning burst.
+      recency_window: the size of the window to keep track of others
+        cooperating. Used in conjunction with the threshold.
+      steps_to_sanction_when_motivated: when a sactioning burst happens, it
+        lasts this long.
+      alternating_steps: change goals between cooperation and defection every
+        this number of steps.
+      nice: whether it starts with cooperation or defection.
+    """
+    self._cooperate_goal = cooperate_goal
+    self._defect_goal = defect_goal
+    self._sanction_goal = sanction_goal
+    self._num_others_cooperating_cumulant = num_others_cooperating_cumulant
+    self._threshold = threshold
+    self._recency_window = recency_window
+
+    self._alternating_steps = alternating_steps
+    self._nice = nice
+
+    self._steps_to_sanction_when_motivated = steps_to_sanction_when_motivated
+
+  def initial_state(self) -> SanctionerAlternatorState:
+    return SanctionerAlternatorState(
+        sanction_until=0,
+        recent_cleaning=tuple([1] * self._recency_window),
+        step_count=0)
+
+  def step(
+      self,
+      timestep: dm_env.TimeStep,
+      prev_state: SanctionerAlternatorState,
+  ) -> tuple[dm_env.TimeStep, SanctionerAlternatorState]:
+    """Puppeteer step.
+
+    Args:
+      timestep: The current timestep from the environment.
+      prev_state: The previous state of the puppeteer.
+
+    Returns:
+      The transformed timestep (with a goal), and the new state.
+    """
+    if timestep.first():
+      prev_state = self.initial_state()
+
+    num_others_cooperating = float(
+        timestep.observation[self._num_others_cooperating_cumulant])
+    recent_cleaning = tuple(
+        [1 if num_others_cooperating else 0] +
+        list(prev_state.recent_cleaning[:-1]))
+    sanction_until = prev_state.sanction_until
+
+    smooth_cleaning = np.sum(recent_cleaning)
+    if smooth_cleaning < self._threshold:
+      sanction_until = (
+          prev_state.step_count + self._steps_to_sanction_when_motivated)
+
+    if prev_state.step_count < sanction_until:
+      goal = self._sanction_goal
+    else:
+      if ((prev_state.step_count // self._alternating_steps) % 2
+          ) == 0 and self._nice:
+        goal = self._cooperate_goal
+      else:
+        goal = self._defect_goal
+
+    return puppeteer.puppet_timestep(timestep, goal), SanctionerAlternatorState(
+        sanction_until=sanction_until,
+        recent_cleaning=recent_cleaning,
+        step_count=prev_state.step_count + 1)
