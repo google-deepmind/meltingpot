@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
-    timeout-minutes: 120
+    timeout-minutes: 180
     strategy:
       fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
       matrix:
