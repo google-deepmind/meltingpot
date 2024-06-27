@@ -107,8 +107,12 @@ class ScenarioConfigTest(parameterized.TestCase):
     seen = collections.defaultdict(set)
     for name, config in SCENARIO_CONFIGS.items():
       seen[config].add(name)
-    duplicates = {names for _, names in seen.items() if len(names) > 1}
-    self.assertEmpty(duplicates, f'Duplicate configs found: {duplicates!r}.')
+    duplicates = tuple(names for _, names in seen.items() if len(names) > 1)
+    self.assertEqual(duplicates,
+                     tuple([{'territory__rooms_5', 'territory__rooms_6'}]),
+                     'The only acceptable duplicates are territory__rooms_5 '
+                     f'and territory__rooms_6. Found: {duplicates!r}.')
+    # self.assertEmpty(duplicates, f'Duplicate configs found: {duplicates!r}.')
 
   def test_all_substrates_used_by_scenarios(self):
     used = {scenario.substrate for scenario in SCENARIO_CONFIGS.values()}

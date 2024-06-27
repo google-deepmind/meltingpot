@@ -19,6 +19,7 @@ import os
 from typing import AbstractSet, Callable, Iterable, Literal, Mapping, Optional, Sequence
 
 import immutabledict
+from meltingpot.utils.puppeteers import allelopathic_harvest
 from meltingpot.utils.puppeteers import alternator
 from meltingpot.utils.puppeteers import clean_up
 from meltingpot.utils.puppeteers import coins
@@ -42,6 +43,14 @@ MODELS_ROOT = _find_models_root()
 # Ordered puppet goals must match the order used in bot training.
 _PUPPET_GOALS = immutabledict.immutabledict(
     # keep-sorted start numeric=yes block=yes
+    allelopathic_harvest__open=puppeteer.puppet_goals([
+        'CONSUME_ANY',
+        'PREFER_RED',
+        'PREFER_GREEN',
+        'FREERIDE_RED',
+        'FREERIDE_GREEN',
+        'ZAP_OTHERS',
+    ]),
     bach_or_stravinsky_in_the_matrix__arena=puppeteer.puppet_goals([
         'COLLECT_BACH',
         'COLLECT_STRAVINSKY',
@@ -69,6 +78,11 @@ _PUPPET_GOALS = immutabledict.immutabledict(
     clean_up=puppeteer.puppet_goals([
         'EAT',
         'CLEAN',
+    ]),
+    clean_up_3_goals=puppeteer.puppet_goals([
+        'EAT',
+        'CLEAN',
+        'SANCTION',
     ]),
     coins=puppeteer.puppet_goals([
         'COOPERATE',
@@ -197,6 +211,12 @@ _PUPPET_GOALS = immutabledict.immutabledict(
         'COLLECT_HARE',
         'INTERACT_PLAYING_STAG',
         'INTERACT_PLAYING_HARE',
+    ]),
+    territory__rooms=puppeteer.puppet_goals([
+        'CLAIM_NEAR',
+        'CLAIM_FAR',
+        'DESTROY_RESOURCE',
+        'ZAP_OTHERS',
     ]),
     # keep-sorted end
 )
@@ -527,6 +547,28 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
         substrate='allelopathic_harvest__open',
         model='bot_that_loves_red_3',
         roles=('default', 'player_who_likes_red', 'player_who_likes_green',),
+    ),
+    allelopathic_harvest__open__puppet_convention_follower_0=puppet(
+        substrate='allelopathic_harvest__open',
+        model='puppet_0',
+        roles=(
+            'default',
+            'player_who_likes_red',
+            'player_who_likes_green',
+        ),
+        puppeteer_builder=functools.partial(
+            allelopathic_harvest.ConventionFollower,
+            initial_goal=(
+                _PUPPET_GOALS['allelopathic_harvest__open']['CONSUME_ANY']
+            ),
+            preference_goals=(
+                _PUPPET_GOALS['allelopathic_harvest__open']['PREFER_RED'],
+                _PUPPET_GOALS['allelopathic_harvest__open']['PREFER_GREEN'],
+                _PUPPET_GOALS['allelopathic_harvest__open']['CONSUME_ANY'],
+            ),
+            color_threshold=57.0,  # Determined empirically.
+            recency_window=5,
+        ),
     ),
     bach_or_stravinsky_in_the_matrix__arena__bach_picker_0=puppet(
         substrate='bach_or_stravinsky_in_the_matrix__arena',
@@ -1053,6 +1095,79 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             steps_per_goal=200,
         ),
     ),
+    clean_up__puppet_corrigible_reciprocator_0=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.CorrigibleReciprocator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=2,
+            recency_window=5,
+            corrigible_threshold=1,
+            timeout_steps=50,
+        ),
+    ),
+    clean_up__puppet_corrigible_reciprocator_1=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.CorrigibleReciprocator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=2,
+            recency_window=5,
+            corrigible_threshold=2,
+            timeout_steps=50,
+        ),
+    ),
+    clean_up__puppet_corrigible_reciprocator_2=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.CorrigibleReciprocator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=2,
+            recency_window=5,
+            corrigible_threshold=3,
+            timeout_steps=50,
+        ),
+    ),
+    clean_up__puppet_easily_corrigible_reciprocator_0=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.CorrigibleReciprocator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=1,  # At least another cleaner to help.
+            recency_window=5,
+            corrigible_threshold=1,
+            timeout_steps=50,
+        ),
+    ),
+    clean_up__puppet_free_rider_to_zapper_alternator_0=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            alternator.Alternator,
+            goals=[
+                _PUPPET_GOALS['clean_up_3_goals']['EAT'],
+                _PUPPET_GOALS['clean_up_3_goals']['SANCTION'],
+            ],
+            steps_per_goal=30,
+        ),
+    ),
     clean_up__puppet_high_threshold_reciprocator_0=puppet(
         substrate='clean_up',
         model='puppet_0',
@@ -1096,6 +1211,23 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             recency_window=5,
             reciprocation_period=75,
             niceness_period=200,
+        ),
+    ),
+    clean_up__puppet_sanctioning_alternator_nice_0=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.SanctionerAlternator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            sanction_goal=_PUPPET_GOALS['clean_up_3_goals']['SANCTION'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=2,
+            recency_window=50,
+            steps_to_sanction_when_motivated=100,
+            alternating_steps=200,
+            nice=True,
         ),
     ),
     coins__puppet_cooperator_0=puppet(
@@ -1774,6 +1906,36 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             margin=5,
         ),
     ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_0=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            margin=5,
+            tremble_probability=0,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_tremble_0=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            margin=3,
+            tremble_probability=0.15,
+        ),
+    ),
     prisoners_dilemma_in_the_matrix__arena__puppet_defector_0=puppet(
         substrate='prisoners_dilemma_in_the_matrix__arena',
         model='puppet_1',
@@ -1856,6 +2018,96 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             defect_resource=_RESOURCES['prisoners_dilemma_in_the_matrix__arena']['DEFECT'],
             threshold=2,
             margin=5,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_0=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0,
+            margin=3,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_1=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0,
+            margin=5,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_2=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0,
+            margin=10,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_0=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0.15,
+            margin=3,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_1=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0.15,
+            margin=5,
+        ),
+    ),
+    prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_2=puppet(
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        model='puppet_3',
+        puppeteer_builder=functools.partial(
+            in_the_matrix.TitForTat,
+            cooperate_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['COOPERATE'],
+            defect_resource=_RESOURCES[
+                'prisoners_dilemma_in_the_matrix__arena'
+            ]['DEFECT'],
+            tremble_probability=0.15,
+            margin=10,
         ),
     ),
     prisoners_dilemma_in_the_matrix__repeated__puppet_cooperator_margin_0=puppet(
@@ -3281,6 +3533,50 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
     territory__rooms__aggressor_with_extra_training_0=saved_model(
         substrate='territory__rooms',
         model='aggressor_with_extra_training_0',
+    ),
+    territory__rooms__puppet_considerate_claimer_0=puppet(
+        substrate='territory__rooms',
+        model='puppet_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            fixed_goal.FixedGoal,
+            goal=_PUPPET_GOALS['territory__rooms']['CLAIM_NEAR'],
+        ),
+    ),
+    territory__rooms__puppet_inconsiderate_claimer_0=puppet(
+        substrate='territory__rooms',
+        model='puppet_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            fixed_goal.FixedGoal,
+            goal=_PUPPET_GOALS['territory__rooms']['CLAIM_FAR'],
+        ),
+    ),
+    territory__rooms__puppet_inconsiderate_claimer_to_destroyer_0=puppet(
+        substrate='territory__rooms',
+        model='puppet_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            alternator.Alternator,
+            goals=[
+                _PUPPET_GOALS['territory__rooms']['CLAIM_FAR'],
+                _PUPPET_GOALS['territory__rooms']['DESTROY_RESOURCE'],
+            ],
+            steps_per_goal=600,
+        ),
+    ),
+    territory__rooms__puppet_inconsiderate_claimer_to_zapper_0=puppet(
+        substrate='territory__rooms',
+        model='puppet_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            alternator.Alternator,
+            goals=[
+                _PUPPET_GOALS['territory__rooms']['CLAIM_FAR'],
+                _PUPPET_GOALS['territory__rooms']['ZAP_OTHERS'],
+            ],
+            steps_per_goal=600,
+        ),
     ),
     # keep-sorted end
 )

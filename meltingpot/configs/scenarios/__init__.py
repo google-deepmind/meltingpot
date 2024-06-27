@@ -131,6 +131,159 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             },
         },
     ),
+    allelopathic_harvest__open_3=ScenarioConfig(
+        description='focals like red, visited by convention followers',
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 8 + ['player_who_likes_green',] * 8,
+        is_focal=(True,) * 8 + (False,) * 8,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_4=ScenarioConfig(
+        description=('focals like red, visited by mixture of convention ' +
+                     'followers and bots who like red'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 8 + ['player_who_likes_green',] * 8,
+        is_focal=(True,) * 8 + (False,) * 8,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__bot_that_supports_red_0',
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_5=ScenarioConfig(
+        description=('focals like red, visited by mixture of convention ' +
+                     'followers and bots who like green'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 8 + ['player_who_likes_green',] * 8,
+        is_focal=(True,) * 8 + (False,) * 8,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__bot_that_supports_green_0',
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_6=ScenarioConfig(
+        description=('not very crowded, focals like red, visited by mixture ' +
+                     'of convention followers and bots who like green'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 5 + ['player_who_likes_green',] * 5,
+        is_focal=(True,) * 5 + (False,) * 5,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__bot_that_supports_green_0',
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_7=ScenarioConfig(
+        description=('not very crowded, focals like red, visited by ' +
+                     'convention followers'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 5 + ['player_who_likes_green',] * 5,
+        is_focal=(True,) * 5 + (False,) * 5,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_8=ScenarioConfig(
+        description=('very low population, focals like red, meeting ' +
+                     'convention followers'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 2 + ['player_who_likes_green',] * 2,
+        is_focal=(True,) * 2 + (False,) * 2,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_9=ScenarioConfig(
+        description=('not very crowded, focals are resident, visited by ' +
+                     'a couple of convention followers'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 5 + ['player_who_likes_green',] * 5,
+        is_focal=(True,) * 8 + (False,) * 2,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_10=ScenarioConfig(
+        description=('very low population, focals are resident, and like ' +
+                     'red berries, they are visited by a convention follower'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 2 + ['player_who_likes_green',] * 2,
+        is_focal=(True,) * 3 + (False,) * 1,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_11=ScenarioConfig(
+        description=('focals are resident, visited by a couple of convention ' +
+                     'followers'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 8 + ['player_who_likes_green',] * 8,
+        is_focal=(True,) * 14 + (False,) * 2,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
+    allelopathic_harvest__open_12=ScenarioConfig(
+        description=('focals are resident, visited by a couple of convention ' +
+                     'followers and bots who plant green'),
+        tags={
+            'convention_following',
+        },
+        substrate='allelopathic_harvest__open',
+        roles=['player_who_likes_red',] * 8 + ['player_who_likes_green',] * 8,
+        is_focal=(True,) * 12 + (False,) * 4,
+        bots_by_role={
+            'player_who_likes_green': {
+                'allelopathic_harvest__open__bot_that_supports_green_0',
+                'allelopathic_harvest__open__puppet_convention_follower_0',
+            },
+        },
+    ),
     bach_or_stravinsky_in_the_matrix__arena_0=ScenarioConfig(
         description='visiting background population who picks bach',
         tags={
@@ -1113,6 +1266,239 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         is_focal=(True,) * 6 + (False,) * 1,
         bots_by_role={
             'default': {'clean_up__puppet_nice_low_threshold_reciprocator_0',},
+        },
+    ),
+    clean_up_9=ScenarioConfig(
+        description=(
+            'resident focals are visited by an easily corrigible reciprocator'),
+        tags={
+            'resident',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 6 + (False,) * 1,
+        bots_by_role={
+            'default': {'clean_up__puppet_easily_corrigible_reciprocator_0'},
+        },
+    ),
+    clean_up_10=ScenarioConfig(
+        description=(
+            'resident focals are visited by a bot who rapidly alternates ' +
+            'between free riding and zapping'),
+        tags={
+            'resident',
+            'enforcement',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 6 + (False,) * 1,
+        bots_by_role={
+            'default': {'clean_up__puppet_free_rider_to_zapper_alternator_0'},
+        },
+    ),
+    clean_up_11=ScenarioConfig(
+        description=(
+            'resident focals are visited by a corrigible reciprocator'),
+        tags={
+            'resident',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 6 + (False,) * 1,
+        bots_by_role={
+            'default': {'clean_up__puppet_corrigible_reciprocator_0'},
+        },
+    ),
+    clean_up_12=ScenarioConfig(
+        description=(
+            'resident focals are visited by a corrigible reciprocator who is ' +
+            'difficult to convince to change'),
+        tags={
+            'resident',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 6 + (False,) * 1,
+        bots_by_role={
+            'default': {'clean_up__puppet_corrigible_reciprocator_1',
+                        'clean_up__puppet_corrigible_reciprocator_2'},
+        },
+    ),
+    clean_up_13=ScenarioConfig(
+        description=(
+            'focals visit easily corrigible reciprocators'),
+        tags={
+            'visitor',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 3 + (False,) * 4,
+        bots_by_role={
+            'default': {'clean_up__puppet_easily_corrigible_reciprocator_0',
+                        'clean_up__puppet_corrigible_reciprocator_0'},
+        },
+    ),
+    clean_up_14=ScenarioConfig(
+        description=(
+            'focals visit reciprocators who are corrigible but difficult to ' +
+            'convince'),
+        tags={
+            'visitor',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 3 + (False,) * 4,
+        bots_by_role={
+            'default': {'clean_up__puppet_corrigible_reciprocator_1',
+                        'clean_up__puppet_corrigible_reciprocator_2'},
+        },
+    ),
+    clean_up_15=ScenarioConfig(
+        description=(
+            'focals visit easily corrigible reciprocators and also bots who ' +
+            'alternate between contributing and free riding'),
+        tags={
+            'visitor',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(False,) * 5 + (True,) * 2,  # Reversed is_focal for variety.
+        bots_by_role={
+            'default': {'clean_up__puppet_easily_corrigible_reciprocator_0',
+                        'clean_up__puppet_corrigible_reciprocator_0',
+                        'clean_up__puppet_alternator_first_cleans_0',
+                        'clean_up__puppet_alternator_first_eats_0'},
+        },
+    ),
+    clean_up_16=ScenarioConfig(
+        description=(
+            'focals visit reciprocators who are corrigible but difficult to ' +
+            'convince and also bots who alternate between contributing and ' +
+            'free riding'),
+        tags={
+            'visitor',
+            'enforcement',
+            'reciprocity',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 2 + (False,) * 5,
+        bots_by_role={
+            'default': {'clean_up__puppet_corrigible_reciprocator_1',
+                        'clean_up__puppet_corrigible_reciprocator_2',
+                        'clean_up__puppet_alternator_first_cleans_0',
+                        'clean_up__puppet_alternator_first_eats_0'},
+        },
+    ),
+    clean_up_17=ScenarioConfig(
+        description=(
+            'not very crowded, focals are resident, they are visited by a ' +
+            'an altruist'),
+        tags={
+            'resident',
+        },
+        substrate='clean_up',
+        roles=('default',) * 4,
+        is_focal=(False,) + (True,) * 3,  # Reversed is_focal for variety.
+        bots_by_role={
+            'default': {
+                'clean_up__cleaner_0',
+            },
+        },
+    ),
+    clean_up_18=ScenarioConfig(
+        description=(
+            'not very crowded, focals are resident, they are visited by a ' +
+            'a nice reciprocator'),
+        tags={
+            'resident',
+        },
+        substrate='clean_up',
+        roles=('default',) * 4,
+        is_focal=(True,) * 3 + (False,),
+        bots_by_role={
+            'default': {
+                'clean_up__puppet_nice_low_threshold_reciprocator_0',
+            },
+        },
+    ),
+    clean_up_19=ScenarioConfig(
+        description=(
+            'resident focals are visited by a sanctioning alternator who '
+            'starts out by cleaning'),
+        tags={
+            'resident',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 6 + (False,) * 1,
+        bots_by_role={
+            'default': {
+                'clean_up__puppet_sanctioning_alternator_nice_0',
+            },
+        },
+    ),
+    clean_up_20=ScenarioConfig(
+        description=(
+            'resident focals are visited by a sanctioning alternator who '
+            'starts out by free riding'),
+        tags={
+            'resident',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(False,) + (True,) * 6,  # Reversed is_focal for variety.
+        bots_by_role={
+            'default': {
+                'clean_up__puppet_sanctioning_alternator_nice_0',
+            },
+        },
+    ),
+    clean_up_21=ScenarioConfig(
+        description=(
+            'resident focals are visited by a couple bots who free ride'),
+        tags={
+            'resident',
+            'acceptance',
+        },
+        substrate='clean_up',
+        roles=('default',) * 7,
+        is_focal=(True,) * 5 + (False,) * 2,
+        bots_by_role={
+            'default': {
+                'clean_up__consumer_0',
+                'clean_up__consumer_1',
+            },
+        },
+    ),
+    clean_up_22=ScenarioConfig(
+        description=(
+            'not very crowded, resident focals are visited by a couple bots ' +
+            'who free ride'),
+        tags={
+            'resident',
+            'acceptance',
+        },
+        substrate='clean_up',
+        roles=('default',) * 6,
+        is_focal=(True,) * 4 + (False,) * 2,
+        bots_by_role={
+            'default': {
+                'clean_up__consumer_0',
+                'clean_up__consumer_1',
+            },
         },
     ),
     coins_0=ScenarioConfig(
@@ -2735,6 +3121,328 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             },
         },
     ),
+    prisoners_dilemma_in_the_matrix__arena_6=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals are ' +
+            'resident and are visited by an unconditional cooperator'),
+        tags={
+            'resident',
+            'prosocial_newcomers',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 4,
+        is_focal=(True,) * 3 + (False,) * 1,
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_cooperator_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_cooperator_margin_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_7=ScenarioConfig(
+        description=(
+            'there are only two players, the focal player and a two-strikes ' +
+            'grim reciprocator'),
+        tags={
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 2,
+        is_focal=(True,) + (False,),
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_grim_two_strikes_margin_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_8=ScenarioConfig(
+        description=(
+            'odd number of players, which creates time pressure to interact ' +
+            'in order to avoid being stuck without a partner, focals are ' +
+            'resident, and are visited by an unconditionally defecting ' +
+            'background bot'),
+        tags={
+            'resident',
+            'partner_choice',
+            'time_pressure',
+            'ostracism',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 7,
+        is_focal=(False,) + (True,) * 6,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_defector_margin_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_9=ScenarioConfig(
+        description=(
+            'odd number of players, which creates time pressure to interact ' +
+            'in order to avoid being stuck without a partner, focals are ' +
+            'resident, and are visited by unconditionally defecting ' +
+            'background bots'),
+        tags={
+            'resident',
+            'partner_choice',
+            'time_pressure',
+            'ostracism',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 5,
+        is_focal=(False,) + (True,) * 4,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_defector_margin_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_10=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals are ' +
+            'resident and are visited by a tit-for-tat reciprocator'),
+        tags={
+            'resident',
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 4,
+        is_focal=(True,) * 3 + (False,),
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_1',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_2',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_11=ScenarioConfig(
+        description=(
+            'there are only two players, the focal player and a tit-for-tat ' +
+            'reciprocator'),
+        tags={
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 2,
+        is_focal=(False,) + (True,),  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                # In this 2-player case, we use only the *_margin_2 bot since it
+                # has the highest margin.
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_2',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_12=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals are ' +
+            'resident and are visited by a tit-for-tat reciprocator who ' +
+            'occasionally chooses to defect instead of to cooperate'),
+        tags={
+            'resident',
+            'reciprocity',
+            'forgiveness',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 4,
+        is_focal=(False,) + (True,) * 3,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_1',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_2',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_13=ScenarioConfig(
+        description=(
+            'there are only two players, the focal player and a tit-for-tat ' +
+            'reciprocator who occasionally chooses to defect instead of to ' +
+            'cooperate'),
+        tags={
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 2,
+        is_focal=(True,) + (False,),
+        bots_by_role={
+            'default': {
+                # In this 2-player case, we use only the *_margin_2 bot since it
+                # has the highest margin.
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_2',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_14=ScenarioConfig(
+        description=(
+            'focals are resident and are visited by a tit-for-tat reciprocator'
+        ),
+        tags={
+            'resident',
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(False,) + (True,) * 7,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_1',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_15=ScenarioConfig(
+        description=(
+            'visting a population of tit-for-tat reciprocator bots'),
+        tags={
+            'visitor',
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(True,) + (False,) * 7,
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_1',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_2',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_16=ScenarioConfig(
+        description=(
+            'focals are resident, a visitor tries to take advantage of them ' +
+            'by defecting, but if punished, will give in and switch to ' +
+            'tit-for-tat conditional cooperation'
+        ),
+        tags={
+            'resident',
+            'teaching',
+            'reciprocity',
+            'forgiveness',
+            'sanctioning',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(True,) * 7 + (False,),
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_17=ScenarioConfig(
+        description=(
+            'focals are resident, visitors try to take advantage of them ' +
+            'by defecting, but if punished, they give in and switch to ' +
+            'tit-for-tat conditional cooperation'
+        ),
+        tags={
+            'resident',
+            'teaching',
+            'reciprocity',
+            'forgiveness',
+            'sanctioning',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(True,) * 5 + (False,) * 3,
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_18=ScenarioConfig(
+        description=(
+            'focals are resident, visitors try to take advantage of them ' +
+            'by defecting, but if punished, they give in and switch to ' +
+            'tit-for-tat conditional cooperation, the visitors occasionally ' +
+            'switch their action from cooperate to defect or vice versa'
+        ),
+        tags={
+            'resident',
+            'teaching',
+            'reciprocity',
+            'forgiveness',
+            'sanctioning',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(True,) * 5 + (False,) * 3,
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_tremble_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_19=ScenarioConfig(
+        description=(
+            'there are only two players, the focal player and a corrigible ' +
+            'visitor who initially tries to exploit the focal player by ' +
+            'defecting on them, the focals can correct this behavior by ' +
+            'punishing the bot in question, once corrected the bot implements' +
+            'a conditional cooperation strategy'
+        ),
+        tags={
+            'teaching',
+            'sanctioning',
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 2,
+        is_focal=(True,) + (False,),
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_20=ScenarioConfig(
+        description=(
+            'there are only two players, the focal player and a corrigible ' +
+            'visitor who initially tries to exploit the focal player by ' +
+            'defecting on them, the focals can correct this behavior by ' +
+            'punishing the bot in question, once it has been corrected ' +
+            'it implements a conditional cooperation strategy'),
+        tags={
+            'teaching',
+            'sanctioning',
+            'reciprocity',
+            'forgiveness',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 2,
+        is_focal=(True,) + (False,),
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_corrigible_tremble_0',
+            },
+        },
+    ),
+    prisoners_dilemma_in_the_matrix__arena_21=ScenarioConfig(
+        description=(
+            'visting a population of tit-for-tat reciprocator bots mixed ' +
+            'with pure cooperator and defector bots'),
+        tags={
+            'visitor',
+            'reciprocity',
+        },
+        substrate='prisoners_dilemma_in_the_matrix__arena',
+        roles=('default',) * 8,
+        is_focal=(True,) + (False,) * 7,
+        bots_by_role={
+            'default': {
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_1',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_margin_2',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_tft_tremble_margin_1',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_cooperator_margin_0',
+                'prisoners_dilemma_in_the_matrix__arena__puppet_defector_margin_0',
+            },
+        },
+    ),
     prisoners_dilemma_in_the_matrix__repeated_0=ScenarioConfig(
         description='partner may play either cooperate or defect',
         tags={
@@ -4301,6 +5009,184 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         substrate='territory__rooms',
         roles=('default',) * 9,
         is_focal=(True,) + (False,) * 8,
+        bots_by_role={'default': {'noop_bot'}},
+    ),
+    territory__rooms_4=ScenarioConfig(
+        description='visiting a population of considerate claimers',
+        tags={
+            'visitor',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 9,
+        is_focal=(True,) + (False,) * 8,
+        bots_by_role={
+            'default': {'territory__rooms__puppet_considerate_claimer_0'}
+        },
+    ),
+    territory__rooms_5=ScenarioConfig(
+        description=('focals are resident, visited by a couple considerate ' +
+                     'claimers'),
+        tags={
+            'resident',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 9,
+        is_focal=(True,) * 7 + (False,) * 2,
+        bots_by_role={
+            'default': {'territory__rooms__puppet_considerate_claimer_0'}
+        },
+    ),
+    territory__rooms_6=ScenarioConfig(
+        description=('focals are resident, visited by a couple considerate ' +
+                     'claimers'),
+        tags={
+            'resident',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 9,
+        is_focal=(True,) * 7 + (False,) * 2,
+        bots_by_role={
+            'default': {'territory__rooms__puppet_considerate_claimer_0'}
+        },
+    ),
+    territory__rooms_7=ScenarioConfig(
+        description=('focals are resident, visited by an inconsiderate ' +
+                     'claimer'),
+        tags={
+            'resident',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 9,
+        is_focal=(False,) + (True,) * 8,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {'territory__rooms__puppet_inconsiderate_claimer_0'}
+        },
+    ),
+    territory__rooms_8=ScenarioConfig(
+        description=('focals are resident, visited by an inconsiderate ' +
+                     'claimer who becomes a zapper later in the episode'),
+        tags={
+            'resident',
+            'flexibility',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 9,
+        is_focal=(True,) * 8 + (False,) * 1,
+        bots_by_role={
+            'default': {
+                'territory__rooms__puppet_inconsiderate_claimer_to_zapper_0'
+            }
+        },
+    ),
+    territory__rooms_9=ScenarioConfig(
+        description=('the environment is not as crowded as it could be, ' +
+                     'focals are resident, and are visited by ' +
+                     'an inconsiderate claimer who becomes a zapper later ' +
+                     'in the episode'),
+        tags={
+            'resident',
+            'flexibility',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 3,
+        is_focal=(True,) * 2 + (False,) * 1,
+        bots_by_role={
+            'default': {
+                'territory__rooms__puppet_inconsiderate_claimer_to_zapper_0'
+            }
+        },
+    ),
+    territory__rooms_10=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals' +
+            'are resident, and are visited by an inconsiderate ' +
+            'claimer who becomes a resource destroyer later in the episode'),
+        tags={
+            'resident',
+            'flexibility',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 3,
+        is_focal=(True,) * 2 + (False,) * 1,
+        bots_by_role={
+            'default': {
+                'territory__rooms__puppet_inconsiderate_claimer_to_destroyer_0'
+            }
+        },
+    ),
+    territory__rooms_11=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals' +
+            'visit a background population of considerate claimers'),
+        tags={
+            'visitor',
+            'chance_to_benefit_oneself_without_imposing_social_cost',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 3,
+        is_focal=(True,) + (False,) * 2,
+        bots_by_role={
+            'default': {
+                'territory__rooms__puppet_considerate_claimer_0'
+            }
+        },
+    ),
+    territory__rooms_12=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals' +
+            'are resident, and are visited by an aggressive background bot'),
+        tags={
+            'resident',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 3,
+        is_focal=(False,) + (True,) * 2,  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'territory__rooms__aggressor_0',
+                'territory__rooms__aggressor_1',
+                'territory__rooms__aggressor_2',
+                'territory__rooms__aggressor_3',
+                'territory__rooms__aggressor_with_extra_training_0',
+            }
+        },
+    ),
+    territory__rooms_13=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals' +
+            'visit an aggressive background population'),
+        tags={
+            'visitor',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 3,
+        is_focal=(False,) * 2 + (True,),  # Reversed is_focal order for variety.
+        bots_by_role={
+            'default': {
+                'territory__rooms__aggressor_0',
+                'territory__rooms__aggressor_1',
+                'territory__rooms__aggressor_2',
+                'territory__rooms__aggressor_3',
+                'territory__rooms__aggressor_with_extra_training_0',
+            }
+        },
+    ),
+    territory__rooms_14=ScenarioConfig(
+        description=(
+            'the environment is not as crowded as it could be, focals' +
+            'are resident, and are visited by a couple bots who do nothing'),
+        tags={
+            'resident',
+            'defense',
+        },
+        substrate='territory__rooms',
+        roles=('default',) * 5,
+        is_focal=(False,) * 2 + (True,) * 3,  # Reversed is_focal for variety.
         bots_by_role={'default': {'noop_bot'}},
     ),
     # keep-sorted end

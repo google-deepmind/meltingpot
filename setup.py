@@ -22,7 +22,7 @@ import setuptools
 from setuptools.command import build_py
 
 VERSION = '2.2.2'
-ASSETS_VERSION = '2.1.0'
+ASSETS_VERSION = '2.2.1'
 
 ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
 
