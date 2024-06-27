@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.3.0] - 2024-06-27
+
+### Added
+
+- New scenarios, puppets and bots used in the Melting Pot Contest, NeurIPS 2023.
+
+### Known issues
+
+- Two scenarios in the competition were set up wrongly. Tracking issue:
+  https://github.com/google-deepmind/meltingpot/issues/246
+    * `clean_up_20` is using the wrong (puppet) bot:
+      `clean_up__puppet_sanctioning_alternator_nice_0` instead of
+      `clean_up__puppet_sanctioning_alternator_0`.
+    * `territory__rooms_6` is identical to `territory__rooms_5`.
+
+
 ## [2.2.2] - 2024-03-20
 
 ### Fixed
