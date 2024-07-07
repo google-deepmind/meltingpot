@@ -1462,7 +1462,7 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
         is_focal=(False,) + (True,) * 6,  # Reversed is_focal for variety.
         bots_by_role={
             'default': {
-                'clean_up__puppet_sanctioning_alternator_nice_0',
+                'clean_up__puppet_sanctioning_alternator_0',
             },
         },
     ),

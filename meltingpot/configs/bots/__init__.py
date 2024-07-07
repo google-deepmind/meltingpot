@@ -1213,6 +1213,23 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
             niceness_period=200,
         ),
     ),
+    clean_up__puppet_sanctioning_alternator_0=puppet(
+        substrate='clean_up',
+        model='puppet_3_goals_0',
+        roles=('default',),
+        puppeteer_builder=functools.partial(
+            clean_up.SanctionerAlternator,
+            cooperate_goal=_PUPPET_GOALS['clean_up_3_goals']['CLEAN'],
+            defect_goal=_PUPPET_GOALS['clean_up_3_goals']['EAT'],
+            sanction_goal=_PUPPET_GOALS['clean_up_3_goals']['SANCTION'],
+            num_others_cooperating_cumulant='NUM_OTHERS_WHO_CLEANED_THIS_STEP',
+            threshold=2,
+            recency_window=50,
+            steps_to_sanction_when_motivated=100,
+            alternating_steps=200,
+            nice=False,
+        ),
+    ),
     clean_up__puppet_sanctioning_alternator_nice_0=puppet(
         substrate='clean_up',
         model='puppet_3_goals_0',
