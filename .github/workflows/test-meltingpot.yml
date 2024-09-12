@@ -32,26 +32,13 @@ permissions: read-all
 jobs:
   test-meltingpot:
     name: Test Melting Pot
-    runs-on: ${{ matrix.os }}
-    env:
-      SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
-    timeout-minutes: 180
-    strategy:
-      fail-fast: ${{ github.event_name != 'workflow_dispatch' }}
-      matrix:
-        os:
-          - macos-12
-          - ubuntu-20.04
-        python-version:
-          - '3.11'
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout Melting Pot
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
 
       - name: Install Melting Pot
         uses: ./.github/actions/install-meltingpot
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Test Melting Pot
         run: pytest meltingpot
