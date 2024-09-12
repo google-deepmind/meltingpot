@@ -38,16 +38,38 @@ runs:
           meltingpot/assets
           venv
         key: install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('setup.py') }}
-        restore-keys: |
-          install-meltingpot-${{ steps.os-info.outputs.name }}-${{ steps.os-info.outputs.version }}-py${{ steps.setup-python.outputs.python-version }}-
+
+    - name: Create venv
+      if: steps.restore.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        python -m venv venv
+
+    - name: Activate venv
+      shell: bash
+      run: |
+        echo "${PWD}/venv/bin" >> $GITHUB_PATH
 
     - name: Install Melting Pot
       if: steps.restore.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        python -m venv venv
-        source venv/bin/activate
         pip install --editable .[dev]
+
+    - name: Show installation
+      shell: bash
+      run: |
+        which python
+        python --version
+        which pip
+        pip --version
+        which pylint
+        pylint --version
+        which pytest
+        pytest --version
+        which pytype
+        pytype --version
+        pip list
 
     - name: Save Melting Pot installation
       if: steps.restore.outputs.cache-hit != 'true'
@@ -57,15 +79,3 @@ runs:
           meltingpot/assets
           venv
         key: ${{ steps.restore.outputs.cache-primary-key }}
-
-    - name: Activate virtual environment
-      shell: bash
-      run: |
-        echo "${PWD}/venv/bin" >> $GITHUB_PATH
-
-    - name: Show installation
-      shell: bash
-      run: |
-        which python
-        which pip
-        pip list
