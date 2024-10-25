@@ -131,7 +131,7 @@ setuptools.setup(
         'ml-collections',
         'networkx',
         'numpy',
-        'opencv-python<4.7',
+        'opencv-python',
         'pandas',
         'pygame',
         'reactivex',
