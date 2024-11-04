@@ -16,14 +16,12 @@
 import collections
 from collections.abc import Collection, Iterator, Mapping
 import contextlib
-import os
 from typing import Optional, TypeVar
-import uuid
 
 from absl import logging
-import cv2
-import dm_env
 import meltingpot
+from meltingpot.utils.evaluation import return_subject
+from meltingpot.utils.evaluation import video_subject as video_subject_lib
 from meltingpot.utils.policies import policy as policy_lib
 from meltingpot.utils.policies import saved_model_policy
 from meltingpot.utils.scenarios import population as population_lib
@@ -32,7 +30,6 @@ from meltingpot.utils.substrates import substrate as substrate_lib
 import numpy as np
 import pandas as pd
 from reactivex import operators as ops
-from reactivex import subject
 
 T = TypeVar('T')
 
@@ -50,85 +47,6 @@ def run_episode(
     timestep = substrate.step(actions)
     population.send_timestep(timestep)
     actions = population.await_action()
-
-
-class VideoSubject(subject.Subject):
-  """Subject that emits a video at the end of each episode."""
-
-  def __init__(
-      self,
-      root: str,
-      *,
-      extension: str = 'webm',
-      codec: str = 'vp90',
-      fps: int = 30,
-  ) -> None:
-    """Initializes the instance.
-
-    Args:
-      root: directory to write videos in.
-      extension: file extention of file.
-      codec: codex to write with.
-      fps: frames-per-second for videos.
-    """
-    super().__init__()
-    self._root = root
-    self._extension = extension
-    self._codec = codec
-    self._fps = fps
-    self._path = None
-    self._writer = None
-
-  def on_next(self, timestep: dm_env.TimeStep) -> None:
-    """Called on each timestep.
-
-    Args:
-      timestep: the most recent timestep.
-    """
-    rgb_frame = timestep.observation[0]['WORLD.RGB']
-    if timestep.step_type.first():
-      self._path = os.path.join(
-          self._root, f'{uuid.uuid4().hex}.{self._extension}')
-      height, width, _ = rgb_frame.shape
-      self._writer = cv2.VideoWriter(
-          filename=self._path,
-          fourcc=cv2.VideoWriter_fourcc(*self._codec),
-          fps=self._fps,
-          frameSize=(width, height),
-          isColor=True)
-    elif self._writer is None:
-      raise ValueError('First timestep must be StepType.FIRST.')
-    bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-    assert self._writer.isOpened()  # Catches any cv2 usage errors.
-    self._writer.write(bgr_frame)
-    if timestep.step_type.last():
-      self._writer.release()
-      super().on_next(self._path)
-      self._path = None
-      self._writer = None
-
-  def dispose(self):
-    """See base class."""
-    if self._writer is not None:
-      self._writer.release()
-    super().dispose()
-
-
-class ReturnSubject(subject.Subject):
-  """Subject that emits the player returns at the end of each episode."""
-
-  def on_next(self, timestep: dm_env.TimeStep):
-    """Called on each timestep.
-
-    Args:
-      timestep: the most recent timestep.
-    """
-    if timestep.step_type.first():
-      self._return = np.zeros_like(timestep.reward)
-    self._return += timestep.reward
-    if timestep.step_type.last():
-      super().on_next(self._return)
-      self._return = None
 
 
 def run_and_observe_episodes(
@@ -173,11 +91,11 @@ def run_and_observe_episodes(
       stack.callback(disposable.dispose)
 
     if video_root:
-      video_subject = VideoSubject(video_root)
+      video_subject = video_subject_lib.VideoSubject(video_root)
       subscribe(substrate_observables.timestep, video_subject)
       subscribe(video_subject, on_next=data['video_path'].append)
 
-    focal_return_subject = ReturnSubject()
+    focal_return_subject = return_subject.ReturnSubject()
     subscribe(focal_observables.timestep, focal_return_subject)
     subscribe(focal_return_subject, on_next=data['focal_player_returns'].append)
     subscribe(focal_return_subject.pipe(ops.map(np.mean)),
@@ -185,7 +103,7 @@ def run_and_observe_episodes(
     subscribe(focal_observables.names,
               on_next=data['focal_player_names'].append)
 
-    background_return_subject = ReturnSubject()
+    background_return_subject = return_subject.ReturnSubject()
     subscribe(background_observables.timestep, background_return_subject)
     subscribe(background_return_subject,
               on_next=data['background_player_returns'].append)
