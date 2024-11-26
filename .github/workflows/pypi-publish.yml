@@ -36,7 +36,14 @@ jobs:
           python --version
           pip list
       - name: Build distribution
-        run: python setup.py sdist
+        run: |
+          python setup.py sdist
+          # Workaround old setuptools not normalizing name in sdist.
+          for OLD in ./dist/dm-meltingpot-*; do
+             NEW="$(echo "$OLD" | sed s/dm-meltingpot/dm_meltingpot/)"
+             mv "$OLD" "$NEW"
+          done
+          ls dist/*
       - name: Save artifact
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874
         with:
