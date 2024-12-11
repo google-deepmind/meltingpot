@@ -1931,9 +1931,9 @@ wrapt==1.17.0 \
     --hash=sha256:fce6fee67c318fdfb7f285c29a82d84782ae2579c0e1b385b7f36c6e8074fffb \
     --hash=sha256:fd136bb85f4568fffca995bd3c8d52080b1e5b225dbf1c2b17b66b4c5fa02838
     # via tensorflow
-yarg==0.1.9 \
-    --hash=sha256:4f9cebdc00fac946c9bf2783d634e538a71c7d280a4d806d45fd4dc0ef441492 \
-    --hash=sha256:55695bf4d1e3e7f756496c36a69ba32c40d18f821e38f61d028f6049e5e15911
+yarg==0.1.10 \
+    --hash=sha256:1fbc94af89d5ebc2d2dfe46a5006a570de549c43e78f0913ce8390a1c5848b7e \
+    --hash=sha256:4413145825e5d0e8b370754b3e829cf7c95ab0131dbc29fb5b52a8e27e1b7234
     # via pipreqs
 zipp==3.21.0 \
     --hash=sha256:2c9958f6430a2040341a52eb608ed6dd93ef4392e02ffe219417c1b28b5dd1f4 \
