@@ -14,7 +14,7 @@
     // on large machines).
     "--shm-size=6gb"
   ],
-  "postCreateCommand": ".devcontainer/setup.sh",
+  "postCreateCommand": "bin/install.sh",
   "customizations": {
     "vscode": {
       "extensions": [
