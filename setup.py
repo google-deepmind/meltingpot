@@ -21,7 +21,7 @@ import urllib.request
 import setuptools
 from setuptools.command import build_py
 
-VERSION = '2.3.1'
+VERSION = '2.4.0'
 ASSETS_VERSION = '2.3.0'
 
 ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
@@ -110,6 +110,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
     ],
     cmdclass={'build_py': BuildPy},

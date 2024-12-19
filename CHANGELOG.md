@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.0] - 2024-12-17
+
+### Changed
+
+- Split out subjects and add more checks for VideoSubject
+- Update supported version of opencv
+
+### Fixed
+
+- [#246](https://github.com/google-deepmind/meltingpot/issues/246)
+    - Fix `clean_up_20` to use the correct puppet bot 
+    - Delete territory__rooms_6 as it is a duplicate of territory__rooms_5
+
 ## [2.3.1] - 2024-06-27
 
 ### Added
