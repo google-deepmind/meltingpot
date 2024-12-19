@@ -5036,19 +5036,8 @@ SCENARIO_CONFIGS: Mapping[str, ScenarioConfig] = immutabledict.immutabledict(
             'default': {'territory__rooms__puppet_considerate_claimer_0'}
         },
     ),
-    territory__rooms_6=ScenarioConfig(
-        description=('focals are resident, visited by a couple considerate ' +
-                     'claimers'),
-        tags={
-            'resident',
-        },
-        substrate='territory__rooms',
-        roles=('default',) * 9,
-        is_focal=(True,) * 7 + (False,) * 2,
-        bots_by_role={
-            'default': {'territory__rooms__puppet_considerate_claimer_0'}
-        },
-    ),
+    # territory__rooms_6 deleted due to
+    # https://github.com/google-deepmind/meltingpot/issues/246.
     territory__rooms_7=ScenarioConfig(
         description=('focals are resident, visited by an inconsiderate ' +
                      'claimer'),
