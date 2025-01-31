@@ -16,6 +16,7 @@
 import os
 import shutil
 import tarfile
+import tempfile
 import urllib.request
 
 import setuptools
@@ -52,15 +53,30 @@ class BuildPy(build_py.build_py):
   def download_and_extract_assets(self):
     """Downloads and extracts assets to meltingpot/assets."""
     tar_file_path = os.path.join(
-        self.get_package_dir('assets'), os.path.basename(ASSETS_URL))
+        self.get_package_dir('assets'), os.path.basename(ASSETS_URL)
+    )
     if os.path.exists(tar_file_path):
       print(f'found cached assets {tar_file_path}', flush=True)
     else:
+      tmp_path = self.download_assets()
       os.makedirs(os.path.dirname(tar_file_path), exist_ok=True)
-      print('downloading assets...', flush=True)
-      urllib.request.urlretrieve(ASSETS_URL, filename=tar_file_path)
-      print(f'downloaded {tar_file_path}', flush=True)
+      shutil.copy(tmp_path, tar_file_path)
+      print(f'copied assets to {tar_file_path}', flush=True)
+    self.extract_assets(tar_file_path)
 
+  def download_assets(self):
+    """Downloads assets tar file to temporary location."""
+    tmp_path = os.path.join(tempfile.gettempdir(), os.path.basename(ASSETS_URL))
+    if os.path.exists(tmp_path):
+      print(f'found cached assets {tmp_path}', flush=True)
+    else:
+      print('downloading assets...', flush=True)
+      urllib.request.urlretrieve(ASSETS_URL, filename=tmp_path)
+      print(f'downloaded assets to {tmp_path}', flush=True)
+    return tmp_path
+
+  def extract_assets(self, tar_file_path):
+    """Extracts assets tar file to meltingpot/assets."""
     root = os.path.join(self.get_package_dir(''), 'meltingpot')
     os.makedirs(root, exist_ok=True)
     if os.path.exists(f'{root}/assets'):
@@ -95,7 +111,6 @@ setuptools.setup(
     description=(
         'A suite of test scenarios for multi-agent reinforcement learning.'
     ),
-    description_content_type='text/plain',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',
     keywords='multi-agent reinforcement-learning python machine-learning',
