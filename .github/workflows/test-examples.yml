@@ -21,6 +21,7 @@ on:
       - '.github/actions/install/action.yml'
       - '.github/workflows/test-examples.yml'
       - '.pylintrc'
+      - '.python-version'
       - 'bin/install.sh'
       - 'examples/**'
       - 'meltingpot/**'

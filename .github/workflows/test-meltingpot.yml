@@ -20,6 +20,7 @@ on:
       - '.github/actions/install/action.yml'
       - '.github/workflows/test-meltingpot.yml'
       - '.pylintrc'
+      - '.python-version'
       - 'bin/install.sh'
       - 'meltingpot/**'
       - 'pyproject.toml'
