@@ -1,7 +1,6 @@
-# Requirements for the Melting Pot examples.
+# Extra requirements for the Melting Pot examples.
 absl_py
 dm_env
-dm_meltingpot
 dm_tree
 dmlab2d
 gymnasium
