@@ -43,8 +43,7 @@ jobs:
         os:
           - macos-13
           - macos-14
-          - ubuntu-20.04
-          - ubunutu-22.04
+          - ubuntu-22.04
           - ubuntu-24.04
         python-version:
           - '3.11'
