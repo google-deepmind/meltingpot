@@ -1,0 +1,10 @@
+# Requirements for PettingZoo examples
+pettingzoo>=1.22.3
+stable_baselines3
+supersuit>=3.7.2
+torch
+gymnasium
+dm_env
+dmlab2d
+numpy
+matplotlib

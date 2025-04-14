@@ -1,0 +1,5 @@
+# Requirements for tutorial examples
+absl_py
+dm_env
+dmlab2d
+numpy

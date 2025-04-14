@@ -1,0 +1,7 @@
+# Requirements for Gym examples
+gymnasium
+dm_env
+dm_tree
+dmlab2d
+numpy
+matplotlib

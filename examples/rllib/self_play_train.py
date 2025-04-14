@@ -27,13 +27,14 @@ from . import utils
 
 def get_config(
     substrate_name: str = "bach_or_stravinsky_in_the_matrix__repeated",
-    num_rollout_workers: int = 2,
+    num_env_runners: int = 2,
     rollout_fragment_length: int = 100,
     train_batch_size: int = 6400,
     fcnet_hiddens=(64, 64),
     post_fcnet_hiddens=(256,),
     lstm_cell_size: int = 256,
     sgd_minibatch_size: int = 128,
+    minibatch_size: int = 128,
 ):
   """Get the configuration for running an agent on a substrate using RLLib.
 
@@ -42,13 +43,14 @@ def get_config(
   Args:
     substrate_name: The name of the MeltingPot substrate, coming from
       `substrate.AVAILABLE_SUBSTRATES`.
-    num_rollout_workers: The number of workers for playing games.
+    num_env_runners: The number of workers for playing games.
     rollout_fragment_length: Unroll time for learning.
     train_batch_size: Batch size (batch * rollout_fragment_length)
     fcnet_hiddens: Fully connected layers.
     post_fcnet_hiddens: Layer sizes after the fully connected torso.
     lstm_cell_size: Size of the LSTM.
-    sgd_minibatch_size: Size of the mini-batch for learning.
+    sgd_minibatch_size: Size of the sgd mini-batch for learning.
+    minibatch_size: Size of the mini-batch for learning.
 
   Returns:
     The configuration for running the experiment.
@@ -56,17 +58,19 @@ def get_config(
   # Gets the default training configuration
   config = ppo.PPOConfig()
   # Number of arenas.
-  config.num_rollout_workers = num_rollout_workers
+  config.num_env_runners = num_env_runners
   # This is to match our unroll lengths.
   config.rollout_fragment_length = rollout_fragment_length
   # Total (time x batch) timesteps on the learning update.
   config.train_batch_size = train_batch_size
-  # Mini-batch size.
+  # SGD Mini-batch size.
   config.sgd_minibatch_size = sgd_minibatch_size
+  # Mini-batch size
+  config.minibatch_size = minibatch_size
   # Use the raw observations/actions as defined by the environment.
   config.preprocessor_pref = None
-  # Use TensorFlow as the tensor framework.
-  config = config.framework("tf")
+  # Use TensorFlow 2 as the tensor framework.
+  config = config.framework("tf2")
   # Use GPUs iff `RLLIB_NUM_GPUS` env var set to > 0.
   config.num_gpus = int(os.environ.get("RLLIB_NUM_GPUS", "0"))
   config.log_level = "DEBUG"
