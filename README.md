@@ -51,14 +51,14 @@ If you are interested in extending Melting Pot, please refer to the
 
 ## Installation
 
-### `pip` install
-
-[Melting Pot is available on PyPI](https://pypi.python.org/pypi/dm-meltingpot)
+Melting Pot is available on PyPI](https://pypi.python.org/pypi/dm-meltingpot)
 and can be installed using:
 
 ```shell
 pip install dm-meltingpot
 ```
+
+After doing this you can then `import meltingpot` in your own code.
 
 NOTE: Melting Pot is built on top of [DeepMind Lab2D](https://github.com/google-deepmind/lab2d)
 which is distributed as pre-built wheels. If there is no appropriate wheel for
@@ -66,10 +66,25 @@ which is distributed as pre-built wheels. If there is no appropriate wheel for
 [the `dmlab2d` `README.md`](https://github.com/google-deepmind/lab2d/blob/main/README.md)
 for details).
 
-### Manual install
+## Development
 
-If you want to work on the Melting Pot source code, you can perform an editable
-installation as follows:
+### Codespace
+
+The easiest way to work on the Melting Pot source code, is to use our
+pre-configured development environment via a
+[Github CodeSpace](https://github.com/features/codespaces).
+
+This provides a tested development workflow that allows for reproducible builds,
+and minimizes dependency management. We strongly advise preparing all Pull
+Requests for Melting Pot via this workflow.
+
+### Manual setup
+
+If you want to work on the Melting Pot source code within your own development
+environment you will have to handle installation and dependency management
+yourself.
+
+For example, you can perform an editable installation as follows:
 
 1.  Clone Melting Pot:
 
@@ -78,7 +93,7 @@ installation as follows:
     cd meltingpot
     ```
 
-2.  (Optional) Activate a virtual environment, e.g.:
+2.  Create and activate a virtual environment:
 
     ```shell
     python -m venv venv
@@ -91,32 +106,11 @@ installation as follows:
     pip install --editable .[dev]
     ```
 
-4.  (Optional) Test the installation:
+4.  Test the installation:
 
     ```shell
     pytest --pyargs meltingpot
     ```
-
-### Devcontainer (x86 only)
-
-*NOTE: This Devcontainer only works for x86 platforms. For arm64 (newer M1 Macs)
-users will have to follow the manual installation steps.*
-
-This project includes a pre-configured development environment
-([devcontainer](https://containers.dev)).
-
-You can launch a working development environment with one click, using e.g.
-[Github Codespaces](https://github.com/features/codespaces) or the
-[VSCode Containers](https://code.visualstudio.com/docs/remote/containers-tutorial)
-extension.
-
-#### CUDA support
-
-To enable CUDA support (required for GPU training), make sure you have the
-[nvidia-container-toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html)
-package installed, and then run Docker with the `---gpus all` flag enabled. Note
-that for GitHub Codespaces this isn't necessary, as it's done for you
-automatically.
 
 ## Example usage
 
