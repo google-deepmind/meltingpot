@@ -159,7 +159,6 @@ setuptools.setup(
         'dev': [
             'build',
             'isort',
-            'pipreqs',
             'pip-tools',
             'pyink',
             'pylint',
