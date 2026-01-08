@@ -105,7 +105,9 @@ function Ore:update()
 end
 
 function Ore:addMiner(minerId)
-  self._miningCountdown = self._config.miningWindow
+  if self._miningCountdown <= 0 then
+    self._miningCountdown = self._config.miningWindow
+  end
   self._miners[minerId] = 1
   self.gameObject:setState(self._config.partialState)
 end
@@ -115,25 +117,34 @@ function Ore:onHit(hitterGameObject, hitName)
       (self.gameObject:getState() == self._config.rawState or
        self.gameObject:getState() == self._config.partialState) then
     local hitterIndex = hitterGameObject:getComponent('Avatar'):getIndex()
-    self:addMiner(hitterIndex)
 
-    local hitterMineBeam = hitterGameObject:getComponent('MineBeam')
-    hitterMineBeam:processRoleMineEvent(self._config.minNumMiners)
-    -- If the Ore has enough miners, process rewards.
-    if self:currentMiners() == self._config.minNumMiners then
-      for id, _ in pairs(self._miners) do
-        local avatarGO = self.gameObject.simulation:getAvatarFromIndex(id)
-        avatarGO:getComponent('MineBeam'):processRoleExtractEvent(
-            self._config.minNumMiners)
-        for otherId, _ in pairs(self._miners) do
-          if otherId ~= id then
-            avatarGO:getComponent('MineBeam'):processRolePairExtractEvent(
-                otherId, self._config.minNumMiners)
+    if not self._miners[hitterIndex] then
+      if self:currentMiners() >= self._config.minNumMiners then
+        self:reset()
+        return true
+      end
+      self:addMiner(hitterIndex)
+
+      local hitterMineBeam = hitterGameObject:getComponent('MineBeam')
+      hitterMineBeam:processRoleMineEvent(self._config.minNumMiners)
+
+      -- If the Ore has enough miners, process rewards.
+      if self:currentMiners() == self._config.minNumMiners then
+        for id, _ in pairs(self._miners) do
+          local avatarGO = self.gameObject.simulation:getAvatarFromIndex(id)
+          avatarGO:getComponent('MineBeam'):processRoleExtractEvent(
+              self._config.minNumMiners)
+          for otherId, _ in pairs(self._miners) do
+            if otherId ~= id then
+              avatarGO:getComponent('MineBeam'):processRolePairExtractEvent(
+                  otherId, self._config.minNumMiners)
+            end
           end
         end
+        self._miners = {}
+        self._miningCountdown = 0
+        self.gameObject:setState(self._config.waitState)
       end
-      self:reset()
-      self.gameObject:setState(self._config.waitState)
     end
     -- return `true` to prevent the beam from passing through a hit ore.
     return true
@@ -221,7 +232,7 @@ function MineBeam:processRolePairExtractEvent(otherId, oreType)
   "player_a", index,
   "player_b", otherId,
   "ore_type", oreType)
-  
+
   self.coExtracted(otherId, oreType):add(1)
 end
 

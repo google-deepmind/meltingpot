@@ -22,6 +22,7 @@ Use `TAB` to switch between players.
 import argparse
 import json
 
+from meltingpot.configs.substrates import collaborative_cooking
 from meltingpot.configs.substrates import collaborative_cooking__asymmetric
 from meltingpot.configs.substrates import collaborative_cooking__circuit
 from meltingpot.configs.substrates import collaborative_cooking__cramped
@@ -84,6 +85,10 @@ def main():
       '--print_events', type=bool, default=False, help='Print events')
 
   args = parser.parse_args()
+
+  if args.verbose:
+    collaborative_cooking._ENABLE_DEBUG_OBSERVATIONS = True
+
   env_module = environment_configs[args.level_name]
   env_config = env_module.get_config()
   with config_dict.ConfigDict(env_config).unlocked() as env_config:
