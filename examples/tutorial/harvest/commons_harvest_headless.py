@@ -2,7 +2,6 @@
 # TensorFlow/XLA may emit initialization warnings in headless environments.
 # These are harmless and can be safely ignored.
 
-
 """
 Headless Harvest example for Melting Pot.
 
