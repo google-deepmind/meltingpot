@@ -1,0 +1,116 @@
+# A workflow to publish releases to PyPi and TestPyPi.
+
+name: pypi-publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  build:
+    name: Build
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+      - name: Show Python setup
+        run: |
+          python --version
+          pip list
+      - name: Build distribution
+        run: |
+          python setup.py sdist
+          # Workaround old setuptools not normalizing name in sdist.
+          for OLD in ./dist/dm-meltingpot-*; do
+             NEW="$(echo "$OLD" | sed s/dm-meltingpot/dm_meltingpot/)"
+             mv "$OLD" "$NEW"
+          done
+          ls dist/*
+      - name: Save artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4
+        with:
+          name: dist
+          path: ./dist
+          retention-days: 1
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ${{ matrix.os }}
+    env:
+      SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
+    timeout-minutes: 180
+    strategy:
+      fail-fast: ${{ github.event_name == 'release' }}
+      matrix:
+        os:
+          - macos-14
+          - macos-15
+          - ubuntu-22.04
+          - ubuntu-22.04-arm
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+        python-version:
+          - '3.11'
+          - '3.12'
+          - '3.13'
+          - '3.14'
+    steps:
+      - name: Load artifact
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53
+        with:
+          name: dist
+          path: ./dist
+      - name: Set up Python
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade setuptools
+      - name: Install source distribution
+        run: |
+          pip install dist/*.tar.gz
+          pip list
+          pip check
+      - name: Test source distribution
+        run: |
+          pip install pytest-xdist
+          pytest -n auto --pyargs meltingpot
+
+  publish:
+    name: Publish
+    needs: [build, test]
+    if: always() && needs.build.result == 'success' && needs.test.result != 'failure'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/dm-meltingpot
+    permissions:
+      id-token: write
+    timeout-minutes: 10
+    steps:
+      - name: Load artifact
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53
+        with:
+          name: dist
+          path: ./dist
+      - name: Publish to TestPyPI
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e
+        with:
+          attestations: false
+          repository-url: https://test.pypi.org/legacy/
+          verbose: true
+      - name: Publish to PyPI
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e
+        with:
+          attestations: false
+          verbose: true

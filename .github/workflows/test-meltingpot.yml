@@ -1,0 +1,55 @@
+name: test-meltingpot
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/actions/install/action.yml'
+      - '.github/workflows/test-meltingpot.yml'
+      - '.pylintrc'
+      - 'bin/install.sh'
+      - 'meltingpot/**'
+      - 'pyproject.toml'
+      - 'requirements.txt'
+      - 'setup.py'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/actions/install/action.yml'
+      - '.github/workflows/test-meltingpot.yml'
+      - '.pylintrc'
+      - '.python-version'
+      - 'bin/install.sh'
+      - 'meltingpot/**'
+      - 'pyproject.toml'
+      - 'requirements.txt'
+      - 'setup.py'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions: read-all
+
+jobs:
+  test-meltingpot:
+    name: Test Melting Pot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Melting Pot
+        uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3
+
+      - name: Install Melting Pot
+        uses: ./.github/actions/install
+
+      - name: Test Melting Pot
+        run: pytest meltingpot
+
+      - name: Lint Melting Pot
+        run: pylint --errors-only meltingpot
+
+      - name: Typecheck Melting Pot
+        run: pytype meltingpot

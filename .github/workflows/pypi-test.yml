@@ -1,0 +1,77 @@
+# Continuous integration tests.
+
+name: pypi-test
+
+on:
+  schedule:
+    - cron: "0 2 * * 1"  # Every Monday at 2am.
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pypi-test.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/pypi-test.yml'
+  workflow_run:
+    workflows:
+      - pypi-publish
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test'
+        type: string
+        default: ''
+
+permissions: read-all
+
+jobs:
+  pypi-test:
+    name: Test PyPI Distribution
+    if: ${{ github.event.workflow_run.conclusion != 'failure' }}
+    runs-on: ${{ matrix.os }}
+    env:
+      SYSTEM_VERSION_COMPAT: 0  # See https://github.com/actions/setup-python/issues/279.
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-14
+          - macos-15
+          - ubuntu-22.04
+          - ubuntu-22.04-arm
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+        python-version:
+          - '3.11'
+          - '3.12'
+          - '3.13'
+          - '3.14'
+
+    steps:
+      - name: Set up Python ${{ matrix.python_version }}
+        uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install --upgrade pip
+          pip install --upgrade setuptools
+
+      - name: Install from PyPI
+        run: |
+          VERSION="${{github.event.inputs.version}}"
+          pip install "dm-meltingpot${VERSION:+==$VERSION}"
+          pip list
+          pip check
+
+      - name: Test installation
+        run: |
+          pip install pytest-xdist
+          pytest -n auto --pyargs meltingpot
