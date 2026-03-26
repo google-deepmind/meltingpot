@@ -7,6 +7,6 @@ gymnasium
 matplotlib
 ml_collections
 numpy
-ray[rllib,default]==2.5.0
+ray[rllib,default]==2.54.0
 supersuit>=3.7.2
 torch
