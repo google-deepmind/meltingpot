@@ -1,29 +1,33 @@
-#from meltingpot_wrapper import MeltingPotWrapper
+# from meltingpot_wrapper import MeltingPotWrapper
+import os
 import random
 
 from meltingpot import substrate
 import numpy as np
+import pandas as pd
 from ppo import PPO
 import torch
 
 
 def process_obs(obs_i):
   if isinstance(obs_i, dict):
-    rgb = obs_i["RGB"][::4, ::4, :]
-    gray = rgb.mean(axis=-1, keepdims=True)  # collapse color channels
-    rgb = gray.flatten()
-    other = np.array([
-        obs_i.get("READY_TO_SHOOT", 0),
-        obs_i.get("NUM_OTHERS_WHO_CLEANED_THIS_STEP", 0),
-    ])
-    return np.concatenate([rgb, other])
+    rgb = obs_i["RGB"][::4, ::4, :].flatten()
+    extras = []
+    if "READY_TO_SHOOT" in obs_i:
+      extras.append(obs_i["READY_TO_SHOOT"])
+    if "NUM_OTHERS_WHO_CLEANED_THIS_STEP" in obs_i:
+      extras.append(obs_i["NUM_OTHERS_WHO_CLEANED_THIS_STEP"])
+    if extras:
+      return np.concatenate([rgb, np.array(extras)])
+    return rgb
   else:
     return np.array(obs_i).flatten()
 
+
 def train_ppo(
-    substrate_name="pure_coordination_in_the_matrix__repeated",
+    substrate_name="stag_hunt_in_the_matrix__repeated",
     total_steps=1000000,
-    rollout_length=10000,
+    rollout_length=1000,
     seed=0,
 ):
   random.seed(seed)
@@ -52,6 +56,13 @@ def train_ppo(
   # Create PPO
   ppo = PPO(obs_dim, action_dim)
 
+  episode_reward = 0
+  step_count = 0
+  episode_count = 0
+  best_reward = -np.inf
+  completed_rewards = []
+  logs = []
+
   # Memory buffer
   memory = {
       "obs": [],
@@ -62,23 +73,16 @@ def train_ppo(
       "values": [],
   }
 
-  episode_reward = 0
-  step_count = 0
-  train_rewards = []
-
   while step_count < total_steps:
 
     for _ in range(rollout_length):
 
       actions = []
-      obs_processed = []
 
       for i in range(num_agents):
         obs_i = process_obs(obs[i])
-        obs_processed.append(obs_i)
 
         action, log_prob, value = ppo.select_action(obs_i)
-
         actions.append(action)
 
         memory["obs"].append(obs_i)
@@ -100,20 +104,20 @@ def train_ppo(
       step_count += 1
 
       if done:
-        train_rewards.append(episode_reward)
+        completed_rewards.append(episode_reward)
+        episode_count += 1
         episode_reward = 0
-
         timestep = env.reset()
         obs = timestep.observation
 
     # Get last observation values for bootstrapping
     last_values = []
     for i in range(num_agents):
-        obs_i = process_obs(obs[i])
-        obs_tensor = torch.tensor(obs_i, dtype=torch.float32).to(ppo.device)
-        with torch.no_grad():
-            _, v = ppo.model(obs_tensor)
-        last_values.append(v.item())
+      obs_i = process_obs(obs[i])
+      obs_tensor = torch.tensor(obs_i, dtype=torch.float32).to(ppo.device)
+      with torch.no_grad():
+        _, v = ppo.model(obs_tensor)
+      last_values.append(v.item())
 
     advantages, returns = ppo.compute_gae(
         memory["rewards"],
@@ -126,23 +130,51 @@ def train_ppo(
     memory["advantages"] = advantages
     memory["returns"] = returns
 
-    ppo.update(memory)
+    stats = ppo.update(memory)
 
-    #print(f"Steps: {step_count}, Episode Reward: {episode_reward:.2f}")
-    print(f"Steps: {step_count}, Avg Train Reward: {np.mean(train_rewards[-10:]) if train_rewards else 0:.2f}")
+    avg_reward = np.mean(completed_rewards[-10:]) if completed_rewards else 0.0
+
+    if avg_reward > best_reward:
+      best_reward = avg_reward
+      torch.save(
+          ppo.model.state_dict(), f"best_model_{substrate_name}_seed{seed}.pt"
+      )
+
+    logs.append({
+        "step": step_count,
+        "avg_reward": avg_reward,
+        "best_reward": best_reward,
+        "episodes_completed": episode_count,
+        "policy_loss": stats["policy_loss"],
+        "value_loss": stats["value_loss"],
+        "entropy": stats["entropy"],
+        "kl": stats["kl"],
+    })
+
+    print(
+        f"Step {step_count} | "
+        f"R: {avg_reward:.2f} | "
+        f"Best: {best_reward:.2f} | "
+        f"Ep: {episode_count} | "
+        f"PL: {stats['policy_loss']:.3f} | "
+        f"VL: {stats['value_loss']:.3f} | "
+        f"H: {stats['entropy']:.3f} | "
+        f"KL: {stats['kl']:.5f}"
+    )
 
     # Reset memory
     for key in memory:
       memory[key] = []
 
   env.close()
-  return ppo, train_rewards
+  return ppo, logs
+
 
 def test(
-    substrate_name="pure_coordination_in_the_matrix__repeated",
+    substrate_name="stag_hunt_in_the_matrix__repeated",
     model=None,
-    num_episodes=3,
-    max_steps=1000000,
+    num_episodes=5,
+    max_steps=5000,
 ):
 
   env_config = substrate.get_config(substrate_name)
@@ -183,22 +215,46 @@ def test(
 
   env.close()
   avg_reward = np.mean(test_rewards)
-  return avg_reward
+  std_reward = np.std(test_rewards)
+  print(f"Avg Test Reward: {avg_reward:.2f} ± {std_reward:.2f}")
+  return test_rewards
+
+
+def save_logs(logs, test_rewards, save_dir="logs", seed=0, substrate="env"):
+  os.makedirs(save_dir, exist_ok=True)
+  base = f"{save_dir}/{substrate}_seed{seed}"
+
+  df = pd.DataFrame(logs)
+  
+  for i, r in enumerate(test_rewards):
+    df[f"test_reward_{i}"] = np.nan
+    df.loc[df.index[-1], f"test_reward_{i}"] = r
+
+  df["test_avg_reward"] = np.nan
+  df["test_std_reward"] = np.nan
+  df.loc[df.index[-1], "test_avg_reward"] = np.mean(test_rewards)
+  df.loc[df.index[-1], "test_std_reward"] = np.std(test_rewards)
+
+  df.to_csv(f"{base}_logs.csv", index=False)
+  print(f"Logs saved to {base}_logs.csv")
+
 
 if __name__ == "__main__":
-  seeds = [0]
+  seeds = [0, 1, 2]
 
-  substrate_name = "commons_harvest__open"
+  # substrate_name = "commons_harvest__open"
+  # substrate_name = "stag_hunt_in_the_matrix__repeated" # test episode length of 2500
+  substrate_name = "chicken_in_the_matrix__repeated"
 
-  all_results = []
   all_test_rewards = []
-  all_train_rewards = []
 
   for seed in seeds:
     print(f"\n=== Training with seed {seed} ===")
 
-    model, train_reward = train_ppo(substrate_name, seed=seed)
-
+    model, logs = train_ppo(substrate_name, seed=seed)
+    model.model.load_state_dict(
+        torch.load(f"best_model_{substrate_name}_seed{seed}.pt")
+    )
     model.model.eval()
 
     test_reward = test(
@@ -208,7 +264,7 @@ if __name__ == "__main__":
     )
 
     all_test_rewards.append(test_reward)
-    all_train_rewards.append(train_reward)
+    save_logs(logs, test_reward, seed=seed, substrate=substrate_name)
 
   print("\nFinal Test Results:")
   print(f"Mean: {np.mean(all_test_rewards):.2f}")

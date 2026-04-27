@@ -31,7 +31,7 @@ class PPO:
                gamma=0.99, gae_lambda=0.95,
                epsilon=0.2, epochs=4,
                batch_size=256, value_loss_coeff=0.5,
-               entr_coeff=0.05, device="cpu"):
+               entr_coeff=0.005, device="cpu"):
     self.device = device
     self.gamma = gamma
     self.lamda = gae_lambda
@@ -79,35 +79,39 @@ class PPO:
 
     for agent_i in range(num_agents):
         # Extract this agent's slice (every num_agents-th element)
-        agent_rewards = rewards[agent_i::num_agents]
-        agent_values  = values[agent_i::num_agents]
-        agent_dones   = dones[agent_i::num_agents]
+      agent_rewards = rewards[agent_i::num_agents]
+      agent_values  = values[agent_i::num_agents]
+      agent_dones   = dones[agent_i::num_agents]
 
-        # Bootstrap from last obs instead of hardcoding 0
-        bootstrapped_values = agent_values + [last_values[agent_i]]
+      # Bootstrap from last obs instead of hardcoding 0
+      bootstrapped_values = agent_values + [last_values[agent_i]]
 
-        gae = 0
-        agent_advantages = []
+      gae = 0
+      agent_advantages = []
 
-        for t in reversed(range(len(agent_rewards))):
-            delta = (
-                agent_rewards[t]
-                + self.gamma * bootstrapped_values[t + 1] * (1 - agent_dones[t])
-                - bootstrapped_values[t]
-            )
-            gae = delta + self.gamma * self.lamda * (1 - agent_dones[t]) * gae
-            agent_advantages.insert(0, gae)
+      for t in reversed(range(len(agent_rewards))):
+        delta = (
+            agent_rewards[t]
+            + self.gamma * bootstrapped_values[t + 1] * (1 - agent_dones[t])
+            - bootstrapped_values[t]
+        )
+        gae = delta + self.gamma * self.lamda * (1 - agent_dones[t]) * gae
+        agent_advantages.insert(0, gae)
 
-        agent_returns = [adv + val for adv, val in zip(agent_advantages, agent_values)]
+      agent_returns = [adv + val for adv, val in zip(agent_advantages, agent_values)]
 
-        # Write back into the interleaved positions
-        for idx, t in enumerate(range(agent_i, len(rewards), num_agents)):
-            all_advantages[t] = agent_advantages[idx]
-            all_returns[t]    = agent_returns[idx]
+      # Write back into the interleaved positions
+      for idx, t in enumerate(range(agent_i, len(rewards), num_agents)):
+        all_advantages[t] = agent_advantages[idx]
+        all_returns[t]    = agent_returns[idx]
 
     return all_advantages, all_returns
 
   def update(self, memory):
+    policy_losses = []
+    value_losses = []
+    entropies = []
+    kls = []
     obs = torch.tensor(np.array(memory["obs"]), dtype=torch.float32).to(self.device)
     actions = torch.tensor(memory["actions"]).to(self.device)
     old_log_probs = torch.stack(memory["log_probs"]).to(self.device)
@@ -146,9 +150,22 @@ class PPO:
             + self.value_loss_coeff * value_loss
             - self.entr_coeff * entropy
         )
+        approx_kl = (old_log_probs[batch_idx] - new_log_probs).mean()
 
         self.optimizer.zero_grad()
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=0.5)
         self.optimizer.step()
         self.scheduler.step()
+
+        policy_losses.append(policy_loss.item())
+        value_losses.append(value_loss.item())
+        entropies.append(entropy.mean().item())
+        kls.append(approx_kl.item())
+
+    return {
+        "policy_loss": np.mean(policy_losses),
+        "value_loss": np.mean(value_losses),
+        "entropy": np.mean(entropies),
+        "kl": np.mean(kls),
+    }
