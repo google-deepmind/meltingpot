@@ -26,7 +26,7 @@ def process_obs(obs_i):
 
 def train_ppo(
     substrate_name="stag_hunt_in_the_matrix__repeated",
-    total_steps=1000000,
+    total_steps=1000000, # 1M for commons and 5M for the others
     rollout_length=1000,
     seed=0,
 ):
@@ -101,6 +101,7 @@ def train_ppo(
         episode_reward += rewards[i]
 
       obs = next_obs
+
       step_count += 1
 
       if done:
@@ -116,12 +117,11 @@ def train_ppo(
       with torch.no_grad():
         _, v = ppos[i].model(obs_tensor)
 
-      advantages, returns = ppos[i].compute_gae(
+      advantages, returns = ppos[i].compute_gae_single(
           memories[i]["rewards"],
           memories[i]["values"],
           memories[i]["dones"],
-          [v.item()],
-          num_agents=1,
+          v.item(),
       )
 
       memories[i]["advantages"] = advantages
@@ -138,7 +138,7 @@ def train_ppo(
       best_reward = avg_reward
       for i in range(num_agents):
         torch.save(
-            ppos[i].model.state_dict(), f"best_model_{substrate_name}_seed{seed}_agent{i}.pt"
+            ppos[i].model.state_dict(), f"logs/ippo/best_model_{substrate_name}_seed{seed}_agent{i}.pt"
         )
 
 
@@ -226,7 +226,7 @@ def test(
   return test_rewards
 
 
-def save_logs(logs, test_rewards, save_dir="logs", seed=0, substrate="env"):
+def save_logs(logs, test_rewards, save_dir="logs/ippo", seed=0, substrate="env"):
   os.makedirs(save_dir, exist_ok=True)
   base = f"{save_dir}/{substrate}_seed{seed}"
 
@@ -248,9 +248,9 @@ def save_logs(logs, test_rewards, save_dir="logs", seed=0, substrate="env"):
 if __name__ == "__main__":
   seeds = [0, 1, 2]
 
-  # substrate_name = "commons_harvest__open"
+  substrate_name = "commons_harvest__open"
   # substrate_name = "stag_hunt_in_the_matrix__repeated" # test episode length of 2500
-  substrate_name = "chicken_in_the_matrix__repeated"
+  # substrate_name = "chicken_in_the_matrix__repeated"
 
   all_test_rewards = []
 
@@ -260,7 +260,7 @@ if __name__ == "__main__":
     models, logs = train_ppo(substrate_name, seed=seed)
     for i in range(len(models)):
       models[i].model.load_state_dict(
-          torch.load(f"best_model_{substrate_name}_seed{seed}_agent{i}.pt")
+          torch.load(f"logs/ippo/best_model_{substrate_name}_seed{seed}_agent{i}.pt")
       )
       models[i].model.eval()
 

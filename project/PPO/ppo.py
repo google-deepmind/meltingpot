@@ -107,6 +107,28 @@ class PPO:
 
     return all_advantages, all_returns
 
+  def compute_gae_single(self, rewards, values, dones, last_value):
+    """
+    Compute gae for IPPO
+    """
+    gae = 0
+    agent_advantages = []
+
+    values = values + [last_value]
+
+    for t in reversed(range(len(rewards))):
+      delta = (
+          rewards[t]
+          + self.gamma * values[t + 1] * (1 - dones[t])
+          - values[t]
+      )
+      gae = delta + self.gamma * self.lamda * (1 - dones[t]) * gae
+      agent_advantages.insert(0, gae)
+
+    agent_returns = [adv + val for adv, val in zip(agent_advantages, values[:-1])]
+
+    return agent_advantages, agent_returns
+
   def update(self, memory):
     policy_losses = []
     value_losses = []
