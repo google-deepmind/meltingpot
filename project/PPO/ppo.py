@@ -31,7 +31,7 @@ class PPO:
                gamma=0.99, gae_lambda=0.95,
                epsilon=0.2, epochs=4,
                batch_size=256, value_loss_coeff=0.5,
-               entr_coeff=0.005, device="cpu"):
+               entr_coeff=0.05, device="cpu"):
     self.device = device
     self.gamma = gamma
     self.lamda = gae_lambda

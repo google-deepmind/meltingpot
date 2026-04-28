@@ -1,13 +1,11 @@
-# from meltingpot_wrapper import MeltingPotWrapper
+
 import os
 import random
-
 from meltingpot import substrate
 import numpy as np
 import pandas as pd
-from ppo import PPO
+from mappo import MAPPO
 import torch
-
 
 def process_obs(obs_i):
   if isinstance(obs_i, dict):
@@ -55,7 +53,7 @@ def train_ppo(
   print(f"Obs dim: {obs_dim}, Action dim: {action_dim}, Agents: {num_agents}")
 
   # Create PPO
-  ppo = PPO(obs_dim, action_dim)
+  mappo = MAPPO(obs_dim, action_dim, num_agents)
 
   episode_reward = 0
   step_count = 0
@@ -66,30 +64,30 @@ def train_ppo(
 
   # Memory buffer
   memory = {
-      "obs": [],
-      "actions": [],
-      "log_probs": [],
-      "rewards": [],
-      "dones": [],
-      "values": [],
+    "obs": [], "actions": [], "log_probs": [],
+    "rewards": [], "dones": [], "values": [],
+    "global_obs": [],  # one entry per timestep, not per agent
   }
 
   while step_count < total_steps:
 
     for _ in range(rollout_length):
 
+      all_obs = []
       actions = []
-
       for i in range(num_agents):
         obs_i = process_obs(obs[i])
-
-        action, log_prob, value = ppo.select_action(obs_i)
+        all_obs.append(obs_i)
+        action, log_prob = mappo.select_action(obs_i)
         actions.append(action)
-
         memory["obs"].append(obs_i)
         memory["actions"].append(action)
         memory["log_probs"].append(log_prob)
-        memory["values"].append(value.item())
+
+      global_obs = np.array(all_obs)  # (num_agents, obs_dim)
+      value = mappo.get_value(global_obs)
+      memory["values"].append(value)
+      memory["global_obs"].append(global_obs.flatten())
 
       timestep = env.step(actions)
       next_obs = timestep.observation
@@ -98,8 +96,8 @@ def train_ppo(
 
       for i in range(num_agents):
         memory["rewards"].append(rewards[i])
-        memory["dones"].append(done)
-        episode_reward += rewards[i]
+      episode_reward += sum(rewards)  # sum all agents
+      memory["dones"].append(done)
 
       obs = next_obs
       step_count += 1
@@ -111,35 +109,29 @@ def train_ppo(
         timestep = env.reset()
         obs = timestep.observation
 
-    # Get last observation values for bootstrapping
-    last_values = []
-    for i in range(num_agents):
-      obs_i = process_obs(obs[i])
-      obs_tensor = torch.tensor(obs_i, dtype=torch.float32).to(ppo.device)
-      with torch.no_grad():
-        _, v = ppo.model(obs_tensor)
-      last_values.append(v.item())
+    last_global_obs = np.array([process_obs(obs[i]) for i in range(num_agents)])
+    last_value = mappo.get_value(last_global_obs)
 
-    advantages, returns = ppo.compute_gae(
+    advantages, returns = mappo.compute_gae(
         memory["rewards"],
         memory["values"],
         memory["dones"],
-        last_values,
-        num_agents,
+        last_value,
     )
 
     memory["advantages"] = advantages
     memory["returns"] = returns
 
-    stats = ppo.update(memory)
+    stats = mappo.update(memory)
 
     avg_reward = np.mean(completed_rewards[-10:]) if completed_rewards else 0.0
 
     if avg_reward > best_reward:
       best_reward = avg_reward
-      torch.save(
-          ppo.model.state_dict(), f"best_model_{substrate_name}_seed{seed}.pt"
-      )
+      torch.save({
+          "actor": mappo.actor.state_dict(),
+          "critic": mappo.critic.state_dict(),
+      }, f"best_model_mappo_{substrate_name}_seed{seed}.pt")
 
     logs.append({
         "step": step_count,
@@ -168,7 +160,7 @@ def train_ppo(
       memory[key] = []
 
   env.close()
-  return ppo, logs
+  return mappo, logs
 
 
 def test(
@@ -223,14 +215,9 @@ def test(
 
 def save_logs(logs, test_rewards, save_dir="logs", seed=0, substrate="env"):
   os.makedirs(save_dir, exist_ok=True)
-  base = f"{save_dir}/{substrate}_seed{seed}"
+  base = f"{save_dir}/mappo_{substrate}_seed{seed}"
 
   df = pd.DataFrame(logs)
-
-  for i, r in enumerate(test_rewards):
-    df[f"test_reward_{i}"] = np.nan
-    df.loc[df.index[-1], f"test_reward_{i}"] = r
-
   df["test_avg_reward"] = np.nan
   df["test_std_reward"] = np.nan
   df.loc[df.index[-1], "test_avg_reward"] = np.mean(test_rewards)
@@ -241,27 +228,28 @@ def save_logs(logs, test_rewards, save_dir="logs", seed=0, substrate="env"):
 
 
 if __name__ == "__main__":
-  seeds = [0]
+  seeds = [0,1]
 
-  # substrate_name = "commons_harvest__open"
+  substrate_name = "commons_harvest__open"
   # substrate_name = "stag_hunt_in_the_matrix__repeated" # test episode length of 2500
-  substrate_name = "chicken_in_the_matrix__repeated"
+  # substrate_name = "chicken_in_the_matrix__repeated"
 
   all_test_rewards = []
 
   for seed in seeds:
     print(f"\n=== Training with seed {seed} ===")
 
-    model, logs = train_ppo(substrate_name, total_steps=5000000, seed=seed)
-    model.model.load_state_dict(
-        torch.load(f"best_model_{substrate_name}_seed{seed}.pt")
-    )
-    model.model.eval()
+    model, logs = train_ppo(substrate_name, seed=seed, total_steps=1000000)
+    checkpoint = torch.load(f"best_model_mappo_{substrate_name}_seed{seed}.pt")
+    model.actor.load_state_dict(checkpoint["actor"])
+    model.critic.load_state_dict(checkpoint["critic"])
+    model.actor.eval()
+    model.critic.eval()
 
     test_reward = test(
         substrate_name=substrate_name,
         model=model,
-        num_episodes=5,
+        num_episodes=5
     )
 
     all_test_rewards.append(test_reward)
