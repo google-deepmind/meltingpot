@@ -11,7 +11,9 @@ import torch
 
 def process_obs(obs_i):
   if isinstance(obs_i, dict):
-    rgb = obs_i["RGB"][::4, ::4, :].flatten()
+    rgb = obs_i["RGB"][::4, ::4, :] / 255.0
+    rgb = rgb.flatten()
+    
     extras = []
     if "READY_TO_SHOOT" in obs_i:
       extras.append(obs_i["READY_TO_SHOOT"])
