@@ -236,19 +236,19 @@ class Scenario(substrate_lib.Substrate):
     focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
     return focal_reward_spec
 
-  def discount_spec(self, *args, **kwargs) -> ...:
+  def discount_spec(self, *args, **kwargs):
     """See base class."""
     return self._substrate.discount_spec(*args, **kwargs)
 
-  def list_property(self, *args, **kwargs) -> ...:
+  def list_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.list_property(*args, **kwargs)
 
-  def write_property(self, *args, **kwargs) -> ...:
+  def write_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.write_property(*args, **kwargs)
 
-  def read_property(self, *args, **kwargs) -> ...:
+  def read_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.read_property(*args, **kwargs)
 
