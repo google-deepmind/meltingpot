@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""A permissive wrapper for a SavedModel."""
 
+"""A permissive wrapper for a SavedModel."""
 import copy
 import inspect
-
 from typing import Any, Callable, NamedTuple
+from typing import TYPE_CHECKING
 
 from absl import logging
 import tensorflow as tf
@@ -43,6 +43,13 @@ class PermissiveModel:
 
   # Disable pytype attribute error checks.
   _HAS_DYNAMIC_ATTRIBUTES = True
+  if TYPE_CHECKING:
+
+    def __getattr__(self, name: str) -> Any:
+      ...
+
+    def __setattr__(self, name: str, value: Any) -> None:
+      ...
 
   def __init__(self, model):
     self.model = model
