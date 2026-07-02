@@ -1237,7 +1237,7 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
       ]
   }
   if is_predator:
-    avatar_object["components"].extend([
+    avatar_object["components"].extend([  # pyrefly: ignore[bad-argument-type]
         {
             "component": "StateManager",
             "kwargs": {
@@ -1272,8 +1272,8 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
             "kwargs": {
                 "renderMode": "ascii_shape",
                 "spriteNames": [avatar_sprite_name],
-                "spriteShapes": [sprite],
-                "palettes": [color_palette],
+                "spriteShapes": [sprite],  # pyrefly: ignore[unbound-name]
+                "palettes": [color_palette],  # pyrefly: ignore[unbound-name]
                 "noRotates": [True]
             }
         },
@@ -1284,7 +1284,7 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
                 "aliveState": live_state_name,
                 "additionalLiveStates": [],
                 "waitState": "playerWait",
-                "spawnGroup": spawn_group,
+                "spawnGroup": spawn_group,  # pyrefly: ignore[unbound-name]
                 "actionOrder": ["move",
                                 "turn",
                                 "interact"],
@@ -1313,7 +1313,7 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         },
         ])
   if not is_predator:
-    avatar_object["components"].extend([
+    avatar_object["components"].extend([  # pyrefly: ignore[bad-argument-type]
         {
             "component": "StateManager",
             "kwargs": {
@@ -1333,44 +1333,44 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
                         "groups": ["playerWaits"]
                     },
                     {
-                        "state": alert_state_name,
+                        "state": alert_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": alert_sprite_name,
+                        "sprite": alert_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     },
                     {
-                        "state": sit_state_name,
+                        "state": sit_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": sit_sprite_name,
+                        "sprite": sit_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     },
                     {
-                        "state": prep_to_eat_state_name,
+                        "state": prep_to_eat_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": prep_to_eat_sprite_name,
+                        "sprite": prep_to_eat_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     },
                     {
-                        "state": first_bite_state_name,
+                        "state": first_bite_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": first_bite_sprite_name,
+                        "sprite": first_bite_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     },
                     {
-                        "state": second_bite_state_name,
+                        "state": second_bite_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": second_bite_sprite_name,
+                        "sprite": second_bite_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     },
                     {
-                        "state": last_bite_state_name,
+                        "state": last_bite_state_name,  # pyrefly: ignore[unbound-name]
                         "layer": "upperPhysical",
-                        "sprite": last_bite_sprite_name,
+                        "sprite": last_bite_sprite_name,  # pyrefly: ignore[unbound-name]
                         "contact": "avatar",
                         "groups": ["players"]
                     }
@@ -1423,9 +1423,9 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
                                 sit_sprite_name, prep_to_eat_sprite_name,
                                 first_bite_sprite_name, second_bite_sprite_name,
                                 last_bite_sprite_name],
-                "spriteShapes": [sprite, alert_sprite, sit_sprite,
-                                 prep_to_eat_sprite, first_bite_sprite,
-                                 second_bite_sprite, last_bite_sprite],
+                "spriteShapes": [sprite, alert_sprite, sit_sprite,  # pyrefly: ignore[unbound-name]
+                                 prep_to_eat_sprite, first_bite_sprite,  # pyrefly: ignore[unbound-name]
+                                 second_bite_sprite, last_bite_sprite],  # pyrefly: ignore[unbound-name]
                 "palettes": [color_palette] * 7,
                 "noRotates": [True] * 7
             }

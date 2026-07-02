@@ -38,8 +38,8 @@ SCENARIO_OBSERVATION_SPEC = immutabledict.immutabledict({
 
 
 def _values_from_specs(
-    specs: Sequence[tree.Structure[dm_env.specs.Array]]
-) -> tree.Structure[np.ndarray]:
+    specs: Sequence[tree.Structure[dm_env.specs.Array]]  # pyrefly: ignore[invalid-type-var]
+) -> tree.Structure[np.ndarray]:  # pyrefly: ignore[invalid-type-var]
   values = tree.map_structure(lambda spec: spec.generate_value(), specs)
   return tuple(
       tree.map_structure(lambda v, n=n: np.full_like(v, n), value)

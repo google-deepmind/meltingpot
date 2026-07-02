@@ -96,7 +96,7 @@ class Wrapper(observables.ObservableLab2dWrapper):
 
   def step(self, action: Sequence[int]):
     """See base class."""
-    action = [self._action_table[player_action] for player_action in action]
+    action = [self._action_table[player_action] for player_action in action]  # pyrefly: ignore[bad-assignment]
     return super().step(action)
 
   @functools.lru_cache(maxsize=1)

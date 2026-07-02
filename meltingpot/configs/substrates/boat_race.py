@@ -164,7 +164,7 @@ SCENE = {
     ]
 }
 if _ENABLE_DEBUG_OBSERVATIONS:
-  SCENE["components"].append({
+  SCENE["components"].append({  # pyrefly: ignore[bad-argument-type]
       "component": "GlobalMetricReporter",
       "kwargs": {
           "metrics": [

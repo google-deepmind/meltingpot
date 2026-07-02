@@ -262,7 +262,7 @@ class CorrigibleReciprocator(puppeteer.Puppeteer[CorrigibleReciprocatorState]):
 
     return (puppeteer.puppet_timestep(timestep, goal),
             CorrigibleReciprocatorState(clean_until, nice, step_count + 1,
-                                        recent_cleaning, sanctioned_steps))
+                                        recent_cleaning, sanctioned_steps))  # pyrefly: ignore[bad-argument-type]
 
 
 class SanctionerAlternator(puppeteer.Puppeteer[SanctionerAlternatorState]):

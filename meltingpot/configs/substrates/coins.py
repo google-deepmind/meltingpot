@@ -135,7 +135,7 @@ if _ENABLE_DEBUG_OBSERVATIONS:
               {
                   "name": "COINS_COLLECTED",
                   "type": "tensor.Int32Tensor",
-                  "shape": (MANDATED_NUM_PLAYERS, 2),
+                  "shape": (MANDATED_NUM_PLAYERS, 2),  # pyrefly: ignore[bad-assignment]
                   "component": "GlobalCoinCollectionTracker",
                   "variable": "coinsCollected",
               },
@@ -216,7 +216,7 @@ def get_coin(
     reward_other_for_mismatch: float,
     ) -> PrefabConfig:
   """Create `PrefabConfig` for coin component."""
-  return {
+  return {  # pyrefly: ignore[bad-return]
       "name": "coin",
       "components": [
           {
@@ -415,7 +415,7 @@ def get_prefabs(
                   reward_self_for_mismatch=reward_self_for_mismatch,
                   reward_other_for_match=reward_other_for_match,
                   reward_other_for_mismatch=reward_other_for_mismatch)
-  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}
+  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}  # pyrefly: ignore[bad-return]
 
 
 # `player_color_palettes` is a list with each entry specifying the color to use

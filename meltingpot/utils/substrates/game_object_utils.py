@@ -52,8 +52,8 @@ TYPE_CHOICE = "choice"
 def get_named_components(
     game_object_config: PrefabConfig,
     name: str):
-  return [component for component in game_object_config["components"]
-          if component["component"] == name]
+  return [component for component in game_object_config["components"]  # pyrefly: ignore[not-iterable]
+          if component["component"] == name]  # pyrefly: ignore[bad-index]
 
 
 def get_first_named_component(
@@ -75,7 +75,7 @@ def build_game_objects(
     badge_palettes: Optional[Sequence[shapes.Color]] = None,
 ) -> Tuple[List[PrefabConfig], List[PrefabConfig]]:
   """Build all avatar and normal game objects based on the config and map."""
-  game_objects = get_game_objects_from_map(ascii_map, char_prefab_map, prefabs)
+  game_objects = get_game_objects_from_map(ascii_map, char_prefab_map, prefabs)  # pyrefly: ignore[bad-argument-type]
   avatar_objects = build_avatar_objects(num_players, prefabs, player_palettes)
   if use_badges:
     game_objects += build_avatar_badges(num_players, prefabs, badge_palettes)
@@ -93,13 +93,13 @@ def build_avatar_objects(
         "Building avatar objects requested, but no avatar prefab provided.")
 
   if not player_palettes:
-    player_palettes = [
+    player_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
 
   avatar_objects = []
   for idx in range(0, num_players):
     game_object = copy.deepcopy(prefabs["avatar"])
-    color_palette = player_palettes[idx]
+    color_palette = player_palettes[idx]  # pyrefly: ignore[unsupported-operation]
     # Lua is 1-indexed.
     lua_index = idx + 1
     # First, modify the prefab's sprite name.
@@ -140,7 +140,7 @@ def build_avatar_badges(
   game_objects = []
 
   if badge_palettes is None:
-    badge_palettes = [
+    badge_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
 
   for idx in range(0, num_players):
@@ -161,7 +161,7 @@ def build_avatar_badges(
         badge_object, "AvatarConnector")["kwargs"]["playerIndex"] = lua_index
     get_first_named_component(
         badge_object,
-        "Appearance")["kwargs"]["palettes"][0] = badge_palettes[idx]
+        "Appearance")["kwargs"]["palettes"][0] = badge_palettes[idx]  # pyrefly: ignore[unsupported-operation]
     game_objects.append(badge_object)
 
   return game_objects
@@ -243,12 +243,12 @@ def get_game_objects_from_map(
       if hasattr(prefab, "items"):
         assert "type" in prefab
         assert "list" in prefab
-        if prefab["type"] == TYPE_ALL:
-          for p in prefab["list"]:
+        if prefab["type"] == TYPE_ALL:  # pyrefly: ignore[bad-index]
+          for p in prefab["list"]:  # pyrefly: ignore[bad-index]
             game_objects.append(_create_game_object(prefabs[p], transform))
         elif prefab["type"] == TYPE_CHOICE:
           game_objects.append(
-              _create_game_object(prefabs[random.choice(prefab["list"])],
+              _create_game_object(prefabs[random.choice(prefab["list"])],  # pyrefly: ignore[bad-index]
                                   transform))
       else:  # Typical case, since named prefab.
         game_objects.append(_create_game_object(prefabs[prefab], transform))

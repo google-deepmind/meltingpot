@@ -25,8 +25,8 @@ import tree
 
 
 def _numpy_to_placeholder(
-    template: tree.Structure[np.ndarray], prefix: str
-) -> tree.Structure[tf.Tensor]:
+    template: tree.Structure[np.ndarray], prefix: str  # pyrefly: ignore[invalid-type-var]
+) -> tree.Structure[tf.Tensor]:  # pyrefly: ignore[invalid-type-var]
   """Returns placeholders that matches a given template.
 
   Args:
@@ -80,10 +80,10 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
   def step(
       self,
       timestep: dm_env.TimeStep,
-      prev_state: tree.Structure[tf.Tensor],
-  ) -> tuple[int, tree.Structure[tf.Tensor]]:
+      prev_state: tree.Structure[tf.Tensor],  # pyrefly: ignore[invalid-type-var]
+  ) -> tuple[int, tree.Structure[tf.Tensor]]:  # pyrefly: ignore[invalid-type-var]
     """See base class."""
-    prev_key, prev_state = prev_state
+    prev_key, prev_state = prev_state  # pyrefly: ignore[bad-assignment]
     timestep = timestep._replace(
         step_type=int(timestep.step_type),
         observation=tree.map_structure(_downcast, timestep.observation),
@@ -93,7 +93,7 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
     (action, _), next_state = outputs
     return int(action.numpy()), (next_key, next_state)
 
-  def initial_state(self) -> tree.Structure[tf.Tensor]:
+  def initial_state(self) -> tree.Structure[tf.Tensor]:  # pyrefly: ignore[invalid-type-var]
     """See base class."""
     random_seed = random.getrandbits(32)
     seed_key = np.array([0, random_seed], dtype=np.uint32)
@@ -185,8 +185,8 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
     self._graph.finalize()
 
   def step(
-      self, timestep: dm_env.TimeStep, prev_state: tree.Structure[np.ndarray]
-  ) -> tuple[int, tree.Structure[np.ndarray]]:
+      self, timestep: dm_env.TimeStep, prev_state: tree.Structure[np.ndarray]  # pyrefly: ignore[invalid-type-var]
+  ) -> tuple[int, tree.Structure[np.ndarray]]:  # pyrefly: ignore[invalid-type-var]
     """See base class."""
     timestep = timestep._replace(
         step_type=int(timestep.step_type),
@@ -199,13 +199,13 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
         'prev_state': prev_state,
     })
     feed_dict = {
-        self._step_inputs[path]: value for path, value in input_values
+        self._step_inputs[path]: value for path, value in input_values  # pyrefly: ignore[unsupported-operation]
         if path in self._step_inputs
     }
     action, next_state = self._session.run(self._step_outputs, feed_dict)
     return int(action), next_state
 
-  def initial_state(self) -> tree.Structure[np.ndarray]:
+  def initial_state(self) -> tree.Structure[np.ndarray]:  # pyrefly: ignore[invalid-type-var]
     """See base class."""
     if not self._initial_state_outputs:
       self._build_initial_state_graph()

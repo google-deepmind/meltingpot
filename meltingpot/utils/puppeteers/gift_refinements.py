@@ -59,7 +59,7 @@ class GiftRefinementsCooperator(puppeteer.Puppeteer[tuple[()]]):
     """See base class."""
     return ()
 
-  def should_consume(self, observation: Observation) -> bool:
+  def should_consume(self, observation: Observation) -> bool:  # pyrefly: ignore[invalid-type-var]
     """Decides whether we should consume tokens in our inventory."""
     _, refined, twice_refined = observation['INVENTORY']
     return bool(refined) or bool(twice_refined)
@@ -89,7 +89,7 @@ class GiftRefinementsExtremeCooperator(GiftRefinementsCooperator):
   refined token.
   """
 
-  def should_consume(self, observation: Observation) -> bool:
+  def should_consume(self, observation: Observation) -> bool:  # pyrefly: ignore[invalid-type-var]
     """See base class."""
     _, _, twice_refined = observation['INVENTORY']
-    return bool(twice_refined > 0)
+    return bool(twice_refined > 0)  # pyrefly: ignore[unsupported-operation]

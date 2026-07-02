@@ -328,17 +328,17 @@ SPAWN_POINT = {
 def get_dry_painted_wall_palette(base_color: shapes.Color
                                  ) -> Mapping[str, shapes.ColorRGBA]:
   return {
-      "*": shapes.scale_color(base_color, 0.75, 200),
-      "#": shapes.scale_color(base_color, 0.90, 150),
+      "*": shapes.scale_color(base_color, 0.75, 200),  # pyrefly: ignore[bad-argument-type]
+      "#": shapes.scale_color(base_color, 0.90, 150),  # pyrefly: ignore[bad-argument-type]
   }
 
 
 def get_brush_palette(
     base_color: shapes.Color) -> Mapping[str, shapes.ColorRGBA]:
-  return {
+  return {  # pyrefly: ignore[bad-return]
       "*": base_color + (255,),
-      "&": shapes.scale_color(base_color, 0.75, 255),
-      "o": shapes.scale_color(base_color, 0.55, 255),
+      "&": shapes.scale_color(base_color, 0.75, 255),  # pyrefly: ignore[bad-argument-type]
+      "o": shapes.scale_color(base_color, 0.55, 255),  # pyrefly: ignore[bad-argument-type]
       "O": (70, 70, 70, 255),
       "-": (143, 96, 74, 255),
       "+": (117, 79, 61, 255),
@@ -414,7 +414,7 @@ def create_resource(num_players: int) -> PrefabConfig:
           },
       ]
   }
-  return prefab
+  return prefab  # pyrefly: ignore[bad-return]
 
 
 def create_resource_texture() -> PrefabConfig:
@@ -450,7 +450,7 @@ def create_resource_texture() -> PrefabConfig:
           },
       ]
   }
-  return prefab
+  return prefab  # pyrefly: ignore[bad-return]
 
 
 def create_reward_indicator(num_players) -> PrefabConfig:
@@ -504,7 +504,7 @@ def create_reward_indicator(num_players) -> PrefabConfig:
           },
       ]
   }
-  return prefab
+  return prefab  # pyrefly: ignore[bad-return]
 
 
 def create_damage_indicator() -> PrefabConfig:
@@ -551,7 +551,7 @@ def create_damage_indicator() -> PrefabConfig:
           },
       ]
   }
-  return prefab
+  return prefab  # pyrefly: ignore[bad-return]
 
 
 def create_prefabs(num_players: int):

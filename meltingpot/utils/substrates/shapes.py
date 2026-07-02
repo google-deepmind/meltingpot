@@ -59,7 +59,7 @@ def scale_color(color_tuple: ColorRGBA, factor: float,
     color_tuple = rgb_to_rgba(color_tuple)  # pytype: disable=wrong-arg-types
   scaled = [int(min(x * factor, 255)) for x in color_tuple]
   scaled[3] = alpha if alpha is not None else color_tuple[-1]
-  return tuple(scaled)
+  return tuple(scaled)  # pyrefly: ignore[bad-return]
 
 
 # LINT.IfChange
@@ -87,11 +87,11 @@ def get_palette(color: Color) -> Dict[str, ColorRGBA]:
   """
   palette = {
       "*": (color[0], color[1], color[2], 255),
-      "&": scale_color(color, 0.75, 255),
-      "o": scale_color(color, 0.55, 255),
-      "!": scale_color(color, 0.65, 255),
-      "~": scale_color(color, 0.9, 255),
-      "@": scale_color(color, 1.25, 255),
+      "&": scale_color(color, 0.75, 255),  # pyrefly: ignore[bad-argument-type]
+      "o": scale_color(color, 0.55, 255),  # pyrefly: ignore[bad-argument-type]
+      "!": scale_color(color, 0.65, 255),  # pyrefly: ignore[bad-argument-type]
+      "~": scale_color(color, 0.9, 255),  # pyrefly: ignore[bad-argument-type]
+      "@": scale_color(color, 1.25, 255),  # pyrefly: ignore[bad-argument-type]
       "r": (color[0], color[2], color[1], 255),
       "R": scale_color((color[0], color[2], color[1], 255),
                        1.25, 255),
@@ -136,7 +136,7 @@ def adjust_color_brightness(
   elif len(color_tuple) == 4:
     output_color = (
         adjusted_rgb[0], adjusted_rgb[1], adjusted_rgb[2], color_tuple[3])
-  return tuple([int(x) for x in output_color])
+  return tuple([int(x) for x in output_color])  # pyrefly: ignore[bad-return]
 
 
 def get_diamond_palette(

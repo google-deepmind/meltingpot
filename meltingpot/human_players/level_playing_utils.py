@@ -149,7 +149,7 @@ def get_key_x_pressed() -> int:
 
 def _split_key(key: str) -> Tuple[str, str]:
   """Splits the key into player index and name."""
-  return tuple(key.split('.', maxsplit=1))
+  return tuple(key.split('.', maxsplit=1))  # pyrefly: ignore[bad-return]
 
 
 def _get_rewards(timestep: dm_env.TimeStep) -> Mapping[str, float]:
@@ -370,7 +370,7 @@ def run_episode(
 
         surf = pygame.transform.scale(
             surface, (rect[2] * scale, rect[3] * scale))
-        game_display.blit(surf, dest=(0, 0))
+        game_display.blit(surf, dest=(0, 0))  # pyrefly: ignore[unbound-name]
 
         # show text
         if text_display_fn:
@@ -378,12 +378,12 @@ def run_episode(
             text_str = text_display_fn(timestep, 0)
           else:
             text_str = text_display_fn(timestep, player_index)
-          img = font.render(text_str, True, text_color)
+          img = font.render(text_str, True, text_color)  # pyrefly: ignore[unbound-name]
           game_display.blit(img, (text_x_pos, text_y_pos))
 
         # tick
         pygame.display.update()
-        clock.tick(fps)
+        clock.tick(fps)  # pyrefly: ignore[unbound-name]
 
     if interactive == RenderType.PYGAME:
       pygame.quit()

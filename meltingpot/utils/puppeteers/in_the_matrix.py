@@ -583,7 +583,7 @@ class RespondToPrevious(puppeteer.Puppeteer[Resource]):
     if timestep.first():
       prev_state = self.initial_state()
     partner_resource = partner_max_resource(timestep)
-    response = self._responses.get(partner_resource, prev_state)
+    response = self._responses.get(partner_resource, prev_state)  # pyrefly: ignore[no-matching-overload]
     timestep = collect_or_interact_puppet_timestep(
         timestep, response, self._margin)
     return timestep, response

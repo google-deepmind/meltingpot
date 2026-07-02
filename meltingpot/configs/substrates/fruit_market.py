@@ -703,7 +703,7 @@ def get_potential_tree(probability_empty: float = 0.9,
           },
       ]
   }
-  return prefab
+  return prefab  # pyrefly: ignore[bad-return]
 
 
 # Primitive action components.
@@ -793,7 +793,7 @@ def create_prefabs() -> PrefabConfig:
           probability_banana=0.45,
       ),
   }
-  return prefabs
+  return prefabs  # pyrefly: ignore[bad-return]
 
 
 def create_scene():

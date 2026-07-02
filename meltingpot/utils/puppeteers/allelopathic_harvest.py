@@ -90,7 +90,7 @@ class ConventionFollower(puppeteer.Puppeteer[ConventionFollowerState]):
     average_color = np.array(recent_frames).mean(axis=(0, 1, 2))
     index = np.argmax(average_color)
     if average_color[index] > self._color_threshold:
-      current_goal = self._preference_goals[index]
+      current_goal = self._preference_goals[index]  # pyrefly: ignore[bad-index]
 
     return puppeteer.puppet_timestep(timestep, current_goal), (
         ConventionFollowerState(

@@ -702,7 +702,7 @@ def create_prefabs() -> PrefabConfig:
       "wall_shadow_s": WALL_SHADOW_S,
       "wall_shadow_se": WALL_SHADOW_SE,
   }
-  return prefabs
+  return prefabs  # pyrefly: ignore[bad-return]
 
 
 def create_scene():

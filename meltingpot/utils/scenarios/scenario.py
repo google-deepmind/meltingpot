@@ -73,10 +73,10 @@ def _merge(
     is_focal: Sequence[bool],
 ) -> Sequence[T]:
   """Merges focal and background sequences into one."""
-  focal_values = iter(focal_values)
-  background_values = iter(background_values)
+  focal_values = iter(focal_values)  # pyrefly: ignore[bad-assignment]
+  background_values = iter(background_values)  # pyrefly: ignore[bad-assignment]
   return tuple(
-      next(focal_values if focal else background_values) for focal in is_focal
+      next(focal_values if focal else background_values) for focal in is_focal  # pyrefly: ignore[bad-argument-type]
   )
 
 
@@ -254,7 +254,7 @@ class Scenario(substrate_lib.Substrate):
 
   def observables(self) -> ScenarioObservables:
     """Returns the observables for the scenario."""
-    return self._observables
+    return self._observables  # pyrefly: ignore[bad-return]
 
 
 def build_scenario(

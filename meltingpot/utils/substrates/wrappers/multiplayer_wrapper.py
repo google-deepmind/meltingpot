@@ -40,7 +40,7 @@ def _player_observations(observations: Mapping[str, T], suffix: str,
     else:
       if isinstance(value, dm_env.specs.Array):
         value = value.replace(name=suffix)
-      yield player_index, value
+      yield player_index, value  # pyrefly: ignore[invalid-yield]
 
 
 class Wrapper(observables.ObservableLab2dWrapper):
@@ -86,7 +86,7 @@ class Wrapper(observables.ObservableLab2dWrapper):
     """
     player_observations = [{} for i in range(self._num_players)]
     for suffix in self._individual_observation_suffixes:
-      for i, value in _player_observations(source, suffix, self._num_players):
+      for i, value in _player_observations(source, suffix, self._num_players):  # pyrefly: ignore[not-iterable]
         player_observations[i][suffix] = value
     for name in self._global_observation_names:
       value = source[name]
@@ -101,9 +101,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
       source: dmlab2d observations source to check.
     """
     rewards = [None] * self._num_players
-    for i, value in _player_observations(source, "REWARD", self._num_players):
+    for i, value in _player_observations(source, "REWARD", self._num_players):  # pyrefly: ignore[not-iterable]
       rewards[i] = value
-    return rewards
+    return rewards  # pyrefly: ignore[bad-return]
 
   def _get_timestep(self, source: dm_env.TimeStep) -> dm_env.TimeStep:
     """Returns multiplayer timestep from dmlab2d observations.

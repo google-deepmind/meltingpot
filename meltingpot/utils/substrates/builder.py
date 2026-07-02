@@ -162,7 +162,7 @@ def builder(
 
   # Copy config, so as not to modify it.
   lab2d_settings = config_dict.ConfigDict(
-      copy.deepcopy(lab2d_settings)).unlock()
+      copy.deepcopy(lab2d_settings)).unlock()  # pyrefly: ignore[bad-argument-type]
 
   apply_prefab_overrides(lab2d_settings, prefab_overrides)
   maybe_build_and_add_avatar_objects(lab2d_settings)

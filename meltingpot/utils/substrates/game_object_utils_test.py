@@ -137,7 +137,7 @@ WWWWWW
     }
     prefabs = {'wall': wall, 'apple': apple}
     game_objects = game_object_utils.get_game_objects_from_map(
-        ascii_map, {'W': 'wall', 'A': 'apple'}, prefabs)
+        ascii_map, {'W': 'wall', 'A': 'apple'}, prefabs)  # pyrefly: ignore[bad-argument-type]
     self.assertLen(game_objects, 15)
     self.assertEqual(
         1,
@@ -267,7 +267,7 @@ class BuildAvatarObjectsTest(parameterized.TestCase):
     prefabs = {'avatar': AVATAR}
     avatars = game_object_utils.build_avatar_objects(
         num_players=num_players,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         player_palettes=None,
         )
     self.assertLen(avatars, num_players)
@@ -277,7 +277,7 @@ class BuildAvatarObjectsTest(parameterized.TestCase):
     prefabs = {'avatar': AVATAR}
     avatars = game_object_utils.build_avatar_objects(
         num_players=2,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         player_palettes=palettes,
         )
     self.assertLen(avatars, 2)
@@ -300,7 +300,7 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
     prefabs = {'avatar_badge': BADGE}
     badges = game_object_utils.build_avatar_badges(
         num_players=num_players,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         badge_palettes=None,
         )
     self.assertLen(badges, num_players)
@@ -310,7 +310,7 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
     prefabs = {'avatar_badge': BADGE}
     badges = game_object_utils.build_avatar_badges(
         num_players=2,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         badge_palettes=palettes,
         )
     self.assertLen(badges, 2)

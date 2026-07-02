@@ -50,7 +50,7 @@ class PartitionMergeTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
   def test_merge(self, expected, is_focal, *partions):
-    actual = scenario_utils._merge(*partions, is_focal)
+    actual = scenario_utils._merge(*partions, is_focal)  # pyrefly: ignore[bad-argument-count]
     self.assertEqual(actual, expected)
 
 
