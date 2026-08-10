@@ -17,6 +17,10 @@ You must provide experiment_state, expected to be
 ~/ray_results/PPO/experiment_state_YOUR_RUN_ID.json
 """
 
+# Ray and Gymnasium are optional example dependencies and absent from core CI.
+# pylint: disable=import-error
+# pytype: disable=import-error
+
 import argparse
 
 import dm_env

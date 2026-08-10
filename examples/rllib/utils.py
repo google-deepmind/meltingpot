@@ -13,6 +13,10 @@
 # limitations under the License.
 """MeltingPotEnv as a MultiAgentEnv wrapper to interface with RLLib."""
 
+# Ray and Gymnasium are optional example dependencies and absent from core CI.
+# pylint: disable=import-error
+# pytype: disable=import-error
+
 from typing import Tuple
 
 import dm_env

@@ -13,6 +13,10 @@
 # limitations under the License.
 """Runs an example of a self-play training experiment."""
 
+# Ray and Gymnasium are optional example dependencies and absent from core CI.
+# pylint: disable=import-error
+# pytype: disable=import-error
+
 import os
 
 from meltingpot import substrate

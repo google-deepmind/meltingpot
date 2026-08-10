@@ -13,15 +13,33 @@
 # limitations under the License.
 """Tests for the self_play_train.py."""
 
+# Ray and Gymnasium are optional example dependencies and absent from core CI.
+# pylint: disable=import-error
+# pytype: disable=import-error
+
+import importlib.util
+import unittest
+
 from absl.testing import absltest
 
-from . import self_play_train
+def _module_available(module):
+  try:
+    return importlib.util.find_spec(module) is not None
+  except ModuleNotFoundError:
+    return False
 
 
+_RLLIB_AVAILABLE = all(
+    _module_available(module) for module in ('gymnasium', 'ray.rllib'))
+
+
+@unittest.skipUnless(_RLLIB_AVAILABLE, 'requires the optional RLlib extras')
 class TrainingTests(absltest.TestCase):
   """Tests for MeltingPotEnv for RLLib."""
 
   def test_training(self):
+    from . import self_play_train  # pylint: disable=g-import-not-at-top
+
     config = self_play_train.get_config(
         num_rollout_workers=1,
         rollout_fragment_length=10,
