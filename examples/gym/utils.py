@@ -13,6 +13,9 @@
 # limitations under the License.
 """Shared utils for third-party library examples."""
 
+# Gymnasium is an optional example dependency and absent from core CI.
+# pytype: disable=import-error
+
 from typing import Any, Mapping
 
 import dm_env
