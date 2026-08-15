@@ -51,7 +51,16 @@ jobs:
       # RLlib is an optional example integration and its Ray/Gymnasium
       # dependencies are intentionally not installed by the core install action.
       - name: Test examples
-        run: pytest examples --ignore=examples/rllib
+        run: |
+          set +e
+          pytest examples --ignore=examples/rllib
+          status=$?
+          set -e
+          if [ "$status" -eq 5 ]; then
+            echo "No non-RLlib example tests were collected."
+            exit 0
+          fi
+          exit "$status"
 
       - name: Lint examples
         run: find examples -name '*.py' -not -path 'examples/rllib/*' -print0 | xargs -0 pylint --errors-only
