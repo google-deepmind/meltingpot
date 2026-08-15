@@ -22,6 +22,7 @@ Use `TAB` to switch between players.
 import argparse
 import json
 
+from meltingpot.configs.substrates import collaborative_cooking as base_config
 from meltingpot.configs.substrates import collaborative_cooking__asymmetric
 from meltingpot.configs.substrates import collaborative_cooking__circuit
 from meltingpot.configs.substrates import collaborative_cooking__cramped
@@ -64,6 +65,20 @@ def verbose_fn(env_timestep, player_index, current_player_index):
       print(obs, env_timestep.observation[f'{lua_index}.{obs}'])
 
 
+def _build_environment_config(env_module, verbose=False):
+  """Builds a human-player configuration, enabling debug metrics if needed."""
+  env_config = env_module.get_config()
+  with config_dict.ConfigDict(env_config).unlocked() as env_config:
+    roles = env_config.default_player_roles
+    previous_debug_setting = getattr(base_config, '_ENABLE_DEBUG_OBSERVATIONS')
+    try:
+      setattr(base_config, '_ENABLE_DEBUG_OBSERVATIONS', verbose)
+      env_config.lab2d_settings = env_module.build(roles, env_config)
+    finally:
+      setattr(base_config, '_ENABLE_DEBUG_OBSERVATIONS', previous_debug_setting)
+  return env_config
+
+
 def main():
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument(
@@ -85,10 +100,7 @@ def main():
 
   args = parser.parse_args()
   env_module = environment_configs[args.level_name]
-  env_config = env_module.get_config()
-  with config_dict.ConfigDict(env_config).unlocked() as env_config:
-    roles = env_config.default_player_roles
-    env_config.lab2d_settings = env_module.build(roles, env_config)
+  env_config = _build_environment_config(env_module, verbose=args.verbose)
   level_playing_utils.run_episode(
       args.observation, args.settings, _ACTION_MAP, env_config,
       level_playing_utils.RenderType.PYGAME, MAX_SCREEN_WIDTH,
