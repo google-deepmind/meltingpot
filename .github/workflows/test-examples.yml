@@ -48,22 +48,22 @@ jobs:
       - name: Install Melting Pot
         uses: ./.github/actions/install
 
-      # RLlib is an optional example integration and its Ray/Gymnasium
+      # Gym and RLlib are optional example integrations. Their Gymnasium/Ray
       # dependencies are intentionally not installed by the core install action.
       - name: Test examples
         run: |
           set +e
-          pytest examples --ignore=examples/rllib
+          pytest examples --ignore=examples/gym --ignore=examples/rllib
           status=$?
           set -e
           if [ "$status" -eq 5 ]; then
-            echo "No non-RLlib example tests were collected."
+            echo "No core-only example tests were collected."
             exit 0
           fi
           exit "$status"
 
       - name: Lint examples
-        run: find examples -name '*.py' -not -path 'examples/rllib/*' -print0 | xargs -0 pylint --errors-only
+        run: find examples -name '*.py' -not -path 'examples/gym/*' -not -path 'examples/rllib/*' -print0 | xargs -0 pylint --errors-only
 
       - name: Typecheck examples
-        run: pytype -x examples/rllib -- examples
+        run: pytype -x examples/gym examples/rllib -- examples
