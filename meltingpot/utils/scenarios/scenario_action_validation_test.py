@@ -15,6 +15,7 @@
 
 from unittest import mock
 
+from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot.utils.scenarios import scenario as scenario_utils
 
@@ -36,4 +37,4 @@ class ScenarioActionValidationTest(parameterized.TestCase):
 
 
 if __name__ == '__main__':
-  parameterized.absltest.main()
+  absltest.main()
