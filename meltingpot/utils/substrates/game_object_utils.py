@@ -202,7 +202,7 @@ def get_game_object_positions_from_map(
   """
   transforms = []
   rows = ascii_map.split("\n")
-  if not rows[0]:
+  if rows and not rows[0]:
     rows = rows[1:]
   for i, row in enumerate(rows):
     indices = [i for i, c in enumerate(row) if char == c]
