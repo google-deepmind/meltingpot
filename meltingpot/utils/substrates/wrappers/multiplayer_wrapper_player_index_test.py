@@ -15,6 +15,7 @@
 
 from unittest import mock
 
+from absl.testing import absltest
 from absl.testing import parameterized
 import dm_env
 import dmlab2d
@@ -56,4 +57,4 @@ class MultiplayerPlayerIndexValidationTest(parameterized.TestCase):
 
 
 if __name__ == '__main__':
-  parameterized.absltest.main()
+  absltest.main()
