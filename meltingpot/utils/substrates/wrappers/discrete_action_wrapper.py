@@ -96,6 +96,17 @@ class Wrapper(observables.ObservableLab2dWrapper):
 
   def step(self, action: Sequence[int]):
     """See base class."""
+    action_spec = self.action_spec()
+    if len(action) != len(action_spec):
+      raise ValueError(
+          f'Expected {len(action_spec)} player actions, got {len(action)}.')
+    for player_index, (player_action, spec) in enumerate(
+        zip(action, action_spec)):
+      try:
+        spec.validate(player_action)
+      except ValueError:
+        raise ValueError(
+            f'Invalid action {player_action!r} for player {player_index}.') from None
     action = [self._action_table[player_action] for player_action in action]  # pyrefly: ignore[bad-assignment]
     return super().step(action)
 
