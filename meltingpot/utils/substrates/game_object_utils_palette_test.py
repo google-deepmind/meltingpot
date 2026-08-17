@@ -16,13 +16,12 @@
 from absl.testing import absltest
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
-from meltingpot.utils.substrates import shapes
 
 
 class PaletteCountValidationTest(absltest.TestCase):
 
   def test_rejects_too_few_player_palettes(self):
-    palette = shapes.get_palette(colors.palette[0])
+    palette = (255, 0, 0, 255)
 
     with self.assertRaisesRegex(ValueError, 'player palettes'):
       game_object_utils.build_avatar_objects(
@@ -32,7 +31,7 @@ class PaletteCountValidationTest(absltest.TestCase):
       )
 
   def test_rejects_too_few_badge_palettes(self):
-    palette = shapes.get_palette(colors.palette[0])
+    palette = (255, 0, 0, 255)
 
     with self.assertRaisesRegex(ValueError, 'badge palettes'):
       game_object_utils.build_avatar_badges(
