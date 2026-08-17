@@ -11,7 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Substrate builder."""
+"""Substrate builder.
+
+A substrate's configuration describes its observations, actions, and player
+roles. Use `get_config(name)` to inspect it before building an environment.
+In particular, `config.valid_roles` lists the accepted role names and
+`config.default_player_roles` gives a ready-to-use role assignment.
+
+For example::
+
+  config = get_config("predator_prey__open")
+  environment = build(
+      "predator_prey__open", roles=config.default_player_roles)
+
+To choose a different assignment, pass one role per player, with every role
+drawn from `config.valid_roles`.
+"""
 
 from collections.abc import Sequence
 
@@ -24,7 +39,18 @@ SUBSTRATES = substrate_configs.SUBSTRATES
 
 
 def get_config(name: str) -> config_dict.ConfigDict:
-  """Returns the configs for the specified substrate."""
+  """Returns the locked configuration for the specified substrate.
+
+  The returned configuration includes `valid_roles`, the role names accepted by
+  `build`, and `default_player_roles`, a valid default assignment whose length
+  determines the default number of players.
+
+  Args:
+    name: Name of a substrate in `SUBSTRATES`.
+
+  Returns:
+    The locked substrate configuration.
+  """
   return substrate_configs.get_config(name).lock()
 
 
@@ -32,9 +58,11 @@ def build(name: str, *, roles: Sequence[str]) -> substrate.Substrate:
   """Builds an instance of the specified substrate.
 
   Args:
-    name: name of the substrate.
-    roles: sequence of strings defining each player's role. The length of
-      this sequence determines the number of players.
+    name: Name of the substrate.
+    roles: One role string per player. Role names must come from
+      `get_config(name).valid_roles`; use
+      `get_config(name).default_player_roles` for the substrate's standard
+      assignment. The length of this sequence determines the number of players.
 
   Returns:
     The training substrate.
@@ -50,9 +78,10 @@ def build_from_config(
   """Builds a substrate from the provided config.
 
   Args:
-    config: config resulting from `get_config`.
-    roles: sequence of strings defining each player's role. The length of
-      this sequence determines the number of players.
+    config: Configuration resulting from `get_config`, optionally customized.
+    roles: One role string per player. Role names must come from
+      `config.valid_roles`; use `config.default_player_roles` for the standard
+      assignment. The length of this sequence determines the number of players.
 
   Returns:
     The training substrate.
