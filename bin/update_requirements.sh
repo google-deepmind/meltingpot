@@ -20,4 +20,4 @@
 set -euxo pipefail
 cd "$(dirname "$0")/.."
 
-pip-compile $@ --all-extras
+pip-compile $@ --all-extras setup.py examples/requirements.in
