@@ -117,10 +117,9 @@ def world_rgb(ascii_map: str,
     sprite_size: the width of the observation.
     name: optional name for the spec.
   """
-  map_body = ascii_map.strip('\n')
-  lines = map_body.split('\n') if map_body else []
+  lines = ascii_map.strip('\n').split('\n')
   height = len(lines) * sprite_size
-  width = len(lines[0]) * sprite_size if lines else 0
+  width = len(lines[0]) * sprite_size if height else 0
   return rgb(height, width, name)
 
 
