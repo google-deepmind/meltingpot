@@ -185,7 +185,7 @@ class SubprocessVectorEnv:
       context = multiprocessing.get_context(start_method)
       for worker_index, builder in enumerate(builders):
         parent_connection, child_connection = context.Pipe()
-        process = context.Process(
+        process = context.Process(  # pytype: disable=attribute-error
             target=_worker,
             args=(child_connection, builder),
             name=f"meltingpot-vector-env-{worker_index}",
