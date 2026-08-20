@@ -19,7 +19,10 @@ from absl import app
 from absl import flags
 from meltingpot.human_players import level_playing_utils
 
-from .configs.environment import harvest as game
+if __package__:
+  from .configs.environment import harvest as game
+else:
+  from configs.environment import harvest as game
 
 FLAGS = flags.FLAGS
 
@@ -42,7 +45,11 @@ _ACTION_MAP = {
 }
 
 
-def verbose_fn(unused_timestep, unused_player_index: int) -> None:
+def verbose_fn(
+    unused_timestep,
+    unused_player_index: int,
+    unused_current_player_index: int,
+) -> None:
   pass
 
 
