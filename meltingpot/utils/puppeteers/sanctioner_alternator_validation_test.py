@@ -15,6 +15,7 @@
 
 from unittest import mock
 
+from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot.utils.puppeteers import clean_up
 
@@ -35,4 +36,4 @@ class SanctionerAlternatorValidationTest(parameterized.TestCase):
 
 
 if __name__ == '__main__':
-  parameterized.absltest.main()
+  absltest.main()
