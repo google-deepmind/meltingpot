@@ -332,19 +332,22 @@ def run_episode(
       # Compute next timestep
       actions = action_reader.step(player_prefix) if player_count else []
       timestep = env.step(actions)
+
+      rewards = _get_rewards(timestep)
+      for prefix in player_prefixes:
+        score[prefix] += rewards[prefix]
+        if prefix == player_prefix and rewards[prefix] != 0:
+          print(f'Player {prefix} Score: {score[prefix]}')
+
       if timestep.step_type == dm_env.StepType.LAST:
         if reset_env_when_done:
           timestep = env.reset()
         else:
           break
 
-      rewards = _get_rewards(timestep)
-      for i, prefix in enumerate(player_prefixes):
+      for i, _ in enumerate(player_prefixes):
         if verbose_fn:
           verbose_fn(timestep, i, player_index)
-        score[prefix] += rewards[prefix]
-        if i == player_index and rewards[prefix] != 0:
-          print(f'Player {prefix} Score: {score[prefix]}')
 
       # Print events if applicable
       if print_events and hasattr(env, 'events'):
