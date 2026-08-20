@@ -54,3 +54,11 @@ engine. The specific order is as follows:
 For more details, see the
 [`DoUpdate`](https://github.com/google-deepmind/lab2d/blob/main/dmlab2d/system/grid_world/grid.cc)
 method of the engine's grid.
+
+## Reproducible evaluation artifacts
+
+Episode-level evaluation results can be accompanied by versioned SHA-256
+manifests that fingerprint both the recorded outcomes and the
+configuration used to define the evaluation. See
+[reproducible evaluation manifests](evaluation_manifests.md) for the hash
+boundary, verification API, and manifest format.
