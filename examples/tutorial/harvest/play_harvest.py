@@ -15,14 +15,19 @@
 
 Use `WASD` keys to move the character around. `Q` and `E` to turn.
 """
+import pathlib
+import sys
+
 from absl import app
 from absl import flags
 from meltingpot.human_players import level_playing_utils
 
-if __package__:
-  from .configs.environment import harvest as game
-else:
-  from configs.environment import harvest as game
+# Allow the documented `python examples/.../play_harvest.py` invocation while
+# retaining a normal absolute package import.
+_REPO_ROOT = str(pathlib.Path(__file__).resolve().parents[3])
+if _REPO_ROOT not in sys.path:
+  sys.path.insert(0, _REPO_ROOT)
+from examples.tutorial.harvest.configs.environment import harvest as game
 
 FLAGS = flags.FLAGS
 
