@@ -129,9 +129,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
         dmlab2d_actions[f"{player_index + 1}.{key}"] = value
     return dmlab2d_actions
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     return self._get_timestep(timestep)
 
   def step(
