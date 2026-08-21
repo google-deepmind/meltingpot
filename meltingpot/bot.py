@@ -58,8 +58,13 @@ def build_from_config(config: bot_configs.BotConfig) -> policy.Policy:
   """
   saved_model = saved_model_policy.SavedModelPolicy(config.model_path)
   if config.puppeteer_builder:
-    puppeteer = config.puppeteer_builder()
-    return puppet_policy.PuppetPolicy(puppeteer=puppeteer, puppet=saved_model)
+    try:
+      puppeteer = config.puppeteer_builder()
+      return puppet_policy.PuppetPolicy(
+          puppeteer=puppeteer, puppet=saved_model)
+    except Exception:
+      saved_model.close()
+      raise
   else:
     return saved_model
 
