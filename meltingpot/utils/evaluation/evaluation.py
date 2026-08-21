@@ -46,7 +46,8 @@ def run_episode(
   while not timestep.step_type.last():
     timestep = substrate.step(actions)
     population.send_timestep(timestep)
-    actions = population.await_action()
+    if not timestep.step_type.last():
+      actions = population.await_action()
 
 
 def run_and_observe_episodes(
