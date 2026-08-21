@@ -60,7 +60,7 @@ class SubstrateTestCase(parameterized.TestCase):
         zip(observations, observation_specs)):
       if set(spec) != set(observation):
         self.fail(f'Observation {n} keys {set(observation)!r} do not match '
-                  f'spec keys {set(observation)!r}.')
+                  f'spec keys {set(spec)!r}.')
       for key in spec:
         try:
           spec[key].validate(observation[key])
