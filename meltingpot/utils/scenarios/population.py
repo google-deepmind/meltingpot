@@ -81,7 +81,7 @@ class Population:
     """
     self._policies = dict(policies)
     self._names_by_role = {
-        role: tuple(set(names)) for role, names in names_by_role.items()
+        role: tuple(set(names)) for role, names in names_by_role.items()}
     self._roles = tuple(roles)
 
     self._locks = {name: threading.Lock() for name in self._policies}
