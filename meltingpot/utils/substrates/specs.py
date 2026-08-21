@@ -76,7 +76,7 @@ def int32(*shape: int, name: Optional[str] = None) -> dm_env.specs.Array:
 
 
 def int64(*shape: int, name: Optional[str] = None) -> dm_env.specs.Array:
-  """Returns the spec for an np.int32 tensor.
+  """Returns the spec for an np.int64 tensor.
 
   Args:
     *shape: the shape of the tensor.
@@ -113,8 +113,8 @@ def world_rgb(ascii_map: str,
   """Returns the spec for a WORLD.RGB observation.
 
   Args:
-    ascii_map: the height of the observation.
-    sprite_size: the width of the observation.
+    ascii_map: the ASCII map used to derive the observation dimensions.
+    sprite_size: the size in pixels of each map cell.
     name: optional name for the spec.
   """
   lines = ascii_map.strip().split('\n')
