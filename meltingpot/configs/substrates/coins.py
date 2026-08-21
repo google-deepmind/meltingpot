@@ -75,7 +75,7 @@ def get_ascii_map(
 
   # Pad with extra rows to reach max height.
   for _ in range(max_height - height):
-    ascii_map += ["\n"] + [" "] * max_width
+    ascii_map += ["\n"] + [" "] * (max_width + 2)
 
   # Join list of strings into single string.
   ascii_map = "".join(ascii_map)
