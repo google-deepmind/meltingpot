@@ -264,18 +264,16 @@ def run_episode(
       (Players are always switchable via the tab key.)
   """
   full_config.lab2d_settings.update(config_overrides)
+  player_count = full_config.lab2d_settings.get('numPlayers', 1)
   if player_prefixes is None:
-    player_count = full_config.lab2d_settings.get('numPlayers', 1)
     # By default, we use lua indices (which start at 1) as player prefixes.
     player_prefixes = [f'{i+1}' for i in range(player_count)]
-  else:
-    player_count = len(player_prefixes)
+  elif len(player_prefixes) != player_count:
+    raise ValueError('Player prefixes, when specified, must be of the same '
+                     'length as the number of players.')
   print(f'Running an episode with {player_count} players: {player_prefixes}.')
   with env_builder(**full_config) as env:
 
-    if len(player_prefixes) != player_count:
-      raise ValueError('Player prefixes, when specified, must be of the same '
-                       'length as the number of players.')
     player_index = initial_player_index
     timestep = env.reset()
 
