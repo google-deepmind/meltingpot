@@ -14,11 +14,13 @@
 """Tests for builder.py."""
 
 import copy
+from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot.configs.substrates import running_with_scissors_in_the_matrix__repeated as test_substrate
 from meltingpot.utils.substrates import builder
+from ml_collections import config_dict
 import numpy as np
 
 
@@ -40,6 +42,27 @@ def _get_lua_randomization_map():
 
 _LUA_RANDOMIZED_LINE = 1
 _LUA_RANDOMIZATION_MAP = _get_lua_randomization_map()
+
+
+class BuilderHelpersTestCase(absltest.TestCase):
+
+  def test_missing_player_palettes_uses_default_palette(self):
+    lab2d_settings = config_dict.ConfigDict({
+        'numPlayers': 1,
+        'simulation': {
+            'prefabs': {'avatar': {}},
+        },
+    })
+
+    with mock.patch.object(
+        builder.game_object_utils,
+        'build_avatar_objects',
+        return_value=['avatar']) as build_avatar_objects:
+      builder.maybe_build_and_add_avatar_objects(lab2d_settings)
+
+    build_avatar_objects.assert_called_once_with(
+        1, lab2d_settings.simulation.prefabs, None)
+    self.assertEqual(lab2d_settings.simulation.gameObjects, ['avatar'])
 
 
 class GeneralTestCase(parameterized.TestCase):
