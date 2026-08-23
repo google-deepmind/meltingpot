@@ -125,9 +125,13 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
     self._graph = tf.compat.v1.Graph()
     self._session = tf.compat.v1.Session(graph=self._graph)
 
-    with self._build_context():
-      model = tf.compat.v1.saved_model.load_v2(model_path)
-      self._model = permissive_model.PermissiveModel(model)
+    try:
+      with self._build_context():
+        model = tf.compat.v1.saved_model.load_v2(model_path)
+        self._model = permissive_model.PermissiveModel(model)
+    except Exception:
+      self._session.close()
+      raise
 
     self._initial_state_outputs = None
     self._step_inputs = None
