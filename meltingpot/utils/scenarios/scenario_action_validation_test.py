@@ -22,7 +22,7 @@ from meltingpot.utils.scenarios import scenario as scenario_utils
 
 class ScenarioActionValidationTest(parameterized.TestCase):
 
-  @parameterized.parameters([0], [1], [0, 1, 2])
+  @parameterized.parameters(([0],), ([1],), ([0, 1, 2],))
   def test_rejects_wrong_number_of_focal_actions(self, focal_action):
     scenario = object.__new__(scenario_utils.Scenario)
     scenario._is_focal = (True, False, True)

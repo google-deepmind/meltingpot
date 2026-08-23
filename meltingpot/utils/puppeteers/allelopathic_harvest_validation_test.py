@@ -31,9 +31,9 @@ _PREFERENCES = (
 class ConventionFollowerValidationTest(parameterized.TestCase):
 
   @parameterized.parameters(
-      (),
-      _PREFERENCES[:2],
-      _PREFERENCES + (mock.sentinel.extra,),
+      ((),),
+      (_PREFERENCES[:2],),
+      (_PREFERENCES + (mock.sentinel.extra,),),
   )
   def test_requires_one_goal_per_rgb_channel(self, preference_goals):
     with self.assertRaisesRegex(ValueError, 'exactly 3 goals'):
