@@ -304,7 +304,10 @@ class SanctionerAlternator(puppeteer.Puppeteer[SanctionerAlternatorState]):
     self._threshold = threshold
     self._recency_window = recency_window
 
-    self._alternating_steps = alternating_steps
+    if alternating_steps > 0:
+      self._alternating_steps = alternating_steps
+    else:
+      raise ValueError('alternating_steps must be positive')
     self._nice = nice
 
     self._steps_to_sanction_when_motivated = steps_to_sanction_when_motivated
