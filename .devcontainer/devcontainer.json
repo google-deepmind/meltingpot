@@ -8,12 +8,6 @@
       "PYTHON_VERSION": "3.11"
     }
   },
-  "runArgs": [
-    // Increase SHM sufficiently for RLlib. Note you can increase this
-    // further for performance gains (recommended to be at least 30% of RAM
-    // on large machines).
-    "--shm-size=6gb"
-  ],
   "postCreateCommand": "bin/install.sh",
   "customizations": {
     "vscode": {

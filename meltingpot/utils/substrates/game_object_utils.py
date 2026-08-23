@@ -92,9 +92,17 @@ def build_avatar_objects(
     raise ValueError(
         "Building avatar objects requested, but no avatar prefab provided.")
 
-  if not player_palettes:
+  if player_palettes is None or len(player_palettes) == 0:
+    if num_players > len(colors.palette):
+      raise ValueError(
+          f"Cannot generate {num_players} default player palettes; only "
+          f"{len(colors.palette)} colors are available.")
     player_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
+  elif len(player_palettes) < num_players:
+    raise ValueError(
+        f"Expected at least {num_players} player palettes, got "
+        f"{len(player_palettes)}.")
 
   avatar_objects = []
   for idx in range(0, num_players):
@@ -139,9 +147,17 @@ def build_avatar_badges(
         "provided.")
   game_objects = []
 
-  if badge_palettes is None:
+  if badge_palettes is None or len(badge_palettes) == 0:
+    if num_players > len(colors.palette):
+      raise ValueError(
+          f"Cannot generate {num_players} default badge palettes; only "
+          f"{len(colors.palette)} colors are available.")
     badge_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
+  elif len(badge_palettes) < num_players:
+    raise ValueError(
+        f"Expected at least {num_players} badge palettes, got "
+        f"{len(badge_palettes)}.")
 
   for idx in range(0, num_players):
     lua_index = idx + 1
