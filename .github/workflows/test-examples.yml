@@ -49,7 +49,16 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Test examples
-        run: pytest examples
+        run: |
+          set +e
+          pytest examples
+          status=$?
+          set -e
+          if [ "$status" -eq 5 ]; then
+            echo "No example tests were collected."
+            exit 0
+          fi
+          exit "$status"
 
       - name: Lint examples
         run: pylint --errors-only examples
