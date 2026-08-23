@@ -347,11 +347,11 @@ class SanctionerAlternator(puppeteer.Puppeteer[SanctionerAlternatorState]):
     if prev_state.step_count < sanction_until:
       goal = self._sanction_goal
     else:
-      if ((prev_state.step_count // self._alternating_steps) % 2
-          ) == 0 and self._nice:
-        goal = self._cooperate_goal
-      else:
-        goal = self._defect_goal
+      even_phase = (
+          (prev_state.step_count // self._alternating_steps) % 2 == 0
+      )
+      cooperate = even_phase == self._nice
+      goal = self._cooperate_goal if cooperate else self._defect_goal
 
     return puppeteer.puppet_timestep(timestep, goal), SanctionerAlternatorState(
         sanction_until=sanction_until,
