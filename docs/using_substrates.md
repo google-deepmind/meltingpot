@@ -101,3 +101,33 @@ with substrate.build_from_config(
 Use `build` when starting from a substrate name. Use `build_from_config` when
 starting from a configuration object. For either path, `get_config` is the
 place to discover the supported roles and default player assignment.
+
+## Multi-Agent Evaluation & Social Outcome Metrics
+
+When evaluating multi-agent reinforcement learning (MARL) policies across Melting Pot substrates, standard scalar rewards should be complemented with social welfare metrics:
+
+```python
+import numpy as np
+
+def compute_social_welfare_metrics(player_rewards: np.ndarray):
+  """Computes Utilitarian social welfare and Equality (Gini index).
+  
+  Args:
+    player_rewards: 1D array of total cumulative rewards per player.
+  """
+  # Utilitarian Social Welfare (Sum of rewards)
+  utilitarian_welfare = np.sum(player_rewards)
+  
+  # Egalitarian / Equality (Gini coefficient)
+  diff_matrix = np.abs(player_rewards[:, None] - player_rewards[None, :])
+  gini_index = np.sum(diff_matrix) / (2 * len(player_rewards) * max(utilitarian_welfare, 1e-6))
+  equality = 1.0 - gini_index
+  
+  return {
+      "utilitarian_welfare": utilitarian_welfare,
+      "equality": equality,
+      "min_player_reward": np.min(player_rewards),
+      "max_player_reward": np.max(player_rewards),
+  }
+```
+
