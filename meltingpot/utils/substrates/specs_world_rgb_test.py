@@ -1,6 +1,4 @@
-#!/bin/bash
-#
-# Copyright 2024 DeepMind Technologies Limited.
+# Copyright 2026 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,29 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Test the examples.
-set -euxo pipefail
-cd "$(dirname "$0")/.."
-FAILURES=false
+"""Regression tests for WORLD.RGB spec sizing."""
 
-echo "pytest examples..."
-pytest examples || [[ $? == 5 ]] || FAILURES=true
-echo
-echo
+from absl.testing import absltest
+from meltingpot.utils.substrates import specs
 
-echo "pytype examples..."
-pytype examples || FAILURES=true
-echo
-echo
 
-echo "pylint examples..."
-pylint --errors-only examples || FAILURES=true
-echo
-echo
+class WorldRgbTest(absltest.TestCase):
 
-if "${FAILURES}"; then
-  echo -e '\033[0;31mFAILURE\033[0m' && exit 1
-else
-  echo -e '\033[0;32mSUCCESS\033[0m'
-fi
+  def test_preserves_spaces_on_boundary_rows(self):
+    ascii_map = '\n  A\n BB\n'
+
+    actual = specs.world_rgb(ascii_map, sprite_size=8)
+
+    self.assertEqual(actual.shape, (16, 24, 3))
+
+
+if __name__ == '__main__':
+  absltest.main()

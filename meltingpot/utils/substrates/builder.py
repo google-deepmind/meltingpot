@@ -82,9 +82,11 @@ def apply_prefab_overrides(
           if prefab not in lab2d_settings.simulation.prefabs:
             raise ValueError(f"Prefab override for '{prefab}' given, but not " +
                              "available in `prefabs`.")
-          game_object_utils.get_first_named_component(
-              lab2d_settings.simulation.prefabs[prefab],
-              component)["kwargs"][arg_name] = arg_override
+          component_config = game_object_utils.get_first_named_component(
+              lab2d_settings.simulation.prefabs[prefab], component)
+          if "kwargs" not in component_config:
+            component_config["kwargs"] = {}
+          component_config["kwargs"][arg_name] = arg_override
 
 
 def maybe_build_and_add_avatar_objects(

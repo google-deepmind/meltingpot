@@ -1,6 +1,4 @@
-#!/bin/bash
-#
-# Copyright 2024 DeepMind Technologies Limited.
+# Copyright 2026 DeepMind Technologies Limited.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,29 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Test the examples.
-set -euxo pipefail
-cd "$(dirname "$0")/.."
-FAILURES=false
+"""Validation tests for coordination puppeteers."""
 
-echo "pytest examples..."
-pytest examples || [[ $? == 5 ]] || FAILURES=true
-echo
-echo
+from absl.testing import absltest
+from meltingpot.utils.puppeteers import coordination_in_the_matrix
 
-echo "pytype examples..."
-pytype examples || FAILURES=true
-echo
-echo
 
-echo "pylint examples..."
-pylint --errors-only examples || FAILURES=true
-echo
-echo
+class CoordinateWithPreviousValidationTest(absltest.TestCase):
 
-if "${FAILURES}"; then
-  echo -e '\033[0;31mFAILURE\033[0m' && exit 1
-else
-  echo -e '\033[0;32mSUCCESS\033[0m'
-fi
+  def test_rejects_empty_resources_at_construction(self):
+    with self.assertRaisesRegex(ValueError, "resources must not be empty"):
+      coordination_in_the_matrix.CoordinateWithPrevious(
+          resources=(), margin=1
+      )
+
+
+if __name__ == '__main__':
+  absltest.main()

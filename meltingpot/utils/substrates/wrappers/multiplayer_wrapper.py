@@ -72,10 +72,22 @@ class Wrapper(observables.ObservableLab2dWrapper):
     self._global_observation_names = set(global_observation_names)
 
   def _get_num_players(self) -> int:
-    """Returns maximum player index in dmlab2d action spec."""
+    """Returns the number of players in the dmlab2d action spec."""
     action_spec_keys = super().action_spec().keys()
-    lua_player_indices = (int(key.split(".", 1)[0]) for key in action_spec_keys)
-    return max(lua_player_indices)
+    lua_player_indices = [
+        int(key.split(".", 1)[0]) for key in action_spec_keys
+    ]
+    if not lua_player_indices:
+      raise ValueError(
+          "DMLab2D action spec must contain at least one player action.")
+    num_players = max(lua_player_indices)
+    actual_indices = set(lua_player_indices)
+    expected_indices = set(range(1, num_players + 1))
+    if actual_indices != expected_indices:
+      raise ValueError(
+          "DMLab2D action spec player indices must be contiguous and start "
+          f"at 1; found {sorted(actual_indices)}.")
+    return num_players
 
   def _get_observations(
       self, source: Mapping[str, T]) -> Sequence[Mapping[str, T]]:
@@ -129,9 +141,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
         dmlab2d_actions[f"{player_index + 1}.{key}"] = value
     return dmlab2d_actions
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     return self._get_timestep(timestep)
 
   def step(

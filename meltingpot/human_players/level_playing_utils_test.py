@@ -70,5 +70,30 @@ class RunEpisodeTerminalRewardTest(absltest.TestCase):
     self.assertIn('Player 1: score is 5', output.getvalue())
 
 
+class RunEpisodePlayerPrefixesTest(absltest.TestCase):
+
+  def test_rejects_prefix_count_mismatch_before_building_environment(self):
+    full_config = config_dict.ConfigDict({
+        'lab2d_settings': {
+            'numPlayers': 2,
+        },
+    })
+    env_builder = mock.Mock()
+
+    with self.assertRaisesRegex(ValueError, 'same length'):
+      level_playing_utils.run_episode(
+          render_observation='WORLD.RGB',
+          config_overrides={},
+          action_map={},
+          full_config=full_config,
+          interactive=level_playing_utils.RenderType.NONE,
+          env_builder=env_builder,
+          player_prefixes=('red',),
+      )
+
+    env_builder.assert_not_called()
+
+
+
 if __name__ == '__main__':
   absltest.main()

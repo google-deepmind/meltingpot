@@ -80,8 +80,14 @@ class VideoSubject(subject.Subject):
           isColor=True)
     elif self._writer is None:
       raise ValueError('First timestep must be StepType.FIRST.')
+
+    if not self._writer.isOpened():
+      self._writer.release()
+      self._writer = None
+      self._path = None
+      raise RuntimeError('Failed to open video writer.')
+
     bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-    assert self._writer.isOpened()  # Catches any cv2 usage errors.
     self._writer.write(bgr_frame)
     if timestep.step_type.last():
       self._writer.release()

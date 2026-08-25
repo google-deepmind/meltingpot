@@ -45,6 +45,11 @@ class CounterPrevious(in_the_matrix.RespondToPrevious):
       margin: Try to collect `margin` more of the target resource than the other
         resource before interacting.
     """
+    resources = (rock_resource, paper_resource, scissors_resource)
+    if len({resource.index for resource in resources}) != len(resources):
+      raise ValueError(
+          'rock, paper, and scissors resources must have distinct indices.')
+
     responses = {
         rock_resource: paper_resource,
         paper_resource: scissors_resource,

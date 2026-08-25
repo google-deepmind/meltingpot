@@ -14,6 +14,7 @@
 """Factory class for building scenarios."""
 
 from collections.abc import Collection, Mapping, Sequence
+import contextlib
 from typing import Callable, Optional
 
 import dm_env
@@ -85,19 +86,37 @@ class ScenarioFactory:
     """Returns spec of action expected from a single focal player."""
     return self._substrate.action_spec()
 
+  def _build_scenario(
+      self,
+      substrate: substrate_lib.Substrate,
+      permitted_observations: Collection[str],
+  ) -> scenario_lib.Scenario:
+    """Builds a scenario and cleans up owned resources if construction fails."""
+    with contextlib.ExitStack() as stack:
+      stack.callback(substrate.close)
+      bots = {}
+      for name, factory in self._bots.items():
+        bot = factory.build()
+        stack.callback(bot.close)
+        bots[name] = bot
+      scenario = scenario_lib.build_scenario(
+          substrate=substrate,
+          bots=bots,
+          bots_by_role=self._bots_by_role,
+          roles=self._roles,
+          is_focal=self._is_focal,
+          permitted_observations=permitted_observations)
+      stack.pop_all()
+      return scenario
+
   def build(self) -> scenario_lib.Scenario:
     """Builds the scenario.
 
     Returns:
       The constructed scenario.
     """
-    return scenario_lib.build_scenario(
-        substrate=self._substrate.build(self._roles),
-        bots={name: factory.build() for name, factory in self._bots.items()},
-        bots_by_role=self._bots_by_role,
-        roles=self._roles,
-        is_focal=self._is_focal,
-        permitted_observations=self._permitted_observations)
+    substrate = self._substrate.build(self._roles)
+    return self._build_scenario(substrate, self._permitted_observations)
 
   def build_transformed(
       self, substrate_transform: Optional[SubstrateTransform] = None
@@ -117,13 +136,11 @@ class ScenarioFactory:
       The constructed scenario.
     """
     substrate = self._substrate.build(self._roles)
-    if substrate_transform:
-      substrate = substrate_transform(substrate)
-    all_observations = frozenset().union(*substrate.observation_spec())
-    return scenario_lib.build_scenario(
-        substrate=substrate,
-        bots={name: factory.build() for name, factory in self._bots.items()},
-        bots_by_role=self._bots_by_role,
-        roles=self._roles,
-        is_focal=self._is_focal,
-        permitted_observations=all_observations)
+    try:
+      if substrate_transform:
+        substrate = substrate_transform(substrate)
+      all_observations = frozenset().union(*substrate.observation_spec())
+    except Exception:
+      substrate.close()
+      raise
+    return self._build_scenario(substrate, all_observations)
