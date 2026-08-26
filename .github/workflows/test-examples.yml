@@ -49,11 +49,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Test examples
-        run: |
-          # pytest exits with code 5 when no tests are collected. Since the
-          # removal of examples/rllib and examples/gym there are no tests
-          # under examples/ anymore, so an empty run must not fail the check.
-          pytest examples || test $? -eq 5
+        run: pytest examples
 
       - name: Lint examples
         run: pylint --errors-only examples
