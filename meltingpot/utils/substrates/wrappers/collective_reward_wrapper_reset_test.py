@@ -27,7 +27,6 @@ class CollectiveRewardResetTest(absltest.TestCase):
     env = mock.Mock(spec_set=dmlab2d.Environment)
     env.reset.return_value = dm_env.restart(
         observation=[{'RGB': mock.sentinel.rgb}],
-        reward=[0.0],
     )
     wrapped = collective_reward_wrapper.CollectiveRewardWrapper(env)
 
