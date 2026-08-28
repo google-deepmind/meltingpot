@@ -122,7 +122,7 @@ def maybe_build_and_add_avatar_objects(
       lab2d_settings.simulation.gameObjects = []
     # Create avatars.
     logging.info("Building avatars in `meltingpot.builder` with palettes: %s",
-                 lab2d_settings.simulation.playerPalettes)
+                 palettes)
     avatar_objects = game_object_utils.build_avatar_objects(
         int(lab2d_settings.numPlayers),
         lab2d_settings.simulation.prefabs,
