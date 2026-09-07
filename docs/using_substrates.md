@@ -104,30 +104,64 @@ place to discover the supported roles and default player assignment.
 
 ## Multi-Agent Evaluation & Social Outcome Metrics
 
-When evaluating multi-agent reinforcement learning (MARL) policies across Melting Pot substrates, standard scalar rewards should be complemented with social welfare metrics:
+When evaluating multi-agent reinforcement learning (MARL) policies across
+Melting Pot substrates, standard scalar rewards should be complemented with
+social welfare and fairness metrics:
 
 ```python
 import numpy as np
 
-def compute_social_welfare_metrics(player_rewards: np.ndarray):
+
+def compute_social_welfare_metrics(
+    player_rewards: np.ndarray, shift_negative: bool = False
+):
   """Computes Utilitarian social welfare and Equality (Gini index).
-  
+
+  Note: The standard Gini index assumes non-negative individual rewards and
+  positive mean welfare. For substrates where cumulative episode rewards can be
+  zero or negative, set `shift_negative=True` to apply an affine baseline shift
+  (R' = R - min(R) + 1e-6) so relative inequality remains mathematically bounded.
+  If unshifted and signed rewards exist, equality returns `np.nan` and
+  `reward_std` provides a dispersion measure.
+
   Args:
     player_rewards: 1D array of total cumulative rewards per player.
+    shift_negative: Whether to non-negatively shift rewards if negative values
+      exist.
+
+  Returns:
+    Dict containing utilitarian welfare, equality, min/max rewards, and std.
   """
-  # Utilitarian Social Welfare (Sum of rewards)
-  utilitarian_welfare = np.sum(player_rewards)
-  
-  # Egalitarian / Equality (Gini coefficient)
-  diff_matrix = np.abs(player_rewards[:, None] - player_rewards[None, :])
-  gini_index = np.sum(diff_matrix) / (2 * len(player_rewards) * max(utilitarian_welfare, 1e-6))
-  equality = 1.0 - gini_index
-  
+  player_rewards = np.asarray(player_rewards, dtype=float)
+  n_players = len(player_rewards)
+  utilitarian_welfare = float(np.sum(player_rewards))
+
+  # Guard against negative or zero welfare in Gini computation
+  eval_rewards = player_rewards
+  if np.any(eval_rewards < 0) or utilitarian_welfare <= 0:
+    if shift_negative:
+      eval_rewards = eval_rewards - np.min(eval_rewards) + 1e-6
+    else:
+      return {
+          "utilitarian_welfare": utilitarian_welfare,
+          "equality": np.nan,
+          "min_player_reward": float(np.min(player_rewards)),
+          "max_player_reward": float(np.max(player_rewards)),
+          "reward_std": float(np.std(player_rewards)),
+      }
+
+  eval_welfare = np.sum(eval_rewards)
+  diff_matrix = np.abs(eval_rewards[:, None] - eval_rewards[None, :])
+  gini_index = np.sum(diff_matrix) / (2 * n_players * eval_welfare)
+  equality = float(1.0 - gini_index)
+
   return {
       "utilitarian_welfare": utilitarian_welfare,
       "equality": equality,
-      "min_player_reward": np.min(player_rewards),
-      "max_player_reward": np.max(player_rewards),
+      "min_player_reward": float(np.min(player_rewards)),
+      "max_player_reward": float(np.max(player_rewards)),
+      "reward_std": float(np.std(player_rewards)),
   }
 ```
+
 
