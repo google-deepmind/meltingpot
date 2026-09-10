@@ -1241,8 +1241,8 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         {
             "component": "StateManager",
             "kwargs": {
-                "initialState": live_state_name,
-                "stateConfigs": [
+                "initialState": live_state_name,  # pyrefly: ignore[bad-assignment]
+                "stateConfigs": [  # pyrefly: ignore[bad-assignment]
                     # Initial player state.
                     {
                         "state": live_state_name,
@@ -1270,30 +1270,30 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         {
             "component": "Appearance",
             "kwargs": {
-                "renderMode": "ascii_shape",
-                "spriteNames": [avatar_sprite_name],
-                "spriteShapes": [sprite],  # pyrefly: ignore[unbound-name]
-                "palettes": [color_palette],  # pyrefly: ignore[unbound-name]
-                "noRotates": [True]
+                "renderMode": "ascii_shape",  # pyrefly: ignore[bad-assignment]
+                "spriteNames": [avatar_sprite_name],  # pyrefly: ignore[bad-assignment]
+                "spriteShapes": [sprite],  # pyrefly: ignore[bad-assignment, unbound-name]
+                "palettes": [color_palette],  # pyrefly: ignore[bad-assignment, unbound-name]
+                "noRotates": [True]  # pyrefly: ignore[bad-assignment]
             }
         },
         {
             "component": "Avatar",
             "kwargs": {
-                "index": lua_index,
-                "aliveState": live_state_name,
-                "additionalLiveStates": [],
-                "waitState": "playerWait",
-                "spawnGroup": spawn_group,  # pyrefly: ignore[unbound-name]
-                "actionOrder": ["move",
+                "index": lua_index,  # pyrefly: ignore[bad-assignment]
+                "aliveState": live_state_name,  # pyrefly: ignore[bad-assignment]
+                "additionalLiveStates": [],  # pyrefly: ignore[bad-assignment]
+                "waitState": "playerWait",  # pyrefly: ignore[bad-assignment]
+                "spawnGroup": spawn_group,  # pyrefly: ignore[bad-assignment, unbound-name]
+                "actionOrder": ["move",  # pyrefly: ignore[bad-assignment]
                                 "turn",
                                 "interact"],
-                "actionSpec": {
+                "actionSpec": {  # pyrefly: ignore[bad-assignment]
                     "move": {"default": 0, "min": 0, "max": len(_COMPASS)},
                     "turn": {"default": 0, "min": -1, "max": 1},
                     "interact": {"default": 0, "min": 0, "max": 1},
                 },
-                "view": {
+                "view": {  # pyrefly: ignore[bad-assignment]
                     "left": 5,
                     "right": 5,
                     "forward": 9,
@@ -1317,8 +1317,8 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         {
             "component": "StateManager",
             "kwargs": {
-                "initialState": live_state_name,
-                "stateConfigs": [
+                "initialState": live_state_name,  # pyrefly: ignore[bad-assignment]
+                "stateConfigs": [  # pyrefly: ignore[bad-assignment]
                     # Initial player state.
                     {
                         "state": live_state_name,
@@ -1380,23 +1380,23 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         {
             "component": "Avatar",
             "kwargs": {
-                "index": lua_index,
-                "aliveState": live_state_name,
-                "additionalLiveStates": [alert_state_name,
+                "index": lua_index,  # pyrefly: ignore[bad-assignment]
+                "aliveState": live_state_name,  # pyrefly: ignore[bad-assignment]
+                "additionalLiveStates": [alert_state_name,  # pyrefly: ignore[bad-assignment]
                                          sit_state_name,
                                          prep_to_eat_state_name,
                                          first_bite_state_name,
                                          second_bite_state_name,
                                          last_bite_state_name],
-                "waitState": "playerWait",
-                "spawnGroup": spawn_group,
-                "actionOrder": ["move", "turn", "interact"],
-                "actionSpec": {
+                "waitState": "playerWait",  # pyrefly: ignore[bad-assignment]
+                "spawnGroup": spawn_group,  # pyrefly: ignore[bad-assignment]
+                "actionOrder": ["move", "turn", "interact"],  # pyrefly: ignore[bad-assignment]
+                "actionSpec": {  # pyrefly: ignore[bad-assignment]
                     "move": {"default": 0, "min": 0, "max": len(_COMPASS)},
                     "turn": {"default": 0, "min": -1, "max": 1},
                     "interact": {"default": 0, "min": 0, "max": 1},
                     },
-                "view": {
+                "view": {  # pyrefly: ignore[bad-assignment]
                     "left": 5,
                     "right": 5,
                     "forward": 9,
@@ -1408,39 +1408,39 @@ def _create_avatar_object(player_idx: int, is_predator: bool,
         {
             "component": "InteractEatAcorn",
             "kwargs": {
-                "cooldownTime": 5,
-                "shapes": [PREDATOR_EAT_SPRITE, shapes.FILL],
-                "palettes": [interact_palette],
+                "cooldownTime": 5,  # pyrefly: ignore[bad-assignment]
+                "shapes": [PREDATOR_EAT_SPRITE, shapes.FILL],  # pyrefly: ignore[bad-assignment]
+                "palettes": [interact_palette],  # pyrefly: ignore[bad-assignment]
                 "isEating": False,
-                "defaultState": live_state_name,
+                "defaultState": live_state_name,  # pyrefly: ignore[bad-assignment]
             }
         },
         {
             "component": "Appearance",
             "kwargs": {
-                "renderMode": "ascii_shape",
-                "spriteNames": [avatar_sprite_name, alert_sprite_name,
+                "renderMode": "ascii_shape",  # pyrefly: ignore[bad-assignment]
+                "spriteNames": [avatar_sprite_name, alert_sprite_name,  # pyrefly: ignore[bad-assignment]
                                 sit_sprite_name, prep_to_eat_sprite_name,
                                 first_bite_sprite_name, second_bite_sprite_name,
                                 last_bite_sprite_name],
-                "spriteShapes": [sprite, alert_sprite, sit_sprite,  # pyrefly: ignore[unbound-name]
+                "spriteShapes": [sprite, alert_sprite, sit_sprite,  # pyrefly: ignore[bad-assignment, unbound-name]
                                  prep_to_eat_sprite, first_bite_sprite,  # pyrefly: ignore[unbound-name]
                                  second_bite_sprite, last_bite_sprite],  # pyrefly: ignore[unbound-name]
-                "palettes": [color_palette] * 7,
-                "noRotates": [True] * 7
+                "palettes": [color_palette] * 7,  # pyrefly: ignore[bad-assignment]
+                "noRotates": [True] * 7  # pyrefly: ignore[bad-assignment]
             }
         },
         {
             "component": "AvatarEatingAnimation",
             "kwargs": {
-                "sit": sit_state_name,
-                "prepToEat": prep_to_eat_state_name,
-                "firstBite": first_bite_state_name,
-                "secondBite": second_bite_state_name,
-                "lastBite": last_bite_state_name,
-                "downState": live_state_name,
+                "sit": sit_state_name,  # pyrefly: ignore[bad-assignment]
+                "prepToEat": prep_to_eat_state_name,  # pyrefly: ignore[bad-assignment]
+                "firstBite": first_bite_state_name,  # pyrefly: ignore[bad-assignment]
+                "secondBite": second_bite_state_name,  # pyrefly: ignore[bad-assignment]
+                "lastBite": last_bite_state_name,  # pyrefly: ignore[bad-assignment]
+                "downState": live_state_name,  # pyrefly: ignore[bad-assignment]
                 # On each of 3 eating frames, get one third of `acornReward`.
-                "acornReward": 18,
+                "acornReward": 18,  # pyrefly: ignore[bad-assignment]
                 }
         },
         {

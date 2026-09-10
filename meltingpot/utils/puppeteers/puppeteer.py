@@ -81,4 +81,4 @@ def puppet_goals(
     raise ValueError('Puppet goal names must be unique.')
   goals = np.eye(len(names), dtype=dtype)
   goals.setflags(write=False)
-  return immutabledict.immutabledict(zip(names, goals))
+  return immutabledict.immutabledict(zip(names, goals))  # pyrefly: ignore[bad-return]

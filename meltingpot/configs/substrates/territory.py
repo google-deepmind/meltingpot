@@ -336,7 +336,7 @@ def get_dry_painted_wall_palette(base_color: shapes.Color
 def get_brush_palette(
     base_color: shapes.Color) -> Mapping[str, shapes.ColorRGBA]:
   return {  # pyrefly: ignore[bad-return]
-      "*": base_color + (255,),
+      "*": base_color + (255,),  # pyrefly: ignore[bad-assignment]
       "&": shapes.scale_color(base_color, 0.75, 255),  # pyrefly: ignore[bad-argument-type]
       "o": shapes.scale_color(base_color, 0.55, 255),  # pyrefly: ignore[bad-argument-type]
       "O": (70, 70, 70, 255),

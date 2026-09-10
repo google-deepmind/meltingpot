@@ -566,7 +566,7 @@ BOT_CONFIGS: Mapping[str, BotConfig] = immutabledict.immutabledict(
                 _PUPPET_GOALS['allelopathic_harvest__open']['PREFER_GREEN'],
                 _PUPPET_GOALS['allelopathic_harvest__open']['CONSUME_ANY'],
             ),
-            color_threshold=57.0,  # Determined empirically.
+            color_threshold=57.0,  # Determined empirically.  # pyrefly: ignore[bad-argument-type]
             recency_window=5,
         ),
     ),
