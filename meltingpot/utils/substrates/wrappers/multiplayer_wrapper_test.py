@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for multiplayer_wrapper."""
 
 from unittest import mock
 
 from absl.testing import absltest
+from absl.testing import parameterized
 import dm_env
 import dmlab2d
 from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
@@ -277,6 +277,57 @@ class Lab2DToListsWrapperTest(absltest.TestCase):
         {'RGB': RGB_VALUE * 3, 'WORLD.RGB': RGB_VALUE},
     ]
     np.testing.assert_equal(actual, expected)
+
+
+class ResetArgumentForwardingTest(absltest.TestCase):
+
+  def test_multiplayer_wrapper_forwards_reset_arguments(self):
+    env = mock.Mock()
+    env.action_spec.return_value = {
+        '1.move': dm_env.specs.DiscreteArray(num_values=2, name='move'),
+    }
+    env.reset.return_value = dm_env.restart(observation={})
+    wrapper = multiplayer_wrapper.Wrapper(
+        env,
+        individual_observation_names=(),
+        global_observation_names=(),
+    )
+
+    wrapper.reset(mock.sentinel.argument, option=mock.sentinel.option)
+
+    env.reset.assert_called_once_with(
+        mock.sentinel.argument, option=mock.sentinel.option
+    )
+
+
+class MultiplayerPlayerIndexValidationTest(parameterized.TestCase):
+
+  @parameterized.named_parameters(
+      ('zero_based', {'0.MOVE': ACT_SPEC, '1.MOVE': ACT_SPEC}),
+      ('gapped', {'1.MOVE': ACT_SPEC, '3.MOVE': ACT_SPEC}),
+  )
+  def test_rejects_non_contiguous_player_indices(self, action_spec):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = action_spec
+
+    with self.assertRaisesRegex(ValueError, 'contiguous and start at 1'):
+      multiplayer_wrapper.Wrapper(
+          env,
+          individual_observation_names=[],
+          global_observation_names=[],
+      )
+
+  def test_rejects_empty_action_spec(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = {}
+
+    with self.assertRaisesRegex(ValueError, 'at least one player action'):
+      multiplayer_wrapper.Wrapper(
+          env,
+          individual_observation_names=[],
+          global_observation_names=[],
+      )
+
 
 if __name__ == '__main__':
   absltest.main()

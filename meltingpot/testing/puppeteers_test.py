@@ -11,31 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Regression test for bot construction cleanup."""
 
 from unittest import mock
 
 from absl.testing import absltest
-from meltingpot import bot
+from meltingpot.testing import puppeteers
+from meltingpot.utils.puppeteers import fixed_goal
 
 
-class BotCleanupTest(absltest.TestCase):
+class EmptyPuppeteerSequenceTest(absltest.TestCase):
 
-  def test_closes_saved_model_when_puppeteer_builder_fails(self):
-    config = mock.Mock()
-    config.model_path = 'model_path'
-    config.puppeteer_builder = mock.Mock(
-        side_effect=RuntimeError('puppeteer build failed'))
-    saved_model = mock.Mock()
+  def test_empty_sequence_returns_initial_state(self):
+    puppet = fixed_goal.FixedGoal(mock.sentinel.goal)
 
-    with mock.patch.object(
-        bot.saved_model_policy,
-        'SavedModelPolicy',
-        return_value=saved_model):
-      with self.assertRaisesRegex(RuntimeError, 'puppeteer build failed'):
-        bot.build_from_config(config)
+    goals, state = puppeteers.goals_from_timesteps(puppet, ())
 
-    saved_model.close.assert_called_once_with()
+    self.assertEmpty(goals)
+    self.assertEqual(state, puppet.initial_state())
 
 
 if __name__ == '__main__':

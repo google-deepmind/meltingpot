@@ -93,5 +93,14 @@ class CounterPrevious(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
 
+class CoordinateWithPreviousValidationTest(absltest.TestCase):
+
+  def test_rejects_empty_resources_at_construction(self):
+    with self.assertRaisesRegex(ValueError, 'resources must not be empty'):
+      coordination_in_the_matrix.CoordinateWithPrevious(
+          resources=(), margin=1
+      )
+
+
 if __name__ == '__main__':
   absltest.main()

@@ -95,5 +95,25 @@ class CounterPrevious(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
 
+def _resource(index):
+  return in_the_matrix.Resource(
+      index=index,
+      collect_goal=mock.sentinel.collect,
+      interact_goal=mock.sentinel.interact,
+  )
+
+
+class CounterPreviousValidationTest(absltest.TestCase):
+
+  def test_rejects_duplicate_resource_indices(self):
+    with self.assertRaisesRegex(ValueError, 'must have distinct indices'):
+      running_with_scissors_in_the_matrix.CounterPrevious(
+          rock_resource=_resource(0),
+          paper_resource=_resource(0),
+          scissors_resource=_resource(2),
+          margin=1,
+      )
+
+
 if __name__ == '__main__':
   absltest.main()

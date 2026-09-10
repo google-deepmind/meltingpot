@@ -11,24 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Regression tests for puppeteer test utilities."""
-
-from unittest import mock
 
 from absl.testing import absltest
-from meltingpot.testing import puppeteers
-from meltingpot.utils.puppeteers import fixed_goal
+from meltingpot.utils.substrates import specs
 
 
-class EmptyPuppeteerSequenceTest(absltest.TestCase):
+class WorldRgbTest(absltest.TestCase):
 
-  def test_empty_sequence_returns_initial_state(self):
-    puppet = fixed_goal.FixedGoal(mock.sentinel.goal)
+  def test_preserves_spaces_on_boundary_rows(self):
+    ascii_map = '\n  A\n BB\n'
 
-    goals, state = puppeteers.goals_from_timesteps(puppet, ())
+    actual = specs.world_rgb(ascii_map, sprite_size=8)
 
-    self.assertEmpty(goals)
-    self.assertEqual(state, puppet.initial_state())
+    self.assertEqual(actual.shape, (16, 24, 3))
 
 
 if __name__ == '__main__':

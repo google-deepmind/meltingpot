@@ -340,5 +340,47 @@ class SanctionerAlternatorTest(parameterized.TestCase):
                                rgbs=[_RGB_NORMAL] * num_steps)
     self.assertEqual(actual, expected)
 
+
+class SanctionerAlternatorNotNiceTest(absltest.TestCase):
+
+  def test_not_nice_alternates_after_starting_with_defection(self):
+    puppeteer = clean_up.SanctionerAlternator(
+        cooperate_goal=_COOPERATE,
+        defect_goal=_DEFECT,
+        sanction_goal=_SANCTION,
+        num_others_cooperating_cumulant=_NUM_OTHERS_WHO_CLEANED_THIS_STEP_KEY,
+        threshold=1,
+        recency_window=1,
+        steps_to_sanction_when_motivated=10,
+        alternating_steps=2,
+        nice=False,
+    )
+    observations = [{_NUM_OTHERS_WHO_CLEANED_THIS_STEP_KEY: 1}] * 6
+
+    goals, _ = puppeteers.goals_from_observations(puppeteer, observations)
+
+    self.assertEqual(
+        goals,
+        [_DEFECT, _DEFECT, _COOPERATE, _COOPERATE, _DEFECT, _DEFECT],
+    )
+
+
+class SanctionerAlternatorValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(0, -1)
+  def test_rejects_nonpositive_alternating_steps(self, alternating_steps):
+    with self.assertRaisesRegex(
+        ValueError, 'alternating_steps must be positive'
+    ):
+      clean_up.SanctionerAlternator(
+          cooperate_goal=mock.sentinel.cooperate,
+          defect_goal=mock.sentinel.defect,
+          sanction_goal=mock.sentinel.sanction,
+          num_others_cooperating_cumulant='NUM_OTHERS_COOPERATING',
+          threshold=1,
+          alternating_steps=alternating_steps,
+      )
+
+
 if __name__ == '__main__':
   absltest.main()

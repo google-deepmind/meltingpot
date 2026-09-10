@@ -59,6 +59,9 @@ class VideoSubject(subject.Subject):
 
     Args:
       timestep: the most recent timestep.
+
+    Raises:
+      RuntimeError: if opening video writer fails.
     """
     rgb_frame = timestep.observation[0]['WORLD.RGB']
     height, width, colors = rgb_frame.shape
@@ -80,6 +83,7 @@ class VideoSubject(subject.Subject):
           isColor=True)
     elif self._writer is None:
       raise ValueError('First timestep must be StepType.FIRST.')
+    assert self._writer is not None
 
     if not self._writer.isOpened():
       self._writer.release()

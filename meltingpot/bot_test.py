@@ -13,6 +13,8 @@
 # limitations under the License.
 """Tests of bots."""
 
+from unittest import mock
+
 from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot import bot
@@ -29,6 +31,25 @@ class BotTest(test_utils.BotTestCase):
           policy,
           timestep_spec=factory.timestep_spec(),
           action_spec=factory.action_spec())
+
+
+class BotCleanupTest(absltest.TestCase):
+
+  def test_closes_saved_model_when_puppeteer_builder_fails(self):
+    config = mock.Mock()
+    config.model_path = 'model_path'
+    config.puppeteer_builder = mock.Mock(
+        side_effect=RuntimeError('puppeteer build failed')
+    )
+    saved_model = mock.Mock()
+
+    with mock.patch.object(
+        bot.saved_model_policy, 'SavedModelPolicy', return_value=saved_model
+    ):
+      with self.assertRaisesRegex(RuntimeError, 'puppeteer build failed'):
+        bot.build_from_config(config)
+
+    saved_model.close.assert_called_once_with()
 
 
 if __name__ == '__main__':
