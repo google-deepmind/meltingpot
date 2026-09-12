@@ -33,8 +33,8 @@ _PREFABS = {
 class PrefabMapDescriptorTest(parameterized.TestCase):
 
   @parameterized.parameters(
-      {'type': game_object_utils.TYPE_ALL},
-      {'list': ['item']},
+      ({'type': game_object_utils.TYPE_ALL},),
+      ({'list': ['item']},),
   )
   def test_rejects_incomplete_descriptor(self, descriptor):
     with self.assertRaisesRegex(ValueError, "both 'type' and 'list'"):
