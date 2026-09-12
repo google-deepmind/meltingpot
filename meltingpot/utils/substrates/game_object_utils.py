@@ -202,9 +202,9 @@ def get_game_object_positions_from_map(
   """
   transforms = []
   rows = ascii_map.split("\n")
-  # Assume the first line of the string consists only of '\n'. This means we
-  # need to skip the first row.
-  for i, row in enumerate(rows[1:]):
+  if rows and not rows[0]:
+    rows = rows[1:]
+  for i, row in enumerate(rows):
     indices = [i for i, c in enumerate(row) if char == c]
     for j in indices:
       if orientation_mode == "always_north":
