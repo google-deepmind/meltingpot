@@ -14,6 +14,7 @@
 """Tests for evaluation result manifests."""
 
 import dataclasses
+import tempfile
 from unittest import mock
 
 from absl.testing import absltest
@@ -197,17 +198,22 @@ class ConfigurationHashTest(absltest.TestCase):
         return_value={'fixed': True},
     ):
       with mock.patch.object(
-          evaluation_manifest.scenario_configs,
-          'SCENARIO_CONFIGS',
-          {'example': base},
+          evaluation_manifest,
+          '_bot_signature',
+          side_effect=lambda name: {'name': name},
       ):
-        first = evaluation_manifest.configuration_hash('example')
-      with mock.patch.object(
-          evaluation_manifest.scenario_configs,
-          'SCENARIO_CONFIGS',
-          {'example': changed},
-      ):
-        second = evaluation_manifest.configuration_hash('example')
+        with mock.patch.object(
+            evaluation_manifest.scenario_configs,
+            'SCENARIO_CONFIGS',
+            {'example': base},
+        ):
+          first = evaluation_manifest.configuration_hash('example')
+        with mock.patch.object(
+            evaluation_manifest.scenario_configs,
+            'SCENARIO_CONFIGS',
+            {'example': changed},
+        ):
+          second = evaluation_manifest.configuration_hash('example')
 
     self.assertNotEqual(first, second)
 
@@ -282,17 +288,22 @@ class ConfigurationHashTest(absltest.TestCase):
         return_value={'fixed': True},
     ):
       with mock.patch.object(
-          evaluation_manifest.scenario_configs,
-          'SCENARIO_CONFIGS',
-          {'example': base},
+          evaluation_manifest,
+          '_bot_signature',
+          side_effect=lambda name: {'name': name},
       ):
-        first = evaluation_manifest.configuration_hash('example')
-      with mock.patch.object(
-          evaluation_manifest.scenario_configs,
-          'SCENARIO_CONFIGS',
-          {'example': changed},
-      ):
-        second = evaluation_manifest.configuration_hash('example')
+        with mock.patch.object(
+            evaluation_manifest.scenario_configs,
+            'SCENARIO_CONFIGS',
+            {'example': base},
+        ):
+          first = evaluation_manifest.configuration_hash('example')
+        with mock.patch.object(
+            evaluation_manifest.scenario_configs,
+            'SCENARIO_CONFIGS',
+            {'example': changed},
+        ):
+          second = evaluation_manifest.configuration_hash('example')
 
     self.assertEqual(first, second)
 
@@ -328,9 +339,10 @@ class ManifestTest(absltest.TestCase):
     self.assertEqual(decoded, self.manifest)
 
   def test_file_round_trip(self):
-    path = self.create_tempfile().full_path
-    self.manifest.write(path)
-    decoded = evaluation_manifest.EvaluationManifest.read(path)
+    with tempfile.TemporaryDirectory() as temp_dir:
+      path = f'{temp_dir}/manifest.json'
+      self.manifest.write(path)
+      decoded = evaluation_manifest.EvaluationManifest.read(path)
     self.assertEqual(decoded, self.manifest)
 
   def test_verify_accepts_matching_results(self):
