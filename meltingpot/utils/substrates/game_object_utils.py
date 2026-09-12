@@ -15,7 +15,7 @@
 
 import copy
 import enum
-from typing import List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union
+from typing import Any, List, Mapping, NamedTuple, Optional, Sequence, Tuple, Union
 from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import shapes
 import numpy as np
@@ -214,7 +214,7 @@ def _create_game_object(
 
 def get_game_objects_from_map(
     ascii_map: str,
-    char_prefab_map: Mapping[str, str],
+    char_prefab_map: Mapping[str, Union[str, Mapping[str, Any]]],
     prefabs: Mapping[str, PrefabConfig],
     random: np.random.RandomState = np.random.RandomState()
 ) -> List[PrefabConfig]:
