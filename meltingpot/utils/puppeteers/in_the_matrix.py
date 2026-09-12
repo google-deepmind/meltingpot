@@ -571,7 +571,7 @@ class RespondToPrevious(puppeteer.Puppeteer[Resource]):
 
   def initial_state(self) -> Resource:
     """See base class."""
-    return random.choice(list(self._responses.values()))
+    return list(self._responses.values())[0]
 
   def step(
       self,
@@ -580,7 +580,7 @@ class RespondToPrevious(puppeteer.Puppeteer[Resource]):
   ) -> tuple[dm_env.TimeStep, Resource]:
     """See base class."""
     if timestep.first():
-      prev_state = self.initial_state()
+      prev_state = random.choice(list(self._responses.values()))
     partner_resource = partner_max_resource(timestep)
     response = self._responses.get(partner_resource, prev_state)  # pyrefly: ignore[no-matching-overload]
     timestep = collect_or_interact_puppet_timestep(
