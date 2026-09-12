@@ -83,7 +83,7 @@ function error_handling.tryWithErrorInfo(tryFn, errorInfoFn)
   event of an exception, `error_handling.traceback` extracts and calls
   `errorInfoFn`.
   ]]
-  result = tryFn()
+  local result = tryFn()
   -- Note: Spreading this over two lines ensures that this is not converted
   -- to a tail call which would make errorInfoFn inaccessible.
   return result
@@ -102,8 +102,8 @@ function error_handling.traceback(msg, level)
   level = (level or 1) + 1
 
   -- Collect the trace information at each level.
-  traceinfo = {}
-  errorinfo = {}
+  local traceinfo = {}
+  local errorinfo = {}
   while true do
     local levelinfo = debug.getinfo(level, 'Slnf')
     if levelinfo == nil then
@@ -129,7 +129,7 @@ function error_handling.traceback(msg, level)
   -- Print line numbers, file info, etc for each line in the trace.
   -- If there is any debug info captured by tryWithErrorInfo, print that
   -- and skip the empty `tryWithErrorInfo` call.
-  trace = {'stack trace-back:'}
+  local trace = {'stack trace-back:'}
   for level, levelinfo in pairs(traceinfo) do
     local errorInfoString = nil
     if errorinfo[level] ~= nil then
