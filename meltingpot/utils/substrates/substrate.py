@@ -23,7 +23,7 @@ from meltingpot.utils.substrates.wrappers import base
 from meltingpot.utils.substrates.wrappers import collective_reward_wrapper
 from meltingpot.utils.substrates.wrappers import discrete_action_wrapper
 from meltingpot.utils.substrates.wrappers import multiplayer_wrapper
-from meltingpot.utils.substrates.wrappers import observables
+from meltingpot.utils.substrates.wrappers import observables as observables_lib
 from meltingpot.utils.substrates.wrappers import observables_wrapper
 import reactivex
 from reactivex import subject
@@ -44,13 +44,13 @@ class SubstrateObservables:
   action: reactivex.Observable[Sequence[int]]
   timestep: reactivex.Observable[dm_env.TimeStep]
   events: reactivex.Observable[tuple[str, Any]]
-  dmlab2d: observables.Lab2dObservables
+  dmlab2d: observables_lib.Lab2dObservables
 
 
 class Substrate(base.Lab2dWrapper):
   """Specific subclass of Wrapper with overridden spec types."""
 
-  def __init__(self, env: observables.ObservableLab2d) -> None:
+  def __init__(self, env: observables_lib.ObservableLab2d) -> None:
     """See base class."""
     super().__init__(env)
     self._action_subject = subject.Subject()
@@ -63,9 +63,9 @@ class Substrate(base.Lab2dWrapper):
         dmlab2d=env.observables(),
     )
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     self._timestep_subject.on_next(timestep)
     for event in super().events():
       self._events_subject.on_next(event)

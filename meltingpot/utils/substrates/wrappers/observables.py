@@ -57,6 +57,6 @@ class ObservableLab2d(dmlab2d.Environment):
 class ObservableLab2dWrapper(base.Lab2dWrapper, ObservableLab2d):
   """Base class for wrappers of ObservableLab2d."""
 
-  def observables(self, *args, **kwargs) -> ...:
+  def observables(self, *args, **kwargs):
     """See base class."""
     return self._env.observables(*args, **kwargs)

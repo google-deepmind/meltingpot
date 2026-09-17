@@ -857,18 +857,18 @@ def create_avatar_object(player_idx: int,
         "kwargs": {
             "metrics": [
                 {
-                    "name": "ADDED_INGREDIENT_TO_COOKING_POT",
-                    "type": "Doubles",
-                    "shape": [],
-                    "component": "AvatarCumulants",
-                    "variable": "addedIngredientToCookingPot",
+                    "name": "ADDED_INGREDIENT_TO_COOKING_POT",  # pyrefly: ignore[bad-assignment]
+                    "type": "Doubles",  # pyrefly: ignore[bad-assignment]
+                    "shape": [],  # pyrefly: ignore[bad-assignment]
+                    "component": "AvatarCumulants",  # pyrefly: ignore[bad-assignment]
+                    "variable": "addedIngredientToCookingPot",  # pyrefly: ignore[bad-assignment]
                 },
                 {
-                    "name": "COLLECTED_SOUP_FROM_COOKING_POT",
-                    "type": "Doubles",
-                    "shape": [],
-                    "component": "AvatarCumulants",
-                    "variable": "collectedSoupFromCookingPot",
+                    "name": "COLLECTED_SOUP_FROM_COOKING_POT",  # pyrefly: ignore[bad-assignment]
+                    "type": "Doubles",  # pyrefly: ignore[bad-assignment]
+                    "shape": [],  # pyrefly: ignore[bad-assignment]
+                    "component": "AvatarCumulants",  # pyrefly: ignore[bad-assignment]
+                    "variable": "collectedSoupFromCookingPot",  # pyrefly: ignore[bad-assignment]
                 },
             ]
         }

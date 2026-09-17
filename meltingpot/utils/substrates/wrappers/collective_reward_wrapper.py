@@ -51,7 +51,7 @@ class CollectiveRewardWrapper(observables.ObservableLab2dWrapper):
 
   def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     return self._get_timestep(timestep)
 
   def step(

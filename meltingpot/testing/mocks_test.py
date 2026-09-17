@@ -27,7 +27,7 @@ class MocksTest(substrates.SubstrateTestCase):
         {'a': dm_env.specs.Array([1, 2, 3], dtype=np.uint8)},
         {'b': dm_env.specs.Array([1, 2, 3], dtype=np.uint8)},
     )
-    actual = mocks._values_from_specs(specs)
+    actual = mocks._values_from_specs(specs)  # pyrefly: ignore[bad-argument-type]
     expected = (
         {'a': np.zeros([1, 2, 3], dtype=np.uint8)},
         {'b': np.ones([1, 2, 3], dtype=np.uint8)},
@@ -56,7 +56,7 @@ class MocksTest(substrates.SubstrateTestCase):
         mock.no_such_method()  # pytype: disable=attribute-error
     with self.subTest('error_setting_invalid'):
       with self.assertRaises(AttributeError):
-        mock.no_such_method = None
+        mock.no_such_method = None  # pyrefly: ignore[missing-attribute]
 
     with self.subTest('can_enter_context'):
       with mock as c:

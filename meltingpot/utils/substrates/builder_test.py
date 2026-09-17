@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for builder.py."""
 
 import copy
 
@@ -19,6 +18,7 @@ from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot.configs.substrates import running_with_scissors_in_the_matrix__repeated as test_substrate
 from meltingpot.utils.substrates import builder
+from ml_collections import config_dict
 import numpy as np
 
 
@@ -104,6 +104,36 @@ class GeneralTestCase(parameterized.TestCase):
       with self.assertRaises(
           AssertionError, msg=f'Episode {episode} match {obs1} == {obs2}'):
         np.testing.assert_equal(obs1, obs2)
+
+
+class PrefabOverrideTest(absltest.TestCase):
+
+  def test_override_adds_missing_kwargs_mapping(self):
+    lab2d_settings = config_dict.ConfigDict({
+        'simulation': {
+            'prefabs': {
+                'item': {
+                    'components': [
+                        {'component': 'Transform'},
+                    ],
+                },
+            },
+        },
+    }).unlock()
+
+    builder.apply_prefab_overrides(
+        lab2d_settings,
+        prefab_overrides={
+            'item': {
+                'Transform': {
+                    'orientation': 'E',
+                },
+            },
+        },
+    )
+
+    component = lab2d_settings.simulation.prefabs.item.components[0]
+    self.assertEqual(component['kwargs']['orientation'], 'E')
 
 
 if __name__ == '__main__':

@@ -87,7 +87,15 @@ class SubstrateFactory:
 
     Returns:
       The constructed substrate.
+
+    Raises:
+      ValueError: if any requested role is not supported by the substrate.
     """
+    invalid_roles = set(roles) - self._valid_roles
+    if invalid_roles:
+      raise ValueError(
+          f'Invalid roles {sorted(invalid_roles)}; valid roles are '
+          f'{sorted(self._valid_roles)}.')
     return substrate.build_substrate(
         lab2d_settings=self._lab2d_settings_builder(roles),
         individual_observations=self._individual_observations,

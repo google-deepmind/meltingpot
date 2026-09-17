@@ -25,7 +25,7 @@ from setuptools.command import build_py
 VERSION = '2.4.0'
 ASSETS_VERSION = '2.3.0'
 
-ASSETS_URL = f'http://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
+ASSETS_URL = f'https://storage.googleapis.com/dm-meltingpot/meltingpot-assets-{ASSETS_VERSION}.tar.gz'
 
 
 def _remove_excluded(description: str) -> str:

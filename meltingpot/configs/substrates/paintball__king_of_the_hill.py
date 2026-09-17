@@ -679,7 +679,7 @@ def create_avatar_object(
       ]
   }
   if _ENABLE_DEBUG_OBSERVATIONS:
-    avatar_object["components"].append({
+    avatar_object["components"].append({  # pyrefly: ignore[bad-argument-type]
         "component": "LocationObserver",
         "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
     })

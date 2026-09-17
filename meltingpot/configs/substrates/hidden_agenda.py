@@ -1378,7 +1378,7 @@ def create_player(player_idx: int, role: str, num_players: int,
       ]
   }
   if _ENABLE_DEBUG_OBSERVATIONS:
-    player["components"].append({
+    player["components"].append({  # pyrefly: ignore[bad-argument-type]
         "component": "LocationObserver",
         "kwargs": {"objectIsAvatar": True, "alsoReportOrientation": True},
     })
@@ -1557,14 +1557,14 @@ def get_config():
     metrics.append({
         "name": "GLOBAL_PROGRESS",
         "type": "tensor.DoubleTensor",
-        "shape": (1,),
+        "shape": (1,),  # pyrefly: ignore[bad-assignment]
         "component": "Progress",
         "variable": "progress_bar",
     })
     metrics.append({
         "name": "IDENTITIES",
         "type": "tensor.DoubleTensor",
-        "shape": (MANDATED_NUM_PLAYERS,),
+        "shape": (MANDATED_NUM_PLAYERS,),  # pyrefly: ignore[bad-assignment]
         "component": "Progress",
         "variable": "identity_tensor"
     })

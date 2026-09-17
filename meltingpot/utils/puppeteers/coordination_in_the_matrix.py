@@ -38,9 +38,15 @@ class CoordinateWithPrevious(in_the_matrix.RespondToPrevious):
     """Initializes the puppeteer.
 
     Args:
-      resources: The collectible resources to coordinate on.
+      resources: The collectible resources to coordinate on. Must not be empty.
       margin: Try to collect `margin` more of the target resource than the other
         resource before interacting.
+
+    Raises:
+      ValueError: if `resources` is empty.
     """
+    resources = tuple(resources)
+    if not resources:
+      raise ValueError("resources must not be empty.")
     responses = {resource: resource for resource in resources}
     super().__init__(responses, margin)

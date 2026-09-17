@@ -675,91 +675,91 @@ def create_scene(num_players: int):
                 {
                     "name": "RIPE_BERRIES_BY_TYPE",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES,),
+                    "shape": (NUM_BERRY_TYPES,),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "ripeBerriesPerType",
                 },
                 {
                     "name": "UNRIPE_BERRIES_BY_TYPE",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES,),
+                    "shape": (NUM_BERRY_TYPES,),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "unripeBerriesPerType",
                 },
                 {
                     "name": "BERRIES_BY_TYPE",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES,),
+                    "shape": (NUM_BERRY_TYPES,),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "berriesPerType",
                 },
                 {
                     "name": "COLORING_BY_PLAYER",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, num_players),
+                    "shape": (NUM_BERRY_TYPES, num_players),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "coloringByPlayerMatrix",
                 },
                 {
                     "name": "EATING_TYPES_BY_PLAYER",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, num_players),
+                    "shape": (NUM_BERRY_TYPES, num_players),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "eatingTypesByPlayerMatrix",
                 },
                 {
                     "name": "BERRIES_PER_TYPE_BY_COLOR_OF_COLORER",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "berryTypesByColorOfColorer",
                 },
                 {
                     "name": "BERRIES_PER_TYPE_BY_TASTE_OF_COLORER",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalBerryTracker",
                     "variable": "berryTypesByTasteOfColorer",
                 },
                 {
                     "name": "PLAYER_TIMEOUT_COUNT",
                     "type": "tensor.Int32Tensor",
-                    "shape": (num_players, num_players),
+                    "shape": (num_players, num_players),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalZapTracker",
                     "variable": "fullZapCountMatrix",
                 },
                 {
                     "name": "COLOR_BY_COLOR_ZAP_COUNTS",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),
+                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES + 1),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalZapTracker",
                     "variable": "colorByColorZapCounts",
                 },
                 {
                     "name": "COLOR_BY_TASTE_ZAP_COUNTS",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),
+                    "shape": (NUM_BERRY_TYPES + 1, NUM_BERRY_TYPES),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalZapTracker",
                     "variable": "colorByTasteZapCounts",
                 },
                 {
                     "name": "TASTE_BY_TASTE_ZAP_COUNTS",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalZapTracker",
                     "variable": "tasteByTasteZapCounts",
                 },
                 {
                     "name": "TASTE_BY_COLOR_ZAP_COUNTS",
                     "type": "tensor.Int32Tensor",
-                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),
+                    "shape": (NUM_BERRY_TYPES, NUM_BERRY_TYPES + 1),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalZapTracker",
                     "variable": "tasteByColorZapCounts",
                 },
                 {
                     "name": "WHO_ZAPPED_WHO",
                     "type": "tensor.Int32Tensor",
-                    "shape": (num_players, num_players),
+                    "shape": (num_players, num_players),  # pyrefly: ignore[bad-assignment]
                     "component": "GlobalMetricHolder",
                     "variable": "playerZapMatrix",
                 },

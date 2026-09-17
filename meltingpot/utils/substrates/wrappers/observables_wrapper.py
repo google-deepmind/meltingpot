@@ -17,14 +17,14 @@ from typing import Mapping, Union
 
 import dm_env
 import dmlab2d
-from meltingpot.utils.substrates.wrappers import observables
+from meltingpot.utils.substrates.wrappers import observables as observables_lib
 import numpy as np
 from reactivex import subject
 
 Action = Union[int, float, np.ndarray]
 
 
-class ObservablesWrapper(observables.ObservableLab2dWrapper):
+class ObservablesWrapper(observables_lib.ObservableLab2dWrapper):
   """Wrapper exposes timesteps, actions, and events as observables."""
 
   def __init__(self, env: dmlab2d.Environment):
@@ -37,7 +37,7 @@ class ObservablesWrapper(observables.ObservableLab2dWrapper):
     self._action_subject = subject.Subject()
     self._timestep_subject = subject.Subject()
     self._events_subject = subject.Subject()
-    self._observables = observables.Lab2dObservables(
+    self._observables = observables_lib.Lab2dObservables(
         action=self._action_subject,
         events=self._events_subject,
         timestep=self._timestep_subject,
@@ -67,6 +67,6 @@ class ObservablesWrapper(observables.ObservableLab2dWrapper):
     self._timestep_subject.on_completed()
     self._events_subject.on_completed()
 
-  def observables(self) -> observables.Lab2dObservables:
+  def observables(self) -> observables_lib.Lab2dObservables:
     """See base class."""
     return self._observables

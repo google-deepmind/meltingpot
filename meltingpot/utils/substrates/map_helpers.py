@@ -14,6 +14,7 @@
 """Tools to help with parsing and procedurally generating ascii maps."""
 
 from collections.abc import Mapping, Sequence
+import numbers
 from typing import Any, Union
 
 
@@ -35,7 +36,19 @@ def a_or_b_with_odds(a_descriptor: Union[str, Mapping[str, Any]],
   Returns:
       The dict descriptor that can be used with the map parser to sample either
       a or b at the specified odds.
+
+  Raises:
+      ValueError: If odds does not contain exactly two non-negative integer
+          values, or if both values are zero.
   """
+  if len(odds) != 2:
+    raise ValueError('odds must contain exactly two values.')
+  if any(not isinstance(value, numbers.Integral) for value in odds):
+    raise ValueError('odds values must be integers.')
   a_odds, b_odds = odds
+  if a_odds < 0 or b_odds < 0:
+    raise ValueError('odds values must be non-negative.')
+  if a_odds + b_odds == 0:
+    raise ValueError('At least one odds value must be positive.')
   choices = [a_descriptor] * a_odds + [b_descriptor] * b_odds
   return {"type": "choice", "list": choices}

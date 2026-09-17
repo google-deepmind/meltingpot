@@ -40,7 +40,7 @@ def _player_observations(observations: Mapping[str, T], suffix: str,
     else:
       if isinstance(value, dm_env.specs.Array):
         value = value.replace(name=suffix)
-      yield player_index, value
+      yield player_index, value  # pyrefly: ignore[invalid-yield]
 
 
 class Wrapper(observables.ObservableLab2dWrapper):
@@ -72,10 +72,22 @@ class Wrapper(observables.ObservableLab2dWrapper):
     self._global_observation_names = set(global_observation_names)
 
   def _get_num_players(self) -> int:
-    """Returns maximum player index in dmlab2d action spec."""
+    """Returns the number of players in the dmlab2d action spec."""
     action_spec_keys = super().action_spec().keys()
-    lua_player_indices = (int(key.split(".", 1)[0]) for key in action_spec_keys)
-    return max(lua_player_indices)
+    lua_player_indices = [
+        int(key.split(".", 1)[0]) for key in action_spec_keys
+    ]
+    if not lua_player_indices:
+      raise ValueError(
+          "DMLab2D action spec must contain at least one player action.")
+    num_players = max(lua_player_indices)
+    actual_indices = set(lua_player_indices)
+    expected_indices = set(range(1, num_players + 1))
+    if actual_indices != expected_indices:
+      raise ValueError(
+          "DMLab2D action spec player indices must be contiguous and start "
+          f"at 1; found {sorted(actual_indices)}.")
+    return num_players
 
   def _get_observations(
       self, source: Mapping[str, T]) -> Sequence[Mapping[str, T]]:
@@ -86,7 +98,7 @@ class Wrapper(observables.ObservableLab2dWrapper):
     """
     player_observations = [{} for i in range(self._num_players)]
     for suffix in self._individual_observation_suffixes:
-      for i, value in _player_observations(source, suffix, self._num_players):
+      for i, value in _player_observations(source, suffix, self._num_players):  # pyrefly: ignore[not-iterable]
         player_observations[i][suffix] = value
     for name in self._global_observation_names:
       value = source[name]
@@ -101,9 +113,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
       source: dmlab2d observations source to check.
     """
     rewards = [None] * self._num_players
-    for i, value in _player_observations(source, "REWARD", self._num_players):
+    for i, value in _player_observations(source, "REWARD", self._num_players):  # pyrefly: ignore[not-iterable]
       rewards[i] = value
-    return rewards
+    return rewards  # pyrefly: ignore[bad-return]
 
   def _get_timestep(self, source: dm_env.TimeStep) -> dm_env.TimeStep:
     """Returns multiplayer timestep from dmlab2d observations.
@@ -129,9 +141,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
         dmlab2d_actions[f"{player_index + 1}.{key}"] = value
     return dmlab2d_actions
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     return self._get_timestep(timestep)
 
   def step(

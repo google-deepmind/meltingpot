@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for multiplayer_wrapper."""
 
 from unittest import mock
 
@@ -63,6 +62,23 @@ class CollectiveRewardWrapperTest(absltest.TestCase):
     added_key = collective_reward_wrapper._COLLECTIVE_REWARD_OBS
     self.assertEqual(wrapped.observation_spec(), [
         {'RGB': RGB_SPEC, added_key: COLLECTIVE_REWARD_SPEC}] * NUM_PLAYERS)
+
+
+class CollectiveRewardResetTest(absltest.TestCase):
+
+  def test_reset_forwards_args_and_kwargs(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.reset.return_value = dm_env.restart(
+        observation=[{'RGB': mock.sentinel.rgb}],
+    )
+    wrapped = collective_reward_wrapper.CollectiveRewardWrapper(env)
+
+    wrapped.reset(mock.sentinel.arg, option=mock.sentinel.option)
+
+    env.reset.assert_called_once_with(
+        mock.sentinel.arg, option=mock.sentinel.option
+    )
+
 
 if __name__ == '__main__':
   absltest.main()

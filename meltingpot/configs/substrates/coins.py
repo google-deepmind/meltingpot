@@ -135,7 +135,7 @@ if _ENABLE_DEBUG_OBSERVATIONS:
               {
                   "name": "COINS_COLLECTED",
                   "type": "tensor.Int32Tensor",
-                  "shape": (MANDATED_NUM_PLAYERS, 2),
+                  "shape": (MANDATED_NUM_PLAYERS, 2),  # pyrefly: ignore[bad-assignment]
                   "component": "GlobalCoinCollectionTracker",
                   "variable": "coinsCollected",
               },
@@ -216,7 +216,7 @@ def get_coin(
     reward_other_for_mismatch: float,
     ) -> PrefabConfig:
   """Create `PrefabConfig` for coin component."""
-  return {
+  return {  # pyrefly: ignore[bad-return]
       "name": "coin",
       "components": [
           {
@@ -245,7 +245,7 @@ def get_coin(
                   "renderMode": "ascii_shape",
                   "spriteNames": [coin_type_a, coin_type_b],
                   "spriteShapes": [shapes.COIN] * 2,
-                  "palettes": [COIN_PALETTES[coin_type_a],
+                  "palettes": [COIN_PALETTES[coin_type_a],  # pyrefly: ignore[bad-assignment]
                                COIN_PALETTES[coin_type_b]],
                   "noRotates": [False] * 2,
               }
@@ -415,7 +415,7 @@ def get_prefabs(
                   reward_self_for_mismatch=reward_self_for_mismatch,
                   reward_other_for_match=reward_other_for_match,
                   reward_other_for_mismatch=reward_other_for_mismatch)
-  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}
+  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}  # pyrefly: ignore[bad-assignment, bad-return]
 
 
 # `player_color_palettes` is a list with each entry specifying the color to use

@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for substrate."""
 
 import dataclasses
 from unittest import mock
 
 from absl.testing import absltest
 from absl.testing import parameterized
+import dm_env
 from meltingpot.utils.substrates import substrate
 from meltingpot.utils.substrates.wrappers import observables as observables_lib
 
@@ -60,6 +60,22 @@ class SubstrateTest(parameterized.TestCase):
         'DONE',
         'DONE',
     ])
+
+
+class ResetArgumentForwardingTest(absltest.TestCase):
+
+  def test_substrate_forwards_reset_arguments(self):
+    env = mock.Mock()
+    env.observables.return_value = mock.sentinel.observables
+    env.reset.return_value = dm_env.restart(observation=())
+    env.events.return_value = ()
+    wrapped = substrate.Substrate(env)
+
+    wrapped.reset(mock.sentinel.argument, option=mock.sentinel.option)
+
+    env.reset.assert_called_once_with(
+        mock.sentinel.argument, option=mock.sentinel.option
+    )
 
 
 if __name__ == '__main__':

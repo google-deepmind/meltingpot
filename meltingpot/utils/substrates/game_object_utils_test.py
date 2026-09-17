@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for game_object_utils."""
 
 from absl.testing import absltest
 from absl.testing import parameterized
+from meltingpot.utils.substrates import colors
 from meltingpot.utils.substrates import game_object_utils
 
 
@@ -137,7 +137,7 @@ WWWWWW
     }
     prefabs = {'wall': wall, 'apple': apple}
     game_objects = game_object_utils.get_game_objects_from_map(
-        ascii_map, {'W': 'wall', 'A': 'apple'}, prefabs)
+        ascii_map, {'W': 'wall', 'A': 'apple'}, prefabs)  # pyrefly: ignore[bad-argument-type]
     self.assertLen(game_objects, 15)
     self.assertEqual(
         1,
@@ -267,7 +267,7 @@ class BuildAvatarObjectsTest(parameterized.TestCase):
     prefabs = {'avatar': AVATAR}
     avatars = game_object_utils.build_avatar_objects(
         num_players=num_players,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         player_palettes=None,
         )
     self.assertLen(avatars, num_players)
@@ -277,7 +277,7 @@ class BuildAvatarObjectsTest(parameterized.TestCase):
     prefabs = {'avatar': AVATAR}
     avatars = game_object_utils.build_avatar_objects(
         num_players=2,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         player_palettes=palettes,
         )
     self.assertLen(avatars, 2)
@@ -300,7 +300,7 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
     prefabs = {'avatar_badge': BADGE}
     badges = game_object_utils.build_avatar_badges(
         num_players=num_players,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         badge_palettes=None,
         )
     self.assertLen(badges, num_players)
@@ -310,7 +310,7 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
     prefabs = {'avatar_badge': BADGE}
     badges = game_object_utils.build_avatar_badges(
         num_players=2,
-        prefabs=prefabs,
+        prefabs=prefabs,  # pyrefly: ignore[bad-argument-type]
         badge_palettes=palettes,
         )
     self.assertLen(badges, 2)
@@ -322,6 +322,36 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
         game_object_utils.get_first_named_component(
             badges[1], 'Appearance')['kwargs']['palettes'][0],
         palettes[1])
+
+
+class PaletteCountValidationTest(absltest.TestCase):
+
+  def test_rejects_too_few_player_palettes(self):
+    palette = (255, 0, 0, 255)
+
+    with self.assertRaisesRegex(ValueError, 'player palettes'):
+      game_object_utils.build_avatar_objects(
+          num_players=2,
+          prefabs={'avatar': {}},
+          player_palettes=[palette],
+      )
+
+  def test_rejects_too_few_badge_palettes(self):
+    palette = (255, 0, 0, 255)
+
+    with self.assertRaisesRegex(ValueError, 'badge palettes'):
+      game_object_utils.build_avatar_badges(
+          num_players=2,
+          prefabs={'avatar_badge': {}},
+          badge_palettes=[palette],
+      )
+
+  def test_rejects_too_many_players_for_default_palette(self):
+    with self.assertRaisesRegex(ValueError, 'default player palettes'):
+      game_object_utils.build_avatar_objects(
+          num_players=len(colors.palette) + 1,
+          prefabs={'avatar': {}},
+      )
 
 
 if __name__ == '__main__':

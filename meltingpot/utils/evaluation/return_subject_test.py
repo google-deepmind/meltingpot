@@ -34,7 +34,7 @@ class ReturnSubjectTest(absltest.TestCase):
 
   def test(self):
     timesteps = [
-        dm_env.restart(observation=[{}])._replace(reward=[0, 0]),
+        dm_env.restart(observation=[{}]),
         dm_env.transition(observation=[{}], reward=[2, 4]),
         dm_env.termination(observation=[{}], reward=[1, 3]),
     ]

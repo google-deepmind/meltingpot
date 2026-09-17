@@ -65,14 +65,20 @@ def puppet_timestep(timestep: dm_env.TimeStep,
   return timestep._replace(observation=puppet_observation)
 
 
-def puppet_goals(names: Sequence[str],
-                 dtype: ... = _GOAL_DTYPE) -> Mapping[str, PuppetGoal]:
+def puppet_goals(
+    names: Sequence[str], dtype=_GOAL_DTYPE
+) -> Mapping[str, PuppetGoal]:
   """Returns a mapping from goal name to a one-hot goal vector for a puppet.
 
   Args:
-    names: names for each of the corresponding goals.
+    names: names for each of the corresponding goals. Names must be unique.
     dtype: dtype of the one-hot goals to return.
+
+  Raises:
+    ValueError: If duplicate goal names are provided.
   """
+  if len(set(names)) != len(names):
+    raise ValueError('Puppet goal names must be unique.')
   goals = np.eye(len(names), dtype=dtype)
   goals.setflags(write=False)
-  return immutabledict.immutabledict(zip(names, goals))
+  return immutabledict.immutabledict(zip(names, goals))  # pyrefly: ignore[bad-return]

@@ -69,7 +69,7 @@ def get_indicator_color_palette(color_rgba):
   indicator_palette["#"] = color_rgba
   slightly_darker_color = [round(value * 0.9) for value in color_rgba[:-1]]
   slightly_darker_color.append(150)  # Add a half transparent alpha channel.
-  indicator_palette["@"] = slightly_darker_color
+  indicator_palette["@"] = slightly_darker_color  # pyrefly: ignore[bad-assignment]
   return indicator_palette
 
 

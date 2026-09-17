@@ -321,7 +321,7 @@ def create_prefabs() -> PrefabConfig:
   }
   prefabs["resource_class1"] = create_resource_prefab(1, RESOURCE1_COLOR_DATA)
   prefabs["resource_class2"] = create_resource_prefab(2, RESOURCE2_COLOR_DATA)
-  return prefabs
+  return prefabs  # pyrefly: ignore[bad-return]
 
 
 def create_avatar_object(player_idx: int,

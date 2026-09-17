@@ -38,8 +38,8 @@ SCENARIO_OBSERVATION_SPEC = immutabledict.immutabledict({
 
 
 def _values_from_specs(
-    specs: Sequence[tree.Structure[dm_env.specs.Array]]
-) -> tree.Structure[np.ndarray]:
+    specs: Sequence[tree.Structure[dm_env.specs.Array]]  # pyrefly: ignore[invalid-type-var]
+) -> tree.Structure[np.ndarray]:  # pyrefly: ignore[invalid-type-var]
   values = tree.map_structure(lambda spec: spec.generate_value(), specs)
   return tuple(
       tree.map_structure(lambda v, n=n: np.full_like(v, n), value)
@@ -55,7 +55,7 @@ def _build_mock_substrate(
     num_players: int,
     timestep_spec: dm_env.TimeStep,
     action_spec: dm_env.specs.DiscreteArray,
-) -> ...:
+):
   """Returns a mock Substrate for use in testing.
 
   Args:
@@ -97,9 +97,10 @@ def build_mock_substrate(
     *,
     num_players: int = 8,
     num_actions: int = 8,
-    observation_spec: Mapping[str,
-                              dm_env.specs.Array] = SUBSTRATE_OBSERVATION_SPEC,
-) -> ...:
+    observation_spec: Mapping[
+        str, dm_env.specs.Array
+    ] = SUBSTRATE_OBSERVATION_SPEC,
+):
   """Returns a mock Substrate for use in testing.
 
   Args:
@@ -115,8 +116,7 @@ def build_mock_substrate(
   )
 
 
-def build_mock_substrate_like(name: str, *,
-                              num_players: Optional[int] = None) -> ...:
+def build_mock_substrate_like(name: str, *, num_players: Optional[int] = None):
   """Returns a mock of a specific Substrate for use in testing.
 
   Args:
@@ -138,9 +138,10 @@ def build_mock_scenario(
     *,
     num_players: int = 8,
     num_actions: int = 8,
-    observation_spec: Mapping[str,
-                              dm_env.specs.Array] = SCENARIO_OBSERVATION_SPEC,
-) -> ...:
+    observation_spec: Mapping[
+        str, dm_env.specs.Array
+    ] = SCENARIO_OBSERVATION_SPEC,
+):
   """Returns a mock Scenario for use in testing.
 
   Args:
@@ -156,7 +157,7 @@ def build_mock_scenario(
   )
 
 
-def build_mock_scenario_like(name: str) -> ...:
+def build_mock_scenario_like(name: str):
   """Returns a mock of a specific Scenario for use in testing.
 
   Args:

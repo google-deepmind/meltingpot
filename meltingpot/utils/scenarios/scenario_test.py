@@ -50,7 +50,7 @@ class PartitionMergeTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
   def test_merge(self, expected, is_focal, *partions):
-    actual = scenario_utils._merge(*partions, is_focal)
+    actual = scenario_utils._merge(*partions, is_focal)  # pyrefly: ignore[bad-argument-count]
     self.assertEqual(actual, expected)
 
 
@@ -278,6 +278,23 @@ class ScenarioWrapperTest(absltest.TestCase):
           'DONE',
       ]
       self.assertEqual(received['background'], expected)
+
+
+class ScenarioActionValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(([0],), ([1],), ([0, 1, 2],))
+  def test_rejects_wrong_number_of_focal_actions(self, focal_action):
+    scenario = object.__new__(scenario_utils.Scenario)
+    scenario._is_focal = (True, False, True)
+    scenario._focal_action_subject = mock.Mock()
+    scenario._background_population = mock.Mock()
+
+    with self.assertRaisesRegex(ValueError, 'Expected 2 focal actions'):
+      scenario._await_full_action(focal_action)
+
+    scenario._focal_action_subject.on_next.assert_not_called()
+    scenario._background_population.await_action.assert_not_called()
+
 
 if __name__ == '__main__':
   absltest.main()

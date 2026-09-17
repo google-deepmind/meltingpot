@@ -140,34 +140,6 @@ between players with `TAB`. There are other substrates available in the
 [human_players](https://github.com/google-deepmind/meltingpot/blob/main/meltingpot/human_players) directory. Some have multiple
 variants, which you select with the `--level_name` flag.
 
-### Training agents
-
-We provide an illustrative example script using
-[RLlib](https://github.com/ray-project/ray). However, note
-that Melting Pot is agnostic to how you train your agents, and this
-script is not meant to be a suggestion for how to achieve a good score
-in the task suite. The authors of the suite never used this example training
-script in their own work.
-
-#### RLlib
-
-This example uses RLlib to train agents in
-self-play on a Melting Pot substrate.
-
-First you will need to install the dependencies needed by the examples:
-
-```shell
-cd <meltingpot_root>
-pip install -r examples/requirements.txt
-```
-
-Then you can run the training experiment using:
-
-```shell
-cd examples/rllib
-python self_play_train.py
-```
-
 ## Documentation
 
 Full documentation is available [here](https://github.com/google-deepmind/meltingpot/blob/main/docs/index.md).

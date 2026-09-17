@@ -175,7 +175,7 @@ function StateManager:getInitialState()
 end
 
 function StateManager:_validateState(state)
-  assert(type(self._config.stateToConfigIndex[state]) ~= nil,
+  assert(self._config.stateToConfigIndex[state] ~= nil,
          'The state "' .. state .. '" is not available.')
 end
 
@@ -193,7 +193,7 @@ preregistered during initialization `allStateConfigs`.
 ]]
 function StateManager:setState(grid, state)
   local uState = self:getUniqueState(state)
-  self:_validateState(uState)
+  self:_validateState(state)
   grid:setState(self.gameObject:getPiece(), uState)
 end
 

@@ -73,10 +73,10 @@ def _merge(
     is_focal: Sequence[bool],
 ) -> Sequence[T]:
   """Merges focal and background sequences into one."""
-  focal_values = iter(focal_values)
-  background_values = iter(background_values)
+  focal_values = iter(focal_values)  # pyrefly: ignore[bad-assignment]
+  background_values = iter(background_values)  # pyrefly: ignore[bad-assignment]
   return tuple(
-      next(focal_values if focal else background_values) for focal in is_focal
+      next(focal_values if focal else background_values) for focal in is_focal  # pyrefly: ignore[bad-argument-type]
   )
 
 
@@ -157,6 +157,11 @@ class Scenario(substrate_lib.Substrate):
 
   def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
     """Returns full action after awaiting bot actions."""
+    expected_num_focal_actions = sum(self._is_focal)
+    if len(focal_action) != expected_num_focal_actions:
+      raise ValueError(
+          f'Expected {expected_num_focal_actions} focal actions, got '
+          f'{len(focal_action)}.')
     self._focal_action_subject.on_next(focal_action)
     background_action = self._background_population.await_action()
     return _merge(focal_action, background_action, self._is_focal)
@@ -236,25 +241,25 @@ class Scenario(substrate_lib.Substrate):
     focal_reward_spec, _ = _partition(reward_spec, self._is_focal)
     return focal_reward_spec
 
-  def discount_spec(self, *args, **kwargs) -> ...:
+  def discount_spec(self, *args, **kwargs):
     """See base class."""
     return self._substrate.discount_spec(*args, **kwargs)
 
-  def list_property(self, *args, **kwargs) -> ...:
+  def list_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.list_property(*args, **kwargs)
 
-  def write_property(self, *args, **kwargs) -> ...:
+  def write_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.write_property(*args, **kwargs)
 
-  def read_property(self, *args, **kwargs) -> ...:
+  def read_property(self, *args, **kwargs):
     """See base class."""
     return self._substrate.read_property(*args, **kwargs)
 
   def observables(self) -> ScenarioObservables:
     """Returns the observables for the scenario."""
-    return self._observables
+    return self._observables  # pyrefly: ignore[bad-return]
 
 
 def build_scenario(

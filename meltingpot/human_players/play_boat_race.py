@@ -77,7 +77,7 @@ def main():
   args = parser.parse_args()
   env_module = environment_configs[args.level_name]
   env_config = env_module.get_config()
-  with config_dict.ConfigDict(env_config).unlocked() as env_config:
+  with config_dict.ConfigDict(env_config).unlocked() as env_config:  # pyrefly: ignore[bad-argument-type]
     roles = env_config.default_player_roles
     env_config.lab2d_settings = env_module.build(roles, env_config)
     # For easier debug, override the flailEffectiveness

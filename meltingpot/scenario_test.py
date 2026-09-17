@@ -37,7 +37,7 @@ class ScenarioTest(test_utils.SubstrateTestCase):
     with factory.build() as env:
       with self.subTest('step'):
         self.assert_step_matches_specs(env)
-      with self.subTest('discount_spec'):
+      with self.subTest('action_spec'):
         self.assertSequenceEqual(env.action_spec(), action_spec)
       with self.subTest('reward_spec'):
         self.assertSequenceEqual(env.reward_spec(), reward_spec)
