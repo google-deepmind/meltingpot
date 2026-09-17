@@ -25,8 +25,9 @@ from meltingpot import substrate
 
 
 def main():
-    roles = ["default"] * 7
-    env = substrate.build("commons_harvest__open", roles=roles)
+    substrate_name = "commons_harvest__open"
+    config = substrate.get_config(substrate_name)
+    env = substrate.build(substrate_name, roles=config.default_player_roles)
 
     timestep = env.reset()
 
