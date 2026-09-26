@@ -9,6 +9,7 @@ on:
       - '.github/workflows/test-examples.yml'
       - '.pylintrc'
       - 'bin/install.sh'
+      - 'bin/test_examples.sh'
       - 'examples/**'
       - 'meltingpot/**'
       - 'pyproject.toml'
@@ -23,6 +24,7 @@ on:
       - '.pylintrc'
       - '.python-version'
       - 'bin/install.sh'
+      - 'bin/test_examples.sh'
       - 'examples/**'
       - 'meltingpot/**'
       - 'pyproject.toml'
@@ -49,7 +51,7 @@ jobs:
         uses: ./.github/actions/install
 
       - name: Test examples
-        run: pytest examples
+        run: bash bin/test_examples.sh
 
       - name: Lint examples
         run: pylint --errors-only examples
