@@ -78,7 +78,13 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
     ) * 2
     self.assertEqual(actual, expected)
 
-  def test_step(self):
+  @parameterized.named_parameters(
+      ('python_int', int),
+      ('numpy_int32', np.int32),
+      ('numpy_int64', np.int64),
+      ('numpy_scalar_array', np.asarray),
+  )
+  def test_step(self, action_type):
     env = mock.Mock(spec_set=dmlab2d.Environment)
     env.action_spec.return_value = [
         {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
@@ -90,7 +96,7 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
         {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_1},
         {'MOVE': VALID_VALUE_1, 'TURN': VALID_VALUE_0},
     ])
-    actual = wrapped.step([0, 2])
+    actual = wrapped.step([action_type(0), action_type(2)])
 
     with self.subTest('timestep'):
       np.testing.assert_equal(actual, mock.sentinel.timestep)
@@ -100,6 +106,67 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
           {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_0},
           {'MOVE': VALID_VALUE_1, 'TURN': VALID_VALUE_0},
       ])
+
+  @parameterized.parameters(-1, 3)
+  def test_step_rejects_out_of_range_action(self, invalid_action):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+    ]
+    wrapped = discrete_action_wrapper.Wrapper(env, action_table=[
+        {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_0},
+        {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_1},
+        {'MOVE': VALID_VALUE_1, 'TURN': VALID_VALUE_0},
+    ])
+
+    with self.assertRaises(ValueError):
+      wrapped.step([0, invalid_action])
+    env.step.assert_not_called()
+
+  @parameterized.named_parameters(
+      ('empty', []),
+      ('too_few', [0]),
+      ('too_many', [0, 1, 2]),
+  )
+  def test_step_rejects_wrong_player_count(self, actions):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+    ]
+    wrapped = discrete_action_wrapper.Wrapper(env, action_table=[
+        {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_0},
+        {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_1},
+        {'MOVE': VALID_VALUE_1, 'TURN': VALID_VALUE_0},
+    ])
+
+    with self.assertRaises(ValueError):
+      wrapped.step(actions)
+    env.step.assert_not_called()
+
+  @parameterized.named_parameters(
+      ('float', 1.0),
+      ('string', '1'),
+      ('non_scalar_array', np.array([1])),
+  )
+  def test_step_rejects_non_integer_action(self, invalid_action):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+        {'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC},
+    ]
+    wrapped = discrete_action_wrapper.Wrapper(
+        env,
+        action_table=[
+            {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_0},
+            {'MOVE': VALID_VALUE_0, 'TURN': VALID_VALUE_1},
+        ],
+    )
+
+    with self.assertRaises(TypeError):
+      wrapped.step([0, invalid_action])
+    env.step.assert_not_called()
 
 
 if __name__ == '__main__':
