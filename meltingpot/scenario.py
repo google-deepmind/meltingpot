@@ -94,7 +94,7 @@ def build_from_config(
   """Builds a scenario from the provided config.
 
   Args:
-    config: bot config
+    config: scenario config.
     substrate_transform: optional transform to apply to underlying substrate.
       This is intended for training purposes and should not be used during
       evaluation. If applied, the observations will not be restricted to
