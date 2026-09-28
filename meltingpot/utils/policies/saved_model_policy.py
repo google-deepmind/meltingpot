@@ -204,7 +204,7 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
     })
     feed_dict = {
         self._step_inputs[path]: value for path, value in input_values  # pyrefly: ignore[unsupported-operation]
-        if path in self._step_inputs
+        if path in self._step_inputs  # pyrefly: ignore[not-iterable]
     }
     action, next_state = self._session.run(self._step_outputs, feed_dict)
     return int(action), next_state

@@ -11,24 +11,26 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Regression tests for puppeteer test utilities."""
+"""Regression tests for the Harvest tutorial player."""
 
+import pathlib
+import runpy
+import sys
 from unittest import mock
 
 from absl.testing import absltest
-from meltingpot.testing import puppeteers
-from meltingpot.utils.puppeteers import fixed_goal
 
 
-class EmptyPuppeteerSequenceTest(absltest.TestCase):
+class PlayHarvestTest(absltest.TestCase):
 
-  def test_empty_sequence_returns_initial_state(self):
-    puppet = fixed_goal.FixedGoal(mock.sentinel.goal)
+  def test_standalone_import_and_verbose_callback(self):
+    script = pathlib.Path(__file__).with_name('play_harvest.py')
+    script_dir = str(script.parent)
 
-    goals, state = puppeteers.goals_from_timesteps(puppet, ())
+    with mock.patch.object(sys, 'path', [script_dir, *sys.path]):
+      namespace = runpy.run_path(str(script), run_name='harvest_tutorial_test')
 
-    self.assertEmpty(goals)
-    self.assertEqual(state, puppet.initial_state())
+    namespace['verbose_fn'](None, 0, 0)
 
 
 if __name__ == '__main__':

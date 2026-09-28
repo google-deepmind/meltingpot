@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Regression tests for substrate test diagnostics."""
 
 from unittest import mock
 
@@ -38,7 +37,8 @@ class SubstrateDiagnosticsTest(substrates.SubstrateTestCase):
 
     with self.assertRaisesRegex(
         AssertionError,
-        r"Observation 0 keys \{'actual'\} do not match spec keys \{'expected'\}",
+        r"Observation 0 keys \{'actual'\} do not match spec keys"
+        r" \{'expected'\}",
     ):
       self.assert_step_matches_specs(env)
 

@@ -59,6 +59,9 @@ class VideoSubject(subject.Subject):
 
     Args:
       timestep: the most recent timestep.
+
+    Raises:
+      RuntimeError: if opening video writer fails.
     """
     rgb_frame = timestep.observation[0]['WORLD.RGB']
     height, width, colors = rgb_frame.shape
@@ -88,6 +91,7 @@ class VideoSubject(subject.Subject):
       raise RuntimeError('Failed to open video writer.')
 
     bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
+    assert self._writer is not None
     self._writer.write(bgr_frame)
     if timestep.step_type.last():
       self._writer.release()
