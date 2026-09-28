@@ -53,6 +53,7 @@ class VideoSubject(subject.Subject):
     self._fps = fps
     self._path = None
     self._writer = None
+    self._frame_size = None
 
   def on_next(self, timestep: dm_env.TimeStep) -> None:
     """Called on each timestep.
@@ -61,6 +62,7 @@ class VideoSubject(subject.Subject):
       timestep: the most recent timestep.
 
     Raises:
+      ValueError: if the frame is invalid or changes size within an episode.
       RuntimeError: if opening video writer fails.
     """
     rgb_frame = timestep.observation[0]['WORLD.RGB']
@@ -73,6 +75,7 @@ class VideoSubject(subject.Subject):
       raise ValueError('WORLD.RGB is not in [0, 255].')
 
     if timestep.step_type.first():
+      self._frame_size = (width, height)
       self._path = os.path.join(
           self._root, f'{uuid.uuid4().hex}.{self._extension}')
       self._writer = cv2.VideoWriter(
@@ -83,6 +86,11 @@ class VideoSubject(subject.Subject):
           isColor=True)
     elif self._writer is None:
       raise ValueError('First timestep must be StepType.FIRST.')
+    elif (width, height) != self._frame_size:
+      raise ValueError(
+          f'WORLD.RGB frame size changed from {self._frame_size} to '
+          f'{(width, height)} within an episode.'
+      )
 
     if not self._writer.isOpened():
       self._writer.release()
