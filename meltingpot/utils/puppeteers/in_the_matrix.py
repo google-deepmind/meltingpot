@@ -405,14 +405,13 @@ class TitForTat(puppeteer.Puppeteer[bool]):
 
   def initial_state(self) -> bool:
     """See base class."""
-    is_cooperative = True if not tremble(self._tremble_probability) else False
-    return is_cooperative
+    return True
 
   def step(self, timestep: dm_env.TimeStep,
            prev_state: bool) -> tuple[dm_env.TimeStep, bool]:
     """See base class."""
     if timestep.first():
-      prev_state = self.initial_state()
+      prev_state = not tremble(self._tremble_probability)
 
     partner_resource = partner_max_resource(timestep)
     partner_defected = partner_resource == self._defect_resource.index

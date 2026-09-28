@@ -82,9 +82,11 @@ def apply_prefab_overrides(
           if prefab not in lab2d_settings.simulation.prefabs:
             raise ValueError(f"Prefab override for '{prefab}' given, but not " +
                              "available in `prefabs`.")
-          game_object_utils.get_first_named_component(
-              lab2d_settings.simulation.prefabs[prefab],
-              component)["kwargs"][arg_name] = arg_override
+          component_config = game_object_utils.get_first_named_component(
+              lab2d_settings.simulation.prefabs[prefab], component)
+          if "kwargs" not in component_config:
+            component_config["kwargs"] = {}
+          component_config["kwargs"][arg_name] = arg_override
 
 
 def maybe_build_and_add_avatar_objects(
@@ -120,7 +122,7 @@ def maybe_build_and_add_avatar_objects(
       lab2d_settings.simulation.gameObjects = []
     # Create avatars.
     logging.info("Building avatars in `meltingpot.builder` with palettes: %s",
-                 lab2d_settings.simulation.playerPalettes)
+                 palettes)
     avatar_objects = game_object_utils.build_avatar_objects(
         int(lab2d_settings.numPlayers),
         lab2d_settings.simulation.prefabs,

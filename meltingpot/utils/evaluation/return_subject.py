@@ -22,6 +22,7 @@ class ReturnSubject(subject.Subject):
   """Subject that emits the player returns at the end of each episode."""
 
   _return: np.ndarray | None = None
+  _episode_started: bool = False
 
   def on_next(self, timestep: dm_env.TimeStep) -> None:
     """Called on each timestep.
@@ -30,10 +31,17 @@ class ReturnSubject(subject.Subject):
       timestep: the most recent timestep.
     """
     if timestep.step_type.first():
-      self._return = np.zeros_like(timestep.reward)
-    elif self._return is None:
+      self._return = None
+      self._episode_started = True
+    elif not self._episode_started:
       raise ValueError('First timestep must be StepType.FIRST.')
-    self._return += timestep.reward
+
+    if timestep.reward is not None:
+      if self._return is None:
+        self._return = np.zeros_like(timestep.reward)
+      self._return += timestep.reward
+
     if timestep.step_type.last():
       super().on_next(self._return)
       self._return = None
+      self._episode_started = False

@@ -14,6 +14,7 @@
 """Substrate builder."""
 
 from collections.abc import Collection, Mapping, Sequence
+import contextlib
 from typing import Any
 
 import chex
@@ -63,9 +64,9 @@ class Substrate(base.Lab2dWrapper):
         dmlab2d=env.observables(),
     )
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """See base class."""
-    timestep = super().reset()
+    timestep = super().reset(*args, **kwargs)
     self._timestep_subject.on_next(timestep)
     for event in super().events():
       self._events_subject.on_next(event)
@@ -127,13 +128,19 @@ def build_substrate(
     The constructed substrate.
   """
   env = builder.builder(lab2d_settings)
-  env = observables_wrapper.ObservablesWrapper(env)
-  env = multiplayer_wrapper.Wrapper(
-      env,
-      individual_observation_names=individual_observations,
-      global_observation_names=global_observations)
-  env = discrete_action_wrapper.Wrapper(env, action_table=action_table)
-  # Add a wrapper that augments adds an observation of the collective
-  # reward (sum of all players' rewards).
-  env = collective_reward_wrapper.CollectiveRewardWrapper(env)
-  return Substrate(env)
+  try:
+    env = observables_wrapper.ObservablesWrapper(env)
+    env = multiplayer_wrapper.Wrapper(
+        env,
+        individual_observation_names=individual_observations,
+        global_observation_names=global_observations,
+    )
+    env = discrete_action_wrapper.Wrapper(env, action_table=action_table)
+    # Add a wrapper that augments adds an observation of the collective
+    # reward (sum of all players' rewards).
+    env = collective_reward_wrapper.CollectiveRewardWrapper(env)
+    return Substrate(env)
+  except Exception:
+    with contextlib.suppress(Exception):
+      env.close()
+    raise

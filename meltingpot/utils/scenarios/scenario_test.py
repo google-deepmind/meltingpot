@@ -279,5 +279,22 @@ class ScenarioWrapperTest(absltest.TestCase):
       ]
       self.assertEqual(received['background'], expected)
 
+
+class ScenarioActionValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(([0],), ([1],), ([0, 1, 2],))
+  def test_rejects_wrong_number_of_focal_actions(self, focal_action):
+    scenario = object.__new__(scenario_utils.Scenario)
+    scenario._is_focal = (True, False, True)
+    scenario._focal_action_subject = mock.Mock()
+    scenario._background_population = mock.Mock()
+
+    with self.assertRaisesRegex(ValueError, 'Expected 2 focal actions'):
+      scenario._await_full_action(focal_action)
+
+    scenario._focal_action_subject.on_next.assert_not_called()
+    scenario._background_population.await_action.assert_not_called()
+
+
 if __name__ == '__main__':
   absltest.main()
