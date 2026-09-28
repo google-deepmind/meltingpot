@@ -75,7 +75,7 @@ def get_ascii_map(
 
   # Pad with extra rows to reach max height.
   for _ in range(max_height - height):
-    ascii_map += ["\n"] + [" "] * max_width
+    ascii_map += ["\n"] + [" "] * (max_width + 2)
 
   # Join list of strings into single string.
   ascii_map = "".join(ascii_map)
@@ -504,7 +504,8 @@ def build(
   player_color_palettes = get_player_color_palettes(
       coin_type_a=coin_type_a, coin_type_b=coin_type_b)
   avatar_objects = game_object_utils.build_avatar_objects(
-      num_players, {"avatar": get_avatar(coin_type_a)}, player_color_palettes)  # pytype: disable=wrong-arg-types  # allow-recursive-types
+      num_players, {"avatar": get_avatar(coin_type_a)}, player_color_palettes  # pyrefly: ignore[bad-argument-type]
+  )
   game_object_utils.get_first_named_component(
       avatar_objects[1], "PlayerCoinType")["kwargs"]["coinType"] = coin_type_b
 
