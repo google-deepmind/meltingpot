@@ -5,9 +5,11 @@
     "dockerfile": "Dockerfile",
     "context": "..",
     "args": {
-      "PYTHON_VERSION": "3.11"
+      "PYTHON_VERSION": "3.14"
     }
   },
+  "containerUser": "ubuntu",
+  "remoteUser": "ubuntu",
   "postCreateCommand": "bin/install.sh",
   "customizations": {
     "vscode": {

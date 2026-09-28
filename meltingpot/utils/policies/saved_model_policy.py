@@ -23,6 +23,7 @@ import numpy as np
 import tensorflow as tf
 import tree
 
+# pylint: disable=unsubscriptable-object
 
 def _numpy_to_placeholder(
     template: tree.Structure[np.ndarray], prefix: str  # pyrefly: ignore[invalid-type-var]

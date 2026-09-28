@@ -75,8 +75,6 @@ runs:
         pylint --version
         which pytest
         pytest --version
-        which pytype
-        pytype --version
         pip list
 
     - name: Save installation

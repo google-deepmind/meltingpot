@@ -36,6 +36,7 @@ SCENARIO_OBSERVATION_SPEC = immutabledict.immutabledict({
     'RGB': meltingpot_specs.OBSERVATION['RGB'],
 })
 
+# pylint: disable=unsubscriptable-object
 
 def _values_from_specs(
     specs: Sequence[tree.Structure[dm_env.specs.Array]]  # pyrefly: ignore[invalid-type-var]
