@@ -55,7 +55,7 @@ def _downcast(x):
     return x
 
 
-class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
+class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):  # pyrefly: ignore[invalid-type-var]
   """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
@@ -104,7 +104,7 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
     """See base class."""
 
 
-class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
+class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):  # pyrefly: ignore[invalid-type-var]
   """Policy wrapping a saved model for TF1 inference.
 
   Note: the model should have methods:
