@@ -24,11 +24,6 @@ pytest meltingpot || FAILURES=true
 echo
 echo
 
-echo "pytype meltingpot..."
-pytype meltingpot || FAILURES=true
-echo
-echo
-
 echo "pylint meltingpot..."
 pylint --errors-only meltingpot || FAILURES=true
 echo

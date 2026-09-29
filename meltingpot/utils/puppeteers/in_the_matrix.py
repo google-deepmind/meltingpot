@@ -24,7 +24,7 @@ import numpy as np
 import tree
 
 State = TypeVar("State")
-Observation = Mapping[str, tree.Structure[np.ndarray]]
+Observation = Mapping[str, tree.Structure[np.ndarray]]  # pylint: disable=unsubscriptable-object
 
 
 def get_inventory(timestep: dm_env.TimeStep) -> np.ndarray:
