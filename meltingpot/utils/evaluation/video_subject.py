@@ -77,7 +77,7 @@ class VideoSubject(subject.Subject):
           self._root, f'{uuid.uuid4().hex}.{self._extension}')
       self._writer = cv2.VideoWriter(
           filename=self._path,
-          fourcc=cv2.VideoWriter_fourcc(*self._codec),
+          fourcc=cv2.VideoWriter_fourcc(*self._codec),  # pyrefly: ignore [missing-attribute]
           fps=self._fps,
           frameSize=(width, height),
           isColor=True)

@@ -75,6 +75,8 @@ runs:
         pylint --version
         which pytest
         pytest --version
+        which pyrefly
+        pyrefly --version
         pip list
 
     - name: Save installation

@@ -162,6 +162,7 @@ setuptools.setup(
             'pip-tools',
             'pyink',
             'pylint',
+            'pyrefly',
             'pytest-xdist',
             'twine',
         ],
