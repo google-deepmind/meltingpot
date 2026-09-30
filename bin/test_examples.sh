@@ -24,6 +24,11 @@ pytest examples || [[ $? == 5 ]] || FAILURES=true
 echo
 echo
 
+echo "pyrefly examples..."
+pyrefly check examples || FAILURES=true
+echo
+echo
+
 echo "pylint examples..."
 pylint --errors-only examples || FAILURES=true
 echo
