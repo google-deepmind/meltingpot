@@ -24,6 +24,7 @@ import numpy as np
 # pytype: disable=not-supported-yet
 PrefabConfig = Mapping[str, "PrefabConfigValue"]
 PrefabConfigValue = Union[str, float, List["PrefabConfigValue"], PrefabConfig]
+Palette = Union[shapes.Color, Mapping[str, shapes.Color]]
 # pytype: enable=not-supported-yet
 
 
@@ -70,9 +71,9 @@ def build_game_objects(
     ascii_map: str,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
     char_prefab_map: Optional[PrefabConfig] = None,
-    player_palettes: Optional[Sequence[shapes.Color]] = None,
+    player_palettes: Optional[Sequence[Palette]] = None,
     use_badges: bool = False,
-    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+    badge_palettes: Optional[Sequence[Palette]] = None,
 ) -> Tuple[List[PrefabConfig], List[PrefabConfig]]:
   """Build all avatar and normal game objects based on the config and map."""
   game_objects = get_game_objects_from_map(ascii_map, char_prefab_map, prefabs)  # pyrefly: ignore[bad-argument-type]
@@ -85,7 +86,7 @@ def build_game_objects(
 def build_avatar_objects(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    player_palettes: Optional[Sequence[shapes.Color]] = None,
+    player_palettes: Optional[Sequence[Palette]] = None,
 ) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar" not in prefabs:
@@ -138,7 +139,7 @@ def build_avatar_objects(
 def build_avatar_badges(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+    badge_palettes: Optional[Sequence[Palette]] = None,
 ) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar_badge" not in prefabs:
@@ -169,10 +170,11 @@ def build_avatar_badges(
     get_first_named_component(
         badge_object,
         "Appearance")["kwargs"]["spriteNames"][0] = new_sprite_name
-    get_first_named_component(
-        badge_object,
-        "StateManager")["kwargs"]["stateConfigs"][0]["sprite"] = (
-            new_sprite_name)
+    state_configs = get_first_named_component(
+        badge_object, "StateManager")["kwargs"]["stateConfigs"]
+    for state_config in state_configs:
+      if "sprite" in state_config and state_config["sprite"] == sprite_name:
+        state_config["sprite"] = new_sprite_name
     get_first_named_component(
         badge_object, "AvatarConnector")["kwargs"]["playerIndex"] = lua_index
     get_first_named_component(
