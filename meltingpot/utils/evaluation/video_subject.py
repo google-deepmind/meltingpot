@@ -59,6 +59,9 @@ class VideoSubject(subject.Subject):
 
     Args:
       timestep: the most recent timestep.
+
+    Raises:
+      RuntimeError: if opening video writer fails.
     """
     rgb_frame = timestep.observation[0]['WORLD.RGB']
     height, width, colors = rgb_frame.shape
@@ -74,14 +77,21 @@ class VideoSubject(subject.Subject):
           self._root, f'{uuid.uuid4().hex}.{self._extension}')
       self._writer = cv2.VideoWriter(
           filename=self._path,
-          fourcc=cv2.VideoWriter_fourcc(*self._codec),
+          fourcc=cv2.VideoWriter_fourcc(*self._codec),  # pyrefly: ignore [missing-attribute]
           fps=self._fps,
           frameSize=(width, height),
           isColor=True)
     elif self._writer is None:
       raise ValueError('First timestep must be StepType.FIRST.')
+
+    if not self._writer.isOpened():
+      self._writer.release()
+      self._writer = None
+      self._path = None
+      raise RuntimeError('Failed to open video writer.')
+
     bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-    assert self._writer.isOpened()  # Catches any cv2 usage errors.
+    assert self._writer is not None
     self._writer.write(bgr_frame)
     if timestep.step_type.last():
       self._writer.release()
