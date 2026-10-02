@@ -85,7 +85,7 @@ class Population:
     }
     self._roles = tuple(roles)
 
-    # Aliases of one policy must serialize access to the same object.
+    # Use one lock per policy object so aliases cannot call it concurrently.
     locks_by_policy = {
         id(policy): threading.Lock() for policy in self._policies.values()
     }
