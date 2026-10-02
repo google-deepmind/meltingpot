@@ -24,6 +24,11 @@ pytest meltingpot || FAILURES=true
 echo
 echo
 
+echo "pyrefly meltingpot..."
+pyrefly check meltingpot || FAILURES=true
+echo
+echo
+
 echo "pylint meltingpot..."
 pylint --errors-only meltingpot || FAILURES=true
 echo

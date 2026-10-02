@@ -24,6 +24,7 @@ pyink-annotation-pragmas = [
   "pylint:",
   "type: ignore",
   "pytype:",
+  "pyrefly:",
   "mypy:",
   "pyright:",
   "pyre-",
@@ -33,3 +34,22 @@ pyink-annotation-pragmas = [
 required_plugins = ["pytest-xdist"]
 addopts = "-n auto"
 testpaths = ["meltingpot", "examples"]
+
+[tool.pyrefly]
+# See //third_party/pyrefly/pyrefly.toml
+infer-with-first-use = false
+check-unannotated-defs = true
+infer-return-types = "never"
+
+[tool.pyrefly.errors]
+abstract-method-call = false
+bad-dunder-all = false
+bad-override-mutable-attribute = false
+bad-override-param-name = false
+implicit-import = false
+protocol-implicitly-defined-attribute = false
+redefinition = false
+redundant-condition = false
+unreachable = false
+unsafe-overlap = false
+unused-coroutine = false

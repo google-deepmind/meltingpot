@@ -53,3 +53,6 @@ jobs:
 
       - name: Lint examples
         run: pylint --errors-only examples
+
+      - name: Typecheck examples
+        run: pyrefly check examples

@@ -50,3 +50,6 @@ jobs:
 
       - name: Lint Melting Pot
         run: pylint --errors-only meltingpot
+
+      - name: Typecheck Melting Pot
+        run: pyrefly check meltingpot
