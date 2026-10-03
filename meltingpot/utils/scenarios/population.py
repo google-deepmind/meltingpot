@@ -135,9 +135,19 @@ class Population:
 
     Raises:
       RuntimeError: previous action has not been awaited.
+      ValueError: the observation or reward count differs from the player count.
     """
     if self._action_futures:
       raise RuntimeError('Previous action not retrieved.')
+    num_players = len(self._roles)
+    if len(timestep.observation) != num_players:
+      raise ValueError(
+          f'Expected {num_players} observations, got '
+          f'{len(timestep.observation)}.'
+      )
+    rewards = timestep.reward
+    if rewards is not None and len(rewards) != num_players:
+      raise ValueError(f'Expected {num_players} rewards, got {len(rewards)}.')
     self._timestep_subject.on_next(timestep)
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
