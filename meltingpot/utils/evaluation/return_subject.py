@@ -49,6 +49,8 @@ class ReturnSubject(subject.Subject):
       self._return = np.asarray(self._return + reward)
 
     if timestep.step_type.last():
-      super().on_next(self._return)
+      episode_return = self._return
       self._return = None
       self._episode_started = False
+      # Observers may start another episode or raise synchronously.
+      super().on_next(episode_return)
