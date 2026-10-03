@@ -1244,7 +1244,7 @@ function AvatarIdsInViewObservation:_getQueryResult(layers)
   local numPlayers = self.gameObject.simulation:getNumPlayers()
   local resultTensor = tensor.Int32Tensor(numPlayers):fill(0)
   for _, avatarId in ipairs(resultsList) do
-    resultTensor(avatarId):add(1)
+    resultTensor(avatarId):fill(1)
   end
   return resultTensor
 end
@@ -1294,7 +1294,7 @@ function AvatarIdsInRangeToZapObservation:_getQueryResult()
       'Zapper'):getZappablePlayerIndices()
     -- Then reformat the avatar ids list as a binary int32 tensor to output.
     for _, avatarId in ipairs(avatarIds) do
-      self._resultTensor(avatarId):add(1)
+      self._resultTensor(avatarId):fill(1)
     end
   end
   return self._resultTensor
