@@ -33,6 +33,7 @@ class ResetWrapper(base.Lab2dWrapper):
     super().__init__(env)
     self._rebuild_environment = build_environment
     self._reset = False
+    self._reset_next_step = True
 
   def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """Rebuilds the environment and calls reset on it."""
@@ -42,4 +43,14 @@ class ResetWrapper(base.Lab2dWrapper):
     else:
       # Don't rebuild on very first reset call (it's inefficient).
       self._reset = True
-    return super().reset(*args, **kwargs)
+    timestep = super().reset(*args, **kwargs)
+    self._reset_next_step = False
+    return timestep
+
+  def step(self, *args, **kwargs) -> dm_env.TimeStep:
+    """Route automatic episode resets through the rebuilding reset method."""
+    if self._reset_next_step:
+      return self.reset()
+    timestep = super().step(*args, **kwargs)
+    self._reset_next_step = timestep.last()
+    return timestep
