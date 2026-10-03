@@ -20,6 +20,7 @@ at engine updates.
 local helpers = require 'common.helpers'
 local log = require 'common.log'
 local class = require 'common.class'
+local tables = require 'common.tables'
 
 
 local UpdaterRegistry = class.Class()
@@ -153,7 +154,8 @@ function UpdaterRegistry:registerUpdater(params)
                 probability = probability,
                 group = group,
                 state = state,
-                states = states,
+                -- Uniquification rewrites this list for one game object.
+                states = states and tables.shallowCopy(states),
                 _updaterName = updaterName,
                 _addGroup = addGroup})  -- Whether a new group must be created.
 end
