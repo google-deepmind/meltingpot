@@ -306,11 +306,10 @@ function returns how many tokens were actually added.
 ]]
 function Inventory:addTokens(tokenType, amount)
   assert(tokenType >= 1 and tokenType <= self._config.numTokenTypes)
-  local value = math.min(
-    self.inventory(tokenType):val() + amount,
-    self._config.capacityPerType)
+  local previous = self.inventory(tokenType):val()
+  local value = math.min(previous + amount, self._config.capacityPerType)
   self.inventory(tokenType):val(value)
-  return value
+  return value - previous
 end
 
 --[[ Attempt to remove a certain amount of tokens of the specified type. If the
