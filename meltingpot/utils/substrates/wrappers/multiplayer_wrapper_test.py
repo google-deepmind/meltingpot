@@ -279,6 +279,31 @@ class Lab2DToListsWrapperTest(absltest.TestCase):
     np.testing.assert_equal(actual, expected)
 
 
+class MultiplayerActionCountValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(2, 4)
+  def test_rejects_wrong_number_of_player_actions(self, action_count):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = {
+        '1.MOVE': ACT_SPEC,
+        '2.MOVE': ACT_SPEC,
+        '3.MOVE': ACT_SPEC,
+    }
+    wrapped = multiplayer_wrapper.Wrapper(
+        env,
+        individual_observation_names=[],
+        global_observation_names=[],
+    )
+    actions = tuple({'MOVE': ACT_VALUE} for _ in range(action_count))
+
+    with self.assertRaisesRegex(
+        ValueError, f'Expected 3 player actions, got {action_count}'
+    ):
+      wrapped.step(actions)
+
+    env.step.assert_not_called()
+
+
 class ResetArgumentForwardingTest(absltest.TestCase):
 
   def test_multiplayer_wrapper_forwards_reset_arguments(self):
