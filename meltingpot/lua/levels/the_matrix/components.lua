@@ -526,26 +526,18 @@ function GameInteractionZapper:sendRewardsToBothInteractants(
     rowReward, columnReward,
     rowResources, columnResources,
     rowAvatar, columnAvatar)
-  if self.gameObject:hasComponent('InteractionTaste') then
-    local interactionTaste = self.gameObject:getComponent('InteractionTaste')
-    if rowReward > self._config.rewardFloor then
-      local rowRewardToDeliver = interactionTaste:getExtraRewardForInteraction(
-          rowReward, rowResources)
-      rowAvatar:addReward(rowRewardToDeliver)
-    end
-    if columnReward > self._config.rewardFloor then
-      local colRewardToDeliver = interactionTaste:getExtraRewardForInteraction(
-          columnReward, columnResources)
-      columnAvatar:addReward(colRewardToDeliver)
-    end
-  else
-    if rowReward > self._config.rewardFloor then
-      rowAvatar:addReward(rowReward)
-    end
-    if columnReward > self._config.rewardFloor then
-      columnAvatar:addReward(columnReward)
+  local function sendReward(avatar, reward, resources)
+    if reward > self._config.rewardFloor then
+      if avatar.gameObject:hasComponent('InteractionTaste') then
+        local interactionTaste = avatar.gameObject:getComponent(
+            'InteractionTaste')
+        reward = interactionTaste:getExtraRewardForInteraction(reward, resources)
+      end
+      avatar:addReward(reward)
     end
   end
+  sendReward(rowAvatar, rowReward, rowResources)
+  sendReward(columnAvatar, columnReward, columnResources)
 end
 
 function GameInteractionZapper:setFramesTillScheduledEffects(frames)
