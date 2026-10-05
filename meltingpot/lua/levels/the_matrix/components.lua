@@ -764,10 +764,6 @@ function GameInteractionZapper:onHit(hitterGameObject, hitName)
       end
     end
 
-    -- At this point the interaction is definitely going to be resolved. So we
-    -- can safely set the cumulant for both zapper and zapped players.
-    self:_setInteractionCumulant(hitterGameObject, self.gameObject)
-
     if self.gameObject:hasComponent(
         'DyadicRole') and hitterGameObject:hasComponent('DyadicRole') then
       -- If the role component is present then assign row versus column player
@@ -779,13 +775,16 @@ function GameInteractionZapper:onHit(hitterGameObject, hitName)
       -- player cannot interact with another row player. A column player cannot
       -- interact with another column player.
       if zapperRole:isRowPlayer() and not zappedRole:isRowPlayer() then
+        self:_setInteractionCumulant(hitterGameObject, self.gameObject)
         self:_resolve(zapperIdx, zappedIdx, hitterGameObject)
       elseif not zapperRole:isRowPlayer() and zappedRole:isRowPlayer() then
+        self:_setInteractionCumulant(hitterGameObject, self.gameObject)
         self:_resolve(zappedIdx, zapperIdx, hitterGameObject)
       end
     else
       -- By default the zapper avatar is the row player and the zapped avatar is
       -- the column player.
+      self:_setInteractionCumulant(hitterGameObject, self.gameObject)
       self:_resolve(zapperIdx, zappedIdx, hitterGameObject)
     end
 
