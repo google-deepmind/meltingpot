@@ -244,13 +244,17 @@ function MushroomRegrowth:destroyRandomMushrooms(mushroomType, percentToDestroy)
 end
 
 function MushroomRegrowth:registerPotentialMushroom(mushroomPiece)
-  self._potentialMushrooms[mushroomPiece] = true
-  self._numPotentialMushrooms = self._numPotentialMushrooms + 1
+  if not self._potentialMushrooms[mushroomPiece] then
+    self._potentialMushrooms[mushroomPiece] = true
+    self._numPotentialMushrooms = self._numPotentialMushrooms + 1
+  end
 end
 
 function MushroomRegrowth:deregisterPotentialMushroom(mushroomPiece)
-  self._potentialMushrooms[mushroomPiece] = nil
-  self._numPotentialMushrooms = self._numPotentialMushrooms - 1
+  if self._potentialMushrooms[mushroomPiece] then
+    self._potentialMushrooms[mushroomPiece] = nil
+    self._numPotentialMushrooms = self._numPotentialMushrooms - 1
+  end
 end
 
 
