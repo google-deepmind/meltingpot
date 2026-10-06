@@ -735,12 +735,16 @@ end
 -- float between 0 and 1. It is possible to use the zapping action when 1 is
 -- returned. Zapping will be restored sooner the closer to 1 the signal becomes.
 function Zapper:readyToShoot()
-  local normalizedTimeTillReady = self._coolingTimer / self._config.cooldownTime
-  if self.gameObject:getComponent('Avatar'):isAlive() then
-    return math.max(1 - normalizedTimeTillReady, 0)
-  else
+  local cooldownTime = self._config.cooldownTime
+  if not self.gameObject:getComponent('Avatar'):isAlive() or cooldownTime < 0 then
     return 0
   end
+  -- A zero cooldown allows firing every frame once any prevention timer clears.
+  if cooldownTime == 0 then
+    return self._coolingTimer <= 0 and 1 or 0
+  end
+  local normalizedTimeTillReady = self._coolingTimer / cooldownTime
+  return math.max(1 - normalizedTimeTillReady, 0)
 end
 
 function Zapper:disallowZapping()
