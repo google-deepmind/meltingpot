@@ -218,13 +218,14 @@ def get_game_object_positions_from_map(
 
 
 def _create_game_object(
-    prefab: PrefabConfig, transform: Transform) -> PrefabConfig:
+    prefab: PrefabConfig, transform: Transform
+) -> PrefabConfig:
   game_object = copy.deepcopy(prefab)
   go_transform = get_first_named_component(game_object, "Transform")
-  go_transform["kwargs"] = {
+  go_transform.setdefault("kwargs", {}).update({
       "position": (transform.position.x, transform.position.y),
       "orientation": transform.orientation.value,
-    }
+  })
   return game_object
 
 
@@ -236,9 +237,8 @@ def get_game_objects_from_map(
 ) -> List[PrefabConfig]:
   """Returns a list of game object configurations from the map and prefabs.
 
-  Each prefab will have its `Transform` component overwritten to its actual
-  location (and orientation, although it is all 'N' by default) in the ASCII
-  map.
+  Each prefab's `Transform` position and orientation are set from the ASCII
+  map. Other Transform options are retained in the independent object copy.
 
   Args:
     ascii_map: The map for the level. Defines which prefab to use at each
