@@ -453,6 +453,10 @@ function EpisodeManager:__init__(kwargs)
   self._step = 0
 end
 
+function EpisodeManager:reset()
+  self._step = 0
+end
+
 function EpisodeManager:registerUpdaters(updaterRegistry)
   local earlyExit = function()
     if self._step % self._config.checkInterval == 0 then
