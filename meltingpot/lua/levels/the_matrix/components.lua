@@ -653,7 +653,6 @@ function GameInteractionZapper:_resolve(
       table.insert(self._scheduledEffects, effect)
     end
     if self._config.reset_winner_inventory then
-      self._matrixComponent:resetInventory(rowResources, rowPlayerIndex)
       local effect = {
         func = self._matrixComponent.resetInventory,
         arguments = {self._matrixComponent, rowResources, rowPlayerIndex}
