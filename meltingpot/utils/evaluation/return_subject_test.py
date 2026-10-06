@@ -57,7 +57,7 @@ class ReturnAccumulationTest(parameterized.TestCase):
   def accumulate(self, rewards):
     recorder = return_subject.ReturnSubject()
     self.addCleanup(recorder.dispose)
-    source = rx_subject.Subject()
+    source = rx_subject.Subject[dm_env.TimeStep]()
     self.addCleanup(source.dispose)
     self.addCleanup(source.subscribe(recorder).dispose)
     results = []
