@@ -200,6 +200,7 @@ function ColorZapper:registerUpdaters(updaterRegistry)
           if actions['fireZap'] == 1 then
             -- A short-range beam with a wide area of effect.
             self._coolingTimer = self._config.cooldownTime
+            self._activeCooldownTime = self._coolingTimer
             self.gameObject:hitBeam(
                 self._config.team,
                 self._config.beamLength,
@@ -222,6 +223,7 @@ function ColorZapper:registerUpdaters(updaterRegistry)
             -- This beam takes twice as long to cool down after use before any
             -- beam can be used again (all beams share a cooling timer).
             self._coolingTimer = self._config.secondaryBeamCooldownTime
+            self._activeCooldownTime = self._coolingTimer
             self.gameObject:hitBeam(
                 self._config.team,
                 self._config.secondaryBeamLength,
@@ -244,12 +246,19 @@ end
 function ColorZapper:reset()
   -- Set the beam cooldown timer to its `ready` state (i.e. coolingTimer = 0).
   self._coolingTimer = 0
+  self._activeCooldownTime = self._config.cooldownTime
   self._previousPosition = nil
 end
 
 function ColorZapper:readyToShoot()
-  local normalizedTimeTillReady = self._coolingTimer / self._config.cooldownTime
-  return 1 - normalizedTimeTillReady
+  if self._config.cooldownTime < 0 then
+    return 0
+  end
+  if self._coolingTimer <= 0 then
+    return 1
+  end
+  -- The two beams share a timer but can have different cooldown durations.
+  return 1 - self._coolingTimer / self._activeCooldownTime
 end
 
 
