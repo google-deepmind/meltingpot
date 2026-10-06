@@ -103,9 +103,12 @@ class VideoSubject(subject.Subject):
     self._writer.write(bgr_frame)
     if timestep.step_type.last():
       self._writer.release()
-      super().on_next(self._path)
+      path = self._path
       self._path = None
       self._writer = None
+      self._frame_size = None
+      # Detach this episode before an observer opens the next recording.
+      super().on_next(path)
 
   def dispose(self):
     """See base class."""
