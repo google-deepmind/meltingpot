@@ -140,7 +140,7 @@ function GiftBeam:onHit(hitterGameObject, hitName)
     local hitterAvatar = hitterGameObject:getComponent('Avatar')
     local hitterRole = hitterGameObject:getComponent('GiftBeam'):getAgentRole()
     local hitterIndex = hitterAvatar:getIndex()
-    local amount = self._config.roleRewardForGifting[hitterRole]
+    local amount = rawget(self._config.roleRewardForGifting, hitterRole)
     if amount ~= nil then
       hitterAvatar:addReward(amount)
     end
@@ -156,7 +156,7 @@ function GiftBeam:onHit(hitterGameObject, hitName)
       if srcType + 1 > hitInventory:getNumTokenTypes() then
         dstType = hitInventory:getNumTokenTypes()
         dstAmount = 1
-      else
+      elseif amount ~= nil then
         hitterAvatar:addReward(amount * self._config.successfulGiftReward)
       end
       hitterInventory:removeTokens(srcType, 1)
