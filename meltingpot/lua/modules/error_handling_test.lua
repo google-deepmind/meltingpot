@@ -26,11 +26,11 @@ local tests = {}
 
 local function _makeError(badFn, handler)
   -- Causes an error and returns the trace (up to this point in the stack.)
-  current_trace = handler('')
-  status, trace = xpcall(function() badFn() end, handler)
+  local current_trace = handler('')
+  local status, trace = xpcall(function() badFn() end, handler)
   -- Remove info for frames above the current one.
-  ct = #current_trace
-  t = #trace
+  local ct = #current_trace
+  local t = #trace
   while current_trace:sub(ct, ct) == trace:sub(t, t) and t > 0 and ct > 0 do
     ct = ct - 1
     t = t - 1
@@ -42,11 +42,11 @@ function tests.noAttachedInfoMatchesOriginalTrace()
   local badFn = function() error('cool error') end
 
   error_handling.useCustomTraceback(false)
-  status_original, error_original = _makeError(badFn, debug.traceback)
+  local status_original, error_original = _makeError(badFn, debug.traceback)
   asserts.EQ(status_original, false)
 
   error_handling.useCustomTraceback(true)
-  status_custom, error_custom = _makeError(badFn, debug.traceback)
+  local status_custom, error_custom = _makeError(badFn, debug.traceback)
   asserts.EQ(status_custom, false)
 
   asserts.EQ(error_original, error_custom)
@@ -60,15 +60,46 @@ function tests.attachedInfoIncludedInTrace()
   end
 
   error_handling.useCustomTraceback(false)
-  status_original, error_original = _makeError(badFn, debug.traceback)
+  local status_original, error_original = _makeError(badFn, debug.traceback)
   asserts.EQ(status_original, false)
 
   error_handling.useCustomTraceback(true)
-  status_custom, error_custom = _makeError(badFn, debug.traceback)
+  local status_custom, error_custom = _makeError(badFn, debug.traceback)
   asserts.EQ(status_custom, false)
 
   asserts.NE(error_original, error_custom)
   asserts.hasSubstr(error_custom, 'some debug info')
+end
+
+function tests.tryWithErrorInfoDoesNotOverwriteGlobalResult()
+  local sentinel = {}
+  _G.result = sentinel
+
+  local actual = error_handling.tryWithErrorInfo(
+      function() return 'ok' end,
+      function() return 'unused' end)
+
+  asserts.EQ(actual, 'ok')
+  asserts.EQ(_G.result, sentinel)
+  _G.result = nil
+end
+
+function tests.tracebackDoesNotOverwriteGlobalState()
+  local traceinfo_sentinel = {}
+  local errorinfo_sentinel = {}
+  local trace_sentinel = {}
+  _G.traceinfo = traceinfo_sentinel
+  _G.errorinfo = errorinfo_sentinel
+  _G.trace = trace_sentinel
+
+  error_handling.traceback('test error')
+
+  asserts.EQ(_G.traceinfo, traceinfo_sentinel)
+  asserts.EQ(_G.errorinfo, errorinfo_sentinel)
+  asserts.EQ(_G.trace, trace_sentinel)
+  _G.traceinfo = nil
+  _G.errorinfo = nil
+  _G.trace = nil
 end
 
 return test_runner.run(tests)
