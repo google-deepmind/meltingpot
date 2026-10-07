@@ -128,11 +128,11 @@ class Scenario(substrate_lib.Substrate):
     self._is_focal = tuple(is_focal)
     self._permitted_observations = frozenset(permitted_observations)
 
-    self._focal_action_subject = subject.Subject()
-    self._focal_timestep_subject = subject.Subject()
-    self._background_action_subject = subject.Subject()
-    self._background_timestep_subject = subject.Subject()
-    self._events_subject = subject.Subject()
+    self._focal_action_subject = subject.Subject[Sequence[int]]()
+    self._focal_timestep_subject = subject.Subject[dm_env.TimeStep]()
+    self._background_action_subject = subject.Subject[Sequence[int]]()
+    self._background_timestep_subject = subject.Subject[dm_env.TimeStep]()
+    self._events_subject = subject.Subject[tuple[str, Any]]()
     self._dmlab2d_observables = observables.Lab2dObservables(
         action=reactivex.empty(),
         events=reactivex.empty(),
@@ -171,8 +171,12 @@ class Scenario(substrate_lib.Substrate):
       self, timestep: dm_env.TimeStep
   ) -> tuple[dm_env.TimeStep, dm_env.TimeStep]:
     """Splits multiplayer timestep as needed by agents and bots."""
-    focal_rewards, background_rewards = _partition(timestep.reward,
-                                                   self._is_focal)
+    if timestep.reward is None:
+      focal_rewards = None
+      background_rewards = None
+    else:
+      focal_rewards, background_rewards = _partition(
+          timestep.reward, self._is_focal)
     focal_observations, background_observations = _partition(
         timestep.observation, self._is_focal)
     focal_observations = _restrict_observations(focal_observations,
