@@ -85,15 +85,22 @@ class Population:
     }
     self._roles = tuple(roles)
 
-    self._locks = {name: threading.Lock() for name in self._policies}
+    # Use one lock per policy object so aliases cannot call it concurrently.
+    locks_by_policy = {
+        id(policy): threading.Lock() for policy in self._policies.values()
+    }
+    self._locks = {
+        name: locks_by_policy[id(policy)]
+        for name, policy in self._policies.items()
+    }
     self._executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=len(roles))
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
-    self._names_subject = subject.Subject()
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
+    self._names_subject = subject.Subject[Sequence[str]]()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
     self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
         names=self._names_subject,
         action=self._action_subject,
