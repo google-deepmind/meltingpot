@@ -17,10 +17,11 @@ from collections.abc import Callable, Mapping, Sequence
 import dataclasses
 import multiprocessing
 from multiprocessing.connection import Connection
+from multiprocessing.process import BaseProcess
 import sys
 import time
 import traceback
-from typing import Any
+from typing import Any, cast
 
 import dm_env
 
@@ -178,14 +179,16 @@ class SubprocessVectorEnv:
 
     self._closed = False
     self._connections: list[Connection] = []
-    self._processes: list[multiprocessing.Process] = []
+    self._processes: list[BaseProcess] = []
     self._start_method = start_method
 
     try:
       context = multiprocessing.get_context(start_method)
+      # Concrete contexts expose a Process factory omitted by BaseContext's type.
+      process_factory = cast(Callable[..., BaseProcess], getattr(context, "Process"))
       for worker_index, builder in enumerate(builders):
         parent_connection, child_connection = context.Pipe()
-        process = context.Process(  # pytype: disable=attribute-error
+        process = process_factory(
             target=_worker,
             args=(child_connection, builder),
             name=f"meltingpot-vector-env-{worker_index}",
