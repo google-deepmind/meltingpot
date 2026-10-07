@@ -21,12 +21,13 @@ Wrappers are assumed to own the wrapped environment and that they have the
 """
 
 import abc
-from typing import Any, Sequence
+from typing import Any, Mapping, Union
 
 import chex
 import dm_env
 import dmlab2d
 from meltingpot.utils.substrates.wrappers import base
+import numpy as np
 import reactivex
 
 
@@ -41,7 +42,7 @@ class Lab2dObservables:
       with the Substrate. Each individual event is emitted as a single element:
       (event_name, event_item).
   """
-  action: reactivex.Observable[Sequence[int]]
+  action: reactivex.Observable[Mapping[str, Union[int, float, np.ndarray]]]
   timestep: reactivex.Observable[dm_env.TimeStep]
   events: reactivex.Observable[tuple[str, Any]]
 
