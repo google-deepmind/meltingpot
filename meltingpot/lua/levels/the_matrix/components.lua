@@ -712,11 +712,11 @@ function GameInteractionZapper:_preventExtraSimultaneousInteraction(
   if self.interactedThisStep then
     return true
   end
-  self.interactedThisStep = true
   local hitterZapper = hitterGameObject:getComponent('GameInteractionZapper')
   if hitterZapper.interactedThisStep then
     return true
   end
+  self.interactedThisStep = true
   hitterZapper.interactedThisStep = true
   return false
 end
