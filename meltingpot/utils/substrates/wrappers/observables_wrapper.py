@@ -13,7 +13,7 @@
 # limitations under the License.
 """Wrapper that exposes Lab2d timesteps, actions, and events as observables."""
 
-from typing import Mapping, Union
+from typing import Any, Mapping, Union
 
 import dm_env
 import dmlab2d
@@ -34,9 +34,9 @@ class ObservablesWrapper(observables_lib.ObservableLab2dWrapper):
       env: The environment to wrap.
     """
     super().__init__(env)
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
-    self._events_subject = subject.Subject()
+    self._action_subject = subject.Subject[Mapping[str, Action]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
+    self._events_subject = subject.Subject[tuple[str, Any]]()
     self._observables = observables_lib.Lab2dObservables(
         action=self._action_subject,
         events=self._events_subject,
