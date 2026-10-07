@@ -36,14 +36,17 @@ SCENARIO_OBSERVATION_SPEC = immutabledict.immutabledict({
     'RGB': meltingpot_specs.OBSERVATION['RGB'],
 })
 
+# pylint: disable=unsubscriptable-object
+
 
 def _values_from_specs(
-    specs: Sequence[tree.Structure[dm_env.specs.Array]]  # pyrefly: ignore[invalid-type-var]
+    specs: Sequence[tree.Structure[dm_env.specs.Array]],  # pyrefly: ignore[invalid-type-var]
 ) -> tree.Structure[np.ndarray]:  # pyrefly: ignore[invalid-type-var]
   values = tree.map_structure(lambda spec: spec.generate_value(), specs)
   return tuple(
       tree.map_structure(lambda v, n=n: np.full_like(v, n), value)
-      for n, value in enumerate(values))
+      for n, value in enumerate(values)
+  )
 
 
 _AnySubstrate = TypeVar('_AnySubstrate', bound=substrate.Substrate)
@@ -69,21 +72,22 @@ def _build_mock_substrate(
   mock_substrate.__exit__.return_value = None
 
   mock_substrate.observation_spec.return_value = (
-      timestep_spec.observation,) * num_players
+      timestep_spec.observation,
+  ) * num_players
   mock_substrate.reward_spec.return_value = (
-      timestep_spec.reward,) * num_players
+      timestep_spec.reward,
+  ) * num_players
   mock_substrate.discount_spec.return_value = timestep_spec.discount
   mock_substrate.action_spec.return_value = (action_spec,) * num_players
 
   mock_substrate.events.return_value = ()
 
-  observation = _values_from_specs(
-      (timestep_spec.observation,) * num_players)
+  observation = _values_from_specs((timestep_spec.observation,) * num_players)
   mock_substrate.observation.return_value = observation
   mock_substrate.reset.return_value = dm_env.TimeStep(
       step_type=dm_env.StepType.FIRST,
       reward=(timestep_spec.reward.generate_value(),) * num_players,
-      discount=0.,
+      discount=0.0,
       observation=observation,
   )
   mock_substrate.step.return_value = dm_env.transition(

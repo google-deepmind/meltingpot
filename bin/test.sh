@@ -24,8 +24,8 @@ pytest meltingpot || FAILURES=true
 echo
 echo
 
-echo "pytype meltingpot..."
-pytype meltingpot || FAILURES=true
+echo "pyrefly meltingpot..."
+pyrefly check meltingpot || FAILURES=true
 echo
 echo
 

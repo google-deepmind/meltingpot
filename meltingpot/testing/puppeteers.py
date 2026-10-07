@@ -41,6 +41,8 @@ def goals_from_timesteps(
     state: Optional[State] = None,
 ) -> tuple[Sequence[puppeteer_lib.PuppetGoal], State]:
   """Returns puppet goals for each timestep."""
+  if state is None:
+    state = puppeteer.initial_state()
   goals = []
   for timestep, state in step_many(puppeteer, timesteps, state):
     goals.append(timestep.observation[GOAL_KEY])

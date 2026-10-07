@@ -113,7 +113,8 @@ class Scenario(substrate_lib.Substrate):
       substrate: the substrate to add bots to. Will be closed with the scenario.
       background_population: the background population to sample bots from. Will
         be closed with the scenario.
-      is_focal: which player slots are allocated to focal players.
+      is_focal: which player slots are allocated to focal players. Copied at
+        construction so later caller changes cannot reassign player slots.
       permitted_observations: the substrate observation keys permitted to be
         exposed by the scenario to focal agents.
     """
@@ -124,7 +125,7 @@ class Scenario(substrate_lib.Substrate):
 
     self._substrate = substrate
     self._background_population = background_population
-    self._is_focal = is_focal
+    self._is_focal = tuple(is_focal)
     self._permitted_observations = frozenset(permitted_observations)
 
     self._focal_action_subject = subject.Subject()
@@ -157,6 +158,11 @@ class Scenario(substrate_lib.Substrate):
 
   def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
     """Returns full action after awaiting bot actions."""
+    expected_num_focal_actions = sum(self._is_focal)
+    if len(focal_action) != expected_num_focal_actions:
+      raise ValueError(
+          f'Expected {expected_num_focal_actions} focal actions, got '
+          f'{len(focal_action)}.')
     self._focal_action_subject.on_next(focal_action)
     background_action = self._background_population.await_action()
     return _merge(focal_action, background_action, self._is_focal)

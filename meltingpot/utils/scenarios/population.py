@@ -81,7 +81,8 @@ class Population:
     """
     self._policies = dict(policies)
     self._names_by_role = {
-        role: tuple(set(names)) for role, names in names_by_role.items()}
+        role: tuple(sorted(set(names))) for role, names in names_by_role.items()
+    }
     self._roles = tuple(roles)
 
     for role in set(self._roles):
@@ -152,7 +153,8 @@ class Population:
     self._timestep_subject.on_next(timestep)
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
-          observation=timestep.observation[n], reward=timestep.reward[n])
+          observation=timestep.observation[n],
+          reward=None if timestep.reward is None else timestep.reward[n])
       future = self._executor.submit(step_fn, bot_timestep)
       self._action_futures.append(future)
 

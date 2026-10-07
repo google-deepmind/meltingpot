@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for observables_wrapper."""
 
 import dataclasses
 from unittest import mock
@@ -60,6 +59,24 @@ class ObservablesWrapperTest(parameterized.TestCase):
         'DONE',
         'DONE',
     ])
+
+  def test_forwards_reset_arguments_and_emits_timestep(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    timestep = mock.sentinel.timestep
+    env.reset.return_value = timestep
+    env.events.return_value = ()
+    wrapped = observables_wrapper.ObservablesWrapper(env)
+    observed = []
+    subscription = wrapped.observables().timestep.subscribe(observed.append)
+    self.addCleanup(subscription.dispose)
+
+    reset_arg = mock.sentinel.reset_arg
+    reset_option = mock.sentinel.reset_option
+    actual = wrapped.reset(reset_arg, option=reset_option)
+
+    env.reset.assert_called_once_with(reset_arg, option=reset_option)
+    self.assertIs(actual, timestep)
+    self.assertEqual(observed, [timestep])
 
 
 if __name__ == '__main__':

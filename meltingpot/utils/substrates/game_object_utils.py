@@ -21,10 +21,10 @@ from meltingpot.utils.substrates import shapes
 import numpy as np
 
 # Type of a GameObject prefab configuration: A recursive string mapping.
-# pytype: disable=not-supported-yet
 PrefabConfig = Mapping[str, "PrefabConfigValue"]
 PrefabConfigValue = Union[str, float, List["PrefabConfigValue"], PrefabConfig]
-# pytype: enable=not-supported-yet
+
+Palette = Union[shapes.Color, Mapping[str, shapes.Color]]
 
 
 class Position(NamedTuple):
@@ -70,9 +70,9 @@ def build_game_objects(
     ascii_map: str,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
     char_prefab_map: Optional[PrefabConfig] = None,
-    player_palettes: Optional[Sequence[shapes.Color]] = None,
+    player_palettes: Optional[Sequence[Palette]] = None,
     use_badges: bool = False,
-    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+    badge_palettes: Optional[Sequence[Palette]] = None,
 ) -> Tuple[List[PrefabConfig], List[PrefabConfig]]:
   """Build all avatar and normal game objects based on the config and map."""
   game_objects = get_game_objects_from_map(ascii_map, char_prefab_map, prefabs)  # pyrefly: ignore[bad-argument-type]
@@ -85,16 +85,24 @@ def build_game_objects(
 def build_avatar_objects(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    player_palettes: Optional[Sequence[shapes.Color]] = None,
+    player_palettes: Optional[Sequence[Palette]] = None,
 ) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar" not in prefabs:
     raise ValueError(
         "Building avatar objects requested, but no avatar prefab provided.")
 
-  if not player_palettes:
+  if player_palettes is None or len(player_palettes) == 0:
+    if num_players > len(colors.palette):
+      raise ValueError(
+          f"Cannot generate {num_players} default player palettes; only "
+          f"{len(colors.palette)} colors are available.")
     player_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
+  elif len(player_palettes) < num_players:
+    raise ValueError(
+        f"Expected at least {num_players} player palettes, got "
+        f"{len(player_palettes)}.")
 
   avatar_objects = []
   for idx in range(0, num_players):
@@ -130,7 +138,7 @@ def build_avatar_objects(
 def build_avatar_badges(
     num_players: int,
     prefabs: Optional[Mapping[str, PrefabConfig]] = None,
-    badge_palettes: Optional[Sequence[shapes.Color]] = None,
+    badge_palettes: Optional[Sequence[Palette]] = None,
 ) -> List[PrefabConfig]:
   """Build all avatar and their associated game objects from the prefabs."""
   if not prefabs or "avatar_badge" not in prefabs:
@@ -139,9 +147,17 @@ def build_avatar_badges(
         "provided.")
   game_objects = []
 
-  if badge_palettes is None:
+  if badge_palettes is None or len(badge_palettes) == 0:
+    if num_players > len(colors.palette):
+      raise ValueError(
+          f"Cannot generate {num_players} default badge palettes; only "
+          f"{len(colors.palette)} colors are available.")
     badge_palettes = [  # pyrefly: ignore[bad-assignment]
         shapes.get_palette(colors.palette[i]) for i in range(num_players)]
+  elif len(badge_palettes) < num_players:
+    raise ValueError(
+        f"Expected at least {num_players} badge palettes, got "
+        f"{len(badge_palettes)}.")
 
   for idx in range(0, num_players):
     lua_index = idx + 1
@@ -186,9 +202,9 @@ def get_game_object_positions_from_map(
   """
   transforms = []
   rows = ascii_map.split("\n")
-  # Assume the first line of the string consists only of '\n'. This means we
-  # need to skip the first row.
-  for i, row in enumerate(rows[1:]):
+  if not rows[0]:
+    rows = rows[1:]
+  for i, row in enumerate(rows):
     indices = [i for i, c in enumerate(row) if char == c]
     for j in indices:
       if orientation_mode == "always_north":
