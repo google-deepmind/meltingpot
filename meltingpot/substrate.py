@@ -33,9 +33,12 @@ from collections.abc import Sequence
 from meltingpot.configs import substrates as substrate_configs
 from meltingpot.utils.substrates import substrate
 from meltingpot.utils.substrates import substrate_factory
+from meltingpot.utils.substrates import vector_env
 from ml_collections import config_dict
 
 SUBSTRATES = substrate_configs.SUBSTRATES
+SubprocessVectorEnv = vector_env.SubprocessVectorEnv
+VectorEnvWorkerError = vector_env.VectorEnvWorkerError
 
 
 def get_config(name: str) -> config_dict.ConfigDict:
@@ -68,6 +71,52 @@ def build(name: str, *, roles: Sequence[str]) -> substrate.Substrate:
     The training substrate.
   """
   return get_factory(name).build(roles)
+
+
+def build_vectorized(
+    name: str,
+    *,
+    roles: Sequence[str],
+    num_envs: int,
+    start_method: str = "spawn",
+) -> SubprocessVectorEnv:
+  """Builds independent copies of a substrate in worker processes.
+
+  Unlike vectorizers that attempt to pickle a live DMLab2D environment, this
+  function sends only a substrate name and role assignment to each worker. Each
+  worker constructs and owns its DMLab2D instance locally.
+
+  Args:
+    name: Name of the substrate.
+    roles: One role string per player, as for `build`.
+    num_envs: Number of independent substrate instances to run concurrently.
+    start_method: Python multiprocessing start method. `spawn` is the default to
+      avoid inheriting live DMLab2D or TensorFlow state into worker processes.
+
+  Returns:
+    A vector environment whose `reset` and `step` methods return one timestep
+    per member substrate.
+
+  Raises:
+    ValueError: if `num_envs` is not positive or a role is unsupported.
+    VectorEnvWorkerError: if a worker fails while constructing its substrate.
+  """
+  if num_envs <= 0:
+    raise ValueError("num_envs must be positive.")
+  factory = get_factory(name)
+  roles = tuple(roles)
+  invalid_roles = set(roles) - factory.valid_roles()
+  if invalid_roles:
+    raise ValueError(
+        f"Invalid roles: {invalid_roles!r}. Must be one of "
+        f"{factory.valid_roles()!r}"
+    )
+  return vector_env.build_vectorized(
+      name,
+      roles=roles,
+      num_envs=num_envs,
+      start_method=start_method,
+  )
 
 
 def build_from_config(
