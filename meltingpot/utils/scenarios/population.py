@@ -85,15 +85,27 @@ class Population:
     }
     self._roles = tuple(roles)
 
+    for role in set(self._roles):
+      if role not in self._names_by_role:
+        raise ValueError(f'No population candidates configured for role {role!r}.')
+      candidates = self._names_by_role[role]
+      if not candidates:
+        raise ValueError(f'Population candidates for role {role!r} are empty.')
+      unknown_names = set(candidates) - self._policies.keys()
+      if unknown_names:
+        raise ValueError(
+            f'Population candidates for role {role!r} reference unknown '
+            f'policies: {unknown_names!r}.')
+
     self._locks = {name: threading.Lock() for name in self._policies}
     self._executor = concurrent.futures.ThreadPoolExecutor(
         max_workers=len(roles))
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
-    self._names_subject = subject.Subject()
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
+    self._names_subject = subject.Subject[Sequence[str]]()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
     self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
         names=self._names_subject,
         action=self._action_subject,
