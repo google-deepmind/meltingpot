@@ -388,4 +388,73 @@ function tests.mergeRegistriesGeneral()
   end
 end
 
+function tests.registeredStatesDoNotAliasCallerStorage()
+  local states = {'state1', 'state2'}
+  local gameObject = makeTestGameObject('snapshot')
+  local registry = updater_registry.UpdaterRegistry()
+  registry:registerUpdater{updateFn = function() end, states = states}
+  states[1] = 'not_a_game_object_state'
+  registry:uniquifyStatesAndAddGroups(gameObject)
+  asserts.tablesEQ(states, {'not_a_game_object_state', 'state2'})
+  asserts.tablesEQ(registry._updateTable[100][1].states, {
+      gameObject:getUniqueState('state1'),
+      gameObject:getUniqueState('state2'),
+  })
+end
+
+function tests.sharedStatesSupportMultipleUpdaters()
+  local states = {'state1', 'state2'}
+  local gameObject = makeTestGameObject('shared')
+  local registry = updater_registry.UpdaterRegistry()
+  local firstCalls, secondCalls = 0, 0
+  registry:registerUpdater{
+      updateFn = function() firstCalls = firstCalls + 1 end,
+      states = states,
+  }
+  -- Exercise positional state-list arguments as well as named arguments.
+  registry:registerUpdater{
+      function() secondCalls = secondCalls + 1 end,
+      90, 0, 1.0, nil, nil, states,
+  }
+  registry:uniquifyStatesAndAddGroups(gameObject)
+  asserts.tablesEQ(states, {'state1', 'state2'})
+  local callbacks = {}
+  for _, state in ipairs(states) do
+    callbacks[gameObject:getUniqueState(state)] = {onUpdate = {}}
+  end
+  registry:registerCallbacks(callbacks)
+  for _, callback in pairs(callbacks) do
+    for _, updateFn in pairs(callback.onUpdate) do updateFn() end
+  end
+  asserts.EQ(firstCalls, 2)
+  asserts.EQ(secondCalls, 2)
+end
+
+function tests.sharedStatesRemainLocalToEachGameObject()
+  local states = {'state1', 'state2'}
+  local merged = updater_registry.UpdaterRegistry()
+  local callbacks = {}
+  local calls = {0, 0}
+  for index = 1, 2 do
+    local player = index
+    local gameObject = makeTestGameObject('object_' .. index)
+    local registry = gameObject:getUpdaterRegistry()
+    registry:registerUpdater{
+        updateFn = function() calls[player] = calls[player] + 1 end,
+        states = states,
+    }
+    registry:uniquifyStatesAndAddGroups(gameObject)
+    for _, state in ipairs({'state1', 'state2'}) do
+      callbacks[gameObject:getUniqueState(state)] = {onUpdate = {}}
+    end
+    merged:mergeWith(registry)
+  end
+  asserts.tablesEQ(states, {'state1', 'state2'})
+  merged:registerCallbacks(callbacks)
+  for _, callback in pairs(callbacks) do
+    for _, updateFn in pairs(callback.onUpdate) do updateFn() end
+  end
+  asserts.tablesEQ(calls, {2, 2})
+end
+
 return test_runner.run(tests)
