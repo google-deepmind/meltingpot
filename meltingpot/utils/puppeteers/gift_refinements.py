@@ -20,7 +20,7 @@ from meltingpot.utils.puppeteers import puppeteer
 import numpy as np
 import tree
 
-Observation = Mapping[str, tree.Structure[np.ndarray]]
+Observation = Mapping[str, tree.Structure[np.ndarray]]  # pylint: disable=unsubscriptable-object
 
 
 class GiftRefinementsCooperator(puppeteer.Puppeteer[tuple[()]]):

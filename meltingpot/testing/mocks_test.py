@@ -53,7 +53,7 @@ class MocksTest(substrates.SubstrateTestCase):
       self.assertIsInstance(mock, substrate.Substrate)
     with self.subTest('error_getting_invalid'):
       with self.assertRaises(AttributeError):
-        mock.no_such_method()  # pytype: disable=attribute-error
+        mock.no_such_method()  # pyrefly: ignore [missing-attribute]
     with self.subTest('error_setting_invalid'):
       with self.assertRaises(AttributeError):
         mock.no_such_method = None  # pyrefly: ignore[missing-attribute]
