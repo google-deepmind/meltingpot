@@ -14,6 +14,7 @@
 """Wrapper that converts action dictionary to a one hot vector."""
 
 import functools
+import operator
 from typing import Mapping, Sequence, TypeVar, Union
 
 import dm_env
@@ -95,9 +96,18 @@ class Wrapper(observables.ObservableLab2dWrapper):
     _validate_action_table(self._action_table, action_spec[0])
 
   def step(self, action: Sequence[int]):
-    """See base class."""
-    action = [self._action_table[player_action] for player_action in action]  # pyrefly: ignore[bad-assignment]
-    return super().step(action)
+    """Validate each player's discrete action before forwarding the batch."""
+    num_players = len(self.action_spec())
+    if len(action) != num_players:
+      raise ValueError(f'Expected {num_players} actions, got {len(action)}.')
+    indices = [operator.index(player_action) for player_action in action]
+    for player, index in enumerate(indices):
+      if not 0 <= index < len(self._action_table):
+        raise ValueError(
+            f'Player {player} action {index} is outside the action table.'
+        )
+    mapped_action = [self._action_table[index] for index in indices]
+    return super().step(mapped_action)
 
   @functools.lru_cache(maxsize=1)
   def action_spec(self) -> Sequence[dm_env.specs.DiscreteArray]:
