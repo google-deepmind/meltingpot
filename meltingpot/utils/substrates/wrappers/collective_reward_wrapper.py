@@ -13,7 +13,6 @@
 # limitations under the License.
 """Wrapper that adds the sum of all players' rewards to observations."""
 
-import copy
 from typing import Mapping, Sequence, TypeVar
 
 import dm_env
@@ -62,7 +61,7 @@ class CollectiveRewardWrapper(observables.ObservableLab2dWrapper):
 
   def observation_spec(self) -> Sequence[Mapping[str, dm_env.specs.Array]]:
     """See base class."""
-    observation_spec = copy.copy(super().observation_spec())
+    observation_spec = [dict(obs) for obs in super().observation_spec()]
     for obs in observation_spec:
       obs[_COLLECTIVE_REWARD_OBS] = dm_env.specs.Array(
           shape=(), dtype=np.float64, name=_COLLECTIVE_REWARD_OBS)
