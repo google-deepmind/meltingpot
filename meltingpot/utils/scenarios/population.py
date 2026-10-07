@@ -98,9 +98,9 @@ class Population:
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
-    self._names_subject = subject.Subject()
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
+    self._names_subject = subject.Subject[Sequence[str]]()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
     self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
         names=self._names_subject,
         action=self._action_subject,
