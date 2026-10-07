@@ -54,9 +54,9 @@ class Substrate(base.Lab2dWrapper):
   def __init__(self, env: observables_lib.ObservableLab2d) -> None:
     """See base class."""
     super().__init__(env)
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
-    self._events_subject = subject.Subject()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
+    self._events_subject = subject.Subject[tuple[str, Any]]()
     self._observables = SubstrateObservables(
         action=self._action_subject,
         events=self._events_subject,
