@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pathlib
 import tempfile
+from unittest import mock
 
 from absl.testing import absltest
+from absl.testing import parameterized
 import cv2
 import dm_env
 from meltingpot.utils.evaluation import video_subject
@@ -50,6 +53,33 @@ def _write_frames_to_subject(subject, frames):
     if results:
       return n, results.pop()
   return None, None
+
+
+def _frame(height=8, width=16, shift=0):
+  values = np.arange(height * width * 3).reshape(height, width, 3)
+  return ((values + shift) % 256).astype(np.uint8)
+
+
+def _timestep(step_type, frame):
+  return dm_env.TimeStep(
+      step_type=step_type,
+      reward=0.0,
+      discount=1.0,
+      observation=[{'WORLD.RGB': frame}],
+  )
+
+
+def _read_frames(path):
+  capture = cv2.VideoCapture(path)
+  try:
+    frames = []
+    while True:
+      success, frame = capture.read()
+      if not success:
+        return frames
+      frames.append(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+  finally:
+    capture.release()
 
 
 FRAME_SHAPE = (8, 16)
@@ -88,6 +118,115 @@ class VideoSubjectTest(absltest.TestCase):
 
     with self.subTest('shape'):
       self.assertEqual(frames_written.shape, TEST_FRAMES.shape)
+
+
+class VideoSubjectWriterTest(absltest.TestCase):
+
+  def test_failed_writer_open_raises_and_cleans_up(self):
+    writer = mock.Mock()
+    writer.isOpened.return_value = False
+    subject = video_subject.VideoSubject(tempfile.mkdtemp())
+    frame = np.zeros((8, 16, 3), dtype=np.uint8)
+    timestep = dm_env.restart(observation=[{'WORLD.RGB': frame}])
+
+    with mock.patch.object(
+        video_subject.cv2, 'VideoWriter', return_value=writer
+    ):
+      with self.assertRaisesRegex(RuntimeError, 'open video writer'):
+        subject.on_next(timestep)
+
+    writer.release.assert_called_once_with()
+    writer.write.assert_not_called()
+    self.assertIsNone(subject._writer)
+    self.assertIsNone(subject._path)
+
+
+class VideoFrameSizeTest(parameterized.TestCase):
+
+  def make_recorder(self):
+    temporary = tempfile.TemporaryDirectory()
+    self.addCleanup(temporary.cleanup)
+    recorder = video_subject.VideoSubject(
+        temporary.name, extension='avi', codec='png '
+    )
+    self.addCleanup(recorder.dispose)
+    paths = []
+    recorder.subscribe(paths.append)
+    return recorder, paths, pathlib.Path(temporary.name)
+
+  @parameterized.product(
+      shape=((10, 16), (8, 18), (16, 8)),
+      step_type=(dm_env.StepType.MID, dm_env.StepType.LAST),
+  )
+  def test_mismatched_frames_raise_without_emitting_or_losing_the_recording(
+      self, shape, step_type
+  ):
+    recorder, paths, directory = self.make_recorder()
+    first, middle, last = _frame(), _frame(shift=23), _frame(shift=51)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    bad_frame = _frame(*shape)
+    original = bad_frame.copy()
+    with self.assertRaisesRegex(ValueError, 'WORLD.RGB.*size'):
+      recorder.on_next(_timestep(step_type, bad_frame))
+    self.assertEmpty(paths)
+    self.assertLen(list(directory.iterdir()), 1)
+    np.testing.assert_array_equal(bad_frame, original)
+    recorder.on_next(_timestep(dm_env.StepType.MID, middle))
+    recorder.on_next(_timestep(dm_env.StepType.LAST, last))
+    self.assertLen(paths, 1)
+    actual = _read_frames(paths[0])
+    self.assertLen(actual, 3)
+    np.testing.assert_array_equal(actual, [first, middle, last])
+
+  def test_frame_size_can_change_between_complete_episodes(self):
+    recorder, paths, directory = self.make_recorder()
+    for height, width in ((8, 16), (12, 20), (16, 8)):
+      expected = [_frame(height, width, shift) for shift in (0, 11, 99)]
+      for step_type, frame in zip(dm_env.StepType, expected):
+        recorder.on_next(_timestep(step_type, frame))
+      np.testing.assert_array_equal(_read_frames(paths[-1]), expected)
+    self.assertLen(paths, 3)
+    self.assertLen(set(paths), 3)
+    self.assertEqual(
+        {pathlib.Path(path) for path in paths}, set(directory.iterdir())
+    )
+
+  @parameterized.parameters('strided', 'fortran')
+  def test_valid_noncontiguous_frames_keep_their_pixels(self, layout):
+    recorder, paths, _ = self.make_recorder()
+    if layout == 'strided':
+      frame = _frame(8, 32)[:, ::2]
+    else:
+      frame = np.asfortranarray(_frame())
+    self.assertFalse(frame.flags.c_contiguous)
+    original = frame.copy()
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, frame))
+    recorder.on_next(_timestep(dm_env.StepType.LAST, frame))
+    np.testing.assert_array_equal(_read_frames(paths[0]), [original, original])
+    np.testing.assert_array_equal(frame, original)
+
+  @parameterized.parameters(dm_env.StepType.MID, dm_env.StepType.LAST)
+  def test_frames_before_first_keep_the_existing_error(self, step_type):
+    recorder, paths, directory = self.make_recorder()
+    with self.assertRaisesRegex(ValueError, 'First timestep'):
+      recorder.on_next(_timestep(step_type, _frame()))
+    self.assertEmpty(paths)
+    self.assertEmpty(list(directory.iterdir()))
+
+  @parameterized.parameters('channels', 'dtype')
+  def test_existing_frame_validation_remains_active(self, invalid):
+    recorder, paths, _ = self.make_recorder()
+    frame = _frame()
+    bad_frame = (
+        frame[:, :, :2] if invalid == 'channels' else frame.astype(float)
+    )
+    with self.assertRaises(ValueError):
+      recorder.on_next(_timestep(dm_env.StepType.FIRST, bad_frame))
+    self.assertEmpty(paths)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, frame))
+    recorder.on_next(_timestep(dm_env.StepType.LAST, frame))
+    np.testing.assert_array_equal(_read_frames(paths[0]), [frame, frame])
+
 
 if __name__ == '__main__':
   absltest.main()
