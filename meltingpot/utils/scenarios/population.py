@@ -101,10 +101,11 @@ class Population:
     )
 
   def close(self):
-    """Closes the population."""
+    """Waits for running steps before closing policy resources and observables."""
     for future in self._action_futures:
       future.cancel()
-    self._executor.shutdown(wait=False)
+    # A running step cannot be cancelled and may still use policy resources.
+    self._executor.shutdown(wait=True)
     for policy in self._policies.values():
       policy.close()
     self._names_subject.on_completed()
