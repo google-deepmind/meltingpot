@@ -146,7 +146,8 @@ class Population:
       return
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
-          observation=timestep.observation[n], reward=timestep.reward[n])
+          observation=timestep.observation[n],
+          reward=None if timestep.reward is None else timestep.reward[n])
       future = self._executor.submit(step_fn, bot_timestep)
       self._action_futures.append(future)
 

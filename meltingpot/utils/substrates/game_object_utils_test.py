@@ -354,5 +354,38 @@ class PaletteCountValidationTest(absltest.TestCase):
       )
 
 
+class ParseMapWithoutLeadingNewlineTest(absltest.TestCase):
+
+  def test_first_row_is_not_skipped(self):
+    transforms = game_object_utils.get_game_object_positions_from_map(
+        'A..\n...', 'A'
+    )
+
+    self.assertEqual(
+        transforms,
+        [
+            game_object_utils.Transform(
+                position=game_object_utils.Position(0, 0),
+                orientation=game_object_utils.Orientation.NORTH,
+            )
+        ],
+    )
+
+  def test_existing_leading_newline_behavior_is_preserved(self):
+    transforms = game_object_utils.get_game_object_positions_from_map(
+        '\nA..\n...', 'A'
+    )
+
+    self.assertEqual(
+        transforms,
+        [
+            game_object_utils.Transform(
+                position=game_object_utils.Position(0, 0),
+                orientation=game_object_utils.Orientation.NORTH,
+            )
+        ],
+    )
+
+
 if __name__ == '__main__':
   absltest.main()

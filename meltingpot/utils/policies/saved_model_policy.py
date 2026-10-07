@@ -23,6 +23,8 @@ import numpy as np
 import tensorflow as tf
 import tree
 
+# pylint: disable=unsubscriptable-object
+
 
 def _numpy_to_placeholder(
     template: tree.Structure[np.ndarray], prefix: str  # pyrefly: ignore[invalid-type-var]
@@ -36,10 +38,13 @@ def _numpy_to_placeholder(
   Returns:
     A tree of placeholders matching the template arrays' specs.
   """
+
   def fn(path, x):
     name = '.'.join(str(x) for x in path)
-    return tf.compat.v1.placeholder(shape=x.shape, dtype=x.dtype,
-                                    name=f'{prefix}.{name}')
+    return tf.compat.v1.placeholder(
+        shape=x.shape, dtype=x.dtype, name=f'{prefix}.{name}'
+    )
+
   return tree.map_structure_with_path(fn, template)
 
 
@@ -55,7 +60,7 @@ def _downcast(x):
     return x
 
 
-class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
+class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):  # pyrefly: ignore[invalid-type-var]
   """Policy wrapping a saved model for TF2 inference.
 
   Note: the model should have methods:
@@ -69,8 +74,8 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
 
     Args:
       model_path: Path to the SavedModel.
-      device_name: Device to load SavedModel onto. Defaults to a cpu device.
-        See tf.device for supported device names.
+      device_name: Device to load SavedModel onto. Defaults to a cpu device. See
+        tf.device for supported device names.
     """
     self._strategy = tf.distribute.OneDeviceStrategy(device_name)
     with self._strategy.scope():
@@ -89,7 +94,8 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
         observation=tree.map_structure(_downcast, timestep.observation),
     )
     next_key, outputs = self._strategy.run(
-        self._model.step, [prev_key, timestep, prev_state])
+        self._model.step, [prev_key, timestep, prev_state]
+    )
     (action, _), next_state = outputs
     return int(action.numpy()), (next_key, next_state)
 
@@ -104,7 +110,7 @@ class TF2SavedModelPolicy(policy.Policy[tree.Structure[tf.Tensor]]):
     """See base class."""
 
 
-class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
+class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):  # pyrefly: ignore[invalid-type-var]
   """Policy wrapping a saved model for TF1 inference.
 
   Note: the model should have methods:
@@ -118,8 +124,8 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
 
     Args:
       model_path: Path to the SavedModel.
-      device_name: Device to load SavedModel onto. Defaults to a cpu device.
-        See tf.device for supported device names.
+      device_name: Device to load SavedModel onto. Defaults to a cpu device. See
+        tf.device for supported device names.
     """
     self._device_name = device_name
     self._graph = tf.compat.v1.Graph()
@@ -162,22 +168,29 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
 
     with self._build_context():
       step_type_in = tf.compat.v1.placeholder(
-          shape=[], dtype=np.int32, name='step_type')
+          shape=[], dtype=np.int32, name='step_type'
+      )
       reward_in = tf.compat.v1.placeholder(
-          shape=[], dtype=np.float32, name='reward')
+          shape=[], dtype=np.float32, name='reward'
+      )
       discount_in = tf.compat.v1.placeholder(
-          shape=[], dtype=np.float32, name='discount')
+          shape=[], dtype=np.float32, name='discount'
+      )
       observation_in = _numpy_to_placeholder(
-          timestep.observation, prefix='observation')
+          timestep.observation, prefix='observation'
+      )
       timestep_in = dm_env.TimeStep(
           step_type=step_type_in,
           reward=reward_in,
           discount=discount_in,
-          observation=observation_in)
+          observation=observation_in,
+      )
       prev_key_in, prev_state_in = _numpy_to_placeholder(
-          prev_state, prefix='prev_state')
-      next_key, outputs = self._model.step(prev_key_in, timestep_in,
-                                           prev_state_in)
+          prev_state, prefix='prev_state'
+      )
+      next_key, outputs = self._model.step(
+          prev_key_in, timestep_in, prev_state_in
+      )
       (action, _), next_state = outputs
       input_values = tree.flatten_with_path({
           'timestep': timestep_in,
@@ -203,7 +216,8 @@ class TF1SavedModelPolicy(policy.Policy[tree.Structure[np.ndarray]]):
         'prev_state': prev_state,
     })
     feed_dict = {
-        self._step_inputs[path]: value for path, value in input_values  # pyrefly: ignore[unsupported-operation]
+        self._step_inputs[path]: value  # pyrefly: ignore[unsupported-operation]
+        for path, value in input_values
         if path in self._step_inputs  # pyrefly: ignore[not-iterable]
     }
     action, next_state = self._session.run(self._step_outputs, feed_dict)

@@ -24,8 +24,8 @@ pytest examples || [[ $? == 5 ]] || FAILURES=true
 echo
 echo
 
-echo "pytype examples..."
-pytype examples || FAILURES=true
+echo "pyrefly examples..."
+pyrefly check examples || FAILURES=true
 echo
 echo
 
