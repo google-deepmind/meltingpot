@@ -27,7 +27,7 @@ class RewardEnvironment(dm_env.Environment):
     self.frame = np.arange(6, dtype=np.uint8).reshape(1, 2, 3)
     self.observations = ({'RGB': self.frame}, {'RGB': self.frame})
     self.closed = False
-    self.last_timestep = None
+    self.last_timestep: dm_env.TimeStep | None = None
     self.actions = []
     self.reset_args = None
 
