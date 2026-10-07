@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.4.1] - 2026-09-30
+
+### Changed
+
+- Move from pygame to pygame-ce to support newer versions of Python.
+
 ## [2.4.0] - 2024-12-17
 
 ### Changed
@@ -15,7 +21,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 
 - [#246](https://github.com/google-deepmind/meltingpot/issues/246)
-    - Fix `clean_up_20` to use the correct puppet bot 
+    - Fix `clean_up_20` to use the correct puppet bot
     - Delete territory__rooms_6 as it is a duplicate of territory__rooms_5
 
 ## [2.3.1] - 2024-06-27
@@ -40,13 +46,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
       `clean_up__puppet_sanctioning_alternator_0`.
     * `territory__rooms_6` is identical to `territory__rooms_5`.
 
-
 ## [2.2.2] - 2024-03-20
 
 ### Fixed
 
 - Update setup.py to work with earlier setuptools (fixes broken 2.2.1 release).
-
 
 ## [2.2.1] - 2024-03-19 [YANKED]
 
@@ -71,7 +75,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Residual v1 file: reaction_graph_utils.py
 - Remove stale documentation left over from 1.0.
-
 
 ## [2.2.0] - 2023-07-25
 
@@ -99,7 +102,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 - Evaluation utilities.
 
-
 ## [2.1.1] - 2023-02-16
 
 ### Changed
@@ -124,7 +126,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Mocks of specific substrates and scenarios, for use in testing.
 - Helper for setting world.rgb spec.
 
-
 ## [2.1.0] - 2022-12-06
 
 ### Changed
@@ -141,7 +142,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 
 - New substrate "Hidden Agenda" and its scenarios.
-
 
 ## [2.0.0] - 2022-11-25
 
@@ -161,7 +161,6 @@ for detailed information on the new substrates, bots, and scenarios.
 - New puppeteers and policies to implement new bots.
 - New utils to handle sprites, colors, and maps.
 - Mocks for use in testing.
-
 
 ## [1.0.4] - 2022-08-22
 

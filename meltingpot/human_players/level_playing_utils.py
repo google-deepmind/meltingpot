@@ -264,18 +264,16 @@ def run_episode(
       (Players are always switchable via the tab key.)
   """
   full_config.lab2d_settings.update(config_overrides)
+  player_count = full_config.lab2d_settings.get('numPlayers', 1)
   if player_prefixes is None:
-    player_count = full_config.lab2d_settings.get('numPlayers', 1)
     # By default, we use lua indices (which start at 1) as player prefixes.
     player_prefixes = [f'{i+1}' for i in range(player_count)]
-  else:
-    player_count = len(player_prefixes)
+  elif len(player_prefixes) != player_count:
+    raise ValueError('Player prefixes, when specified, must be of the same '
+                     'length as the number of players.')
   print(f'Running an episode with {player_count} players: {player_prefixes}.')
   with env_builder(**full_config) as env:
 
-    if len(player_prefixes) != player_count:
-      raise ValueError('Player prefixes, when specified, must be of the same '
-                       'length as the number of players.')
     player_index = initial_player_index
     timestep = env.reset()
 
@@ -332,19 +330,22 @@ def run_episode(
       # Compute next timestep
       actions = action_reader.step(player_prefix) if player_count else []
       timestep = env.step(actions)
+
+      rewards = _get_rewards(timestep)
+      for prefix in player_prefixes:
+        score[prefix] += rewards[prefix]
+        if prefix == player_prefix and rewards[prefix] != 0:
+          print(f'Player {prefix} Score: {score[prefix]}')
+
       if timestep.step_type == dm_env.StepType.LAST:
         if reset_env_when_done:
           timestep = env.reset()
         else:
           break
 
-      rewards = _get_rewards(timestep)
-      for i, prefix in enumerate(player_prefixes):
+      for i, _ in enumerate(player_prefixes):
         if verbose_fn:
           verbose_fn(timestep, i, player_index)
-        score[prefix] += rewards[prefix]
-        if i == player_index and rewards[prefix] != 0:
-          print(f'Player {prefix} Score: {score[prefix]}')
 
       # Print events if applicable
       if print_events and hasattr(env, 'events'):
