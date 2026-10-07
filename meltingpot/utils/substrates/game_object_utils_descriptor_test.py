@@ -18,7 +18,7 @@ from absl.testing import parameterized
 from meltingpot.utils.substrates import game_object_utils
 
 
-_PREFABS = {
+_PREFABS: dict[str, game_object_utils.PrefabConfig] = {
     'item': {
         'components': [
             {

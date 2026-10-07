@@ -256,17 +256,17 @@ def get_game_objects_from_map(
   for char, prefab in char_prefab_map.items():
     transforms = get_game_object_positions_from_map(ascii_map, char)
     for transform in transforms:
-      if hasattr(prefab, "items"):
+      if not isinstance(prefab, str):
         if "type" not in prefab or "list" not in prefab:
           raise ValueError(
               "Prefab descriptors must contain both 'type' and 'list'.")
         descriptor_type = prefab["type"]
-        if descriptor_type == TYPE_ALL:  # pyrefly: ignore[bad-index]
-          for p in prefab["list"]:  # pyrefly: ignore[bad-index]
+        if descriptor_type == TYPE_ALL:
+          for p in prefab["list"]:
             game_objects.append(_create_game_object(prefabs[p], transform))
         elif descriptor_type == TYPE_CHOICE:
           game_objects.append(
-              _create_game_object(prefabs[random.choice(prefab["list"])],  # pyrefly: ignore[bad-index]
+              _create_game_object(prefabs[random.choice(prefab["list"])],
                                   transform))
         else:
           raise ValueError(
