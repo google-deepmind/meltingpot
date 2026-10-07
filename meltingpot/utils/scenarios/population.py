@@ -91,9 +91,9 @@ class Population:
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
 
-    self._names_subject = subject.Subject()
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
+    self._names_subject = subject.Subject[Sequence[str]]()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
     self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
         names=self._names_subject,
         action=self._action_subject,
@@ -135,9 +135,19 @@ class Population:
 
     Raises:
       RuntimeError: previous action has not been awaited.
+      ValueError: the observation or reward count differs from the player count.
     """
     if self._action_futures:
       raise RuntimeError('Previous action not retrieved.')
+    num_players = len(self._roles)
+    if len(timestep.observation) != num_players:
+      raise ValueError(
+          f'Expected {num_players} observations, got '
+          f'{len(timestep.observation)}.'
+      )
+    rewards = timestep.reward
+    if rewards is not None and len(rewards) != num_players:
+      raise ValueError(f'Expected {num_players} rewards, got {len(rewards)}.')
     self._timestep_subject.on_next(timestep)
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
