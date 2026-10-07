@@ -34,7 +34,7 @@ class ResetWrapper(base.Lab2dWrapper):
     self._rebuild_environment = build_environment
     self._reset = False
 
-  def reset(self) -> dm_env.TimeStep:
+  def reset(self, *args, **kwargs) -> dm_env.TimeStep:
     """Rebuilds the environment and calls reset on it."""
     if self._reset:
       self._env.close()
@@ -42,4 +42,4 @@ class ResetWrapper(base.Lab2dWrapper):
     else:
       # Don't rebuild on very first reset call (it's inefficient).
       self._reset = True
-    return super().reset()
+    return super().reset(*args, **kwargs)

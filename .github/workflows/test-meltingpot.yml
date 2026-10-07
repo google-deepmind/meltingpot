@@ -52,4 +52,4 @@ jobs:
         run: pylint --errors-only meltingpot
 
       - name: Typecheck Melting Pot
-        run: pytype meltingpot
+        run: pyrefly check meltingpot

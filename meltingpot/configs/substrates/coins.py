@@ -75,7 +75,7 @@ def get_ascii_map(
 
   # Pad with extra rows to reach max height.
   for _ in range(max_height - height):
-    ascii_map += ["\n"] + [" "] * max_width
+    ascii_map += ["\n"] + [" "] * (max_width + 2)
 
   # Join list of strings into single string.
   ascii_map = "".join(ascii_map)
@@ -245,7 +245,7 @@ def get_coin(
                   "renderMode": "ascii_shape",
                   "spriteNames": [coin_type_a, coin_type_b],
                   "spriteShapes": [shapes.COIN] * 2,
-                  "palettes": [COIN_PALETTES[coin_type_a],
+                  "palettes": [COIN_PALETTES[coin_type_a],  # pyrefly: ignore[bad-assignment]
                                COIN_PALETTES[coin_type_b]],
                   "noRotates": [False] * 2,
               }
@@ -415,7 +415,7 @@ def get_prefabs(
                   reward_self_for_mismatch=reward_self_for_mismatch,
                   reward_other_for_match=reward_other_for_match,
                   reward_other_for_mismatch=reward_other_for_mismatch)
-  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}  # pyrefly: ignore[bad-return]
+  return {"wall": WALL, "spawn_point": SPAWN_POINT, "coin": coin}  # pyrefly: ignore[bad-assignment, bad-return]
 
 
 # `player_color_palettes` is a list with each entry specifying the color to use
@@ -504,7 +504,8 @@ def build(
   player_color_palettes = get_player_color_palettes(
       coin_type_a=coin_type_a, coin_type_b=coin_type_b)
   avatar_objects = game_object_utils.build_avatar_objects(
-      num_players, {"avatar": get_avatar(coin_type_a)}, player_color_palettes)  # pytype: disable=wrong-arg-types  # allow-recursive-types
+      num_players, {"avatar": get_avatar(coin_type_a)}, player_color_palettes  # pyrefly: ignore[bad-argument-type]
+  )
   game_object_utils.get_first_named_component(
       avatar_objects[1], "PlayerCoinType")["kwargs"]["coinType"] = coin_type_b
 
