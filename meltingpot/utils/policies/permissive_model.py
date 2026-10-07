@@ -116,7 +116,7 @@ class PermissiveModel:
           table_op = nodes[table_name]
 
       logging.info("Initialising table for Op `%s`", table_name)
-      table_handle_name = table_op.attr["shared_name"].s  # pytype: disable=attribute-error
+      table_handle_name = table_op.attr["shared_name"].s  # pyrefly: ignore [missing-attribute]
       table_handle = tf.raw_ops.HashTableV2(
           key_dtype=table_keys.dtype,
           value_dtype=table_values.dtype,

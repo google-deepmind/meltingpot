@@ -21,9 +21,6 @@ __pycache__/
 # Test cache
 .pytest_cache
 
-# Type checking
-.pytype
-
 # Saved models.
 /examples/results/
 /meltingpot/assets/

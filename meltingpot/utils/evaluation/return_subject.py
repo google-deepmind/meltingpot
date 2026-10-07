@@ -19,9 +19,15 @@ from reactivex import subject
 
 
 class ReturnSubject(subject.Subject):
-  """Subject that emits the player returns at the end of each episode."""
+  """Emits episode returns accumulated with at least float64 precision.
+
+  Wider floating-point rewards retain their precision. Integer rewards are
+  converted to floating point to avoid overflow and accept later fractional
+  rewards.
+  """
 
   _return: np.ndarray | None = None
+  _episode_started: bool = False
 
   def on_next(self, timestep: dm_env.TimeStep) -> None:
     """Called on each timestep.
@@ -30,10 +36,19 @@ class ReturnSubject(subject.Subject):
       timestep: the most recent timestep.
     """
     if timestep.step_type.first():
-      self._return = np.zeros_like(timestep.reward)
-    elif self._return is None:
+      self._return = None
+      self._episode_started = True
+    elif not self._episode_started:
       raise ValueError('First timestep must be StepType.FIRST.')
-    self._return += timestep.reward
+
+    if timestep.reward is not None:
+      reward = np.asarray(timestep.reward)
+      if self._return is None:
+        dtype = np.result_type(reward.dtype, np.float64)
+        self._return = np.zeros_like(reward, dtype=dtype)
+      self._return = np.asarray(self._return + reward)
+
     if timestep.step_type.last():
       super().on_next(self._return)
       self._return = None
+      self._episode_started = False

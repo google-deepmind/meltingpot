@@ -543,5 +543,48 @@ class AlternatingSpecialistTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
 
+_COOPERATE = in_the_matrix.Resource(
+    index=1,
+    collect_goal=mock.sentinel.cooperate_collect,
+    interact_goal=mock.sentinel.cooperate_interact,
+)
+_DEFECT = in_the_matrix.Resource(
+    index=0,
+    collect_goal=mock.sentinel.defect_collect,
+    interact_goal=mock.sentinel.defect_interact,
+)
+
+
+class TitForTatInitialStateTest(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self.puppeteer = in_the_matrix.TitForTat(
+        cooperate_resource=_COOPERATE,
+        defect_resource=_DEFECT,
+        margin=1,
+        tremble_probability=0.5,
+    )
+
+  @mock.patch.object(in_the_matrix, 'tremble')
+  def test_initial_state_has_no_rng_side_effect(self, tremble):
+    self.assertTrue(self.puppeteer.initial_state())
+    tremble.assert_not_called()
+
+  @mock.patch.object(in_the_matrix, 'tremble', return_value=True)
+  def test_first_timestep_samples_opening_tremble_once(self, tremble):
+    timestep = dm_env.restart({
+        'INVENTORY': np.array([0, 0]),
+        'INTERACTION_INVENTORIES': np.array(([-1, -1], [-1, -1])),
+    })
+
+    transformed, state = self.puppeteer.step(
+        timestep, self.puppeteer.initial_state())
+
+    self.assertFalse(state)
+    self.assertIs(transformed.observation['GOAL'], _DEFECT.collect_goal)
+    tremble.assert_called_once_with(0.5)
+
+
 if __name__ == '__main__':
   absltest.main()
