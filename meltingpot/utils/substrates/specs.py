@@ -112,6 +112,8 @@ def world_rgb(ascii_map: str,
               name: Optional[str] = 'WORLD.RGB') -> dm_env.specs.Array:
   """Returns the spec for a WORLD.RGB observation.
 
+  Ragged maps span their longest row, matching the Lab2D map dimensions.
+
   Args:
     ascii_map: the ASCII map used to derive the observation dimensions.
     sprite_size: the size in pixels of each map cell.
@@ -119,7 +121,7 @@ def world_rgb(ascii_map: str,
   """
   lines = ascii_map.strip('\n').split('\n')
   height = len(lines) * sprite_size
-  width = len(lines[0]) * sprite_size if height else 0
+  width = max(map(len, lines)) * sprite_size if height else 0
   return rgb(height, width, name)
 
 
