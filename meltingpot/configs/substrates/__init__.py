@@ -55,7 +55,7 @@ def get_config(substrate: str) -> config_dict.ConfigDict:
     substrate: the name of the substrate. Must be in SUBSTRATES.
 
   Raises:
-    ModuleNotFoundError: the config does not exist.
+    ValueError: the substrate is not in SUBSTRATES.
   """
   if substrate not in SUBSTRATES:
     raise ValueError(f'{substrate} not in {SUBSTRATES}.')

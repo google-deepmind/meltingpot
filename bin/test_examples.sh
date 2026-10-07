@@ -20,12 +20,12 @@ cd "$(dirname "$0")/.."
 FAILURES=false
 
 echo "pytest examples..."
-pytest examples || FAILURES=true
+pytest examples || [[ $? == 5 ]] || FAILURES=true
 echo
 echo
 
-echo "pytype examples..."
-pytype examples || FAILURES=true
+echo "pyrefly examples..."
+pyrefly check examples || FAILURES=true
 echo
 echo
 
