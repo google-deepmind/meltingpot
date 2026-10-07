@@ -23,7 +23,6 @@ import numpy as np
 # Type of a GameObject prefab configuration: A recursive string mapping.
 PrefabConfig = Mapping[str, "PrefabConfigValue"]
 PrefabConfigValue = Union[str, float, List["PrefabConfigValue"], PrefabConfig]
-
 Palette = Union[shapes.Color, Mapping[str, shapes.Color]]
 
 
