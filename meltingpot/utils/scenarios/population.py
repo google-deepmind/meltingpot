@@ -87,13 +87,14 @@ class Population:
 
     self._locks = {name: threading.Lock() for name in self._policies}
     self._executor = concurrent.futures.ThreadPoolExecutor(
-        max_workers=len(roles))
+        max_workers=max(1, len(roles)))
     self._step_fns: List[Callable[[dm_env.TimeStep], int]] = []
     self._action_futures: List[concurrent.futures.Future[int]] = []
+    self._empty_action_pending = False
 
-    self._names_subject = subject.Subject()
-    self._action_subject = subject.Subject()
-    self._timestep_subject = subject.Subject()
+    self._names_subject = subject.Subject[Sequence[str]]()
+    self._action_subject = subject.Subject[Sequence[int]]()
+    self._timestep_subject = subject.Subject[dm_env.TimeStep]()
     self._observables = PopulationObservables(  # pylint: disable=unexpected-keyword-arg
         names=self._names_subject,
         action=self._action_subject,
@@ -126,6 +127,7 @@ class Population:
     for future in self._action_futures:
       future.cancel()
     self._action_futures.clear()
+    self._empty_action_pending = False
 
   def send_timestep(self, timestep: dm_env.TimeStep) -> None:
     """Sends timestep to population for asynchronous processing.
@@ -136,9 +138,12 @@ class Population:
     Raises:
       RuntimeError: previous action has not been awaited.
     """
-    if self._action_futures:
+    if self._action_futures or self._empty_action_pending:
       raise RuntimeError('Previous action not retrieved.')
     self._timestep_subject.on_next(timestep)
+    if not self._step_fns:
+      self._empty_action_pending = True
+      return
     for n, step_fn in enumerate(self._step_fns):
       bot_timestep = timestep._replace(
           observation=timestep.observation[n],
@@ -155,6 +160,11 @@ class Population:
     Raises:
       RuntimeError: no timestep has been sent.
     """
+    if self._empty_action_pending:
+      self._empty_action_pending = False
+      actions = ()
+      self._action_subject.on_next(actions)
+      return actions
     if not self._action_futures:
       raise RuntimeError('No timestep sent.')
     actions = tuple(future.result() for future in self._action_futures)
