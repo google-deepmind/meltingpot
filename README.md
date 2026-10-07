@@ -51,7 +51,7 @@ If you are interested in extending Melting Pot, please refer to the
 
 ## Installation
 
-Melting Pot is available on PyPI](https://pypi.python.org/pypi/dm-meltingpot)
+Melting Pot is available on [PyPI](https://pypi.python.org/pypi/dm-meltingpot)
 and can be installed using:
 
 ```shell
