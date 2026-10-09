@@ -138,8 +138,21 @@ function DirtCleaning:__init__(kwargs)
   DirtCleaning.Base.__init__(self, kwargs)
 end
 
+function DirtCleaning:reset()
+  self._cleaned = false
+end
+
+function DirtCleaning:onStateChange()
+  if self.gameObject:getState() == 'dirt' then
+    self._cleaned = false
+  end
+end
+
 function DirtCleaning:onHit(hittingGameObject, hitName)
-  if self.gameObject:getState() == 'dirt' and hitName == 'cleanHit' then
+  if self.gameObject:getState() == 'dirt' and hitName == 'cleanHit' and
+      not self._cleaned then
+    -- Claim this cleaning before the engine applies its queued state change.
+    self._cleaned = true
     self.gameObject:setState('dirtWait')
     -- Trigger role-specific logic if applicable.
     if hittingGameObject:hasComponent('Taste') then
