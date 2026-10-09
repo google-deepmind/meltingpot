@@ -101,3 +101,27 @@ with substrate.build_from_config(
 Use `build` when starting from a substrate name. Use `build_from_config` when
 starting from a configuration object. For either path, `get_config` is the
 place to discover the supported roles and default player assignment.
+
+## Run the API example
+
+The [runnable substrate example](../examples/tutorial/substrate_basics.py) uses
+`get_config`, `build`, player roles, environment specifications, and a few
+discrete actions together. From the repository root, after
+[installing Melting Pot](../README.md):
+
+```shell
+python -m examples.tutorial.substrate_basics --substrate clean_up --steps 3
+```
+
+To discover the available role strings for a multi-role environment without
+starting Lab2D:
+
+```shell
+python -m examples.tutorial.substrate_basics \
+    --substrate predator_prey__open --inspect-only
+```
+
+Supply the exact role names displayed by `--inspect-only` to `--roles` to
+override the default assignment, e.g. `--roles predator prey prey`. This is
+an API demonstration using discrete action index 0, **not** a learned policy or
+a meaningful benchmark; running the example is not required to train an agent.
