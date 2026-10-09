@@ -104,10 +104,10 @@ place to discover the supported roles and default player assignment.
 
 ## Run the API example
 
-The [runnable substrate example](../examples/tutorial/substrate_basics.py) uses
+The [runnable substrate example](https://github.com/google-deepmind/meltingpot/blob/main/examples/tutorial/substrate_basics.py) uses
 `get_config`, `build`, player roles, environment specifications, and a few
 discrete actions together. From the repository root, after
-[installing Melting Pot](../README.md):
+[installing Melting Pot](https://github.com/google-deepmind/meltingpot#installation):
 
 ```shell
 python -m examples.tutorial.substrate_basics --substrate clean_up --steps 3

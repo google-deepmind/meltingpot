@@ -77,7 +77,7 @@ class SubstrateBasicsTest(unittest.TestCase):
     self.substrate_api.get_config.return_value = self.config
     self.substrate_api.build.return_value = self.environment
     meltingpot = types.ModuleType('meltingpot')
-    meltingpot.substrate = self.substrate_api
+    setattr(meltingpot, 'substrate', self.substrate_api)
     self.module_patch = mock.patch.dict(
         'sys.modules', {'meltingpot': meltingpot}
     )
