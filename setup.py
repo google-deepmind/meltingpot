@@ -14,6 +14,7 @@
 """Install script for setuptools."""
 
 import os
+from pathlib import PurePosixPath
 import shutil
 import tarfile
 import tempfile
@@ -39,6 +40,24 @@ def _remove_excluded(description: str) -> str:
 
 with open('README.md') as f:
   LONG_DESCRIPTION = _remove_excluded(f.read())
+
+
+def _validate_asset_member(member: tarfile.TarInfo) -> None:
+  """Reject archive entries that could write outside the assets directory.
+
+  Only ordinary files and directories are needed for packaged Melting Pot
+  assets. Links, devices, and other archive special types are not allowed.
+  """
+  path = PurePosixPath(member.name)
+  if (
+      path.is_absolute()
+      or not path.parts
+      or path.parts[0] != 'assets'
+      or '..' in path.parts
+      or chr(92) in member.name
+      or not (member.isfile() or member.isdir())
+  ):
+    raise ValueError(f'Unsafe Melting Pot asset archive entry: {member.name!r}')
 
 
 class BuildPy(build_py.build_py):
@@ -76,15 +95,47 @@ class BuildPy(build_py.build_py):
     return tmp_path
 
   def extract_assets(self, tar_file_path):
-    """Extracts assets tar file to meltingpot/assets."""
+    """Extract only safe asset entries, retaining old assets on failure."""
     root = os.path.join(self.get_package_dir(''), 'meltingpot')
+    assets_path = os.path.join(root, 'assets')
     os.makedirs(root, exist_ok=True)
-    if os.path.exists(f'{root}/assets'):
-      shutil.rmtree(f'{root}/assets')
-      print('deleted existing assets', flush=True)
-    with tarfile.open(tar_file_path, mode='r|*') as tarball:
-      tarball.extractall(root)
-    print(f'extracted assets from {tar_file_path} to {root}/assets', flush=True)
+
+    # Validate each member before extracting into an isolated staging area.
+    # Streaming avoids buffering the large saved-model archive in memory.
+    with tempfile.TemporaryDirectory(
+        prefix='.assets-staging-', dir=root
+    ) as tmp:
+      has_files = False
+      with tarfile.open(tar_file_path, mode='r|*') as tarball:
+        # Additional defense in depth on Python versions supporting the
+        # standard tarfile data filter (including patched Python 3.11).
+        extraction_filter = (
+            {'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}
+        )
+        for member in tarball:
+          _validate_asset_member(member)
+          has_files |= member.isfile()
+          # Do not apply archived ownership, setuid bits, or filesystem modes.
+          tarball.extract(
+              member, path=tmp, set_attrs=False, **extraction_filter
+          )
+
+      staged_assets = os.path.join(tmp, 'assets')
+      if not has_files or not os.path.isdir(staged_assets):
+        raise ValueError('Melting Pot asset archive contains no asset files.')
+
+      # Retain the existing assets until the complete archive is validated.
+      previous_assets = os.path.join(tmp, 'previous_assets')
+      if os.path.lexists(assets_path):
+        os.replace(assets_path, previous_assets)
+      try:
+        os.replace(staged_assets, assets_path)
+      except BaseException:
+        if os.path.lexists(previous_assets):
+          os.replace(previous_assets, assets_path)
+        raise
+
+    print(f'extracted assets from {tar_file_path} to {assets_path}', flush=True)
 
   def build_assets(self):
     """Copies assets from package to build lib."""
@@ -95,8 +146,10 @@ class BuildPy(build_py.build_py):
       shutil.rmtree(f'{build_root}/assets')
       print('deleted existing assets', flush=True)
     shutil.copytree(f'{package_root}/assets', f'{build_root}/assets')
-    print(f'copied assets from {package_root}/assets to {build_root}/assets',
-          flush=True)
+    print(
+        f'copied assets from {package_root}/assets to {build_root}/assets',
+        flush=True,
+    )
 
 
 setuptools.setup(
