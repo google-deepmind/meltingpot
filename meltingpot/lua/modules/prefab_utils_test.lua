@@ -189,5 +189,49 @@ function tests.buildGameObjectFromNestedSpecAllChoice()
       gameObjects[2], _createGameObjectConfig('prefabC', 0, 0, 'N'))
 end
 
+local function _avatarPrefab()
+  return {
+      name = 'avatar',
+      components = {
+          {component = 'Appearance', kwargs = {
+              spriteNames = {'Avatar'},
+              palettes = {{}}}},
+          {component = 'StateManager', kwargs = {
+              stateConfigs = {{state = 'alive', sprite = 'Avatar'}}}},
+          {component = 'Avatar', kwargs = {index = -1}},
+      },
+  }
+end
+
+function tests.buildAvatarsWithoutPlayerPalettes()
+  local prefabs = {avatar = _avatarPrefab()}
+  local avatars = prefab_utils.buildAvatarConfigs(2, prefabs)
+  asserts.EQ(#avatars, 2)
+  for idx, avatar in ipairs(avatars) do
+    asserts.EQ(avatar.components[3].kwargs.index, idx)
+    asserts.EQ(avatar.components[1].kwargs.spriteNames[1], 'Avatar' .. idx)
+    asserts.EQ(
+        avatar.components[2].kwargs.stateConfigs[1].sprite, 'Avatar' .. idx)
+    assert(avatar.components[1].kwargs.palettes[1] ~= nil)
+  end
+  -- The original prefab must not be modified by avatar creation.
+  asserts.EQ(prefabs.avatar.components[3].kwargs.index, -1)
+end
+
+function tests.buildAvatarsWithTooFewDefaultPalettesFailsClearly()
+  local colors = require 'meltingpot.lua.modules.colors'
+  local count = #colors.colors + 1
+  local success, err = pcall(function()
+    prefab_utils.buildAvatarConfigs(count, {avatar = _avatarPrefab()})
+  end)
+  assert(not success)
+  asserts.hasSubstr(tostring(err), 'only ' .. #colors.colors .. ' colors')
+end
+
+function tests.buildZeroAvatarsWithoutPlayerPalettes()
+  local avatars = prefab_utils.buildAvatarConfigs(0, {avatar = _avatarPrefab()})
+  asserts.EQ(#avatars, 0)
+end
+
 return test_runner.run(tests)
 
