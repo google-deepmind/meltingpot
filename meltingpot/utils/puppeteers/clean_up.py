@@ -198,6 +198,8 @@ class CorrigibleReciprocator(puppeteer.Puppeteer[CorrigibleReciprocatorState]):
     self._timeout_steps = timeout_steps
     self._corrigible_threshold = corrigible_threshold
 
+    if recency_window <= 0:
+      raise ValueError('recency_window must be positive')
     self._threshold = threshold
     self._recency_window = recency_window
 
@@ -301,6 +303,8 @@ class SanctionerAlternator(puppeteer.Puppeteer[SanctionerAlternatorState]):
     self._defect_goal = defect_goal
     self._sanction_goal = sanction_goal
     self._num_others_cooperating_cumulant = num_others_cooperating_cumulant
+    if recency_window <= 0:
+      raise ValueError('recency_window must be positive')
     self._threshold = threshold
     self._recency_window = recency_window
 
