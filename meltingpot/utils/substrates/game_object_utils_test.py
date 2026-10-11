@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from unittest import mock
+
 from absl.testing import absltest
 from absl.testing import parameterized
 from meltingpot.utils.substrates import colors
@@ -159,6 +161,65 @@ WWWWWW
             (0, 2), (1, 2), (2, 2), (3, 2), (4, 2), (5, 2),  # Bottom walls
         ],
         positions)
+
+
+class PrefabChoiceRandomTest(absltest.TestCase):
+  """Prefab choice defaults must not leak RNG state across map builds."""
+
+  def setUp(self):
+    super().setUp()
+    self.prefabs = {
+        name: {
+            'name': name,
+            'components': [{
+                'component': 'Transform',
+                'kwargs': {'position': (0, 0), 'orientation': 'N'},
+            }],
+        }
+        for name in ('apple', 'berry')
+    }
+    self.choices = {
+        'A': {'type': 'choice', 'list': ['apple', 'berry']}
+    }
+
+  def _build(self, char_prefab_map=None, random=None):
+    return game_object_utils.get_game_objects_from_map(
+        'A', char_prefab_map or self.choices, self.prefabs,
+        **({} if random is None else {'random': random}))
+
+  def test_each_unspecified_random_uses_independent_generator(self):
+    first_rng = mock.Mock()
+    first_rng.choice.return_value = 'apple'
+    second_rng = mock.Mock()
+    second_rng.choice.return_value = 'berry'
+    with mock.patch.object(
+        game_object_utils.np.random, 'RandomState',
+        side_effect=[first_rng, second_rng]) as generator:
+      first = self._build()
+      second = self._build()
+
+    self.assertEqual(generator.call_count, 2)
+    first_rng.choice.assert_called_once_with(['apple', 'berry'])
+    second_rng.choice.assert_called_once_with(['apple', 'berry'])
+    self.assertEqual(first[0]['name'], 'apple')
+    self.assertEqual(second[0]['name'], 'berry')
+
+  def test_explicit_generator_is_used_without_creating_default(self):
+    chosen_rng = mock.Mock()
+    chosen_rng.choice.return_value = 'berry'
+    with mock.patch.object(game_object_utils.np.random,
+                           'RandomState') as generator:
+      result = self._build(random=chosen_rng)
+    generator.assert_not_called()
+    chosen_rng.choice.assert_called_once_with(['apple', 'berry'])
+    self.assertEqual(result[0]['name'], 'berry')
+
+  def test_named_prefab_does_not_need_random_generator(self):
+    with mock.patch.object(game_object_utils.np.random,
+                           'RandomState') as generator:
+      result = self._build(char_prefab_map={'A': 'apple'})
+    generator.assert_not_called()
+    self.assertEqual(result[0]['name'], 'apple')
 
 
 AVATAR = {
