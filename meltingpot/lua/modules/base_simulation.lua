@@ -151,8 +151,13 @@ local function _makeComponent(config, isAvatar)
   local component = config.component
   local kwargs = config.kwargs
   -- Avatar pieces must be created by the Avatar component instead of the
-  -- transform component, so must set the `deferPieceCreation` flag.
+  -- transform component. Copy the kwargs first so that the same prefab may
+  -- also be reused for non-avatar objects without inheriting this flag.
   if isAvatar and component == 'Transform' then
+    kwargs = {}
+    for name, value in pairs(config.kwargs) do
+      kwargs[name] = value
+    end
     kwargs.deferPieceCreation = true
   end
   return component_registry.getComponent(component)(kwargs)
