@@ -40,9 +40,14 @@ local function getComponent(componentName)
   error('The component ' .. componentName .. ' does not exist in the registry.')
 end
 
--- Get all components in the registry.
+-- Get a snapshot of all registered components. Callers must use
+-- registerComponent or registerAllComponents to modify the registry.
 local function getAllComponents()
-  return ComponentRegistry
+  local components = {}
+  for name, component in pairs(ComponentRegistry) do
+    components[name] = component
+  end
+  return components
 end
 
 return {
