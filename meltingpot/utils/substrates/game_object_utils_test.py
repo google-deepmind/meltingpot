@@ -184,8 +184,11 @@ class PrefabChoiceRandomTest(absltest.TestCase):
 
   def _build(self, char_prefab_map=None, random=None):
     return game_object_utils.get_game_objects_from_map(
-        'A', char_prefab_map or self.choices, self.prefabs,
-        **({} if random is None else {'random': random}))
+        'A',
+        char_prefab_map or self.choices,  # pyrefly: ignore[bad-argument-type]
+        self.prefabs,  # pyrefly: ignore[bad-argument-type]
+        **({} if random is None else {'random': random})
+    )
 
   def test_each_unspecified_random_uses_independent_generator(self):
     first_rng = mock.Mock()
