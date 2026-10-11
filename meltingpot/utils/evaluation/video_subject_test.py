@@ -140,6 +140,26 @@ class VideoSubjectWriterTest(absltest.TestCase):
     self.assertIsNone(subject._writer)
     self.assertIsNone(subject._path)
 
+  def test_interrupted_episode_releases_previous_video_writer(self):
+    previous_writer = mock.Mock()
+    current_writer = mock.Mock()
+    previous_writer.isOpened.return_value = True
+    current_writer.isOpened.return_value = True
+    subject = video_subject.VideoSubject(tempfile.mkdtemp())
+    frame = np.zeros((8, 16, 3), dtype=np.uint8)
+    first = dm_env.restart(observation=[{'WORLD.RGB': frame}])
+    last = dm_env.termination(observation=[{'WORLD.RGB': frame}], reward=0)
+
+    with mock.patch.object(
+        video_subject.cv2, 'VideoWriter',
+        side_effect=[previous_writer, current_writer]):
+      subject.on_next(first)
+      subject.on_next(first)
+      previous_writer.release.assert_called_once_with()
+      current_writer.release.assert_not_called()
+      subject.on_next(last)
+    current_writer.release.assert_called_once_with()
+
 
 class VideoFrameSizeTest(parameterized.TestCase):
 
@@ -190,6 +210,42 @@ class VideoFrameSizeTest(parameterized.TestCase):
     self.assertEqual(
         {pathlib.Path(path) for path in paths}, set(directory.iterdir())
     )
+
+  def test_new_first_abandons_unfinished_video_without_leaking_file(self):
+    recorder, paths, directory = self.make_recorder()
+    first, middle = _frame(), _frame(shift=30)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    abandoned = pathlib.Path(recorder._path)
+    recorder.on_next(_timestep(dm_env.StepType.MID, middle))
+    self.assertTrue(abandoned.exists())
+
+    # The next episode begins without a LAST from the old recording.
+    replacement_first = _frame(12, 20, shift=60)
+    replacement_last = _frame(12, 20, shift=90)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, replacement_first))
+    self.assertFalse(abandoned.exists())
+    self.assertEmpty(paths)
+
+    recorder.on_next(_timestep(dm_env.StepType.LAST, replacement_last))
+    self.assertLen(paths, 1)
+    self.assertEqual(set(directory.iterdir()), {pathlib.Path(paths[0])})
+    np.testing.assert_array_equal(
+        _read_frames(paths[0]), [replacement_first, replacement_last])
+
+  def test_bad_new_first_keeps_ongoing_video_intact(self):
+    recorder, paths, _ = self.make_recorder()
+    first, last = _frame(), _frame(shift=80)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    existing_path = recorder._path
+
+    with self.assertRaisesRegex(ValueError, 'not uint8'):
+      recorder.on_next(_timestep(
+          dm_env.StepType.FIRST, first.astype(np.float32)))
+
+    self.assertEqual(recorder._path, existing_path)
+    recorder.on_next(_timestep(dm_env.StepType.LAST, last))
+    self.assertLen(paths, 1)
+    np.testing.assert_array_equal(_read_frames(paths[0]), [first, last])
 
   @parameterized.parameters('strided', 'fortran')
   def test_valid_noncontiguous_frames_keep_their_pixels(self, layout):
