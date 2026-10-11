@@ -37,9 +37,10 @@ def rgb_to_rgba(rgb: ColorRGB, alpha: int = 255) -> ColorRGBA:
   return (rgb[0], rgb[1], rgb[2], alpha)
 
 
-def scale_color(color_tuple: ColorRGBA, factor: float,
-                alpha: Optional[int] = None) -> ColorRGBA:
-  """Scale an RGBA color tuple by a given factor.
+def scale_color(
+    color_tuple: Color, factor: float, alpha: Optional[int] = None
+) -> ColorRGBA:
+  """Scale an RGB or RGBA color tuple by a given factor.
 
   This function scales, multiplicatively, the RGB values of a color tuple by the
   given amount, clamped to the valid range [0, 255]. The alpha channel is either
@@ -47,10 +48,10 @@ def scale_color(color_tuple: ColorRGBA, factor: float,
   the original color.
 
   Args:
-    color_tuple: The original color to scale.
+    color_tuple: The original RGB or RGBA color to scale.
     factor: The factor to multiplicatively scale the RGB channels by.
     alpha: If provided, the new color will have this alpha, otherwise, inherit
-      from original color_tuple.
+      from original color_tuple (or defaults to 255 for RGB input).
 
   Returns:
     A new color tuple, with its RGB channels scaled.
