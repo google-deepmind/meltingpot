@@ -160,6 +160,43 @@ class ReturnAccumulationTest(parameterized.TestCase):
     self.assertLen(results, 1)
     np.testing.assert_array_equal(results[0], [1.5])
 
+  @parameterized.named_parameters(
+      ('fewer_players', [1, 2], [3]),
+      ('more_players', [1], [2, 3]),
+      ('broadcastable_matrix', [[1], [2]], [[3, 4]]),
+      ('scalar_to_vector', 1, [2]),
+  )
+  def test_rejects_inconsistent_reward_shapes_without_corrupting_return(
+      self, first_reward, bad_reward
+  ):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    results = []
+    self.addCleanup(recorder.subscribe(results.append).dispose)
+    recorder.on_next(dm_env.restart(observation=()))
+    recorder.on_next(dm_env.transition(first_reward, ()))
+
+    with self.assertRaisesRegex(ValueError, 'Reward shape changed'):
+      recorder.on_next(dm_env.transition(bad_reward, ()))
+
+    self.assertEmpty(results)
+    recorder.on_next(dm_env.termination(first_reward, ()))
+    self.assertLen(results, 1)
+    np.testing.assert_array_equal(results[0], 2 * np.asarray(first_reward))
+    self.assertEqual(results[0].shape, np.asarray(first_reward).shape)
+
+  def test_skipped_reward_keeps_previous_reward_shape(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    results = []
+    self.addCleanup(recorder.subscribe(results.append).dispose)
+    recorder.on_next(dm_env.restart(observation=()))
+    recorder.on_next(dm_env.transition([1, 2], ()))
+    recorder.on_next(dm_env.transition(None, ()))
+    recorder.on_next(dm_env.termination([3, 4], ()))
+    self.assertLen(results, 1)
+    np.testing.assert_array_equal(results[0], [4, 6])
+
   def test_episode_order_and_missing_reward_controls(self):
     recorder = return_subject.ReturnSubject()
     self.addCleanup(recorder.dispose)
