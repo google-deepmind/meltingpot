@@ -23,7 +23,7 @@ from reactivex import subject
 
 
 class VideoSubject(subject.Subject):
-  """Subject that emits a video at the end of each episode."""
+  """Emits complete episode videos and discards interrupted recordings."""
 
   def __init__(
       self,
@@ -75,6 +75,12 @@ class VideoSubject(subject.Subject):
       raise ValueError('WORLD.RGB is not in [0, 255].')
 
     if timestep.step_type.first():
+      # A reset can arrive before the previous episode produces LAST.
+      # Discard its incomplete video and close the writer before replacing it.
+      if self._writer is not None:
+        self._writer.release()
+        if self._path is not None and os.path.isfile(self._path):
+          os.remove(self._path)
       self._frame_size = (width, height)
       self._path = os.path.join(
           self._root, f'{uuid.uuid4().hex}.{self._extension}')
