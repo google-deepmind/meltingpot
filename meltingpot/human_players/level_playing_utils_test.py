@@ -96,5 +96,44 @@ class RunEpisodePlayerPrefixesTest(absltest.TestCase):
     env_builder.assert_not_called()
 
 
+class ActionReaderTest(absltest.TestCase):
+
+  def test_only_reads_actions_supported_by_selected_player(self):
+    env = mock.Mock()
+    env.action_spec.return_value = {
+        '1.move': mock.sentinel.move_spec,
+        '2.fire': mock.sentinel.fire_spec,
+    }
+    move = mock.Mock(return_value=3)
+    fire = mock.Mock(return_value=1)
+    reader = level_playing_utils.ActionReader(
+        env, {'move': move, 'fire': fire}
+    )
+
+    player_one_actions = reader.step('1')
+
+    self.assertEqual(player_one_actions, {'1.move': 3, '2.fire': 0})
+    move.assert_called_once_with()
+    fire.assert_not_called()
+
+  def test_uses_other_players_own_action_names(self):
+    env = mock.Mock()
+    env.action_spec.return_value = {
+        '1.move': mock.sentinel.move_spec,
+        '2.fire': mock.sentinel.fire_spec,
+    }
+    move = mock.Mock(return_value=3)
+    fire = mock.Mock(return_value=1)
+    reader = level_playing_utils.ActionReader(
+        env, {'move': move, 'fire': fire}
+    )
+
+    player_two_actions = reader.step('2')
+
+    self.assertEqual(player_two_actions, {'1.move': 0, '2.fire': 1})
+    move.assert_not_called()
+    fire.assert_called_once_with()
+
+
 if __name__ == '__main__':
   absltest.main()
