@@ -586,5 +586,40 @@ class TitForTatInitialStateTest(absltest.TestCase):
     tremble.assert_called_once_with(0.5)
 
 
+def _first_timestep():
+  return dm_env.restart({
+      'INVENTORY': np.array([0, 0]),
+      'INTERACTION_INVENTORIES': np.array([[-1, -1], [-1, -1]]),
+  })
+
+
+class RespondToPreviousInitialStateTest(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self._puppeteer = in_the_matrix.RespondToPrevious(
+        responses={_RESOURCE_0: _RESOURCE_0, _RESOURCE_1: _RESOURCE_1},
+        margin=1,
+    )
+
+  def test_initial_state_does_not_sample_random_target(self):
+    with mock.patch.object(in_the_matrix.random, 'choice') as choice:
+      state = self._puppeteer.initial_state()
+
+    choice.assert_not_called()
+    self.assertIs(state, _RESOURCE_0)
+
+  def test_first_timestep_samples_opening_target_once(self):
+    initial_state = self._puppeteer.initial_state()
+    with mock.patch.object(
+        in_the_matrix.random, 'choice', return_value=_RESOURCE_1
+    ) as choice:
+      timestep, state = self._puppeteer.step(_first_timestep(), initial_state)
+
+    choice.assert_called_once_with([_RESOURCE_0, _RESOURCE_1])
+    self.assertIs(state, _RESOURCE_1)
+    self.assertIs(timestep.observation['GOAL'], _RESOURCE_1.collect_goal)
+
+
 if __name__ == '__main__':
   absltest.main()
