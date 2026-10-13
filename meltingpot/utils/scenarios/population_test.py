@@ -190,5 +190,36 @@ class PopulationRestartTest(parameterized.TestCase):
     self.assertEqual(bot_population.await_action(), (0,))
 
 
+class PopulationValidationTest(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self.policy = mock.Mock(spec_set=policy.Policy)
+
+  def test_rejects_missing_role_candidates(self):
+    with self.assertRaisesRegex(ValueError, 'No population candidates'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={},
+          roles=['resident'],
+      )
+
+  def test_rejects_empty_role_candidates(self):
+    with self.assertRaisesRegex(ValueError, 'candidates.*empty'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={'resident': ()},
+          roles=['resident'],
+      )
+
+  def test_rejects_unknown_policy_candidate(self):
+    with self.assertRaisesRegex(ValueError, 'unknown policies'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={'resident': ('missing_bot',)},
+          roles=['resident'],
+      )
+
+
 if __name__ == '__main__':
   absltest.main()
