@@ -162,9 +162,6 @@ end
 
 function Receiver:setHasNeededObjects(x)
   self._config.hasNeededObjects = x
-  if self._config.hasNeededObjects == true then
-    self.gameObject:setState(self._config.waitState)
-  end
   return self._config.hasNeededObjects
 end
 
@@ -174,9 +171,6 @@ end
 
 function Receiver:setHasOneOfTwoCubes(x)
   self._config.hasOneOfTwoCubes = x
-  if self._config.hasOneOfTwoCubes == true then
-    self.gameObject:setState(self._config.waitState)
-  end
   return self._config.hasOneOfTwoCubes
 end
 
