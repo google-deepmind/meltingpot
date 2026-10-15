@@ -112,10 +112,15 @@ function buildAvatarConfigs(numPlayers, prefabs, playerPalettes)
   local gameObjects = {}
 
   log.v(1, "Building " .. numPlayers .. " avatars.")
-  if #playerPalettes ~= numPlayers then
+  local paletteCount = playerPalettes and #playerPalettes or 0
+  if paletteCount ~= numPlayers then
+    if numPlayers > #colors.colors then
+      error("Cannot generate " .. numPlayers .. " default player palettes; " ..
+            "only " .. #colors.colors .. " colors are available.")
+    end
     log.v(
       1,
-      "Player palettes passed (" .. #playerPalettes .. ") don't correspond " ..
+      "Player palettes passed (" .. paletteCount .. ") don't correspond " ..
       "to the number of players (" .. numPlayers .. "). " ..
       "Creating default player palettes.")
     playerPalettes = {}
