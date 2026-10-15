@@ -282,6 +282,27 @@ class ScenarioWrapperTest(absltest.TestCase):
       self.assertEqual(received['background'], expected)
 
 
+class ScenarioRewardFreeRestartTest(absltest.TestCase):
+
+  def test_split_timestep_preserves_absent_rewards(self):
+    scenario = object.__new__(scenario_utils.Scenario)
+    scenario._is_focal = (True, False, True)
+    scenario._permitted_observations = frozenset({'ok'})
+    timestep = dm_env.restart((
+        {'ok': 1, 'hidden': 10},
+        {'ok': 2, 'hidden': 20},
+        {'ok': 3, 'hidden': 30},
+    ))
+
+    focal, background = scenario._split_timestep(timestep)
+
+    self.assertIsNone(focal.reward)
+    self.assertIsNone(background.reward)
+    self.assertEqual(focal.observation, ({'ok': 1}, {'ok': 3}))
+    self.assertEqual(
+        background.observation, ({'ok': 2, 'hidden': 20},))
+
+
 class ScenarioActionValidationTest(parameterized.TestCase):
 
   @parameterized.parameters(([0],), ([1],), ([0, 1, 2],))
