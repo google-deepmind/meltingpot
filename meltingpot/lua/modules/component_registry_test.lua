@@ -47,6 +47,17 @@ function tests.testUsage()
   allComponents['Empty'] = component
   asserts.tablesEQ(component_registry.getAllComponents(), allComponents)
 
+  -- Inspecting the registry must not expose the mutable source mapping.
+  local snapshot = component_registry.getAllComponents()
+  assert(snapshot ~= component_registry.getAllComponents())
+  snapshot['Empty'] = nil
+  assert(component_registry.getComponent('Empty') == component)
+
+  snapshot['NotRegisteredComponent'] = component
+  assert(component_registry.getAllComponents()['NotRegisteredComponent'] == nil)
+  asserts.shouldFail(
+      function() component_registry.getComponent('NotRegisteredComponent') end)
+
 end
 
 return test_runner.run(tests)
