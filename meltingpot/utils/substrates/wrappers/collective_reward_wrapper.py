@@ -42,11 +42,15 @@ class CollectiveRewardWrapper(observables.ObservableLab2dWrapper):
     Args:
       input_timestep: input_timestep before adding `collective_reward'.
     """
+    # Match the declared observation dtype, including a reward-free FIRST step.
+    collective_reward = (
+        np.float64(0) if input_timestep.reward is None
+        else np.sum(input_timestep.reward, dtype=np.float64))
     return dm_env.TimeStep(
         step_type=input_timestep.step_type,
         reward=input_timestep.reward,
         discount=input_timestep.discount,
-        observation=[{_COLLECTIVE_REWARD_OBS: np.sum(input_timestep.reward),
+        observation=[{_COLLECTIVE_REWARD_OBS: collective_reward,
                       **obs} for obs in input_timestep.observation])
 
   def reset(self, *args, **kwargs) -> dm_env.TimeStep:
