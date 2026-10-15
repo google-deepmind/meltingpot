@@ -64,6 +64,23 @@ class CollectiveRewardWrapperTest(absltest.TestCase):
         {'RGB': RGB_SPEC, added_key: COLLECTIVE_REWARD_SPEC}] * NUM_PLAYERS)
 
 
+class CollectiveRewardSpecIsolationTest(absltest.TestCase):
+
+  def test_observation_spec_does_not_mutate_wrapped_spec(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    source_spec = [{'RGB': RGB_SPEC} for _ in range(NUM_PLAYERS)]
+    env.observation_spec.return_value = source_spec
+    wrapped = collective_reward_wrapper.CollectiveRewardWrapper(env)
+
+    actual = wrapped.observation_spec()
+
+    added_key = collective_reward_wrapper._COLLECTIVE_REWARD_OBS
+    self.assertTrue(all(added_key in obs for obs in actual))
+    self.assertTrue(all(added_key not in obs for obs in source_spec))
+    for returned, source in zip(actual, source_spec):
+      self.assertIsNot(returned, source)
+
+
 class CollectiveRewardResetTest(absltest.TestCase):
 
   def test_reset_forwards_args_and_kwargs(self):
