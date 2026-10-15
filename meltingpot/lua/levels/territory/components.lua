@@ -83,7 +83,8 @@ end
 
 function Resource:registerUpdaters(updaterRegistry)
   local provideRewards = function()
-    if self.gameObject:getState() ~= self._config.destroyedState then
+    if not self._destroyed and
+        self.gameObject:getState() ~= self._config.destroyedState then
       if self._claimedByAvatarComponent.gameObject:hasComponent('Taste') then
         local avatarObject = self._claimedByAvatarComponent.gameObject
         local tasteComponent = avatarObject:getComponent('Taste')
@@ -136,6 +137,11 @@ function Resource:_claim(hittingGameObject)
 end
 
 function Resource:onHit(hittingGameObject, hitName)
+  -- Destruction takes effect before the engine commits the queued state.
+  if self._destroyed then
+    return false
+  end
+
   if string.sub(hitName, 1, string.len('directionHit')) == 'directionHit' then
     self:_claim(hittingGameObject)
   end
