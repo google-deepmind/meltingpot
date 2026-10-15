@@ -390,7 +390,7 @@ function Progress:getPlayerVotedOff()
   local numActiveAvatars = #self:getActivePlayers()
   for player = 1, self.numPlayers do
     local col = self.votingMatrix:select(2, player)
-    if col:sum() >= math.ceil(numActiveAvatars/2) then
+    if col:sum() > numActiveAvatars/2 then
       return player
     end
   end
