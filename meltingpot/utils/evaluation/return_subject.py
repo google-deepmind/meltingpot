@@ -46,6 +46,11 @@ class ReturnSubject(subject.Subject):
       if self._return is None:
         dtype = np.result_type(reward.dtype, np.float64)
         self._return = np.zeros_like(reward, dtype=dtype)
+      elif reward.shape != self._return.shape:
+        raise ValueError(
+            'Reward shape changed during episode: expected '
+            f'{self._return.shape}, got {reward.shape}.'
+        )
       self._return = np.asarray(self._return + reward)
 
     if timestep.step_type.last():

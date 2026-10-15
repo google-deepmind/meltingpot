@@ -172,14 +172,16 @@ class ActionReader(object):
     self._action_spec = env.action_spec()
     assert isinstance(self._action_spec, dict)
     self._action_names = set()
+    self._action_names_by_player = collections.defaultdict(set)
     for action_key in self._action_spec.keys():
-      _, action_name = _split_key(action_key)
+      player_prefix, action_name = _split_key(action_key)
       self._action_names.add(action_name)
+      self._action_names_by_player[player_prefix].add(action_name)
 
   def step(self, player_prefix: str) -> Mapping[str, int]:
     """Update the actions of player `player_prefix`."""
     actions = {action_key: 0 for action_key in self._action_spec.keys()}
-    for action_name in self._action_names:
+    for action_name in self._action_names_by_player[player_prefix]:
       actions[f'{player_prefix}.{action_name}'] = self._action_map[
           action_name]()
     return actions
@@ -330,19 +332,22 @@ def run_episode(
       # Compute next timestep
       actions = action_reader.step(player_prefix) if player_count else []
       timestep = env.step(actions)
+
+      rewards = _get_rewards(timestep)
+      for prefix in player_prefixes:
+        score[prefix] += rewards[prefix]
+        if prefix == player_prefix and rewards[prefix] != 0:
+          print(f'Player {prefix} Score: {score[prefix]}')
+
       if timestep.step_type == dm_env.StepType.LAST:
         if reset_env_when_done:
           timestep = env.reset()
         else:
           break
 
-      rewards = _get_rewards(timestep)
-      for i, prefix in enumerate(player_prefixes):
+      for i, _ in enumerate(player_prefixes):
         if verbose_fn:
           verbose_fn(timestep, i, player_index)
-        score[prefix] += rewards[prefix]
-        if i == player_index and rewards[prefix] != 0:
-          print(f'Player {prefix} Score: {score[prefix]}')
 
       # Print events if applicable
       if print_events and hasattr(env, 'events'):

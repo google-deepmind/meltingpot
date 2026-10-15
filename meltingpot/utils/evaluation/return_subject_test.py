@@ -57,7 +57,7 @@ class ReturnAccumulationTest(parameterized.TestCase):
   def accumulate(self, rewards):
     recorder = return_subject.ReturnSubject()
     self.addCleanup(recorder.dispose)
-    source = rx_subject.Subject()
+    source = rx_subject.Subject[dm_env.TimeStep]()
     self.addCleanup(source.dispose)
     self.addCleanup(source.subscribe(recorder).dispose)
     results = []
@@ -160,6 +160,43 @@ class ReturnAccumulationTest(parameterized.TestCase):
     self.assertLen(results, 1)
     np.testing.assert_array_equal(results[0], [1.5])
 
+  @parameterized.named_parameters(
+      ('fewer_players', [1, 2], [3]),
+      ('more_players', [1], [2, 3]),
+      ('broadcastable_matrix', [[1], [2]], [[3, 4]]),
+      ('scalar_to_vector', 1, [2]),
+  )
+  def test_rejects_inconsistent_reward_shapes_without_corrupting_return(
+      self, first_reward, bad_reward
+  ):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    results = []
+    self.addCleanup(recorder.subscribe(results.append).dispose)
+    recorder.on_next(dm_env.restart(observation=()))
+    recorder.on_next(dm_env.transition(first_reward, ()))
+
+    with self.assertRaisesRegex(ValueError, 'Reward shape changed'):
+      recorder.on_next(dm_env.transition(bad_reward, ()))
+
+    self.assertEmpty(results)
+    recorder.on_next(dm_env.termination(first_reward, ()))
+    self.assertLen(results, 1)
+    np.testing.assert_array_equal(results[0], 2 * np.asarray(first_reward))
+    self.assertEqual(results[0].shape, np.asarray(first_reward).shape)
+
+  def test_skipped_reward_keeps_previous_reward_shape(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    results = []
+    self.addCleanup(recorder.subscribe(results.append).dispose)
+    recorder.on_next(dm_env.restart(observation=()))
+    recorder.on_next(dm_env.transition([1, 2], ()))
+    recorder.on_next(dm_env.transition(None, ()))
+    recorder.on_next(dm_env.termination([3, 4], ()))
+    self.assertLen(results, 1)
+    np.testing.assert_array_equal(results[0], [4, 6])
+
   def test_episode_order_and_missing_reward_controls(self):
     recorder = return_subject.ReturnSubject()
     self.addCleanup(recorder.dispose)
@@ -172,6 +209,72 @@ class ReturnAccumulationTest(parameterized.TestCase):
     self.assertEqual(results, [None])
     with self.assertRaisesRegex(ValueError, 'First timestep'):
       recorder.on_next(dm_env.termination([1], ()))
+
+
+class ReturnCallbackStateTest(parameterized.TestCase):
+
+  @parameterized.parameters((None,), ((10.0, 20.0),))
+  def test_callback_can_start_the_next_episode(self, restart_reward):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    completed = []
+
+    def on_return(value):
+      completed.append(value)
+      if len(completed) == 1:
+        first = dm_env.restart(())
+        recorder.on_next(first._replace(reward=restart_reward))
+
+    recorder.subscribe(on_return)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((1.0, 2.0), ()))
+    recorder.on_next(dm_env.transition((3.0, 4.0), ()))
+    recorder.on_next(dm_env.termination((5.0, 6.0), ()))
+    np.testing.assert_array_equal(completed[0], [1.0, 2.0])
+    initial = [0.0, 0.0] if restart_reward is None else restart_reward
+    np.testing.assert_array_equal(
+        completed[1], np.asarray(initial) + [8.0, 10.0]
+    )
+
+  def test_failing_observer_does_not_keep_the_completed_episode_active(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+
+    def fail(value):
+      del value
+      raise RuntimeError('observer failed')
+
+    subscription = recorder.subscribe(fail)
+    recorder.on_next(dm_env.restart(()))
+    with self.assertRaisesRegex(RuntimeError, 'observer failed'):
+      recorder.on_next(dm_env.termination((2.0,), ()))
+    subscription.dispose()
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(dm_env.transition((10.0,), ()))
+    completed = []
+    recorder.subscribe(completed.append)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((3.0,), ()))
+    np.testing.assert_array_equal(completed, [[3.0]])
+
+  def test_complete_nested_episode_and_empty_returns_keep_their_values(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    completed = []
+
+    def on_return(value):
+      completed.append(value)
+      if len(completed) == 1:
+        recorder.on_next(dm_env.restart(()))
+        recorder.on_next(dm_env.termination((), ()))
+
+    recorder.subscribe(on_return)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((1.5,), ()))
+    np.testing.assert_array_equal(completed[0], [1.5])
+    self.assertEqual(completed[1].shape, (0,))
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(dm_env.transition((1.0,), ()))
 
 
 if __name__ == '__main__':

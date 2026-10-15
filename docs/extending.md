@@ -17,19 +17,20 @@ Add your bots to the library by adding an entry for each one in [`bots`](https:/
 If your bot is purely a saved model then structure its entry like this:
 
 ```python
-my_bot_0=_saved_model(
+my_bot_0=saved_model(
     substrate='name_of_substrate_where_bot_operates',
     model='my_bot_0',
 ),
 ```
 
 If instead your bot is a puppet, then select a `Puppeteer` from those
-defined in [`puppeteers`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/utils/bots/puppeteers).
+defined in [`puppeteers`](https://github.com/google-deepmind/meltingpot/tree/main/meltingpot/utils/puppeteers).
 Then structure its bot entry like this:
 
 ```python
-my_puppet_bot_0=_puppet(
+my_puppet_bot_0=puppet(
     substrate='name_of_substrate_where_bot_operates',
+    model='my_puppet_bot_0',
     puppeteer_builder=functools.partial(Puppeteer, **kwargs)
 ),
 ```

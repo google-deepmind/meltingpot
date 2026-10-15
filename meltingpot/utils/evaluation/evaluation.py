@@ -92,6 +92,7 @@ def run_and_observe_episodes(
 
     if video_root:
       video_subject = video_subject_lib.VideoSubject(video_root)
+      stack.callback(video_subject.dispose)
       subscribe(substrate_observables.timestep, video_subject)
       subscribe(video_subject, on_next=data['video_path'].append)
 

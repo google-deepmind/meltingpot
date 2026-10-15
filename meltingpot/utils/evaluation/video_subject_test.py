@@ -140,6 +140,26 @@ class VideoSubjectWriterTest(absltest.TestCase):
     self.assertIsNone(subject._writer)
     self.assertIsNone(subject._path)
 
+  def test_interrupted_episode_releases_previous_video_writer(self):
+    previous_writer = mock.Mock()
+    current_writer = mock.Mock()
+    previous_writer.isOpened.return_value = True
+    current_writer.isOpened.return_value = True
+    subject = video_subject.VideoSubject(tempfile.mkdtemp())
+    frame = np.zeros((8, 16, 3), dtype=np.uint8)
+    first = dm_env.restart(observation=[{'WORLD.RGB': frame}])
+    last = dm_env.termination(observation=[{'WORLD.RGB': frame}], reward=0)
+
+    with mock.patch.object(
+        video_subject.cv2, 'VideoWriter',
+        side_effect=[previous_writer, current_writer]):
+      subject.on_next(first)
+      subject.on_next(first)
+      previous_writer.release.assert_called_once_with()
+      current_writer.release.assert_not_called()
+      subject.on_next(last)
+    current_writer.release.assert_called_once_with()
+
 
 class VideoFrameSizeTest(parameterized.TestCase):
 
@@ -191,6 +211,42 @@ class VideoFrameSizeTest(parameterized.TestCase):
         {pathlib.Path(path) for path in paths}, set(directory.iterdir())
     )
 
+  def test_new_first_abandons_unfinished_video_without_leaking_file(self):
+    recorder, paths, directory = self.make_recorder()
+    first, middle = _frame(), _frame(shift=30)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    abandoned = pathlib.Path(recorder._path)
+    recorder.on_next(_timestep(dm_env.StepType.MID, middle))
+    self.assertTrue(abandoned.exists())
+
+    # The next episode begins without a LAST from the old recording.
+    replacement_first = _frame(12, 20, shift=60)
+    replacement_last = _frame(12, 20, shift=90)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, replacement_first))
+    self.assertFalse(abandoned.exists())
+    self.assertEmpty(paths)
+
+    recorder.on_next(_timestep(dm_env.StepType.LAST, replacement_last))
+    self.assertLen(paths, 1)
+    self.assertEqual(set(directory.iterdir()), {pathlib.Path(paths[0])})
+    np.testing.assert_array_equal(
+        _read_frames(paths[0]), [replacement_first, replacement_last])
+
+  def test_bad_new_first_keeps_ongoing_video_intact(self):
+    recorder, paths, _ = self.make_recorder()
+    first, last = _frame(), _frame(shift=80)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    existing_path = recorder._path
+
+    with self.assertRaisesRegex(ValueError, 'not uint8'):
+      recorder.on_next(_timestep(
+          dm_env.StepType.FIRST, first.astype(np.float32)))
+
+    self.assertEqual(recorder._path, existing_path)
+    recorder.on_next(_timestep(dm_env.StepType.LAST, last))
+    self.assertLen(paths, 1)
+    np.testing.assert_array_equal(_read_frames(paths[0]), [first, last])
+
   @parameterized.parameters('strided', 'fortran')
   def test_valid_noncontiguous_frames_keep_their_pixels(self, layout):
     recorder, paths, _ = self.make_recorder()
@@ -226,6 +282,81 @@ class VideoFrameSizeTest(parameterized.TestCase):
     recorder.on_next(_timestep(dm_env.StepType.FIRST, frame))
     recorder.on_next(_timestep(dm_env.StepType.LAST, frame))
     np.testing.assert_array_equal(_read_frames(paths[0]), [frame, frame])
+
+
+def _video_timestep(step_type, value, shape=(8, 16, 3)):
+  return _timestep(step_type, np.full(shape, value, np.uint8))
+
+
+class VideoCallbackStateTest(absltest.TestCase):
+
+  def make_recorder(self):
+    directory = tempfile.TemporaryDirectory()
+    self.addCleanup(directory.cleanup)
+    recorder = video_subject.VideoSubject(
+        directory.name, extension='avi', codec='png '
+    )
+    self.addCleanup(recorder.dispose)
+    return recorder, pathlib.Path(directory.name)
+
+  def test_callback_can_open_a_differently_sized_next_recording(self):
+    recorder, directory = self.make_recorder()
+    completed = []
+    next_shape = (12, 20, 3)
+
+    def on_video(path):
+      completed.append(path)
+      np.testing.assert_array_equal(
+          _read_frames(path)[-1],
+          np.full((8, 16, 3), 30, np.uint8)
+          if len(completed) == 1
+          else np.full(next_shape, 90, np.uint8),
+      )
+      if len(completed) == 1:
+        recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 50, next_shape))
+
+    recorder.subscribe(on_video)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 10))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 30))
+    recorder.on_next(_video_timestep(dm_env.StepType.MID, 70, next_shape))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 90, next_shape))
+    self.assertLen(completed, 2)
+    self.assertLen(set(completed), 2)
+    self.assertEqual(
+        {pathlib.Path(path) for path in completed}, set(directory.iterdir())
+    )
+    for path, values, shape in (
+        (completed[0], (10, 30), (8, 16, 3)),
+        (completed[1], (50, 70, 90), next_shape),
+    ):
+      expected = [np.full(shape, value, np.uint8) for value in values]
+      np.testing.assert_array_equal(_read_frames(path), expected)
+
+  def test_failing_observer_leaves_no_released_writer_as_an_active_episode(
+      self,
+  ):
+    recorder, _ = self.make_recorder()
+    completed = []
+
+    def fail(path):
+      completed.append(path)
+      raise RuntimeError('video callback failed')
+
+    subscription = recorder.subscribe(fail)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 15))
+    with self.assertRaisesRegex(RuntimeError, 'video callback failed'):
+      recorder.on_next(_video_timestep(dm_env.StepType.LAST, 25))
+    subscription.dispose()
+    self.assertLen(_read_frames(completed[0]), 2)
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(_video_timestep(dm_env.StepType.MID, 35))
+    recorder.subscribe(completed.append)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 45))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 55))
+    np.testing.assert_array_equal(
+        _read_frames(completed[1]),
+        [np.full((8, 16, 3), x, np.uint8) for x in (45, 55)],
+    )
 
 
 if __name__ == '__main__':

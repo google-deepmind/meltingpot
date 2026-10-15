@@ -23,7 +23,7 @@ from reactivex import subject
 
 
 class VideoSubject(subject.Subject):
-  """Subject that emits a video at the end of each episode."""
+  """Emits complete episode videos and discards interrupted recordings."""
 
   def __init__(
       self,
@@ -75,6 +75,12 @@ class VideoSubject(subject.Subject):
       raise ValueError('WORLD.RGB is not in [0, 255].')
 
     if timestep.step_type.first():
+      # A reset can arrive before the previous episode produces LAST.
+      # Discard its incomplete video and close the writer before replacing it.
+      if self._writer is not None:
+        self._writer.release()
+        if self._path is not None and os.path.isfile(self._path):
+          os.remove(self._path)
       self._frame_size = (width, height)
       self._path = os.path.join(
           self._root, f'{uuid.uuid4().hex}.{self._extension}')
@@ -91,18 +97,19 @@ class VideoSubject(subject.Subject):
           f'WORLD.RGB frame size changed from {self._frame_size} to '
           f'{(width, height)} within an episode.'
       )
+    writer = self._writer
+    assert writer is not None
 
-    if not self._writer.isOpened():
-      self._writer.release()
+    if not writer.isOpened():
+      writer.release()
       self._writer = None
       self._path = None
       raise RuntimeError('Failed to open video writer.')
 
     bgr_frame = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-    assert self._writer is not None
-    self._writer.write(bgr_frame)
+    writer.write(bgr_frame)
     if timestep.step_type.last():
-      self._writer.release()
+      writer.release()
       path = self._path
       self._path = None
       self._writer = None
