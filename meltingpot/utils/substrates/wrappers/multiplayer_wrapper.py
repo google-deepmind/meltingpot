@@ -135,6 +135,9 @@ class Wrapper(observables.ObservableLab2dWrapper):
     Args:
       source: multiplayer actions.
     """
+    if len(source) != self._num_players:
+      raise ValueError(
+          f"Expected {self._num_players} player actions, got {len(source)}.")
     dmlab2d_actions = {}
     for player_index, action in enumerate(source):
       for key, value in action.items():
