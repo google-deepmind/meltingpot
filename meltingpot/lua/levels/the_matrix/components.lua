@@ -1027,7 +1027,8 @@ function InteractionTaste:getExtraRewardForInteraction(reward, inventory)
     local mostTastyIsMaximal = true
     for idx = 1, inventory:size() do
       if idx ~= self.mostTastyResourceClass then
-        mostTastyIsMaximal = amountMostTastyResource > inventory(idx):val()
+        mostTastyIsMaximal = mostTastyIsMaximal and
+            amountMostTastyResource > inventory(idx):val()
       end
     end
     if mostTastyIsMaximal then
