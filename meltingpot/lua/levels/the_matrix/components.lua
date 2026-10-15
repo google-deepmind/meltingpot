@@ -877,7 +877,7 @@ function GameInteractionZapper:start()
   -- Set the beam cooldown timer to its `ready` state (i.e. coolingTimer = 0).
   self._coolingTimer = 0
   self.latest_interaction_inventories = tensor.DoubleTensor(
-    2, self._config.numResources)
+    2, self._config.numResources):fill(-1)
 
   -- Create variables to hold cumulant data (scalars that can be used as
   -- instantaneous reward signals for generalized value function learning.
