@@ -372,6 +372,10 @@ function ZappedByColor:reset()
 end
 
 function ZappedByColor:onHit(hittingGameObject, hitName)
+  -- State changes are deferred, so health marks an elimination immediately.
+  if self._health <= 0 or self.gameObject:getState() == self:getWaitState() then
+    return false
+  end
   if self._config.allTeamNames[hitName] and hitName ~= self._config.team then
     self._health = self._health - 1
     if self._health <= 0 then
