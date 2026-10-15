@@ -1166,7 +1166,7 @@ Returns 0 when hungerLevel = delay and returns 1 when hungerLevel <= 0.
 function PeriodicNeed:getNeed()
   local normalizedTimeTillActive = self._hungerLevel / self._config.delay
   if self.gameObject:getComponent('Avatar'):isAlive() then
-    return math.max(1 - normalizedTimeTillActive, 0)
+    return math.min(math.max(1 - normalizedTimeTillActive, 0), 1)
   else
     return 0
   end
