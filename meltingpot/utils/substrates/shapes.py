@@ -113,10 +113,12 @@ def flip_horizontal(sprite: str) -> str:
 
 
 def flip_vertical(sprite: str) -> str:
-  flipped = ""
-  for line in sprite[1:].split("\n"):
-    flipped = line + "\n" + flipped
-  return flipped
+  """Reverse sprite rows while preserving optional boundary newlines."""
+  rows = sprite.split("\n")
+  start = int(sprite.startswith("\n"))
+  end = len(rows) - int(sprite.endswith("\n"))
+  rows[start:end] = reversed(rows[start:end])
+  return "\n".join(rows)
 
 
 def convert_rgb_to_rgba(rgb_tuple: ColorRGB) -> ColorRGBA:

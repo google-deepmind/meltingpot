@@ -189,6 +189,8 @@ class PopulationRestartTest(parameterized.TestCase):
     with self.assertRaisesRegex(RuntimeError, 'Previous action not retrieved'):
       bot_population.send_timestep(timestep)
     self.assertEqual(bot_population.await_action(), (0,))
+
+
 class _CountingPolicy(policy.Policy[int]):
   """A deliberately unhashable policy with observable per-slot state."""
 
@@ -319,6 +321,37 @@ class AliasedPolicyTest(parameterized.TestCase):
         self.assertEqual(agents.await_action(), (10 + count, 20 + count))
     self.assertEqual(names, [['first', 'second'], ['first', 'second']])
     self.assertEqual(actions, [(10, 20), (11, 21), (12, 22)] * 2)
+
+
+class PopulationValidationTest(absltest.TestCase):
+
+  def setUp(self):
+    super().setUp()
+    self.policy = mock.Mock(spec_set=policy.Policy)
+
+  def test_rejects_missing_role_candidates(self):
+    with self.assertRaisesRegex(ValueError, 'No population candidates'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={},
+          roles=['resident'],
+      )
+
+  def test_rejects_empty_role_candidates(self):
+    with self.assertRaisesRegex(ValueError, 'candidates.*empty'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={'resident': ()},
+          roles=['resident'],
+      )
+
+  def test_rejects_unknown_policy_candidate(self):
+    with self.assertRaisesRegex(ValueError, 'unknown policies'):
+      population.Population(
+          policies={'bot': self.policy},
+          names_by_role={'resident': ('missing_bot',)},
+          roles=['resident'],
+      )
 
 
 if __name__ == '__main__':
