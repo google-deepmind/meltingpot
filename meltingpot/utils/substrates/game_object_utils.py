@@ -169,10 +169,11 @@ def build_avatar_badges(
     get_first_named_component(
         badge_object,
         "Appearance")["kwargs"]["spriteNames"][0] = new_sprite_name
-    get_first_named_component(
-        badge_object,
-        "StateManager")["kwargs"]["stateConfigs"][0]["sprite"] = (
-            new_sprite_name)
+    state_configs = get_first_named_component(
+        badge_object, "StateManager")["kwargs"]["stateConfigs"]
+    for state_config in state_configs:
+      if "sprite" in state_config and state_config["sprite"] == sprite_name:
+        state_config["sprite"] = new_sprite_name
     get_first_named_component(
         badge_object, "AvatarConnector")["kwargs"]["playerIndex"] = lua_index
     get_first_named_component(
