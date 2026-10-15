@@ -211,5 +211,71 @@ class ReturnAccumulationTest(parameterized.TestCase):
       recorder.on_next(dm_env.termination([1], ()))
 
 
+class ReturnCallbackStateTest(parameterized.TestCase):
+
+  @parameterized.parameters((None,), ((10.0, 20.0),))
+  def test_callback_can_start_the_next_episode(self, restart_reward):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    completed = []
+
+    def on_return(value):
+      completed.append(value)
+      if len(completed) == 1:
+        first = dm_env.restart(())
+        recorder.on_next(first._replace(reward=restart_reward))
+
+    recorder.subscribe(on_return)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((1.0, 2.0), ()))
+    recorder.on_next(dm_env.transition((3.0, 4.0), ()))
+    recorder.on_next(dm_env.termination((5.0, 6.0), ()))
+    np.testing.assert_array_equal(completed[0], [1.0, 2.0])
+    initial = [0.0, 0.0] if restart_reward is None else restart_reward
+    np.testing.assert_array_equal(
+        completed[1], np.asarray(initial) + [8.0, 10.0]
+    )
+
+  def test_failing_observer_does_not_keep_the_completed_episode_active(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+
+    def fail(value):
+      del value
+      raise RuntimeError('observer failed')
+
+    subscription = recorder.subscribe(fail)
+    recorder.on_next(dm_env.restart(()))
+    with self.assertRaisesRegex(RuntimeError, 'observer failed'):
+      recorder.on_next(dm_env.termination((2.0,), ()))
+    subscription.dispose()
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(dm_env.transition((10.0,), ()))
+    completed = []
+    recorder.subscribe(completed.append)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((3.0,), ()))
+    np.testing.assert_array_equal(completed, [[3.0]])
+
+  def test_complete_nested_episode_and_empty_returns_keep_their_values(self):
+    recorder = return_subject.ReturnSubject()
+    self.addCleanup(recorder.dispose)
+    completed = []
+
+    def on_return(value):
+      completed.append(value)
+      if len(completed) == 1:
+        recorder.on_next(dm_env.restart(()))
+        recorder.on_next(dm_env.termination((), ()))
+
+    recorder.subscribe(on_return)
+    recorder.on_next(dm_env.restart(()))
+    recorder.on_next(dm_env.termination((1.5,), ()))
+    np.testing.assert_array_equal(completed[0], [1.5])
+    self.assertEqual(completed[1].shape, (0,))
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(dm_env.transition((1.0,), ()))
+
+
 if __name__ == '__main__':
   absltest.main()

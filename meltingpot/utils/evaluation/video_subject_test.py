@@ -284,5 +284,80 @@ class VideoFrameSizeTest(parameterized.TestCase):
     np.testing.assert_array_equal(_read_frames(paths[0]), [frame, frame])
 
 
+def _video_timestep(step_type, value, shape=(8, 16, 3)):
+  return _timestep(step_type, np.full(shape, value, np.uint8))
+
+
+class VideoCallbackStateTest(absltest.TestCase):
+
+  def make_recorder(self):
+    directory = tempfile.TemporaryDirectory()
+    self.addCleanup(directory.cleanup)
+    recorder = video_subject.VideoSubject(
+        directory.name, extension='avi', codec='png '
+    )
+    self.addCleanup(recorder.dispose)
+    return recorder, pathlib.Path(directory.name)
+
+  def test_callback_can_open_a_differently_sized_next_recording(self):
+    recorder, directory = self.make_recorder()
+    completed = []
+    next_shape = (12, 20, 3)
+
+    def on_video(path):
+      completed.append(path)
+      np.testing.assert_array_equal(
+          _read_frames(path)[-1],
+          np.full((8, 16, 3), 30, np.uint8)
+          if len(completed) == 1
+          else np.full(next_shape, 90, np.uint8),
+      )
+      if len(completed) == 1:
+        recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 50, next_shape))
+
+    recorder.subscribe(on_video)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 10))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 30))
+    recorder.on_next(_video_timestep(dm_env.StepType.MID, 70, next_shape))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 90, next_shape))
+    self.assertLen(completed, 2)
+    self.assertLen(set(completed), 2)
+    self.assertEqual(
+        {pathlib.Path(path) for path in completed}, set(directory.iterdir())
+    )
+    for path, values, shape in (
+        (completed[0], (10, 30), (8, 16, 3)),
+        (completed[1], (50, 70, 90), next_shape),
+    ):
+      expected = [np.full(shape, value, np.uint8) for value in values]
+      np.testing.assert_array_equal(_read_frames(path), expected)
+
+  def test_failing_observer_leaves_no_released_writer_as_an_active_episode(
+      self,
+  ):
+    recorder, _ = self.make_recorder()
+    completed = []
+
+    def fail(path):
+      completed.append(path)
+      raise RuntimeError('video callback failed')
+
+    subscription = recorder.subscribe(fail)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 15))
+    with self.assertRaisesRegex(RuntimeError, 'video callback failed'):
+      recorder.on_next(_video_timestep(dm_env.StepType.LAST, 25))
+    subscription.dispose()
+    self.assertLen(_read_frames(completed[0]), 2)
+    with self.assertRaisesRegex(ValueError, 'FIRST'):
+      recorder.on_next(_video_timestep(dm_env.StepType.MID, 35))
+    recorder.subscribe(completed.append)
+    recorder.on_next(_video_timestep(dm_env.StepType.FIRST, 45))
+    recorder.on_next(_video_timestep(dm_env.StepType.LAST, 55))
+    np.testing.assert_array_equal(
+        _read_frames(completed[1]),
+        [np.full((8, 16, 3), x, np.uint8) for x in (45, 55)],
+    )
+
+
 if __name__ == '__main__':
   absltest.main()
