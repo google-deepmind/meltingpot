@@ -37,27 +37,28 @@ def rgb_to_rgba(rgb: ColorRGB, alpha: int = 255) -> ColorRGBA:
   return (rgb[0], rgb[1], rgb[2], alpha)
 
 
-def scale_color(color_tuple: ColorRGBA, factor: float,
-                alpha: Optional[int] = None) -> ColorRGBA:
-  """Scale an RGBA color tuple by a given factor.
+def scale_color(
+    color_tuple: Color, factor: float, alpha: Optional[int] = None
+) -> ColorRGBA:
+  """Scale an RGB or RGBA color tuple by a given factor.
 
   This function scales, multiplicatively, the RGB values of a color tuple by the
-  given amount, clamped to a maximum of 255. The alpha channel is either
+  given amount, clamped to the valid range [0, 255]. The alpha channel is either
   overwritten by the specified one, or if none is specified, it is inherited by
   the original color.
 
   Args:
-    color_tuple: The original color to scale.
+    color_tuple: The original RGB or RGBA color to scale.
     factor: The factor to multiplicatively scale the RGB channels by.
     alpha: If provided, the new color will have this alpha, otherwise, inherit
-      from original color_tuple.
+      from original color_tuple (or defaults to 255 for RGB input).
 
   Returns:
     A new color tuple, with its RGB channels scaled.
   """
   if len(color_tuple) == 3:
     color_tuple = rgb_to_rgba(color_tuple)  # pytype: disable=wrong-arg-types
-  scaled = [int(min(x * factor, 255)) for x in color_tuple]
+  scaled = [int(max(0, min(x * factor, 255))) for x in color_tuple]
   scaled[3] = alpha if alpha is not None else color_tuple[-1]
   return tuple(scaled)  # pyrefly: ignore[bad-return]
 
@@ -131,7 +132,9 @@ def adjust_color_brightness(
     factor: float) -> ColorRGBA:
   """Adjust color brightness by first converting to hsv and then back to rgb."""
   hsv = colorsys.rgb_to_hsv(color_tuple[0], color_tuple[1], color_tuple[2])
-  adjusted_hsv = (hsv[0], hsv[1], hsv[2] * factor)
+  # HSV values are expressed using the original 8-bit RGB range here.
+  # Clamping brightness avoids invalid negative or >255 output channels.
+  adjusted_hsv = (hsv[0], hsv[1], max(0, min(hsv[2] * factor, 255)))
   adjusted_rgb = colorsys.hsv_to_rgb(*adjusted_hsv)
   if len(color_tuple) == 3:
     output_color = (adjusted_rgb[0], adjusted_rgb[1], adjusted_rgb[2], 255)

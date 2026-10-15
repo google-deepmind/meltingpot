@@ -22,6 +22,34 @@ from meltingpot.utils.substrates import shapes
 
 class ShapesTest(parameterized.TestCase):
 
+  def test_scale_color_clamps_negative_channels_to_zero(self):
+    self.assertEqual(
+        shapes.scale_color((80, 120, 200, 64), -0.5), (0, 0, 0, 64)
+    )
+    self.assertEqual(shapes.scale_color((80, 120, 200), -2), (0, 0, 0, 255))
+
+  def test_scale_color_clamps_high_values_and_preserves_alpha(self):
+    self.assertEqual(
+        shapes.scale_color((200, 100, 50, 14), 2), (255, 200, 100, 14)
+    )
+    self.assertEqual(
+        shapes.scale_color((100, 80, 60, 14), 0.5, 23), (50, 40, 30, 23)
+    )
+
+  def test_brightness_does_not_exceed_rgb_range(self):
+    result = shapes.adjust_color_brightness((200, 100, 50, 14), 2)
+    self.assertEqual(result[3], 14)
+    self.assertEqual(result[0], 255)
+    self.assertTrue(all(0 <= value <= 255 for value in result))
+
+  def test_negative_brightness_becomes_black_without_changing_alpha(self):
+    self.assertEqual(
+        shapes.adjust_color_brightness((200, 100, 50), -0.5), (0, 0, 0, 255)
+    )
+    self.assertEqual(
+        shapes.adjust_color_brightness((200, 100, 50, 20), -0.5), (0, 0, 0, 20)
+    )
+
   @parameterized.parameters([
       ["""
 a
