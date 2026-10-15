@@ -28,8 +28,9 @@ class ConventionFollowerState:
   Attributes:
     step_count: number of timesteps previously seen in this episode.
     current_goal: the goal last used by the puppeteer.
-    recent_frames: buffer of recent observation frames.
+    recent_frames: independent snapshots of recent observation frames.
   """
+
   step_count: int
   current_goal: puppeteer.PuppetGoal
   recent_frames: tuple[np.ndarray, ...]
@@ -85,12 +86,12 @@ class ConventionFollower(puppeteer.Puppeteer[ConventionFollowerState]):
     if timestep.first():
       prev_state = self.initial_state()
 
-    recent_frames = list(prev_state.recent_frames)
+    # Environments may reuse RGB storage after this timestep is processed.
+    frame = np.array(timestep.observation['RGB'], copy=True)
+    recent_frames = (frame,) + prev_state.recent_frames[
+        : self._recency_window - 1
+    ]
     current_goal = prev_state.current_goal
-    if len(recent_frames) < self._recency_window:
-      recent_frames = tuple([timestep.observation['RGB']] + recent_frames)
-    else:
-      recent_frames = tuple([timestep.observation['RGB']] + recent_frames[:-1])
 
     average_color = np.array(recent_frames).mean(axis=(0, 1, 2))
     index = np.argmax(average_color)
