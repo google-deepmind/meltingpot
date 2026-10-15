@@ -136,9 +136,9 @@ end
 
 function Container:onHit(hittingGameObject, hitName)
   -- Assume nothing will send a hit that doesn't also have InteractBeam.
-  local hitName =
+  local interactionHitName =
       hittingGameObject:getComponent('InteractBeam'):getHitName()
-  if hitName == hitName and not self._usedThisStep then
+  if hitName == interactionHitName and not self._usedThisStep then
     self._usedThisStep = true
     -- Local variables.
     local avatar = hittingGameObject:getComponent('Avatar')
@@ -297,9 +297,9 @@ end
 
 function Receiver:onHit(hittingGameObject, hitName)
   -- Assume nothing will send a hit that doesn't also have InteractBeam.
-  local hitName =
+  local interactionHitName =
       hittingGameObject:getComponent('InteractBeam'):getHitName()
-  if hitName == hitName then
+  if hitName == interactionHitName then
     -- Local variables.
     local avatar = hittingGameObject:getComponent('Avatar')
     local avatarsInventory = (
@@ -372,10 +372,10 @@ end
 
 function CookingPot:onHit(hittingGameObject, hitName)
   -- Assume nothing will send a hit that doesn't also have InteractBeam.
-  local hitName =
+  local interactionHitName =
       hittingGameObject:getComponent('InteractBeam'):getHitName()
   -- When the avatar interacts with the cooking pot, move items if applicable.
-  if hitName == hitName then
+  if hitName == interactionHitName then
     -- Local variables.
     local avatar = hittingGameObject:getComponent('Avatar')
     local avatarsInventory = (
