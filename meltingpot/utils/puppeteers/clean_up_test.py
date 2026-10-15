@@ -268,6 +268,20 @@ class CorrigibleReciprocatorTest(parameterized.TestCase):
     self.assertEqual(actual, expected)
 
 
+class CorrigibleReciprocatorValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(0, -1)
+  def test_rejects_nonpositive_recency_window(self, recency_window):
+    with self.assertRaisesRegex(ValueError, 'recency_window must be positive'):
+      clean_up.CorrigibleReciprocator(
+          cooperate_goal=_COOPERATE,
+          defect_goal=_DEFECT,
+          num_others_cooperating_cumulant=_NUM_COOPERATORS_KEY,
+          threshold=1,
+          recency_window=recency_window,
+      )
+
+
 class SanctionerAlternatorTest(parameterized.TestCase):
 
   def test_nice_starts_cooperating(self):
@@ -366,6 +380,18 @@ class SanctionerAlternatorNotNiceTest(absltest.TestCase):
 
 
 class SanctionerAlternatorValidationTest(parameterized.TestCase):
+
+  @parameterized.parameters(0, -1)
+  def test_rejects_nonpositive_recency_window(self, recency_window):
+    with self.assertRaisesRegex(ValueError, 'recency_window must be positive'):
+      clean_up.SanctionerAlternator(
+          cooperate_goal=_COOPERATE,
+          defect_goal=_DEFECT,
+          sanction_goal=_SANCTION,
+          num_others_cooperating_cumulant=_NUM_COOPERATORS_KEY,
+          threshold=1,
+          recency_window=recency_window,
+      )
 
   @parameterized.parameters(0, -1)
   def test_rejects_nonpositive_alternating_steps(self, alternating_steps):
