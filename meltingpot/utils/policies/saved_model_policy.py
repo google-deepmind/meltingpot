@@ -49,8 +49,8 @@ def _numpy_to_placeholder(
 
 
 def _downcast(x):
-  """Downcasts input to 32-bit precision."""
-  if not isinstance(x, np.ndarray):
+  """Downcasts NumPy arrays and scalars to 32-bit precision."""
+  if not isinstance(x, (np.ndarray, np.generic)):
     return x
   elif x.dtype == np.float64:
     return np.asarray(x, dtype=np.float32)
