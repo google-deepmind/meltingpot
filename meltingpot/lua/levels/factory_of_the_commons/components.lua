@@ -354,12 +354,12 @@ end
 
 function HopperMouth:processing()
   self._counter = self._config.framesToProcess
-  processing = true
+  self._processing = true
   return
 end
 
 function HopperMouth:reset()
-  processing = false
+  self._processing = false
   self._counter = 0
 end
 
@@ -380,10 +380,10 @@ function HopperMouth:setIsOpen(x)
 end
 
 function HopperMouth:update()
-  if not processing == true then
+  if not self._processing then
     self.gameObject:setState(self._config.open)
     self:setIsOpen(true)
-  elseif processing == true then
+  elseif self._processing then
     if self._counter > 0 then
       if self._counter == 15 then
         self.gameObject:setState(self._config.opening)
@@ -411,7 +411,7 @@ function HopperMouth:update()
       'upperPhysical', 1)
   for _, neededObjects in ipairs(hopper) do
     if self.gameObject:getComponent('Receiver'):hasNeededObjects() then
-      if not processing == true then
+      if not self._processing then
         self:processing()
       end
     end
