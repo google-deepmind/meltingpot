@@ -123,7 +123,8 @@ class PermissiveModel:
           shared_name=table_handle_name)
       tf.raw_ops.LookupTableImportV2(
           table_handle=table_handle, keys=table_keys, values=table_values)
-      self._initialized_tables[name] = self._tables.pop(name)  # Only init once.
+
+    self._initialized_tables[name] = self._tables.pop(name)  # Only init once.
 
   def _make_permissive_function(self, name: str) -> Callable[..., Any]:
     """Create a permissive version of a function in the SavedModel."""
