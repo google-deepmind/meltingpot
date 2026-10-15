@@ -232,7 +232,7 @@ def get_game_objects_from_map(
     ascii_map: str,
     char_prefab_map: Mapping[str, str],
     prefabs: Mapping[str, PrefabConfig],
-    random: np.random.RandomState = np.random.RandomState()
+    random: Optional[np.random.RandomState] = None
 ) -> List[PrefabConfig]:
   """Returns a list of game object configurations from the map and prefabs.
 
@@ -247,7 +247,8 @@ def get_game_objects_from_map(
         names.
     prefabs: A collection of named prefabs that define a GameObject
         configuration.
-    random: An optional random number generator.
+    random: An optional random number generator. If omitted, each map build
+      creates a fresh generator for randomly selected prefabs.
 
   Returns:
     A list of game object configurations from the map and prefabs.
@@ -263,6 +264,8 @@ def get_game_objects_from_map(
           for p in prefab["list"]:  # pyrefly: ignore[bad-index]
             game_objects.append(_create_game_object(prefabs[p], transform))
         elif prefab["type"] == TYPE_CHOICE:
+          if random is None:
+            random = np.random.RandomState()
           game_objects.append(
               _create_game_object(prefabs[random.choice(prefab["list"])],  # pyrefly: ignore[bad-index]
                                   transform))
