@@ -940,7 +940,7 @@ function StochasticIntervalEpisodeEnding:registerUpdaters(updaterRegistry)
 end
 
 function StochasticIntervalEpisodeEnding:reset()
-  self._t = 1
+  self._t = 0
 end
 
 function StochasticIntervalEpisodeEnding:update()
