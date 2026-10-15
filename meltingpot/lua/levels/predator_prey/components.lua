@@ -340,6 +340,9 @@ function AvatarEdible:_beEaten()
 end
 
 function AvatarEdible:onHit(hitterObject, hitName)
+  if not self:alive() then
+    return
+  end
   local selfRole = self.gameObject:getComponent('Role')
   if hitName == 'predator' and selfRole:isPrey() then
     local preyGroupSize, preyNearby = self:_countGroupSize('prey')
