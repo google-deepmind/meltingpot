@@ -1161,8 +1161,8 @@ function Role:__init__(kwargs)
          "role must be either `crewmate` or `impostor`, got `" .. kwargs.role ..
          "`.")
   self.role = kwargs.role
-  self.gemsCollectedReward = 0
-  self.gemsDepositedReward = 0
+  self._gemsCollectedReward = 0
+  self._gemsDepositedReward = 0
 
   self.crewVisionSteps = 0
   self.impVisionSteps = 0
@@ -1190,19 +1190,19 @@ function Role:awake()
 end
 
 function Role:rewardForGemsCollected(reward)
-  self.gemsCollectedReward = self.gemsCollectedReward + reward
+  self._gemsCollectedReward = self._gemsCollectedReward + reward
 end
 
 function Role:rewardForGemsDeposited(reward)
-  self.gemsDepositedReward = self.gemsDepositedReward + reward
+  self._gemsDepositedReward = self._gemsDepositedReward + reward
 end
 
 function Role:gemsDepositedReward()
-  return self.gemsDepositedReward
+  return self._gemsDepositedReward
 end
 
 function Role:gemsCollectedReward()
-  return self.gemsCollectedReward
+  return self._gemsCollectedReward
 end
 
 function Role:getRole()
