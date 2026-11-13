@@ -211,6 +211,29 @@ class VideoFrameSizeTest(parameterized.TestCase):
         {pathlib.Path(path) for path in paths}, set(directory.iterdir())
     )
 
+  def test_dispose_removes_unfinished_video_and_keeps_completed_videos(self):
+    recorder, paths, directory = self.make_recorder()
+    first, last = _frame(), _frame(shift=30)
+    recorder.on_next(_timestep(dm_env.StepType.FIRST, first))
+    pending_path = pathlib.Path(recorder._path)
+    recorder.on_next(_timestep(dm_env.StepType.MID, last))
+    self.assertTrue(pending_path.exists())
+
+    recorder.dispose()
+    self.assertFalse(pending_path.exists())
+    self.assertEmpty(paths)
+    self.assertEmpty(list(directory.iterdir()))
+
+    complete = video_subject.VideoSubject(
+        str(directory), extension='avi', codec='png '
+    )
+    complete.on_next(_timestep(dm_env.StepType.FIRST, first))
+    complete.on_next(_timestep(dm_env.StepType.LAST, last))
+    finished_files = set(directory.iterdir())
+    self.assertLen(finished_files, 1)
+    complete.dispose()
+    self.assertEqual(set(directory.iterdir()), finished_files)
+
   def test_new_first_abandons_unfinished_video_without_leaking_file(self):
     recorder, paths, directory = self.make_recorder()
     first, middle = _frame(), _frame(shift=30)

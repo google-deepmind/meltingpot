@@ -118,4 +118,8 @@ class VideoSubject(subject.Subject):
     """See base class."""
     if self._writer is not None:
       self._writer.release()
+      if self._path is not None and os.path.isfile(self._path):
+        os.remove(self._path)
+      self._writer = None
+      self._path = None
     super().dispose()
