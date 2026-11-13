@@ -62,10 +62,12 @@ class ObservablesWrapper(observables_lib.ObservableLab2dWrapper):
 
   def close(self) -> None:
     """See base class."""
-    super().close()
-    self._action_subject.on_completed()
-    self._timestep_subject.on_completed()
-    self._events_subject.on_completed()
+    try:
+      super().close()
+    finally:
+      self._action_subject.on_completed()
+      self._timestep_subject.on_completed()
+      self._events_subject.on_completed()
 
   def observables(self) -> observables_lib.Lab2dObservables:
     """See base class."""

@@ -60,6 +60,24 @@ class ObservablesWrapperTest(parameterized.TestCase):
         'DONE',
     ])
 
+  def test_close_failure_completes_all_observables(self):
+    base = mock.create_autospec(
+        dmlab2d.Environment, instance=True, spec_set=True
+    )
+    base.close.side_effect = RuntimeError('close failed')
+    wrapper = observables_wrapper.ObservablesWrapper(base)
+    completed = []
+    observables = wrapper.observables()
+    for field in dataclasses.fields(observables):
+      getattr(observables, field.name).subscribe(
+          on_completed=lambda name=field.name: completed.append(name)
+      )
+
+    with self.assertRaisesRegex(RuntimeError, 'close failed'):
+      wrapper.close()
+
+    self.assertCountEqual(completed, ['action', 'timestep', 'events'])
+
   def test_forwards_reset_arguments_and_emits_timestep(self):
     env = mock.Mock(spec_set=dmlab2d.Environment)
     timestep = mock.sentinel.timestep
