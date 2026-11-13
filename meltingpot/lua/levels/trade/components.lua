@@ -632,22 +632,17 @@ function Trading:resolve(offerPackage, theirPackage)
   local myExecutedTrade = {}
   local theirExecutedTrade = {}
   for _, fruitType in ipairs(self._config.itemTypes) do
-    -- Ensure the minimal possible number of items actually change hands.
-    if offerPackage.offer[fruitType] >= theirPackage.offer[fruitType] then
-      myExecutedTrade[fruitType] = math.min(
-          offerPackage.offer[fruitType],
-          math.abs(theirPackage.offer[fruitType])
-      )
-      theirExecutedTrade[fruitType] = -myExecutedTrade[fruitType]
-    else
-      theirExecutedTrade[fruitType] = math.min(
-          theirPackage.offer[fruitType],
-          math.abs(offerPackage.offer[fruitType])
-      )
-      myExecutedTrade[fruitType] = -theirExecutedTrade[fruitType]
+    -- Transfer only items one party requests and the other offers.
+    local myOffer = offerPackage.offer[fruitType]
+    local theirOffer = theirPackage.offer[fruitType]
+    local amount = 0
+    if myOffer > 0 and theirOffer < 0 then
+      amount = math.min(myOffer, -theirOffer)
+    elseif myOffer < 0 and theirOffer > 0 then
+      amount = -math.min(-myOffer, theirOffer)
     end
-    assert(myExecutedTrade[fruitType] == -theirExecutedTrade[fruitType],
-           'Trades do not match.')
+    myExecutedTrade[fruitType] = amount
+    theirExecutedTrade[fruitType] = -amount
 
     -- Update the inventories.
     myInventory:add(fruitType, myExecutedTrade[fruitType])
