@@ -146,6 +146,10 @@ function BoatManager:isFull()
   return self._rowers["L"] and self._rowers["R"]
 end
 
+function BoatManager:isSeatTaken(side)
+  return self._rowers[side] ~= nil
+end
+
 function BoatManager:_registerPair(pairsTensor)
   if self._rowers["L"] == nil or self._rowers["R"] == nil then
     return
@@ -736,7 +740,8 @@ end
 
 function Seat:onEnter(enteringObject, contactName)
   if contactName == 'avatar' and self.gameObject:getState() == "seat" and
-      enteringObject:getState() == "player" then
+      enteringObject:getState() == "player" and
+      not self._manager:isSeatTaken(self._seatSide) then
     self._manager:reportRower(self._seatSide, enteringObject)
     enteringObject:getComponent("Avatar"):disallowMovement()
     enteringObject:getComponent("Rowing"):setSeat(self)
