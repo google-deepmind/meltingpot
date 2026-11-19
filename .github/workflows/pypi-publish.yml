@@ -7,7 +7,8 @@ on:
     types: [published]
   workflow_dispatch:
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   build:
@@ -104,7 +105,7 @@ jobs:
           path: ./dist
       - name: Publish to TestPyPI
         if: github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # release/v1
         with:
           attestations: false
           repository-url: https://test.pypi.org/legacy/
