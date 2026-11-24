@@ -282,6 +282,57 @@ class ScenarioWrapperTest(absltest.TestCase):
       self.assertEqual(received['background'], expected)
 
 
+class ScenarioCloseTest(parameterized.TestCase):
+
+  @parameterized.parameters('background', 'substrate', None)
+  def test_close_releases_both_resources_and_completes_observables(
+      self, failing_resource
+  ):
+    substrate = mock.Mock(spec_set=substrate_lib.Substrate)
+    substrate.action_spec.return_value = (dm_env.specs.DiscreteArray(1),)
+    background = mock.Mock(spec_set=population.Population)
+    scenario = scenario_utils.Scenario(
+        substrate, background, (True,), ('position',)
+    )
+    completed = _track(scenario.observables(), ['action', 'timestep', 'events'])
+    error = RuntimeError('close failed')
+    if failing_resource == 'background':
+      background.close.side_effect = error
+    elif failing_resource == 'substrate':
+      substrate.close.side_effect = error
+
+    if failing_resource is None:
+      scenario.close()
+    else:
+      with self.assertRaises(RuntimeError) as raised:
+        scenario.close()
+      self.assertIs(raised.exception, error)
+
+    background.close.assert_called_once_with()
+    substrate.close.assert_called_once_with()
+    self.assertEqual(completed, ['DONE', 'DONE', 'DONE'])
+
+  def test_completion_callback_failure_does_not_skip_other_streams(self):
+    substrate = mock.Mock(spec_set=substrate_lib.Substrate)
+    substrate.action_spec.return_value = (dm_env.specs.DiscreteArray(1),)
+    background = mock.Mock(spec_set=population.Population)
+    scenario = scenario_utils.Scenario(
+        substrate, background, (True,), ('position',)
+    )
+    observables = scenario.observables()
+    error = RuntimeError('subscriber failed')
+    observables.action.subscribe(on_completed=mock.Mock(side_effect=error))
+    completed = _track(observables, ['timestep', 'events'])
+
+    with self.assertRaises(RuntimeError) as raised:
+      scenario.close()
+
+    self.assertIs(raised.exception, error)
+    background.close.assert_called_once_with()
+    substrate.close.assert_called_once_with()
+    self.assertEqual(completed, ['DONE', 'DONE'])
+
+
 class ScenarioActionValidationTest(parameterized.TestCase):
 
   @parameterized.parameters(([0],), ([1],), ([0, 1, 2],))
