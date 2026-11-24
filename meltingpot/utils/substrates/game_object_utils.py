@@ -108,6 +108,8 @@ def build_avatar_objects(
   for idx in range(0, num_players):
     game_object = copy.deepcopy(prefabs["avatar"])
     color_palette = player_palettes[idx]  # pyrefly: ignore[unsupported-operation]
+    if isinstance(color_palette, Mapping):
+      color_palette = dict(color_palette)
     # Lua is 1-indexed.
     lua_index = idx + 1
     # First, modify the prefab's sprite name.
@@ -175,9 +177,11 @@ def build_avatar_badges(
             new_sprite_name)
     get_first_named_component(
         badge_object, "AvatarConnector")["kwargs"]["playerIndex"] = lua_index
+    color_palette = badge_palettes[idx]  # pyrefly: ignore[unsupported-operation]
+    if isinstance(color_palette, Mapping):
+      color_palette = dict(color_palette)
     get_first_named_component(
-        badge_object,
-        "Appearance")["kwargs"]["palettes"][0] = badge_palettes[idx]  # pyrefly: ignore[unsupported-operation]
+        badge_object, "Appearance")["kwargs"]["palettes"][0] = color_palette
     game_objects.append(badge_object)
 
   return game_objects

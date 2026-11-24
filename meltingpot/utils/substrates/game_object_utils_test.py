@@ -324,6 +324,27 @@ class BuildAvatarBadgesTest(parameterized.TestCase):
         palettes[1])
 
 
+class PaletteIsolationTest(parameterized.TestCase):
+
+  @parameterized.named_parameters(
+      ('avatar', game_object_utils.build_avatar_objects, 'avatar', AVATAR),
+      ('badge', game_object_utils.build_avatar_badges, 'avatar_badge', BADGE),
+  )
+  def test_shared_palette_is_copied_for_each_object(self, build, name, prefab):
+    palette = {'*': (255, 0, 0, 255)}
+    objects = build(2, {name: prefab}, [palette, palette])
+    first, second = [
+        game_object_utils.get_first_named_component(
+            obj, 'Appearance')['kwargs']['palettes'][0]
+        for obj in objects
+    ]
+    first['*'] = (0, 255, 0, 255)
+    self.assertEqual(second['*'], (255, 0, 0, 255))
+    self.assertEqual(palette['*'], (255, 0, 0, 255))
+    palette['*'] = (0, 0, 255, 255)
+    self.assertEqual(second['*'], (255, 0, 0, 255))
+
+
 class PaletteCountValidationTest(absltest.TestCase):
 
   def test_rejects_too_few_player_palettes(self):
