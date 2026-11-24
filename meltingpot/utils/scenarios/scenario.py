@@ -14,6 +14,7 @@
 """Scenario class."""
 
 from collections.abc import Collection, Iterable, Mapping, Sequence
+import contextlib
 from typing import Any, TypeVar
 
 import chex
@@ -150,11 +151,13 @@ class Scenario(substrate_lib.Substrate):
 
   def close(self) -> None:
     """See base class."""
-    self._background_population.close()
-    self._substrate.close()
-    self._focal_action_subject.on_completed()
-    self._focal_timestep_subject.on_completed()
-    self._events_subject.on_completed()
+    # Close the owned resources and complete every stream even when one fails.
+    with contextlib.ExitStack() as stack:
+      stack.callback(self._events_subject.on_completed)
+      stack.callback(self._focal_timestep_subject.on_completed)
+      stack.callback(self._focal_action_subject.on_completed)
+      stack.callback(self._substrate.close)
+      stack.callback(self._background_population.close)
 
   def _await_full_action(self, focal_action: Sequence[int]) -> Sequence[int]:
     """Returns full action after awaiting bot actions."""
