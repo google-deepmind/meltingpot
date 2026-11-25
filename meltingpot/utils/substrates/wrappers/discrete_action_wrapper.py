@@ -54,12 +54,26 @@ def _immutable_action(
     action_spec: Mapping[str, dm_env.specs.Array],
 ) -> Mapping[str, np.ndarray]:
   """Returns an immutable action."""
+  if set(action) != set(action_spec):
+    raise ValueError('Keys do not match.')
   new_action = {}
   for key, value in action.items():
     if isinstance(value, np.ndarray):
       value = np.copy(value)
     else:
-      value = np.array(value, dtype=action_spec[key].dtype)
+      dtype = action_spec[key].dtype
+      if np.issubdtype(dtype, np.integer):
+        # Validate the original scalar before NumPy can truncate or wrap it.
+        scalar = value.item() if isinstance(value, np.generic) else value
+        try:
+          integer = int(scalar)
+        except (TypeError, ValueError, OverflowError) as error:
+          raise ValueError(f'Invalid integer action {key}: {scalar!r}.') from error
+        limits = np.iinfo(dtype)
+        if scalar != integer or not limits.min <= integer <= limits.max:
+          raise ValueError(f'Invalid integer action {key}: {scalar!r}.')
+        value = integer
+      value = np.array(value, dtype=dtype)
     value.flags.writeable = False
     new_action[key] = value
   return immutabledict.immutabledict(new_action)
