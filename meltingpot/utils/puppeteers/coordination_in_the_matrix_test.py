@@ -95,6 +95,17 @@ class CounterPrevious(parameterized.TestCase):
 
 class CoordinateWithPreviousValidationTest(absltest.TestCase):
 
+  def test_rejects_duplicate_resource_indices(self):
+    duplicate = in_the_matrix.Resource(
+        index=_RESOURCE_A.index,
+        collect_goal=_RESOURCE_B.collect_goal,
+        interact_goal=_RESOURCE_B.interact_goal,
+    )
+    with self.assertRaisesRegex(ValueError, 'distinct indices'):
+      coordination_in_the_matrix.CoordinateWithPrevious(
+          resources=(_RESOURCE_A, duplicate), margin=1
+      )
+
   def test_rejects_empty_resources_at_construction(self):
     with self.assertRaisesRegex(ValueError, 'resources must not be empty'):
       coordination_in_the_matrix.CoordinateWithPrevious(
