@@ -76,14 +76,15 @@ def apply_prefab_overrides(
 
   # Edit prefabs with the overrides, both in lab2d_settings and in prefabs.
   if prefab_overrides:
+    prefabs = lab2d_settings.simulation.get("prefabs", {})
     for prefab, override in prefab_overrides.items():
       for component, arg_overrides in override.items():
         for arg_name, arg_override in arg_overrides.items():
-          if prefab not in lab2d_settings.simulation.prefabs:
+          if prefab not in prefabs:
             raise ValueError(f"Prefab override for '{prefab}' given, but not " +
                              "available in `prefabs`.")
           component_config = game_object_utils.get_first_named_component(
-              lab2d_settings.simulation.prefabs[prefab], component)
+              prefabs[prefab], component)
           if "kwargs" not in component_config:
             component_config["kwargs"] = {}
           component_config["kwargs"][arg_name] = arg_override
@@ -108,11 +109,12 @@ def maybe_build_and_add_avatar_objects(
   """
   # Whether the avatars will be built in Lua (False) or here (True). This is
   # roughly the opposite of the `buildAvatars` setting.
-  build_avatars_here = ("avatar" in lab2d_settings.simulation.prefabs)
+  prefabs = lab2d_settings.simulation.get("prefabs", {})
+  build_avatars_here = "avatar" in prefabs
   if ("buildAvatars" in lab2d_settings.simulation
       and lab2d_settings.simulation.buildAvatars):
     build_avatars_here = False
-    if "avatar" not in lab2d_settings.simulation.prefabs:
+    if "avatar" not in prefabs:
       raise ValueError(
           "Deferring avatar building to Lua, yet no 'avatar' prefab given.")
   if build_avatars_here:
@@ -125,7 +127,7 @@ def maybe_build_and_add_avatar_objects(
                  palettes)
     avatar_objects = game_object_utils.build_avatar_objects(
         int(lab2d_settings.numPlayers),
-        lab2d_settings.simulation.prefabs,
+        prefabs,
         palettes)
     lab2d_settings.simulation.gameObjects += avatar_objects
 

@@ -64,6 +64,57 @@ class BuilderHelpersTestCase(absltest.TestCase):
     self.assertEqual(lab2d_settings.simulation.gameObjects, ['avatar'])
 
 
+class ExplicitGameObjectsTest(absltest.TestCase):
+
+  def test_no_prefabs_preserves_explicit_game_objects(self):
+    settings = config_dict.ConfigDict({
+        'numPlayers': 1,
+        'simulation': {'gameObjects': [{'name': 'avatar'}]},
+    })
+    expected = copy.deepcopy(settings.simulation.gameObjects)
+    builder.maybe_build_and_add_avatar_objects(settings)
+    self.assertEqual(settings.simulation.gameObjects, expected)
+
+  def test_lua_avatar_build_requires_avatar_prefab(self):
+    settings = config_dict.ConfigDict({
+        'numPlayers': 1,
+        'simulation': {'buildAvatars': True},
+    })
+    with self.assertRaisesRegex(ValueError, 'no .*avatar.* prefab given'):
+      builder.maybe_build_and_add_avatar_objects(settings)
+
+  def test_unknown_override_without_prefabs_raises_value_error(self):
+    settings = config_dict.ConfigDict({'simulation': {}})
+    with self.assertRaisesRegex(ValueError, 'Prefab override'):
+      builder.apply_prefab_overrides(
+          settings,
+          prefab_overrides={'wall': {'Transform': {'orientation': 'E'}}},
+      )
+
+  def test_native_environment_with_explicit_game_objects(self):
+    config = test_substrate.get_config()
+    settings = copy.deepcopy(test_substrate.build(
+        roles=config.default_player_roles, config=config))
+    simulation = settings['simulation']
+    game_objects = builder.game_object_utils.get_game_objects_from_map(
+        simulation['map'],
+        simulation.pop('charPrefabMap'),
+        simulation.pop('prefabs'),
+        random=np.random.RandomState(42),
+    )
+    simulation['gameObjects'] += game_objects
+    with builder.builder(settings, env_seed=42) as env:
+      first = env.reset()
+      self.assertTrue(first.first())
+      self.assertEqual(first.observation['WORLD.RGB'].shape, (120, 184, 3))
+      action = {
+          key: spec.generate_value()
+          for key, spec in env.action_spec().items()
+      }
+      self.assertTrue(env.step(action).mid())
+      self.assertTrue(env.reset().first())
+
+
 class GeneralTestCase(parameterized.TestCase):
 
   @parameterized.product(seed=[42, 123, 1337, 12481632])
