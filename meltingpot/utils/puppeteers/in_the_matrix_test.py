@@ -405,6 +405,22 @@ class CorrigibleTest(parameterized.TestCase):
 
 class RespondToPreviousTest(parameterized.TestCase):
 
+  def test_rejects_empty_responses_at_construction(self):
+    with self.assertRaisesRegex(ValueError, 'responses must not be empty'):
+      in_the_matrix.RespondToPrevious(responses={}, margin=1)
+
+  def test_rejects_ambiguous_partner_resource_indices(self):
+    duplicate = in_the_matrix.Resource(
+        index=_RESOURCE_0.index,
+        collect_goal=_RESOURCE_1.collect_goal,
+        interact_goal=_RESOURCE_1.interact_goal,
+    )
+    with self.assertRaisesRegex(ValueError, 'distinct indices'):
+      in_the_matrix.RespondToPrevious(
+          responses={_RESOURCE_0: _RESOURCE_1, duplicate: _RESOURCE_2},
+          margin=1,
+      )
+
   def test(self):
     puppeteer = in_the_matrix.RespondToPrevious(
         responses={

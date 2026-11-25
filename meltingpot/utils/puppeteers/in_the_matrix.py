@@ -561,9 +561,13 @@ class RespondToPrevious(puppeteer.Puppeteer[Resource]):
       margin: Try to collect `margin` more of the target resource than the other
         resource before interacting.
     """
+    if not responses:
+      raise ValueError("responses must not be empty.")
     self._responses = {
         resource.index: response for resource, response in responses.items()
     }
+    if len(self._responses) != len(responses):
+      raise ValueError("Response resources must have distinct indices.")
     if margin > 0:
       self._margin = margin
     else:
