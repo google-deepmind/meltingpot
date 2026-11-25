@@ -61,6 +61,45 @@ class Lab2DToListsWrapperTest(parameterized.TestCase):
     with self.assertRaises(ValueError):
       discrete_action_wrapper.Wrapper(env, action_table=action_table)
 
+  @parameterized.named_parameters(
+      ('fractional', 1.5),
+      ('negative_fractional', -0.5),
+      ('numpy_fractional', np.float64(2.9)),
+      ('numpy_overflow', np.int64(256)),
+      ('numpy_underflow', np.int64(-256)),
+      ('overflow', 256),
+      ('infinite', float('inf')),
+      ('nan', float('nan')),
+  )
+  def test_integer_action_does_not_silently_narrow(self, value):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [{'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC}]
+    with self.assertRaises(ValueError):
+      discrete_action_wrapper.Wrapper(
+          env, action_table=[{'MOVE': value, 'TURN': 0}]
+      )
+
+  def test_extra_scalar_key_is_rejected_as_value_error(self):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [{'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC}]
+    with self.assertRaises(ValueError):
+      discrete_action_wrapper.Wrapper(
+          env, action_table=[{'MOVE': 0, 'TURN': 0, 'INVALID': 0}]
+      )
+
+  @parameterized.parameters(0, 3, 2.0, np.int64(1), np.float64(1.0))
+  def test_representable_scalar_is_preserved(self, value):
+    env = mock.Mock(spec_set=dmlab2d.Environment)
+    env.action_spec.return_value = [{'MOVE': MOVE_SPEC, 'TURN': TURN_SPEC}]
+    wrapped = discrete_action_wrapper.Wrapper(
+        env, action_table=[{'MOVE': value, 'TURN': 0}]
+    )
+    wrapped.step([0])
+    (actions,), _ = env.step.call_args
+    self.assertEqual(actions[0]['MOVE'], value)
+    self.assertEqual(actions[0]['MOVE'].dtype, MOVE_SPEC.dtype)
+    self.assertFalse(actions[0]['MOVE'].flags.writeable)
+
   def test_action_spec(self):
     env = mock.Mock(spec_set=dmlab2d.Environment)
     env.action_spec.return_value = [
